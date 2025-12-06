@@ -1,0 +1,64 @@
+{
+  "name": "mwm",
+  "version": "1.0.0",
+  "description": "MWM - Integrated Software Solutions",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "build": "npm run build --workspaces",
+    "build:backend": "npm run build --workspace=backend",
+    "build:frontend": "npm run build --workspace=frontend",
+    "test": "npm run test --workspaces --if-present",
+    "test:backend": "npm run test --workspace=backend",
+    "test:frontend": "npm run test --workspace=frontend",
+    "test:coverage": "npm run test:coverage --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "lint:fix": "npm run lint:fix --workspaces --if-present",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "prepare": "husky",
+    "docker:dev": "docker-compose -f docker/docker-compose.dev.yml up -d",
+    "docker:prod": "docker-compose -f docker/docker-compose.prod.yml up -d",
+    "docker:down": "docker-compose -f docker/docker-compose.dev.yml down",
+    "docker:logs": "docker-compose -f docker/docker-compose.dev.yml logs -f",
+    "clean": "rimraf node_modules backend/node_modules frontend/node_modules packages/*/node_modules"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.0.0",
+    "@commitlint/config-conventional": "^19.0.0",
+    "concurrently": "^8.2.0",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.2.0",
+    "prettier": "^3.2.0",
+    "rimraf": "^5.0.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "lint-staged": {
+    "backend/src/**/*.ts": [
+      "eslint --fix --config backend/.eslintrc.js",
+      "prettier --write"
+    ],
+    "frontend/src/**/*.{ts,tsx}": [
+      "eslint --fix --config frontend/.eslintrc.js",
+      "prettier --write"
+    ],
+    "packages/shared/src/**/*.ts": [
+      "eslint --fix --config packages/shared/.eslintrc.js",
+      "prettier --write"
+    ],
+    "*.{js,jsx,json,md}": [
+      "prettier --write"
+    ]
+  }
+}

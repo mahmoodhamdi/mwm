@@ -1,0 +1,169 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "viewAll": "View All",
+    "readMore": "Read More",
+    "learnMore": "Learn More",
+    "getStarted": "Get Started",
+    "contactUs": "Contact Us",
+    "submit": "Submit",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous"
+  },
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "services": "Services",
+    "projects": "Projects",
+    "blog": "Blog",
+    "contact": "Contact",
+    "careers": "Careers"
+  },
+  "home": {
+    "title": "Integrated Software Solutions",
+    "subtitle": "Building the digital future for your business",
+    "heroTitle": "MWM",
+    "heroDescription": "We are a team of professional developers providing innovative and integrated software solutions that help businesses grow and digitally transform",
+    "ctaPrimary": "Start Your Project",
+    "ctaSecondary": "View Our Work",
+    "featuredProjects": "Featured Projects",
+    "ourServices": "Our Services",
+    "ourClients": "Our Clients",
+    "testimonials": "Testimonials",
+    "stats": {
+      "projects": "Projects Completed",
+      "clients": "Happy Clients",
+      "experience": "Years of Experience",
+      "team": "Professional Developers"
+    }
+  },
+  "about": {
+    "title": "About Us",
+    "subtitle": "A team passionate about technology",
+    "description": "We are a team of professional developers specialized in software development and integrated digital solutions",
+    "mission": "Our Mission",
+    "missionText": "To provide innovative software solutions that help companies achieve their digital goals",
+    "vision": "Our Vision",
+    "visionText": "To be the leading technology partner for companies in the region",
+    "values": "Our Values",
+    "ourTeam": "Our Team",
+    "joinUs": "Join Us"
+  },
+  "services": {
+    "title": "Our Services",
+    "subtitle": "We offer a comprehensive range of software services",
+    "webDev": {
+      "title": "Web Development",
+      "description": "We build modern, fast, and responsive websites and web applications"
+    },
+    "mobileDev": {
+      "title": "Mobile Development",
+      "description": "Mobile applications for iOS and Android using the latest technologies"
+    },
+    "uiux": {
+      "title": "UI/UX Design",
+      "description": "Attractive user interface design and seamless user experience"
+    },
+    "backend": {
+      "title": "Backend Development",
+      "description": "Building robust, secure, and scalable backend systems"
+    },
+    "consulting": {
+      "title": "Technical Consulting",
+      "description": "We help you make the right technical decisions"
+    },
+    "support": {
+      "title": "Support & Maintenance",
+      "description": "Continuous technical support and regular maintenance for your systems"
+    }
+  },
+  "projects": {
+    "title": "Our Projects",
+    "subtitle": "Samples of our previous work",
+    "viewProject": "View Project",
+    "allProjects": "All Projects",
+    "categories": {
+      "all": "All",
+      "web": "Web",
+      "mobile": "Mobile",
+      "design": "Design"
+    }
+  },
+  "blog": {
+    "title": "Blog",
+    "subtitle": "Latest articles and tech news",
+    "readTime": "min read",
+    "publishedOn": "Published on",
+    "author": "Author",
+    "categories": "Categories",
+    "tags": "Tags",
+    "relatedPosts": "Related Posts",
+    "comments": "Comments",
+    "leaveComment": "Leave a comment"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "We're here to answer your questions",
+    "form": {
+      "name": "Full Name",
+      "email": "Email",
+      "phone": "Phone Number",
+      "subject": "Subject",
+      "message": "Your Message",
+      "send": "Send Message"
+    },
+    "info": {
+      "address": "Address",
+      "phone": "Phone",
+      "email": "Email",
+      "workingHours": "Working Hours"
+    },
+    "success": "Your message has been sent successfully",
+    "error": "An error occurred while sending your message"
+  },
+  "careers": {
+    "title": "Careers",
+    "subtitle": "Join our amazing team",
+    "openPositions": "Open Positions",
+    "noPositions": "No positions available at the moment",
+    "apply": "Apply Now",
+    "requirements": "Requirements",
+    "responsibilities": "Responsibilities",
+    "benefits": "Benefits"
+  },
+  "footer": {
+    "description": "We are a team specialized in software development and integrated digital solutions",
+    "quickLinks": "Quick Links",
+    "services": "Services",
+    "contact": "Contact",
+    "newsletter": "Newsletter",
+    "newsletterPlaceholder": "Your email",
+    "subscribe": "Subscribe",
+    "copyright": "All rights reserved",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service"
+  },
+  "errors": {
+    "notFound": "Page Not Found",
+    "notFoundDescription": "Sorry, the page you're looking for doesn't exist",
+    "serverError": "Server Error",
+    "serverErrorDescription": "An unexpected error occurred, please try again later",
+    "goHome": "Go Home"
+  },
+  "meta": {
+    "defaultTitle": "MWM - Integrated Software Solutions",
+    "defaultDescription": "A company specialized in software development and integrated digital solutions"
+  }
+}

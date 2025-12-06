@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@mwm/shared": ["packages/shared/src"],
+      "@mwm/shared/*": ["packages/shared/src/*"]
+    }
+  },
+  "references": [{ "path": "packages/shared" }, { "path": "backend" }, { "path": "frontend" }],
+  "include": [],
+  "exclude": ["node_modules", "dist", "coverage"]
+}

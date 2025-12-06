@@ -6,26 +6,32 @@
 
 ---
 
+<a id="top"></a>
+
 ## جدول المحتويات | Table of Contents
 
-1. [نظرة عامة | Project Overview](#1-project-overview)
-2. [المبادئ وأفضل الممارسات | Core Principles](#2-core-principles--best-practices)
-3. [هيكل المشروع | Project Structure](#3-project-structure)
-4. [نظام الترجمة | Localization System](#4-localization-system)
-5. [نظام الإعدادات الديناميكية | Dynamic Configuration](#5-dynamic-configuration-system)
-6. [الميزات الكاملة | Complete Features](#6-complete-features)
-7. [هيكل قاعدة البيانات | Database Schema](#7-database-schema)
-8. [توثيق الـ API | API Documentation](#8-api-documentation)
-9. [استراتيجية السيو | SEO Strategy](#9-seo-strategy)
-10. [استراتيجية الاختبارات | Testing Strategy](#10-testing-strategy)
-11. [نظام معالجة الأخطاء | Error Handling](#11-error-handling-system)
-12. [تطبيق الأمان | Security Implementation](#12-security-implementation)
-13. [تحسين الأداء | Performance Optimization](#13-performance-optimization)
-14. [مراحل التطوير | Development Phases](#14-development-phases)
-15. [DevOps & CI/CD](#15-devops--cicd)
-16. [إعدادات البيئة | Environment Configuration](#16-environment-configuration)
+| #   | القسم                      | Section                   | الرابط                                                            |
+| --- | -------------------------- | ------------------------- | ----------------------------------------------------------------- |
+| 1   | نظرة عامة                  | Project Overview          | [🔗](#1-project-overview--نظرة-عامة)                              |
+| 2   | المبادئ وأفضل الممارسات    | Core Principles           | [🔗](#2-core-principles--best-practices--المبادئ-وأفضل-الممارسات) |
+| 3   | هيكل المشروع               | Project Structure         | [🔗](#3-project-structure--هيكل-المشروع)                          |
+| 4   | نظام الترجمة               | Localization System       | [🔗](#4-localization-system--نظام-الترجمة-والتعريب)               |
+| 5   | نظام الإعدادات الديناميكية | Dynamic Configuration     | [🔗](#5-dynamic-configuration-system--نظام-الإعدادات-الديناميكية) |
+| 6   | الميزات الكاملة            | Complete Features         | [🔗](#6-complete-features--الميزات-الكاملة)                       |
+| 7   | هيكل قاعدة البيانات        | Database Schema           | [🔗](#7-database-schema--هيكل-قاعدة-البيانات)                     |
+| 8   | توثيق الـ API              | API Documentation         | [🔗](#8-api-documentation--توثيق-الـ-api)                         |
+| 9   | استراتيجية السيو           | SEO Strategy              | [🔗](#9-seo-strategy--استراتيجية-السيو)                           |
+| 10  | استراتيجية الاختبارات      | Testing Strategy          | [🔗](#10-testing-strategy--استراتيجية-الاختبارات)                 |
+| 11  | نظام معالجة الأخطاء        | Error Handling            | [🔗](#11-error-handling-system--نظام-معالجة-الأخطاء)              |
+| 12  | تطبيق الأمان               | Security Implementation   | [🔗](#12-security-implementation--تطبيق-الأمان)                   |
+| 13  | تحسين الأداء               | Performance Optimization  | [🔗](#13-performance-optimization--تحسين-الأداء)                  |
+| 14  | مراحل التطوير              | Development Phases        | [🔗](#14-development-phases--مراحل-التطوير)                       |
+| 15  | DevOps & CI/CD             | DevOps & CI/CD            | [🔗](#15-devops--cicd)                                            |
+| 16  | إعدادات البيئة             | Environment Configuration | [🔗](#16-environment-configuration--إعدادات-البيئة)               |
 
 ---
+
+<a id="1-project-overview--نظرة-عامة"></a>
 
 ## 1. Project Overview | نظرة عامة
 
@@ -37,14 +43,14 @@ Create a world-class, fully customizable, multilingual development agency websit
 
 ### الأهداف الرئيسية | Key Goals
 
-| الهدف | الوصف | Goal | Description |
-|------|-------|------|-------------|
-| 🎨 قابل للتخصيص 100% | كل شيء قابل للتعديل من لوحة التحكم | 100% Customizable | Everything editable from admin |
-| 🌍 متعدد اللغات | عربي + إنجليزي + قابل للتوسع | Multilingual | Arabic + English + Extensible |
-| 🔍 سيو متقدم | تحسين محركات البحث بأعلى المعايير | Advanced SEO | Search engine optimization |
-| 🔒 أمان مؤسسي | حماية على مستوى المؤسسات | Enterprise Security | Bank-level security |
-| ✅ اختبارات شاملة | تغطية 80%+ للكود | Comprehensive Testing | 80%+ code coverage |
-| ♿ إمكانية الوصول | متوافق مع WCAG 2.1 AA | Accessibility | WCAG 2.1 AA compliant |
+| الهدف                | الوصف                              | Goal                  | Description                    |
+| -------------------- | ---------------------------------- | --------------------- | ------------------------------ |
+| 🎨 قابل للتخصيص 100% | كل شيء قابل للتعديل من لوحة التحكم | 100% Customizable     | Everything editable from admin |
+| 🌍 متعدد اللغات      | عربي + إنجليزي + قابل للتوسع       | Multilingual          | Arabic + English + Extensible  |
+| 🔍 سيو متقدم         | تحسين محركات البحث بأعلى المعايير  | Advanced SEO          | Search engine optimization     |
+| 🔒 أمان مؤسسي        | حماية على مستوى المؤسسات           | Enterprise Security   | Bank-level security            |
+| ✅ اختبارات شاملة    | تغطية 80%+ للكود                   | Comprehensive Testing | 80%+ code coverage             |
+| ♿ إمكانية الوصول    | متوافق مع WCAG 2.1 AA              | Accessibility         | WCAG 2.1 AA compliant          |
 
 ### مقاييس النجاح | Success Metrics
 
@@ -90,6 +96,8 @@ DevOps:
 
 ---
 
+<a id="2-core-principles--best-practices--المبادئ-وأفضل-الممارسات"></a>
+
 ## 2. Core Principles & Best Practices | المبادئ وأفضل الممارسات
 
 ### 2.1 معايير جودة الكود | Code Quality Standards
@@ -106,7 +114,7 @@ Naming Conventions:
     - Utilities: camelCase (formatDate.ts)
     - Constants: SCREAMING_SNAKE_CASE
     - Types: PascalCase with prefix (IUser, TResponse)
-  
+
   Variables:
     - Boolean: isActive, hasPermission, canEdit
     - Arrays: users, items (plural)
@@ -119,7 +127,7 @@ Architecture:
     - Service Layer: Business logic
     - Controller Layer: HTTP handling
     - Middleware: Cross-cutting concerns
-  
+
   Frontend:
     - Feature-based structure
     - Custom hooks for logic
@@ -140,7 +148,7 @@ Branches:
 
 Commit Format: # Conventional Commits
   type(scope): description
-  
+
   Types:
     feat: New feature
     fix: Bug fix
@@ -196,6 +204,8 @@ SEO Checklist:
 ```
 
 ---
+
+<a id="3-project-structure--هيكل-المشروع"></a>
 
 ## 3. Project Structure | هيكل المشروع
 
@@ -278,6 +288,8 @@ mwm/
 
 ---
 
+<a id="4-localization-system--نظام-الترجمة-والتعريب"></a>
+
 ## 4. Localization System | نظام الترجمة والتعريب
 
 ### 4.1 Configuration | الإعدادات
@@ -294,14 +306,14 @@ export const localeConfig = {
     name: 'العربية',
     dir: 'rtl',
     dateFormat: 'dd/MM/yyyy',
-    currency: 'EGP'
+    currency: 'EGP',
   },
   en: {
     name: 'English',
     dir: 'ltr',
     dateFormat: 'MM/dd/yyyy',
-    currency: 'USD'
-  }
+    currency: 'USD',
+  },
 };
 ```
 
@@ -396,26 +408,38 @@ export const localeConfig = {
 
 export function useTranslation(namespace?: string) {
   const locale = useLocale();
-  
-  const t = useCallback((key: string, params?: Record<string, any>) => {
-    // Get translation with interpolation support
-    // t('greeting', { name: 'أحمد' }) => "مرحباً أحمد"
-  }, [locale, namespace]);
 
-  const formatDate = useCallback((date: Date) => {
-    return new Intl.DateTimeFormat(locale).format(date);
-  }, [locale]);
+  const t = useCallback(
+    (key: string, params?: Record<string, any>) => {
+      // Get translation with interpolation support
+      // t('greeting', { name: 'أحمد' }) => "مرحباً أحمد"
+    },
+    [locale, namespace]
+  );
 
-  const formatNumber = useCallback((num: number) => {
-    return new Intl.NumberFormat(locale).format(num);
-  }, [locale]);
+  const formatDate = useCallback(
+    (date: Date) => {
+      return new Intl.DateTimeFormat(locale).format(date);
+    },
+    [locale]
+  );
 
-  const formatCurrency = useCallback((amount: number) => {
-    return new Intl.NumberFormat(locale, {
-      style: 'currency',
-      currency: locale === 'ar' ? 'EGP' : 'USD'
-    }).format(amount);
-  }, [locale]);
+  const formatNumber = useCallback(
+    (num: number) => {
+      return new Intl.NumberFormat(locale).format(num);
+    },
+    [locale]
+  );
+
+  const formatCurrency = useCallback(
+    (amount: number) => {
+      return new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency: locale === 'ar' ? 'EGP' : 'USD',
+      }).format(amount);
+    },
+    [locale]
+  );
 
   return {
     t,
@@ -423,7 +447,7 @@ export function useTranslation(namespace?: string) {
     dir: locale === 'ar' ? 'rtl' : 'ltr',
     formatDate,
     formatNumber,
-    formatCurrency
+    formatCurrency,
   };
 }
 ```
@@ -433,20 +457,36 @@ export function useTranslation(namespace?: string) {
 ```css
 /* styles/rtl.css */
 
-[dir="rtl"] {
+[dir='rtl'] {
   direction: rtl;
   text-align: right;
 }
 
 /* Logical properties - work for both RTL and LTR */
-.margin-start { margin-inline-start: 1rem; }
-.margin-end { margin-inline-end: 1rem; }
-.padding-start { padding-inline-start: 1rem; }
-.padding-end { padding-inline-end: 1rem; }
-.text-start { text-align: start; }
-.text-end { text-align: end; }
-.start-0 { inset-inline-start: 0; }
-.end-0 { inset-inline-end: 0; }
+.margin-start {
+  margin-inline-start: 1rem;
+}
+.margin-end {
+  margin-inline-end: 1rem;
+}
+.padding-start {
+  padding-inline-start: 1rem;
+}
+.padding-end {
+  padding-inline-end: 1rem;
+}
+.text-start {
+  text-align: start;
+}
+.text-end {
+  text-align: end;
+}
+.start-0 {
+  inset-inline-start: 0;
+}
+.end-0 {
+  inset-inline-end: 0;
+}
 ```
 
 ### 4.5 Database Translation Model | نموذج الترجمة في قاعدة البيانات
@@ -455,28 +495,28 @@ export function useTranslation(namespace?: string) {
 // models/Translation.ts
 
 interface ITranslation {
-  key: string;              // "home.hero.title"
-  namespace: string;        // "home"
+  key: string; // "home.hero.title"
+  namespace: string; // "home"
   translations: {
     ar: string;
     en: string;
     [locale: string]: string; // Extensible
   };
-  description?: string;     // Admin reference
-  isSystem: boolean;        // System vs user-created
+  description?: string; // Admin reference
+  isSystem: boolean; // System vs user-created
 }
 ```
 
 ---
+
+<a id="5-dynamic-configuration-system--نظام-الإعدادات-الديناميكية"></a>
 
 ## 5. Dynamic Configuration System | نظام الإعدادات الديناميكية
 
 ### 5.1 Everything is Configurable | كل شيء قابل للتعديل
 
 ```yaml
-من لوحة التحكم يمكن تعديل:
-  
-  ✅ المحتوى النصي (جميع الصفحات)
+من لوحة التحكم يمكن تعديل: ✅ المحتوى النصي (جميع الصفحات)
   ✅ الصور والوسائط
   ✅ الألوان والثيمات
   ✅ القوائم والتنقل
@@ -610,7 +650,7 @@ interface IMenuItem {
 }
 
 interface IMenu {
-  name: string;           // "main", "footer", "mobile"
+  name: string; // "main", "footer", "mobile"
   location: 'header' | 'footer' | 'sidebar';
   items: IMenuItem[];
   isActive: boolean;
@@ -618,6 +658,8 @@ interface IMenu {
 ```
 
 ---
+
+<a id="6-complete-features--الميزات-الكاملة"></a>
 
 ## 6. Complete Features | الميزات الكاملة
 
@@ -692,9 +734,9 @@ Service Detail Page:
 Portfolio Grid:
   - تخطيط Masonry/Grid
   - فلتر حسب:
-    - الفئة
-    - التقنية
-    - الصناعة
+      - الفئة
+      - التقنية
+      - الصناعة
   - بحث
   - معاينة سريعة
 
@@ -900,6 +942,8 @@ Sections:
 
 ---
 
+<a id="7-database-schema--هيكل-قاعدة-البيانات"></a>
+
 ## 7. Database Schema | هيكل قاعدة البيانات
 
 ### 7.1 Core Models
@@ -914,24 +958,24 @@ interface IUser {
   avatar?: string;
   role: 'super_admin' | 'admin' | 'editor' | 'author' | 'viewer';
   customPermissions?: string[];
-  
+
   isEmailVerified: boolean;
   isActive: boolean;
-  
+
   twoFactorEnabled: boolean;
   twoFactorSecret?: string;
-  
+
   refreshTokens: Array<{
     token: string;
     expiresAt: Date;
     device: string;
     ip: string;
   }>;
-  
+
   lastLogin?: Date;
   loginAttempts: number;
   lockUntil?: Date;
-  
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -939,7 +983,7 @@ interface IUser {
 // Project Model
 interface IProject {
   _id: ObjectId;
-  
+
   title: { ar: string; en: string };
   slug: string; // unique
   shortDescription: { ar: string; en: string };
@@ -947,39 +991,39 @@ interface IProject {
   challenge?: { ar: string; en: string };
   solution?: { ar: string; en: string };
   results?: { ar: string; en: string };
-  
+
   thumbnail: string;
   images: string[];
   video?: string;
-  
+
   category: ObjectId;
   technologies: string[];
-  
+
   client?: {
     name: { ar: string; en: string };
     logo?: string;
   };
-  
+
   testimonial?: {
     text: { ar: string; en: string };
     author: { ar: string; en: string };
     position: { ar: string; en: string };
   };
-  
+
   liveUrl?: string;
   githubUrl?: string;
-  
+
   seo: {
     title: { ar: string; en: string };
     description: { ar: string; en: string };
     keywords: { ar: string[]; en: string[] };
   };
-  
+
   isFeatured: boolean;
   isPublished: boolean;
   order: number;
   views: number;
-  
+
   createdBy: ObjectId;
   createdAt: Date;
   updatedAt: Date;
@@ -988,17 +1032,17 @@ interface IProject {
 // Service Model
 interface IService {
   _id: ObjectId;
-  
+
   title: { ar: string; en: string };
   slug: string;
   shortDescription: { ar: string; en: string };
   description: { ar: string; en: string };
-  
+
   icon: string;
   image?: string;
-  
+
   features: Array<{ ar: string; en: string }>;
-  
+
   pricing?: Array<{
     name: { ar: string; en: string };
     price: number;
@@ -1006,14 +1050,16 @@ interface IService {
     features: Array<{ ar: string; en: string }>;
     isPopular: boolean;
   }>;
-  
+
   faqs: Array<{
     question: { ar: string; en: string };
     answer: { ar: string; en: string };
   }>;
-  
-  seo: { /* ... */ };
-  
+
+  seo: {
+    /* ... */
+  };
+
   isActive: boolean;
   order: number;
 }
@@ -1021,26 +1067,28 @@ interface IService {
 // BlogPost Model
 interface IBlogPost {
   _id: ObjectId;
-  
+
   title: { ar: string; en: string };
   slug: string;
   content: { ar: string; en: string }; // HTML
   excerpt: { ar: string; en: string };
-  
+
   thumbnail: string;
-  
+
   category: ObjectId;
   tags: ObjectId[];
   author: ObjectId;
-  
+
   views: number;
   readingTime: number;
-  
+
   status: 'draft' | 'published' | 'scheduled';
   publishedAt?: Date;
-  
-  seo: { /* ... */ };
-  
+
+  seo: {
+    /* ... */
+  };
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -1048,7 +1096,7 @@ interface IBlogPost {
 // Contact Model
 interface IContact {
   _id: ObjectId;
-  
+
   name: string;
   email: string;
   phone?: string;
@@ -1058,15 +1106,15 @@ interface IContact {
   subject: string;
   message: string;
   attachments?: string[];
-  
+
   status: 'new' | 'read' | 'replied' | 'archived';
   isStarred: boolean;
   notes?: string;
-  
+
   ip: string;
   userAgent: string;
   locale: string;
-  
+
   createdAt: Date;
 }
 ```
@@ -1092,6 +1140,8 @@ contactSchema.index({ email: 1 });
 ```
 
 ---
+
+<a id="8-api-documentation--توثيق-الـ-api"></a>
 
 ## 8. API Documentation | توثيق الـ API
 
@@ -1224,6 +1274,8 @@ GET    /api/v1/health
 
 ---
 
+<a id="9-seo-strategy--استراتيجية-السيو"></a>
+
 ## 9. SEO Strategy | استراتيجية السيو
 
 ### 9.1 Technical SEO
@@ -1237,13 +1289,15 @@ module.exports = {
     formats: ['image/avif', 'image/webp'],
   },
   async headers() {
-    return [{
-      source: '/:path*',
-      headers: [
-        { key: 'X-Content-Type-Options', value: 'nosniff' },
-        { key: 'X-Frame-Options', value: 'DENY' },
-      ],
-    }];
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'X-Frame-Options', value: 'DENY' },
+        ],
+      },
+    ];
   },
 };
 ```
@@ -1255,15 +1309,15 @@ module.exports = {
 
 export function generateMetadata(props: SEOProps): Metadata {
   const { title, description, image, url, locale } = props;
-  
+
   return {
     title: `${title} | ${siteName}`,
     description,
     alternates: {
       canonical: url,
       languages: {
-        'ar': `/ar${url}`,
-        'en': `/en${url}`,
+        ar: `/ar${url}`,
+        en: `/en${url}`,
       },
     },
     openGraph: {
@@ -1377,6 +1431,8 @@ Content:
 
 ---
 
+<a id="10-testing-strategy--استراتيجية-الاختبارات"></a>
+
 ## 10. Testing Strategy | استراتيجية الاختبارات
 
 ### 10.1 Testing Pyramid
@@ -1435,7 +1491,7 @@ describe('Auth API', () => {
 
     it('should fail with duplicate email', async () => {
       await createTestUser({ email: 'test@example.com' });
-      
+
       const response = await request(app)
         .post('/api/v1/auth/register')
         .send({
@@ -1465,9 +1521,9 @@ describe('Button', () => {
   it('calls onClick when clicked', () => {
     const handleClick = jest.fn();
     render(<Button onClick={handleClick}>Click</Button>);
-    
+
     fireEvent.click(screen.getByRole('button'));
-    
+
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
 
@@ -1482,13 +1538,13 @@ describe('Button', () => {
 test.describe('Contact Page', () => {
   test('should submit form successfully', async ({ page }) => {
     await page.goto('/ar/contact');
-    
+
     await page.fill('[name="name"]', 'أحمد محمد');
     await page.fill('[name="email"]', 'ahmed@test.com');
     await page.fill('[name="message"]', 'رسالة اختبارية');
-    
+
     await page.click('button[type="submit"]');
-    
+
     await expect(page.locator('.success-message')).toBeVisible();
   });
 });
@@ -1511,6 +1567,8 @@ Critical Paths (100%):
 
 ---
 
+<a id="11-error-handling-system--نظام-معالجة-الأخطاء"></a>
+
 ## 11. Error Handling System | نظام معالجة الأخطاء
 
 ### 11.1 Error Classes
@@ -1532,32 +1590,25 @@ export class ApiError extends Error {
 
 export const Errors = {
   // Auth
-  UNAUTHORIZED: (msg?: string) => 
-    new ApiError(401, 'UNAUTHORIZED', msg || 'غير مصرح'),
-  INVALID_CREDENTIALS: () => 
-    new ApiError(401, 'INVALID_CREDENTIALS', 'بيانات الدخول غير صحيحة'),
-  TOKEN_EXPIRED: () => 
-    new ApiError(401, 'TOKEN_EXPIRED', 'انتهت صلاحية الجلسة'),
-  
+  UNAUTHORIZED: (msg?: string) => new ApiError(401, 'UNAUTHORIZED', msg || 'غير مصرح'),
+  INVALID_CREDENTIALS: () => new ApiError(401, 'INVALID_CREDENTIALS', 'بيانات الدخول غير صحيحة'),
+  TOKEN_EXPIRED: () => new ApiError(401, 'TOKEN_EXPIRED', 'انتهت صلاحية الجلسة'),
+
   // Validation
-  VALIDATION_ERROR: (details: any) => 
+  VALIDATION_ERROR: (details: any) =>
     new ApiError(400, 'VALIDATION_ERROR', 'خطأ في البيانات', true, details),
-  
+
   // Not Found
-  NOT_FOUND: (resource: string) => 
-    new ApiError(404, 'NOT_FOUND', `${resource} غير موجود`),
-  
+  NOT_FOUND: (resource: string) => new ApiError(404, 'NOT_FOUND', `${resource} غير موجود`),
+
   // Conflict
-  EMAIL_EXISTS: () => 
-    new ApiError(409, 'EMAIL_EXISTS', 'البريد الإلكتروني مستخدم'),
-  
+  EMAIL_EXISTS: () => new ApiError(409, 'EMAIL_EXISTS', 'البريد الإلكتروني مستخدم'),
+
   // Rate Limit
-  TOO_MANY_REQUESTS: () => 
-    new ApiError(429, 'TOO_MANY_REQUESTS', 'طلبات كثيرة، حاول لاحقاً'),
-  
+  TOO_MANY_REQUESTS: () => new ApiError(429, 'TOO_MANY_REQUESTS', 'طلبات كثيرة، حاول لاحقاً'),
+
   // Server
-  INTERNAL_ERROR: () => 
-    new ApiError(500, 'INTERNAL_ERROR', 'خطأ في الخادم', false),
+  INTERNAL_ERROR: () => new ApiError(500, 'INTERNAL_ERROR', 'خطأ في الخادم', false),
 };
 ```
 
@@ -1596,7 +1647,7 @@ export const errorMessagesEn = {
 
 export const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
   const locale = req.headers['accept-language']?.startsWith('ar') ? 'ar' : 'en';
-  
+
   logger.error({ message: err.message, stack: err.stack, path: req.path });
 
   if (err instanceof ApiError) {
@@ -1623,6 +1674,8 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
 
 ---
 
+<a id="12-security-implementation--تطبيق-الأمان"></a>
+
 ## 12. Security Implementation | تطبيق الأمان
 
 ### 12.1 Security Middleware
@@ -1635,22 +1688,30 @@ export function setupSecurity(app: Express) {
   app.use(helmet());
 
   // CORS
-  app.use(cors({
-    origin: process.env.CORS_ORIGIN?.split(','),
-    credentials: true,
-  }));
+  app.use(
+    cors({
+      origin: process.env.CORS_ORIGIN?.split(','),
+      credentials: true,
+    })
+  );
 
   // Rate limiting
-  app.use('/api/', rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 min
-    max: 100,
-  }));
+  app.use(
+    '/api/',
+    rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 min
+      max: 100,
+    })
+  );
 
   // Auth rate limiting (stricter)
-  app.use('/api/v1/auth/login', rateLimit({
-    windowMs: 60 * 60 * 1000, // 1 hour
-    max: 5,
-  }));
+  app.use(
+    '/api/v1/auth/login',
+    rateLimit({
+      windowMs: 60 * 60 * 1000, // 1 hour
+      max: 5,
+    })
+  );
 
   // NoSQL injection protection
   app.use(mongoSanitize());
@@ -1672,19 +1733,16 @@ const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$
 
 export const authSchemas = {
   register: Joi.object({
-    name: Joi.string().min(2).max(50).required()
-      .messages({
-        'string.min': 'الاسم يجب أن يكون على الأقل {#limit} أحرف',
-        'any.required': 'الاسم مطلوب',
-      }),
-    email: Joi.string().email().required()
-      .messages({
-        'string.email': 'البريد الإلكتروني غير صحيح',
-      }),
-    password: Joi.string().pattern(passwordRegex).required()
-      .messages({
-        'string.pattern.base': 'كلمة المرور يجب أن تحتوي على حرف كبير وصغير ورقم ورمز',
-      }),
+    name: Joi.string().min(2).max(50).required().messages({
+      'string.min': 'الاسم يجب أن يكون على الأقل {#limit} أحرف',
+      'any.required': 'الاسم مطلوب',
+    }),
+    email: Joi.string().email().required().messages({
+      'string.email': 'البريد الإلكتروني غير صحيح',
+    }),
+    password: Joi.string().pattern(passwordRegex).required().messages({
+      'string.pattern.base': 'كلمة المرور يجب أن تحتوي على حرف كبير وصغير ورقم ورمز',
+    }),
   }),
 };
 ```
@@ -1721,18 +1779,20 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
 export const authorize = (...permissions: string[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const userPermissions = rolePermissions[req.user.role];
-    
+
     if (userPermissions.includes('*')) return next();
-    
+
     const hasPermission = permissions.every(p => userPermissions.includes(p));
     if (!hasPermission) throw Errors.INSUFFICIENT_PERMISSIONS();
-    
+
     next();
   };
 };
 ```
 
 ---
+
+<a id="13-performance-optimization--تحسين-الأداء"></a>
 
 ## 13. Performance Optimization | تحسين الأداء
 
@@ -1746,7 +1806,7 @@ export const cache = (ttl = 300) => {
     if (req.method !== 'GET') return next();
 
     const cacheKey = `cache:${req.originalUrl}`;
-    
+
     const cached = await redis.get(cacheKey);
     if (cached) return res.json(JSON.parse(cached));
 
@@ -1814,6 +1874,8 @@ export function LazySection({ children, fallback }) {
 
 ---
 
+<a id="14-development-phases--مراحل-التطوير"></a>
+
 ## 14. Development Phases | مراحل التطوير
 
 ### Overview | نظرة عامة
@@ -1836,26 +1898,27 @@ export function LazySection({ children, fallback }) {
 
 **المدة: أسبوعان | Duration: 2 weeks**
 
-#### 1.1 Project Setup (3 days)
+#### 1.1 Project Setup (3 days) ✅ COMPLETED
 
 ```yaml
 المهام | Tasks:
-  - [ ] Initialize monorepo structure
-  - [ ] Setup Docker environment
-  - [ ] Configure ESLint, Prettier, Husky
-  - [ ] Setup CI/CD pipelines
-  - [ ] Setup shared packages
+  - [x] Initialize monorepo structure
+  - [x] Setup Docker environment
+  - [x] Configure ESLint, Prettier, Husky
+  - [x] Setup CI/CD pipelines
+  - [x] Setup shared packages
 
 الاختبارات المطلوبة | Required Tests:
   Unit:
-    - Config validation
+    - [x] Config validation (22 tests)
   Integration:
-    - Docker services health check
+    - [x] Docker services health check (22 tests)
 
 معايير الانتقال | Gate Criteria:
   ✅ All services start successfully
   ✅ Linting passes
   ✅ CI pipeline passes
+  ✅ 94 total tests passing
 ```
 
 #### 1.2 Backend Foundation (4 days)
@@ -2349,6 +2412,8 @@ Frontend:
 
 ---
 
+<a id="15-devops--cicd"></a>
+
 ## 15. DevOps & CI/CD
 
 ### 15.1 GitHub Actions
@@ -2420,7 +2485,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "5000:5000"
+      - '5000:5000'
     environment:
       - NODE_ENV=development
       - MONGODB_URI=mongodb://mongo:27017/mwm
@@ -2434,7 +2499,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:5000/api
     depends_on:
@@ -2445,14 +2510,14 @@ services:
     volumes:
       - mongo-data:/data/db
     ports:
-      - "27017:27017"
+      - '27017:27017'
 
   redis:
     image: redis:7-alpine
     volumes:
       - redis-data:/data
     ports:
-      - "6379:6379"
+      - '6379:6379'
 
 volumes:
   mongo-data:
@@ -2460,6 +2525,8 @@ volumes:
 ```
 
 ---
+
+<a id="16-environment-configuration--إعدادات-البيئة"></a>
 
 ## 16. Environment Configuration | إعدادات البيئة
 
@@ -2527,16 +2594,16 @@ NEXT_PUBLIC_ENABLE_DARK_MODE=true
 
 ### ما يميز هذا المشروع | Key Differentiators
 
-| الميزة | الوصف |
-|--------|-------|
+| الميزة                   | الوصف                                               |
+| ------------------------ | --------------------------------------------------- |
 | 🎨 **قابل للتخصيص 100%** | كل شيء قابل للتعديل من لوحة التحكم بدون تعديل الكود |
-| 🌍 **متعدد اللغات** | دعم كامل للعربية والإنجليزية مع RTL |
-| 🔍 **سيو متقدم** | Meta tags, Schema, Sitemap, Core Web Vitals |
-| 🔒 **أمان مؤسسي** | JWT, RBAC, Rate limiting, Input validation |
-| ✅ **اختبارات شاملة** | Unit, Integration, E2E (80%+ coverage) |
-| ⚡ **أداء عالي** | Caching, Lazy loading, Image optimization |
-| 📱 **متجاوب** | Mobile-first responsive design |
-| ♿ **إمكانية الوصول** | WCAG 2.1 AA compliant |
+| 🌍 **متعدد اللغات**      | دعم كامل للعربية والإنجليزية مع RTL                 |
+| 🔍 **سيو متقدم**         | Meta tags, Schema, Sitemap, Core Web Vitals         |
+| 🔒 **أمان مؤسسي**        | JWT, RBAC, Rate limiting, Input validation          |
+| ✅ **اختبارات شاملة**    | Unit, Integration, E2E (80%+ coverage)              |
+| ⚡ **أداء عالي**         | Caching, Lazy loading, Image optimization           |
+| 📱 **متجاوب**            | Mobile-first responsive design                      |
+| ♿ **إمكانية الوصول**    | WCAG 2.1 AA compliant                               |
 
 ### الميزات الرئيسية | Main Features
 

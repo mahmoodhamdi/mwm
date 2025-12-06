@@ -1,0 +1,47 @@
+version: '3.8'
+
+# Test environment - for CI/CD
+# Use with: docker-compose -f docker-compose.test.yml up -d
+
+services:
+  # MongoDB Database
+  mongo-test:
+    image: mongo:7
+    container_name: mwm-mongo-test
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: mwm_test
+    ports:
+      - "27018:27017"
+    networks:
+      - mwm-network-test
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    tmpfs:
+      - /data/db
+
+  # Redis Cache
+  redis-test:
+    image: redis:7-alpine
+    container_name: mwm-redis-test
+    ports:
+      - "6380:6379"
+    networks:
+      - mwm-network-test
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    tmpfs:
+      - /data
+
+networks:
+  mwm-network-test:
+    name: mwm-network-test
+    driver: bridge

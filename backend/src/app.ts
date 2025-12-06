@@ -3,7 +3,7 @@
  * إعداد تطبيق Express
  */
 
-import express, { Express, Request, Response, NextFunction } from 'express';
+import express, { Express } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
@@ -13,13 +13,11 @@ import rateLimit from 'express-rate-limit';
 import mongoSanitize from 'express-mongo-sanitize';
 import hpp from 'hpp';
 
-import { env, logger, morganStream } from './config';
+import { env, morganStream } from './config';
 import { errorHandler } from './middlewares/errorHandler';
 import { notFoundHandler } from './middlewares/notFoundHandler';
 import healthRouter from './routes/health.routes';
-// Import other routes as they are created
-// import authRouter from './routes/auth.routes';
-// import projectsRouter from './routes/projects.routes';
+import authRouter from './routes/auth.routes';
 
 /**
  * Create Express application
@@ -88,8 +86,7 @@ export function createApp(): Express {
 
   // API Routes
   app.use('/api/v1/health', healthRouter);
-  // app.use('/api/v1/auth', authRouter);
-  // app.use('/api/v1/projects', projectsRouter);
+  app.use('/api/v1/auth', authRouter);
   // Add more routes as they are created
 
   // 404 handler

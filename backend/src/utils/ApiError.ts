@@ -135,4 +135,34 @@ export class ApiError extends Error {
       'Service unavailable'
     );
   }
+
+  static emailNotVerified(): ApiError {
+    return new ApiError(
+      HTTP_STATUS.FORBIDDEN,
+      'EMAIL_NOT_VERIFIED',
+      'Email not verified | البريد الإلكتروني غير مؤكد'
+    );
+  }
 }
+
+/**
+ * Errors factory object for convenient error creation
+ * كائن مصنع الأخطاء لإنشاء الأخطاء بسهولة
+ */
+export const Errors = {
+  UNAUTHORIZED: (msg?: string) => ApiError.unauthorized(msg),
+  INVALID_CREDENTIALS: () => ApiError.invalidCredentials(),
+  TOKEN_EXPIRED: () => ApiError.tokenExpired(),
+  INVALID_TOKEN: () => ApiError.invalidToken(),
+  INSUFFICIENT_PERMISSIONS: () => ApiError.insufficientPermissions(),
+  VALIDATION_ERROR: (details: unknown) => ApiError.validationError(details),
+  INVALID_INPUT: (msg?: string) => ApiError.invalidInput(msg),
+  NOT_FOUND: (resource: string) => ApiError.notFound(resource),
+  ALREADY_EXISTS: (resource: string) => ApiError.alreadyExists(resource),
+  EMAIL_EXISTS: () => ApiError.emailExists(),
+  SLUG_EXISTS: () => ApiError.slugExists(),
+  TOO_MANY_REQUESTS: () => ApiError.tooManyRequests(),
+  INTERNAL_ERROR: (msg?: string) => ApiError.internalError(msg),
+  SERVICE_UNAVAILABLE: () => ApiError.serviceUnavailable(),
+  EMAIL_NOT_VERIFIED: () => ApiError.emailNotVerified(),
+};

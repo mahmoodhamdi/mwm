@@ -1,0 +1,154 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd:*)",
+      "Bash(ls:*)",
+      "Bash(dir:*)",
+      "Bash(cat:*)",
+      "Bash(echo:*)",
+      "Bash(mkdir:*)",
+      "Bash(touch:*)",
+      "Bash(cp:*)",
+      "Bash(mv:*)",
+      "Bash(rm:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(pwd:*)",
+      "Bash(tree:*)",
+      
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "Bash(node:*)",
+      "Bash(yarn:*)",
+      "Bash(pnpm:*)",
+      "Bash(tsx:*)",
+      "Bash(ts-node:*)",
+      
+      "Bash(git:*)",
+      "Bash(gh:*)",
+      
+      "Bash(docker:*)",
+      "Bash(docker-compose:*)",
+      
+      "Bash(mongod:*)",
+      "Bash(mongo:*)",
+      "Bash(mongosh:*)",
+      "Bash(redis-server:*)",
+      "Bash(redis-cli:*)",
+      
+      "Bash(curl:*)",
+      "Bash(wget:*)",
+      "Bash(ping:*)",
+      
+      "Bash(code:*)",
+      "Bash(eslint:*)",
+      "Bash(prettier:*)",
+      "Bash(tsc:*)",
+      "Bash(jest:*)",
+      "Bash(vitest:*)",
+      "Bash(playwright:*)",
+      "Bash(cypress:*)",
+      
+      "Bash(python:*)",
+      "Bash(python3:*)",
+      "Bash(pip:*)",
+      "Bash(pip3:*)",
+      
+      "Bash(chmod:*)",
+      "Bash(chown:*)",
+      "Bash(env:*)",
+      "Bash(export:*)",
+      "Bash(source:*)",
+      "Bash(which:*)",
+      "Bash(whereis:*)",
+      "Bash(whoami:*)",
+      "Bash(clear:*)",
+      "Bash(history:*)",
+      
+      "Bash(tar:*)",
+      "Bash(zip:*)",
+      "Bash(unzip:*)",
+      "Bash(gzip:*)",
+      
+      "Bash(ps:*)",
+      "Bash(kill:*)",
+      "Bash(pkill:*)",
+      "Bash(lsof:*)",
+      "Bash(netstat:*)",
+      "Bash(top:*)",
+      "Bash(htop:*)",
+      
+      "Bash(sed:*)",
+      "Bash(awk:*)",
+      "Bash(sort:*)",
+      "Bash(uniq:*)",
+      "Bash(wc:*)",
+      "Bash(diff:*)",
+      "Bash(xargs:*)",
+      
+      "Bash(openssl:*)",
+      "Bash(ssh-keygen:*)",
+      
+      "Bash(D:\\mwm\\*)",
+      "Bash(*D:\\mwm*)",
+      "Bash(dir /b /s D:\\mwm)",
+      "Bash(dir D:\\mwm*)",
+      
+      "Read(*)",
+      "Write(*)",
+      "Edit(*)",
+      "MultiEdit(*)",
+      
+      "WebFetch(*)",
+      "WebSearch(*)",
+      
+      "mcp__*"
+    ],
+    "deny": [
+      "Bash(rm -rf /)",
+      "Bash(rm -rf /*)",
+      "Bash(format:*)",
+      "Bash(mkfs:*)",
+      "Bash(dd if=/dev/zero*)",
+      "Bash(shutdown:*)",
+      "Bash(reboot:*)",
+      "Bash(init 0)",
+      "Bash(init 6)",
+      "Bash(:(){ :|:& };:)"
+    ]
+  },
+  "settings": {
+    "model": "claude-sonnet-4-20250514",
+    "customInstructions": "أنت مطور متخصص في بناء مشروع MWM. اتبع خطة المشروع بدقة واستخدم TypeScript strict mode دائماً. اكتب اختبارات لكل كود. استخدم العربية والإنجليزية في التعليقات.",
+    "workingDirectory": "D:\\mwm",
+    "preferredLanguage": "ar"
+  },
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@anthropic/mcp-server-filesystem", "D:\\mwm"]
+    },
+    "git": {
+      "command": "npx", 
+      "args": ["-y", "@anthropic/mcp-server-git"]
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@anthropic/mcp-server-memory"]
+    }
+  },
+  "projectContext": {
+    "name": "MWM - Integrated Software Solutions",
+    "type": "fullstack",
+    "stack": {
+      "frontend": ["Next.js 14", "React 18", "TypeScript", "Tailwind CSS"],
+      "backend": ["Node.js", "Express", "TypeScript", "MongoDB", "Redis"],
+      "testing": ["Jest", "React Testing Library", "Playwright", "Supertest"],
+      "devops": ["Docker", "GitHub Actions"]
+    },
+    "languages": ["ar", "en"],
+    "defaultLanguage": "ar"
+  }
+}

@@ -5,8 +5,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '../config';
-import { ApiError } from '../utils/ApiError';
-import { ERROR_CODES, HTTP_STATUS } from '@mwm/shared';
+import { ApiError, ERROR_CODES, HTTP_STATUS } from '../utils/ApiError';
 
 // Error messages in Arabic and English
 const errorMessages: Record<string, { ar: string; en: string }> = {

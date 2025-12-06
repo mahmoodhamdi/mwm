@@ -17,30 +17,38 @@ const router = Router();
  */
 
 // Register
-router.post('/register', validate(authValidation.register), authController.register);
+router.post('/register', validate({ body: authValidation.register }), authController.register);
 
 // Login
-router.post('/login', validate(authValidation.login), authController.login);
+router.post('/login', validate({ body: authValidation.login }), authController.login);
 
 // Refresh token
-router.post('/refresh-token', validate(authValidation.refreshToken), authController.refreshToken);
+router.post(
+  '/refresh-token',
+  validate({ body: authValidation.refreshToken }),
+  authController.refreshToken
+);
 
 // Forgot password
 router.post(
   '/forgot-password',
-  validate(authValidation.forgotPassword),
+  validate({ body: authValidation.forgotPassword }),
   authController.forgotPassword
 );
 
 // Reset password
 router.post(
   '/reset-password',
-  validate(authValidation.resetPassword),
+  validate({ body: authValidation.resetPassword }),
   authController.resetPassword
 );
 
 // Verify email
-router.post('/verify-email', validate(authValidation.verifyEmail), authController.verifyEmail);
+router.post(
+  '/verify-email',
+  validate({ body: authValidation.verifyEmail }),
+  authController.verifyEmail
+);
 
 /**
  * Protected routes
@@ -57,7 +65,7 @@ router.get('/me', authenticate, authController.getMe);
 router.put(
   '/me',
   authenticate,
-  validate(authValidation.updateProfile),
+  validate({ body: authValidation.updateProfile }),
   authController.updateProfile
 );
 
@@ -65,7 +73,7 @@ router.put(
 router.put(
   '/change-password',
   authenticate,
-  validate(authValidation.changePassword),
+  validate({ body: authValidation.changePassword }),
   authController.changePassword
 );
 

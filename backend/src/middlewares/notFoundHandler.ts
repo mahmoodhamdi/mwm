@@ -4,7 +4,7 @@
  */
 
 import { Request, Response } from 'express';
-import { HTTP_STATUS, ERROR_CODES } from '@mwm/shared';
+import { HTTP_STATUS, ERROR_CODES } from '../utils/ApiError';
 
 /**
  * Not found handler

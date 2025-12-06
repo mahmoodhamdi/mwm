@@ -90,7 +90,7 @@ function hasPermission(userRole: UserRole, requiredPermissions: string[]): boole
  * وسيط التحقق من الهوية
  */
 export const authenticate = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
+  async (req: Request, _res: Response, next: NextFunction) => {
     // Get token from header
     const authHeader = req.headers.authorization;
 
@@ -137,7 +137,7 @@ export const authenticate = asyncHandler(
  * وسيط التفويض - التحقق من الصلاحيات
  */
 export const authorize = (...permissions: string[]) => {
-  return asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+  return asyncHandler(async (req: Request, _res: Response, next: NextFunction) => {
     if (!req.user) {
       throw Errors.UNAUTHORIZED();
     }
@@ -164,7 +164,7 @@ export const authorize = (...permissions: string[]) => {
  * تحقق اختياري - لا يفشل إذا لم يكن هناك توكن
  */
 export const optionalAuth = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
+  async (req: Request, _res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader?.startsWith('Bearer ')) {
@@ -202,7 +202,7 @@ export const optionalAuth = asyncHandler(
  * يتطلب التحقق من البريد الإلكتروني
  */
 export const requireEmailVerified = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
+  async (req: Request, _res: Response, next: NextFunction) => {
     if (!req.user) {
       throw Errors.UNAUTHORIZED();
     }

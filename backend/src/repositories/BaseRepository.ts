@@ -14,8 +14,21 @@ import {
   QueryOptions,
   ProjectionType,
   PopulateOptions,
+  PipelineStage,
 } from 'mongoose';
-import { PaginationMeta } from '@mwm/shared';
+
+/**
+ * Pagination metadata
+ * بيانات الترقيم
+ */
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
 
 /**
  * Query options for find operations
@@ -281,7 +294,7 @@ export class BaseRepository<T extends Document> {
    * Aggregate documents
    * تجميع المستندات
    */
-  async aggregate<R = unknown>(pipeline: object[]): Promise<R[]> {
+  async aggregate<R = unknown>(pipeline: PipelineStage[]): Promise<R[]> {
     return this.model.aggregate(pipeline).exec();
   }
 

@@ -18,6 +18,10 @@ import { errorHandler } from './middlewares/errorHandler';
 import { notFoundHandler } from './middlewares/notFoundHandler';
 import healthRouter from './routes/health.routes';
 import authRouter from './routes/auth.routes';
+import settingsRouter from './routes/settings.routes';
+import contentRouter from './routes/content.routes';
+import translationRouter from './routes/translation.routes';
+import menuRouter from './routes/menu.routes';
 
 /**
  * Create Express application
@@ -87,7 +91,10 @@ export function createApp(): Express {
   // API Routes
   app.use('/api/v1/health', healthRouter);
   app.use('/api/v1/auth', authRouter);
-  // Add more routes as they are created
+  app.use('/api/v1/settings', settingsRouter);
+  app.use('/api/v1/content', contentRouter);
+  app.use('/api/v1/translations', translationRouter);
+  app.use('/api/v1/menus', menuRouter);
 
   // 404 handler
   app.use(notFoundHandler);

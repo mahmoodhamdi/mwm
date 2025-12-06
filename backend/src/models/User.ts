@@ -223,11 +223,11 @@ const userSchema = new Schema<IUser, UserModel, IUserMethods>(
   {
     timestamps: true,
     toJSON: {
-      transform(doc, ret) {
-        delete ret.password;
-        delete ret.refreshTokens;
-        delete ret.twoFactorSecret;
-        delete ret.__v;
+      transform(_doc, ret: Record<string, unknown>) {
+        delete ret['password'];
+        delete ret['refreshTokens'];
+        delete ret['twoFactorSecret'];
+        delete ret['__v'];
         return ret;
       },
     },

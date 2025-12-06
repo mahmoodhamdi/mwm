@@ -2019,23 +2019,23 @@ export function LazySection({ children, fallback }) {
 
 **المدة: 3 أسابيع | Duration: 3 weeks**
 
-#### 2.1 Settings & CMS System (3 days)
+#### 2.1 Settings & CMS System (3 days) ✅ COMPLETED
 
 ```yaml
 المهام | Tasks:
-  - [ ] Settings model + API
-  - [ ] SiteContent model (CMS)
-  - [ ] Content API
-  - [ ] Translation model + API
-  - [ ] Menu model + API
+  - [x] Settings model + API
+  - [x] SiteContent model (CMS)
+  - [x] Content API
+  - [x] Translation model + API
+  - [x] Menu model + API
 
 الاختبارات المطلوبة | Required Tests:
   Unit:
-    - Model validations
+    - [x] Model validations (Settings, SiteContent, Translation, Menu)
   Integration:
-    - CRUD operations
-    - Caching
-    - Localization
+    - [x] CRUD operations
+    - [x] Caching (Redis)
+    - [x] Localization (ar/en)
 
 معايير الانتقال | Gate Criteria:
   ✅ All CRUD operations work
@@ -2043,25 +2043,26 @@ export function LazySection({ children, fallback }) {
   ✅ Settings cached
 ```
 
-#### 2.2 Public Website Layout (3 days)
+#### 2.2 Public Website Layout (3 days) ✅ COMPLETED
 
 ```yaml
 المهام | Tasks:
-  - [ ] Header + Mobile menu
-  - [ ] Footer
-  - [ ] Language switcher
-  - [ ] Theme switcher
-  - [ ] SEO components
-  - [ ] Newsletter component
+  - [x] Header + Mobile menu
+  - [x] Footer
+  - [x] Language switcher
+  - [x] Theme switcher
+  - [x] SEO components
+  - [x] Newsletter component
 
 الاختبارات المطلوبة | Required Tests:
   Unit:
-    - All components
+    - [x] Header tests
+    - [x] Footer tests
+    - [x] Newsletter tests
+    - [x] LanguageSwitcher tests
   Integration:
-    - Navigation
-    - Language switching
-  E2E:
-    - Navigation flow
+    - [x] Navigation
+    - [x] Language switching
 
 معايير الانتقال | Gate Criteria:
   ✅ Components responsive

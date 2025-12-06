@@ -3,7 +3,56 @@
  * فئة أخطاء الـ API
  */
 
-import { HTTP_STATUS, ERROR_CODES } from '@mwm/shared';
+/**
+ * HTTP Status Codes
+ * أكواد حالة HTTP
+ */
+export const HTTP_STATUS = {
+  OK: 200,
+  CREATED: 201,
+  NO_CONTENT: 204,
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  CONFLICT: 409,
+  UNPROCESSABLE_ENTITY: 422,
+  TOO_MANY_REQUESTS: 429,
+  INTERNAL_SERVER_ERROR: 500,
+  SERVICE_UNAVAILABLE: 503,
+} as const;
+
+/**
+ * Error Codes
+ * أكواد الأخطاء
+ */
+export const ERROR_CODES = {
+  // Auth
+  UNAUTHORIZED: 'UNAUTHORIZED',
+  INVALID_CREDENTIALS: 'INVALID_CREDENTIALS',
+  TOKEN_EXPIRED: 'TOKEN_EXPIRED',
+  INVALID_TOKEN: 'INVALID_TOKEN',
+  INSUFFICIENT_PERMISSIONS: 'INSUFFICIENT_PERMISSIONS',
+  ACCOUNT_DISABLED: 'ACCOUNT_DISABLED',
+  EMAIL_NOT_VERIFIED: 'EMAIL_NOT_VERIFIED',
+
+  // Validation
+  VALIDATION_ERROR: 'VALIDATION_ERROR',
+  INVALID_INPUT: 'INVALID_INPUT',
+
+  // Resources
+  NOT_FOUND: 'NOT_FOUND',
+  ALREADY_EXISTS: 'ALREADY_EXISTS',
+  EMAIL_EXISTS: 'EMAIL_EXISTS',
+  SLUG_EXISTS: 'SLUG_EXISTS',
+
+  // Rate Limiting
+  TOO_MANY_REQUESTS: 'TOO_MANY_REQUESTS',
+
+  // Server
+  INTERNAL_ERROR: 'INTERNAL_ERROR',
+  SERVICE_UNAVAILABLE: 'SERVICE_UNAVAILABLE',
+} as const;
 
 /**
  * Custom API Error class
@@ -143,6 +192,10 @@ export class ApiError extends Error {
       'Email not verified | البريد الإلكتروني غير مؤكد'
     );
   }
+
+  static forbidden(message?: string): ApiError {
+    return new ApiError(HTTP_STATUS.FORBIDDEN, 'FORBIDDEN', message || 'Forbidden');
+  }
 }
 
 /**
@@ -165,4 +218,5 @@ export const Errors = {
   INTERNAL_ERROR: (msg?: string) => ApiError.internalError(msg),
   SERVICE_UNAVAILABLE: () => ApiError.serviceUnavailable(),
   EMAIL_NOT_VERIFIED: () => ApiError.emailNotVerified(),
+  FORBIDDEN: (msg?: string) => ApiError.forbidden(msg),
 };

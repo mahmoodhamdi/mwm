@@ -4,7 +4,19 @@
  */
 
 import { Response } from 'express';
-import { PaginationMeta } from '@mwm/shared';
+
+/**
+ * Pagination metadata
+ * بيانات الترقيم
+ */
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
 
 /**
  * Standard API response structure
@@ -86,7 +98,43 @@ export function sendPaginated<T>(
   pagination: PaginationMeta,
   meta?: Record<string, unknown>
 ): Response {
-  return sendSuccess(res, data, { pagination, meta });
+  return sendSuccess(res, data, { pagination, ...(meta && { meta }) });
+}
+
+/**
+ * Helper: Success response (alias for sendSuccess)
+ * مساعد: استجابة النجاح
+ */
+export function successResponse<T>(res: Response, data: T, statusCode: number = 200): Response {
+  return sendSuccess(res, data, { statusCode });
+}
+
+/**
+ * Helper: Paginated response
+ * مساعد: استجابة مرقمة
+ */
+export function paginatedResponse<T>(
+  res: Response,
+  options: {
+    data: T[];
+    page: number;
+    limit: number;
+    total: number;
+  }
+): Response {
+  const { data, page, limit, total } = options;
+  const totalPages = Math.ceil(total / limit);
+
+  const pagination: PaginationMeta = {
+    page,
+    limit,
+    total,
+    totalPages,
+    hasNextPage: page < totalPages,
+    hasPrevPage: page > 1,
+  };
+
+  return sendPaginated(res, data, pagination);
 }
 
 /**
@@ -121,4 +169,6 @@ export default {
   sendNoContent,
   sendPaginated,
   sendError,
+  successResponse,
+  paginatedResponse,
 };

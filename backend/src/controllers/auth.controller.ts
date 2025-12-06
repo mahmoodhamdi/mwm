@@ -117,7 +117,7 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
       },
       ...tokens,
     },
-    'Login successful | تم تسجيل الدخول بنجاح'
+    { message: 'Login successful | تم تسجيل الدخول بنجاح' }
   );
 });
 
@@ -140,7 +140,7 @@ export const logout = asyncHandler(async (req: Request, res: Response) => {
     await authService.blacklistAccessToken(accessToken);
   }
 
-  sendSuccess(res, null, 'Logged out successfully | تم تسجيل الخروج بنجاح');
+  sendSuccess(res, null, { message: 'Logged out successfully | تم تسجيل الخروج بنجاح' });
 });
 
 /**
@@ -153,7 +153,7 @@ export const refreshToken = asyncHandler(async (req: Request, res: Response) => 
 
   const tokens = await authService.refreshTokens(token, req.headers['user-agent'], req.ip);
 
-  sendSuccess(res, tokens, 'Tokens refreshed successfully | تم تحديث التوكنات بنجاح');
+  sendSuccess(res, tokens, { message: 'Tokens refreshed successfully | تم تحديث التوكنات بنجاح' });
 });
 
 /**
@@ -171,11 +171,10 @@ export const forgotPassword = asyncHandler(async (req: Request, res: Response) =
     await emailService.sendPasswordResetEmail(result.user.email, result.user.name, result.token);
   }
 
-  sendSuccess(
-    res,
-    null,
-    'If an account exists with this email, a password reset link has been sent | إذا كان هناك حساب بهذا البريد، تم إرسال رابط إعادة تعيين كلمة المرور'
-  );
+  sendSuccess(res, null, {
+    message:
+      'If an account exists with this email, a password reset link has been sent | إذا كان هناك حساب بهذا البريد، تم إرسال رابط إعادة تعيين كلمة المرور',
+  });
 });
 
 /**
@@ -188,11 +187,10 @@ export const resetPassword = asyncHandler(async (req: Request, res: Response) =>
 
   await authService.resetPassword(token, password);
 
-  sendSuccess(
-    res,
-    null,
-    'Password reset successful. Please login with your new password | تم إعادة تعيين كلمة المرور بنجاح. يرجى تسجيل الدخول بكلمة المرور الجديدة'
-  );
+  sendSuccess(res, null, {
+    message:
+      'Password reset successful. Please login with your new password | تم إعادة تعيين كلمة المرور بنجاح. يرجى تسجيل الدخول بكلمة المرور الجديدة',
+  });
 });
 
 /**
@@ -208,7 +206,9 @@ export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
   // Send welcome email
   await emailService.sendWelcomeEmail(user.email, user.name);
 
-  sendSuccess(res, null, 'Email verified successfully | تم تأكيد البريد الإلكتروني بنجاح');
+  sendSuccess(res, null, {
+    message: 'Email verified successfully | تم تأكيد البريد الإلكتروني بنجاح',
+  });
 });
 
 /**
@@ -237,7 +237,7 @@ export const resendVerification = asyncHandler(async (req: Request, res: Respons
 
   await emailService.sendVerificationEmail(user.email, user.name, verificationToken);
 
-  sendSuccess(res, null, 'Verification email sent | تم إرسال بريد التحقق');
+  sendSuccess(res, null, { message: 'Verification email sent | تم إرسال بريد التحقق' });
 });
 
 /**
@@ -296,7 +296,7 @@ export const updateProfile = asyncHandler(async (req: Request, res: Response) =>
         isEmailVerified: user.isEmailVerified,
       },
     },
-    'Profile updated successfully | تم تحديث الملف الشخصي بنجاح'
+    { message: 'Profile updated successfully | تم تحديث الملف الشخصي بنجاح' }
   );
 });
 
@@ -330,12 +330,14 @@ export const changePassword = asyncHandler(async (req: Request, res: Response) =
   await user.save();
 
   // Revoke all refresh tokens
-  await authService.revokeAllRefreshTokens(userId);
+  await authService.revokeAllRefreshTokens(userId!.toString());
 
   // Generate new tokens
   const tokens = await authService.generateTokenPair(user, req.headers['user-agent'], req.ip);
 
-  sendSuccess(res, tokens, 'Password changed successfully | تم تغيير كلمة المرور بنجاح');
+  sendSuccess(res, tokens, {
+    message: 'Password changed successfully | تم تغيير كلمة المرور بنجاح',
+  });
 });
 
 export const authController = {

@@ -17,7 +17,10 @@
       "@validations/*": ["./validations/*"],
       "@types/*": ["./types/*"],
       "@constants/*": ["./constants/*"]
-    }
+    },
+    "noPropertyAccessFromIndexSignature": false,
+    "exactOptionalPropertyTypes": false,
+    "noUncheckedIndexedAccess": false
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "coverage", "**/*.test.ts"]

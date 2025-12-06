@@ -74,8 +74,8 @@ class AuthService {
    */
   generateAccessToken(payload: TokenPayload): string {
     return jwt.sign(payload, env.jwt.secret, {
-      expiresIn: env.jwt.expiresIn,
-    });
+      expiresIn: env.jwt.expiresIn as string,
+    } as jwt.SignOptions);
   }
 
   /**

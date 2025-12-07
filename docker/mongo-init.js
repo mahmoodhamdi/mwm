@@ -77,6 +77,39 @@ db.contacts.createIndex({ email: 1 });
 // Create indexes for translations
 db.translations.createIndex({ key: 1, namespace: 1 }, { unique: true });
 
+// Create contact messages indexes
+db.contactmessages.createIndex({ status: 1, createdAt: -1 });
+db.contactmessages.createIndex({ isStarred: 1 });
+
+// Create newsletter indexes
+db.newslettersubscribers.createIndex({ email: 1 }, { unique: true });
+db.newslettersubscribers.createIndex({ status: 1 });
+
+// Create settings and menu indexes
+db.settings.createIndex({ key: 1 }, { unique: true });
+db.menus.createIndex({ slug: 1 }, { unique: true });
+db.sitecontent.createIndex({ key: 1 }, { unique: true });
+
+// Insert default admin user if not exists
+const adminEmail = 'admin@mwm.com';
+const existingAdmin = db.users.findOne({ email: adminEmail });
+
+if (!existingAdmin) {
+  print('Creating default admin user...');
+  // Password: Admin@123 (hashed with bcrypt, 12 rounds)
+  db.users.insertOne({
+    email: adminEmail,
+    password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.2SJGXH1LPWbsyi',
+    name: 'Admin',
+    role: 'super_admin',
+    isEmailVerified: true,
+    isActive: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  });
+  print('Default admin user created: admin@mwm.com / Admin@123');
+}
+
 // Print success message
 print('✅ MongoDB initialization completed successfully!');
 print(

@@ -5,7 +5,10 @@
       "Bash(npm test:*)",
       "Bash(npm run test:shared:*)",
       "Bash(npm run test:*)",
-      "Bash(git init:*)"
+      "Bash(git init:*)",
+      "Bash(NODE_OPTIONS=\"--max-old-space-size=4096\" npm test:*)",
+      "Bash(rd /s /q \"%LOCALAPPDATA%\\mongodb-binaries\")",
+      "Bash(cd:*)"
     ],
     "deny": [],
     "ask": []

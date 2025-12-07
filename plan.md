@@ -2358,20 +2358,46 @@ Tests:
 
 - 122 admin tests (6 test suites, all passing)
 
-#### 3.4 Messages & Newsletter (3 days)
+#### 3.4 Messages & Newsletter (3 days) ✅ COMPLETED
 
 ```yaml
 المهام | Tasks:
-  - [ ] Messages inbox
-  - [ ] Reply functionality
-  - [ ] Newsletter subscribers
-  - [ ] Export functionality
+  - [x] Messages inbox
+  - [x] Reply functionality
+  - [x] Newsletter subscribers
+  - [x] Export functionality
 
 معايير الانتقال | Gate Criteria:
   ✅ Messages manageable
   ✅ Reply sends email
   ✅ Export works
 ```
+
+**التنفيذ | Implementation:**
+
+Admin Pages:
+
+- /[locale]/admin/messages - Messages inbox with status tracking, filtering, replies
+- /[locale]/admin/newsletter - Newsletter subscribers with campaigns management
+
+Features:
+
+- Messages inbox with status (new, read, replied, archived)
+- Priority levels (low, normal, high)
+- Star/unstar functionality
+- Bulk actions (archive, delete)
+- Reply modal with email sending
+- Export to CSV
+- Search and filter by status/priority
+- Newsletter subscribers management with stats
+- Campaign management (draft, scheduled, sent)
+- Subscriber import/export
+- Open rate and click tracking metrics
+- Bilingual campaign content (Arabic/English)
+
+Tests:
+
+- 151 admin tests (7 test suites, all passing)
 
 #### 3.5 User Management & Permissions (3 days)
 

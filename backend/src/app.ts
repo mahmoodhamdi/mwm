@@ -13,7 +13,9 @@ import rateLimit from 'express-rate-limit';
 import mongoSanitize from 'express-mongo-sanitize';
 import hpp from 'hpp';
 
+import swaggerUi from 'swagger-ui-express';
 import { env, morganStream } from './config';
+import { swaggerSpec } from './config/swagger';
 import { errorHandler } from './middlewares/errorHandler';
 import { notFoundHandler } from './middlewares/notFoundHandler';
 import healthRouter from './routes/health.routes';
@@ -103,6 +105,22 @@ export function createApp(): Express {
   app.use('/api/v1/projects', projectRouter);
   app.use('/api/v1/team', teamRouter);
   app.use('/api/v1/contact', contactRouter);
+
+  // Swagger documentation
+  app.use(
+    '/api/docs',
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerSpec, {
+      customCss: '.swagger-ui .topbar { display: none }',
+      customSiteTitle: 'MWM API Documentation',
+    })
+  );
+
+  // Swagger JSON
+  app.get('/api/docs.json', (_req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(swaggerSpec);
+  });
 
   // 404 handler
   app.use(notFoundHandler);

@@ -2246,21 +2246,42 @@ Frontend:
 
 **المدة: 3 أسابيع | Duration: 3 weeks**
 
-#### 3.1 Admin Layout & Dashboard (4 days)
+#### 3.1 Admin Layout & Dashboard (4 days) ✅ COMPLETED
 
 ```yaml
 المهام | Tasks:
-  - [ ] Admin layout
-  - [ ] Sidebar navigation
-  - [ ] Dashboard statistics
-  - [ ] Charts components
-  - [ ] Recent activity
+  - [x] Admin layout
+  - [x] Sidebar navigation
+  - [x] Dashboard statistics
+  - [x] Charts components
+  - [x] Recent activity
 
 معايير الانتقال | Gate Criteria:
   ✅ Layout responsive
   ✅ Stats load correctly
   ✅ Charts render
 ```
+
+**التنفيذ | Implementation:**
+
+Frontend Components:
+
+- AdminLayout.tsx - Main layout wrapper with sidebar and header
+- AdminSidebar.tsx - Responsive sidebar with navigation
+- AdminHeader.tsx - Header with search, notifications, user menu
+- StatsCard.tsx - Statistics card with trends and variants
+- DashboardCharts.tsx - Line, Pie, Bar charts (CSS-based)
+- RecentActivity.tsx - Activity feed with time formatting
+
+Admin Pages:
+
+- /[locale]/admin - Dashboard page with stats, charts, activity
+- /[locale]/admin/layout.tsx - Admin layout wrapper
+
+Tests:
+
+- 64 tests for admin components (all passing)
+- AdminSidebar, StatsCard, DashboardCharts, RecentActivity tests
 
 #### 3.2 CRUD Interfaces (5 days)
 

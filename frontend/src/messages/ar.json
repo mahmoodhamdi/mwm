@@ -218,5 +218,56 @@
   "meta": {
     "defaultTitle": "MWM - حلول برمجية متكاملة",
     "defaultDescription": "شركة متخصصة في تطوير البرمجيات والحلول الرقمية المتكاملة"
+  },
+  "admin": {
+    "dashboard": {
+      "title": "لوحة التحكم",
+      "welcome": "مرحباً بك في لوحة تحكم MWM",
+      "totalProjects": "إجمالي المشاريع",
+      "newMessages": "الرسائل الجديدة",
+      "todayVisitors": "زوار اليوم",
+      "newsletterSubscribers": "مشتركي النشرة",
+      "recentActivity": "النشاط الأخير",
+      "quickActions": "إجراءات سريعة",
+      "viewAll": "عرض الكل"
+    },
+    "sidebar": {
+      "dashboard": "لوحة التحكم",
+      "projects": "المشاريع",
+      "services": "الخدمات",
+      "team": "الفريق",
+      "messages": "الرسائل",
+      "content": "المحتوى",
+      "siteContent": "محتوى الموقع",
+      "translations": "الترجمات",
+      "menus": "القوائم",
+      "newsletter": "النشرة البريدية",
+      "users": "المستخدمين",
+      "settings": "الإعدادات",
+      "backToSite": "العودة للموقع"
+    },
+    "header": {
+      "search": "بحث...",
+      "notifications": "الإشعارات",
+      "profile": "الملف الشخصي",
+      "logout": "تسجيل الخروج"
+    },
+    "stats": {
+      "fromLastMonth": "من الشهر الماضي"
+    },
+    "activity": {
+      "message": "رسالة جديدة",
+      "subscriber": "مشترك جديد",
+      "projectUpdate": "تحديث مشروع",
+      "projectView": "مشاهدة مشروع",
+      "userLogin": "تسجيل دخول مستخدم",
+      "noActivity": "لا يوجد نشاط حتى الآن"
+    },
+    "quickActions": {
+      "addProject": "إضافة مشروع جديد",
+      "addTeamMember": "إضافة عضو فريق",
+      "viewMessages": "عرض الرسائل",
+      "manageNewsletter": "إدارة النشرة البريدية"
+    }
   }
 }

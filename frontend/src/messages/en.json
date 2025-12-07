@@ -218,5 +218,56 @@
   "meta": {
     "defaultTitle": "MWM - Integrated Software Solutions",
     "defaultDescription": "A company specialized in software development and integrated digital solutions"
+  },
+  "admin": {
+    "dashboard": {
+      "title": "Dashboard",
+      "welcome": "Welcome to MWM Admin Dashboard",
+      "totalProjects": "Total Projects",
+      "newMessages": "New Messages",
+      "todayVisitors": "Today's Visitors",
+      "newsletterSubscribers": "Newsletter Subscribers",
+      "recentActivity": "Recent Activity",
+      "quickActions": "Quick Actions",
+      "viewAll": "View all"
+    },
+    "sidebar": {
+      "dashboard": "Dashboard",
+      "projects": "Projects",
+      "services": "Services",
+      "team": "Team",
+      "messages": "Messages",
+      "content": "Content",
+      "siteContent": "Site Content",
+      "translations": "Translations",
+      "menus": "Menus",
+      "newsletter": "Newsletter",
+      "users": "Users",
+      "settings": "Settings",
+      "backToSite": "Back to Site"
+    },
+    "header": {
+      "search": "Search...",
+      "notifications": "Notifications",
+      "profile": "Profile",
+      "logout": "Logout"
+    },
+    "stats": {
+      "fromLastMonth": "from last month"
+    },
+    "activity": {
+      "message": "New message",
+      "subscriber": "New subscriber",
+      "projectUpdate": "Project updated",
+      "projectView": "Project viewed",
+      "userLogin": "User logged in",
+      "noActivity": "No activity yet"
+    },
+    "quickActions": {
+      "addProject": "Add New Project",
+      "addTeamMember": "Add Team Member",
+      "viewMessages": "View Messages",
+      "manageNewsletter": "Manage Newsletter"
+    }
   }
 }

@@ -9,3 +9,4 @@ export { contentValidation } from './content.validation';
 export { translationValidation } from './translation.validation';
 export { menuValidation } from './menu.validation';
 export { serviceValidation } from './service.validation';
+export { projectValidation } from './project.validation';

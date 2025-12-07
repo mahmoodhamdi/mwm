@@ -34,3 +34,16 @@ export {
   type IFAQItem,
   type IProcessStep,
 } from './Service';
+export {
+  ProjectCategory,
+  type IProjectCategory,
+  type IProjectCategoryModel,
+} from './ProjectCategory';
+export {
+  Project,
+  type IProject,
+  type IProjectModel,
+  type IProjectClient,
+  type IProjectTestimonial,
+  type IProjectTechnology,
+} from './Project';

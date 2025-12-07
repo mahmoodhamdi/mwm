@@ -24,6 +24,7 @@ import translationRouter from './routes/translation.routes';
 import menuRouter from './routes/menu.routes';
 import serviceRouter from './routes/service.routes';
 import projectRouter from './routes/project.routes';
+import teamRouter from './routes/team.routes';
 
 /**
  * Create Express application
@@ -99,6 +100,7 @@ export function createApp(): Express {
   app.use('/api/v1/menus', menuRouter);
   app.use('/api/v1/services', serviceRouter);
   app.use('/api/v1/projects', projectRouter);
+  app.use('/api/v1/team', teamRouter);
 
   // 404 handler
   app.use(notFoundHandler);

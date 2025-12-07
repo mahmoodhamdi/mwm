@@ -47,3 +47,11 @@ export {
   type IProjectTestimonial,
   type IProjectTechnology,
 } from './Project';
+export { Department, type IDepartment, type IDepartmentModel } from './Department';
+export {
+  TeamMember,
+  type ITeamMember,
+  type ITeamMemberModel,
+  type ISocialLinks,
+  type ISkill,
+} from './TeamMember';

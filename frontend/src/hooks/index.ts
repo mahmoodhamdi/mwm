@@ -14,3 +14,4 @@ export {
   usePrefersReducedMotion,
 } from './useMediaQuery';
 export { useClickOutside } from './useClickOutside';
+export { useIntersectionObserver, useLazyLoad } from './useIntersectionObserver';

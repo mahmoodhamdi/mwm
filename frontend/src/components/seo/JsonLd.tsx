@@ -1,9 +1,43 @@
 /**
- * JSON-LD Structured Data Components
- * مكونات البيانات المنظمة
+ * JSON-LD Structured Data Component
+ * مكون البيانات المنظمة JSON-LD
  */
 
-interface OrganizationSchema {
+import React from 'react';
+
+interface JsonLdProps {
+  data: Record<string, unknown> | Record<string, unknown>[];
+}
+
+/**
+ * Component to inject JSON-LD structured data into the page
+ * مكون لإدراج البيانات المنظمة في الصفحة
+ */
+export function JsonLd({ data }: JsonLdProps) {
+  const jsonString = JSON.stringify(data);
+
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonString }} />;
+}
+
+/**
+ * Multiple JSON-LD schemas wrapper
+ * غلاف لمخططات JSON-LD متعددة
+ */
+export function MultipleJsonLd({ schemas }: { schemas: Record<string, unknown>[] }) {
+  return (
+    <>
+      {schemas.map((schema, index) => (
+        <JsonLd key={index} data={schema} />
+      ))}
+    </>
+  );
+}
+
+/**
+ * Organization JSON-LD Schema Component
+ * مكون مخطط المؤسسة JSON-LD
+ */
+interface OrganizationJsonLdProps {
   name: string;
   description: string;
   url: string;
@@ -11,63 +45,13 @@ interface OrganizationSchema {
   email?: string;
   phone?: string;
   address?: {
-    street: string;
-    city: string;
-    country: string;
+    street?: string;
+    city?: string;
+    country?: string;
   };
   socialProfiles?: string[];
 }
 
-interface ServiceSchema {
-  name: string;
-  description: string;
-  provider: string;
-  url: string;
-  image?: string;
-  category?: string;
-}
-
-interface ArticleSchema {
-  title: string;
-  description: string;
-  url: string;
-  image: string;
-  datePublished: string;
-  dateModified?: string;
-  author: {
-    name: string;
-    url?: string;
-  };
-  publisher: {
-    name: string;
-    logo: string;
-  };
-}
-
-interface FAQSchema {
-  questions: Array<{
-    question: string;
-    answer: string;
-  }>;
-}
-
-interface BreadcrumbSchema {
-  items: Array<{
-    name: string;
-    url: string;
-  }>;
-}
-
-interface WebPageSchema {
-  name: string;
-  description: string;
-  url: string;
-  image?: string;
-}
-
-/**
- * Organization JSON-LD
- */
 export function OrganizationJsonLd({
   name,
   description,
@@ -76,108 +60,110 @@ export function OrganizationJsonLd({
   email,
   phone,
   address,
-  socialProfiles = [],
-}: OrganizationSchema) {
+  socialProfiles,
+}: OrganizationJsonLdProps) {
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name,
     description,
     url,
-    logo: {
-      '@type': 'ImageObject',
-      url: logo,
-    },
+    logo,
     ...(email && { email }),
     ...(phone && { telephone: phone }),
+    ...(socialProfiles && socialProfiles.length > 0 && { sameAs: socialProfiles }),
     ...(address && {
       address: {
         '@type': 'PostalAddress',
-        streetAddress: address.street,
-        addressLocality: address.city,
-        addressCountry: address.country,
+        ...(address.street && { streetAddress: address.street }),
+        ...(address.city && { addressLocality: address.city }),
+        ...(address.country && { addressCountry: address.country }),
       },
     }),
-    ...(socialProfiles.length > 0 && { sameAs: socialProfiles }),
     contactPoint: {
       '@type': 'ContactPoint',
       contactType: 'customer service',
-      ...(email && { email }),
-      ...(phone && { telephone: phone }),
       availableLanguage: ['Arabic', 'English'],
+      ...(phone && { telephone: phone }),
+      ...(email && { email }),
     },
   };
 
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-    />
-  );
+  return <JsonLd data={schema} />;
 }
 
 /**
- * Service JSON-LD
+ * Website JSON-LD Schema Component
+ * مكون مخطط الموقع JSON-LD
  */
-export function ServiceJsonLd({
-  name,
-  description,
-  provider,
-  url,
-  image,
-  category,
-}: ServiceSchema) {
-  const schema = {
+interface WebsiteJsonLdProps {
+  name: string;
+  url: string;
+  searchUrl?: string;
+}
+
+export function WebsiteJsonLd({ name, url, searchUrl }: WebsiteJsonLdProps) {
+  const schema: Record<string, unknown> = {
     '@context': 'https://schema.org',
-    '@type': 'Service',
+    '@type': 'WebSite',
     name,
-    description,
-    provider: {
-      '@type': 'Organization',
-      name: provider,
-    },
     url,
-    ...(image && { image }),
-    ...(category && { category }),
   };
 
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-    />
-  );
+  if (searchUrl) {
+    schema.potentialAction = {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: searchUrl,
+      },
+      'query-input': 'required name=search_term_string',
+    };
+  }
+
+  return <JsonLd data={schema} />;
 }
 
 /**
- * Article JSON-LD (for blog posts)
+ * Article JSON-LD Schema Component
+ * مكون مخطط المقالة JSON-LD
  */
+interface ArticleJsonLdProps {
+  title: string;
+  description: string;
+  url: string;
+  image?: string;
+  publishedTime: string;
+  modifiedTime?: string;
+  author: string;
+  publisher: {
+    name: string;
+    logo: string;
+  };
+}
+
 export function ArticleJsonLd({
   title,
   description,
   url,
   image,
-  datePublished,
-  dateModified,
+  publishedTime,
+  modifiedTime,
   author,
   publisher,
-}: ArticleSchema) {
+}: ArticleJsonLdProps) {
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: title,
     description,
     url,
-    image: {
-      '@type': 'ImageObject',
-      url: image,
-    },
-    datePublished,
-    dateModified: dateModified || datePublished,
+    ...(image && { image }),
+    datePublished: publishedTime,
+    dateModified: modifiedTime || publishedTime,
     author: {
       '@type': 'Person',
-      name: author.name,
-      ...(author.url && { url: author.url }),
+      name: author,
     },
     publisher: {
       '@type': 'Organization',
@@ -187,24 +173,85 @@ export function ArticleJsonLd({
         url: publisher.logo,
       },
     },
-    mainEntityOfPage: {
-      '@type': 'WebPage',
-      '@id': url,
-    },
   };
 
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-    />
-  );
+  return <JsonLd data={schema} />;
 }
 
 /**
- * FAQ JSON-LD
+ * Breadcrumb JSON-LD Schema Component
+ * مكون مخطط التنقل JSON-LD
  */
-export function FAQJsonLd({ questions }: FAQSchema) {
+interface BreadcrumbJsonLdProps {
+  items: Array<{ name: string; url: string }>;
+}
+
+export function BreadcrumbJsonLd({ items }: BreadcrumbJsonLdProps) {
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      item: item.url,
+    })),
+  };
+
+  return <JsonLd data={schema} />;
+}
+
+/**
+ * Service JSON-LD Schema Component
+ * مكون مخطط الخدمة JSON-LD
+ */
+interface ServiceJsonLdProps {
+  name: string;
+  description: string;
+  url: string;
+  image?: string;
+  provider: {
+    name: string;
+    url: string;
+  };
+  category?: string;
+}
+
+export function ServiceJsonLd({
+  name,
+  description,
+  url,
+  image,
+  provider,
+  category,
+}: ServiceJsonLdProps) {
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name,
+    description,
+    url,
+    ...(image && { image }),
+    ...(category && { serviceType: category }),
+    provider: {
+      '@type': 'Organization',
+      name: provider.name,
+      url: provider.url,
+    },
+  };
+
+  return <JsonLd data={schema} />;
+}
+
+/**
+ * FAQ JSON-LD Schema Component
+ * مكون مخطط الأسئلة الشائعة JSON-LD
+ */
+interface FAQJsonLdProps {
+  questions: Array<{ question: string; answer: string }>;
+}
+
+export function FAQJsonLd({ questions }: FAQJsonLdProps) {
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
@@ -218,41 +265,21 @@ export function FAQJsonLd({ questions }: FAQSchema) {
     })),
   };
 
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-    />
-  );
+  return <JsonLd data={schema} />;
 }
 
 /**
- * Breadcrumb JSON-LD
+ * WebPage JSON-LD Schema Component
+ * مكون مخطط صفحة الويب JSON-LD
  */
-export function BreadcrumbJsonLd({ items }: BreadcrumbSchema) {
-  const schema = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: items.map((item, index) => ({
-      '@type': 'ListItem',
-      position: index + 1,
-      name: item.name,
-      item: item.url,
-    })),
-  };
-
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-    />
-  );
+interface WebPageJsonLdProps {
+  name: string;
+  description: string;
+  url: string;
+  image?: string;
 }
 
-/**
- * WebPage JSON-LD
- */
-export function WebPageJsonLd({ name, description, url, image }: WebPageSchema) {
+export function WebPageJsonLd({ name, description, url, image }: WebPageJsonLdProps) {
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
@@ -262,103 +289,85 @@ export function WebPageJsonLd({ name, description, url, image }: WebPageSchema) 
     ...(image && { image }),
   };
 
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-    />
-  );
+  return <JsonLd data={schema} />;
 }
 
 /**
- * LocalBusiness JSON-LD
+ * LocalBusiness JSON-LD Schema Component
+ * مكون مخطط الأعمال المحلية JSON-LD
  */
-interface LocalBusinessSchema {
+interface LocalBusinessJsonLdProps {
   name: string;
   description: string;
   url: string;
-  logo: string;
   image?: string;
-  email?: string;
   phone?: string;
-  priceRange?: string;
-  address: {
-    street: string;
-    city: string;
+  email?: string;
+  address?: {
+    street?: string;
+    city?: string;
     region?: string;
     postalCode?: string;
-    country: string;
-  };
-  geo?: {
-    latitude: number;
-    longitude: number;
+    country?: string;
   };
   openingHours?: string[];
+  priceRange?: string;
 }
 
 export function LocalBusinessJsonLd({
   name,
   description,
   url,
-  logo,
   image,
-  email,
   phone,
-  priceRange,
+  email,
   address,
-  geo,
   openingHours,
-}: LocalBusinessSchema) {
+  priceRange,
+}: LocalBusinessJsonLdProps) {
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
     name,
     description,
     url,
-    logo,
     ...(image && { image }),
-    ...(email && { email }),
     ...(phone && { telephone: phone }),
+    ...(email && { email }),
     ...(priceRange && { priceRange }),
-    address: {
-      '@type': 'PostalAddress',
-      streetAddress: address.street,
-      addressLocality: address.city,
-      ...(address.region && { addressRegion: address.region }),
-      ...(address.postalCode && { postalCode: address.postalCode }),
-      addressCountry: address.country,
-    },
-    ...(geo && {
-      geo: {
-        '@type': 'GeoCoordinates',
-        latitude: geo.latitude,
-        longitude: geo.longitude,
+    ...(openingHours && { openingHoursSpecification: openingHours }),
+    ...(address && {
+      address: {
+        '@type': 'PostalAddress',
+        ...(address.street && { streetAddress: address.street }),
+        ...(address.city && { addressLocality: address.city }),
+        ...(address.region && { addressRegion: address.region }),
+        ...(address.postalCode && { postalCode: address.postalCode }),
+        ...(address.country && { addressCountry: address.country }),
       },
     }),
-    ...(openingHours && { openingHours }),
   };
 
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-    />
-  );
+  return <JsonLd data={schema} />;
 }
 
 /**
- * Product JSON-LD (for services as products)
+ * Product JSON-LD Schema Component
+ * مكون مخطط المنتج JSON-LD
  */
-interface ProductSchema {
+interface ProductJsonLdProps {
   name: string;
   description: string;
-  image: string;
-  brand: string;
+  image?: string;
+  brand?: string;
   sku?: string;
   price?: number;
   currency?: string;
   availability?: 'InStock' | 'OutOfStock' | 'PreOrder';
-  url: string;
+  rating?: {
+    value: number;
+    count: number;
+  };
 }
 
 export function ProductJsonLd({
@@ -370,34 +379,41 @@ export function ProductJsonLd({
   price,
   currency = 'SAR',
   availability = 'InStock',
-  url,
-}: ProductSchema) {
-  const schema = {
+  rating,
+}: ProductJsonLdProps) {
+  const schema: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name,
     description,
-    image,
-    brand: {
-      '@type': 'Brand',
-      name: brand,
-    },
-    ...(sku && { sku }),
-    url,
-    ...(price && {
-      offers: {
-        '@type': 'Offer',
-        price,
-        priceCurrency: currency,
-        availability: `https://schema.org/${availability}`,
+    ...(image && { image }),
+    ...(brand && {
+      brand: {
+        '@type': 'Brand',
+        name: brand,
       },
     }),
+    ...(sku && { sku }),
   };
 
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-    />
-  );
+  if (price !== undefined) {
+    schema.offers = {
+      '@type': 'Offer',
+      price,
+      priceCurrency: currency,
+      availability: `https://schema.org/${availability}`,
+    };
+  }
+
+  if (rating) {
+    schema.aggregateRating = {
+      '@type': 'AggregateRating',
+      ratingValue: rating.value,
+      reviewCount: rating.count,
+    };
+  }
+
+  return <JsonLd data={schema} />;
 }
+
+export default JsonLd;

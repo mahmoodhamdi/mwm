@@ -2439,20 +2439,79 @@ Tests:
 
 - 191 admin tests (8 test suites, all passing)
 
-#### 3.6 Settings & SEO Management (2 days)
+#### 3.6 Settings & SEO Management (2 days) ✅ COMPLETED
 
 ```yaml
 المهام | Tasks:
-  - [ ] General settings
-  - [ ] SEO defaults
-  - [ ] Theme customization
-  - [ ] Feature toggles
+  - [x] General settings
+  - [x] SEO defaults
+  - [x] Theme customization
+  - [x] Feature toggles
+  - [x] Notification settings
+  - [x] Security settings
 
 معايير الانتقال | Gate Criteria:
   ✅ Settings save correctly
   ✅ Theme applies
   ✅ SEO meta updates
 ```
+
+**التنفيذ | Implementation:**
+
+Admin Pages:
+
+- /[locale]/admin/settings - Comprehensive settings management with 6 tabs
+
+Settings Tabs:
+
+1. General Settings:
+   - Bilingual site name and tagline
+   - Contact information (email, phone, address)
+   - Localization (default language, timezone, date format)
+   - Social media links (Facebook, Twitter, LinkedIn, Instagram, YouTube)
+
+2. SEO Settings:
+   - Bilingual title templates with %s placeholder
+   - Default meta descriptions and keywords
+   - Open Graph image configuration
+   - Twitter card type selection
+   - robots.txt editor
+   - Sitemap toggle
+   - Google Analytics integration
+
+3. Theme Settings:
+   - Color mode (light/dark/system)
+   - Primary, secondary, accent colors with color picker
+   - Arabic and English font selection
+   - Border radius options
+   - Logo upload (light/dark variants)
+   - Favicon upload
+
+4. Feature Toggles:
+   - Organized by category (content, user, integration, advanced)
+   - Blog, portfolio, testimonials, newsletter
+   - User registration, comments
+   - Live chat, analytics
+   - API access, caching
+
+5. Notification Settings:
+   - Email notification toggles
+   - New message/subscriber/contact alerts
+   - Weekly report and security alerts
+   - Email digest frequency (none/daily/weekly)
+
+6. Security Settings:
+   - Two-factor authentication requirement
+   - Session timeout configuration
+   - Max login attempts
+   - Password policy (length, complexity)
+   - IP whitelist management
+   - Maintenance mode toggle
+
+Tests:
+
+- 240 admin tests (9 test suites, all passing)
+- 49 new tests for Settings functionality
 
 ---
 

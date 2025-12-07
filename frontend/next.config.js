@@ -7,6 +7,9 @@ const nextConfig = {
   // Enable React strict mode
   reactStrictMode: true,
 
+  // Standalone output for Docker
+  output: 'standalone',
+
   // Production optimizations
   poweredByHeader: false, // Remove X-Powered-By header
 

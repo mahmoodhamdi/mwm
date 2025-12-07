@@ -22,6 +22,7 @@ import settingsRouter from './routes/settings.routes';
 import contentRouter from './routes/content.routes';
 import translationRouter from './routes/translation.routes';
 import menuRouter from './routes/menu.routes';
+import serviceRouter from './routes/service.routes';
 
 /**
  * Create Express application
@@ -95,6 +96,7 @@ export function createApp(): Express {
   app.use('/api/v1/content', contentRouter);
   app.use('/api/v1/translations', translationRouter);
   app.use('/api/v1/menus', menuRouter);
+  app.use('/api/v1/services', serviceRouter);
 
   // 404 handler
   app.use(notFoundHandler);

@@ -33,3 +33,7 @@ export type {
   RecentSubscribersProps,
   ActivityItem,
 } from './RecentActivity';
+
+// CRUD components
+export { DataTable, tableActions } from './DataTable';
+export type { DataTableProps, Column, DataTableAction } from './DataTable';

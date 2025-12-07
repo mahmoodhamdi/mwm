@@ -55,3 +55,10 @@ export {
   type ISocialLinks,
   type ISkill,
 } from './TeamMember';
+export {
+  Contact,
+  type IContact,
+  type IContactModel,
+  type ContactStatus,
+  type ContactPriority,
+} from './Contact';

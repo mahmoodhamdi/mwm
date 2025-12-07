@@ -136,19 +136,54 @@
     "subtitle": "We're here to answer your questions",
     "form": {
       "name": "Full Name",
+      "namePlaceholder": "Enter your full name",
       "email": "Email",
+      "emailPlaceholder": "Enter your email address",
       "phone": "Phone Number",
+      "phonePlaceholder": "Enter your phone number",
+      "company": "Company",
+      "companyPlaceholder": "Enter your company name",
+      "website": "Website",
+      "websitePlaceholder": "Enter your website URL",
       "subject": "Subject",
+      "subjectPlaceholder": "Choose your message subject",
       "message": "Your Message",
-      "send": "Send Message"
+      "messagePlaceholder": "Write your message here...",
+      "service": "Requested Service",
+      "servicePlaceholder": "Select a service",
+      "budget": "Expected Budget",
+      "budgetPlaceholder": "Select budget range",
+      "preferredContact": "Preferred Contact Method",
+      "send": "Send Message",
+      "sending": "Sending...",
+      "required": "Required",
+      "optional": "Optional"
     },
     "info": {
       "address": "Address",
       "phone": "Phone",
       "email": "Email",
-      "workingHours": "Working Hours"
+      "workingHours": "Working Hours",
+      "followUs": "Follow Us"
+    },
+    "budget": {
+      "under_5k": "Under $5,000",
+      "5k_10k": "$5,000 - $10,000",
+      "10k_25k": "$10,000 - $25,000",
+      "25k_50k": "$25,000 - $50,000",
+      "50k_100k": "$50,000 - $100,000",
+      "over_100k": "Over $100,000",
+      "not_sure": "Not Sure"
+    },
+    "contactMethod": {
+      "email": "Email",
+      "phone": "Phone",
+      "whatsapp": "WhatsApp"
     },
     "success": "Your message has been sent successfully",
+    "successTitle": "Message Sent Successfully!",
+    "successMessage": "Thank you for contacting us. We'll get back to you as soon as possible.",
+    "sendAnother": "Send Another Message",
     "error": "An error occurred while sending your message"
   },
   "careers": {

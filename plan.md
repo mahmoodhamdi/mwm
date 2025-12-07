@@ -2399,20 +2399,45 @@ Tests:
 
 - 151 admin tests (7 test suites, all passing)
 
-#### 3.5 User Management & Permissions (3 days)
+#### 3.5 User Management & Permissions (3 days) ✅ COMPLETED
 
 ```yaml
 المهام | Tasks:
-  - [ ] Users list & editor
-  - [ ] Role management
-  - [ ] Permission matrix
-  - [ ] Activity logs
+  - [x] Users list & editor
+  - [x] Role management
+  - [x] Permission matrix
+  - [x] Activity logs
 
 معايير الانتقال | Gate Criteria:
   ✅ RBAC working
   ✅ Audit logs recording
   ✅ 90% auth coverage
 ```
+
+**التنفيذ | Implementation:**
+
+Admin Pages:
+
+- /[locale]/admin/users - User management with RBAC (5 roles)
+- /[locale]/admin/activity - Activity logs with filtering and export
+
+Features:
+
+- User list with search, role/status filters
+- Add/Edit/Delete users
+- Role management (super_admin, admin, editor, author, viewer)
+- User status tracking (active, inactive, locked, pending)
+- Email verification and 2FA status display
+- Password reset functionality
+- Bulk actions (activate, deactivate, unlock, delete)
+- Activity logs with timeline view
+- Activity filtering by type, resource, date range
+- Export activity logs to CSV
+- Pagination support
+
+Tests:
+
+- 191 admin tests (8 test suites, all passing)
 
 #### 3.6 Settings & SEO Management (2 days)
 

@@ -243,7 +243,7 @@ export default function ServiceDetailPage({
       <ServiceJsonLd
         name={title}
         description={description}
-        provider="MWM - Integrated Software Solutions"
+        provider={{ name: 'MWM - Integrated Software Solutions', url: 'https://mwm.com' }}
         url={`https://mwm.com/${locale}/services/${slug}`}
       />
       {faqs.length > 0 && (

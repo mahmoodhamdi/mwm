@@ -5,7 +5,10 @@
 
 export { generateMetaTags, defaultMetadata } from './MetaTags';
 export {
+  JsonLd,
+  MultipleJsonLd,
   OrganizationJsonLd,
+  WebsiteJsonLd,
   ServiceJsonLd,
   ArticleJsonLd,
   FAQJsonLd,

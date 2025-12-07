@@ -20,3 +20,17 @@ export {
 export { SiteContent, type ISiteContent, type ContentType } from './SiteContent';
 export { Translation, type ITranslation } from './Translation';
 export { Menu, type IMenu, type IMenuItem, type MenuLocation } from './Menu';
+export {
+  ServiceCategory,
+  type IServiceCategory,
+  type IServiceCategoryModel,
+} from './ServiceCategory';
+export {
+  Service,
+  type IService,
+  type IServiceModel,
+  type IServiceFeature,
+  type IPricingPlan,
+  type IFAQItem,
+  type IProcessStep,
+} from './Service';

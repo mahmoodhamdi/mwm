@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",
+    "@heroicons/react": "^2.2.0",
     "@mwm/shared": "*",
     "@tanstack/react-query": "^5.17.0",
     "@tiptap/react": "^2.2.0",

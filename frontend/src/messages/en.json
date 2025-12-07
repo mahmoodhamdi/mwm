@@ -64,6 +64,8 @@
   "services": {
     "title": "Our Services",
     "subtitle": "We offer a comprehensive range of software services",
+    "pageTitle": "Our Services",
+    "pageDescription": "We offer a comprehensive range of software services to meet all your technical needs",
     "webDev": {
       "title": "Web Development",
       "description": "We build modern, fast, and responsive websites and web applications"
@@ -87,6 +89,22 @@
     "support": {
       "title": "Support & Maintenance",
       "description": "Continuous technical support and regular maintenance for your systems"
+    },
+    "webdevelopment": {
+      "title": "Web Development",
+      "description": "We build modern, fast, and responsive websites and web applications using cutting-edge technologies"
+    },
+    "mobiledevelopment": {
+      "title": "Mobile Development",
+      "description": "Mobile applications for iOS and Android using the latest technologies and best practices"
+    },
+    "uiuxdesign": {
+      "title": "UI/UX Design",
+      "description": "Attractive user interface design and seamless, exceptional user experience"
+    },
+    "backenddevelopment": {
+      "title": "Backend Development",
+      "description": "Building robust, secure, and scalable backend systems"
     }
   },
   "projects": {

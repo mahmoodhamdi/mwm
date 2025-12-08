@@ -15,18 +15,24 @@ import { Footer } from '@/components/layout/Footer';
 import { OrganizationJsonLd } from '@/components/seo/JsonLd';
 import '@/styles/globals.css';
 
-// Arabic font
+// Arabic font with fallbacks
 const cairo = Cairo({
   subsets: ['arabic', 'latin'],
   variable: '--font-cairo',
   display: 'swap',
+  preload: true,
+  adjustFontFallback: true,
+  fallback: ['Tahoma', 'Arial', 'sans-serif'],
 });
 
-// English font
+// English font with fallbacks
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
   display: 'swap',
+  preload: true,
+  adjustFontFallback: true,
+  fallback: ['Helvetica Neue', 'Arial', 'sans-serif'],
 });
 
 export function generateStaticParams() {
@@ -84,10 +90,11 @@ export default async function LocaleLayout({
 
   const messages = await getMessages();
   const direction = localeDirection[locale as Locale];
-  const fontClass = locale === 'ar' ? cairo.variable : inter.variable;
+  // Include both font variables so they're available for the whole app
+  const fontClasses = `${cairo.variable} ${inter.variable}`;
 
   return (
-    <html lang={locale} dir={direction} className={fontClass} suppressHydrationWarning>
+    <html lang={locale} dir={direction} className={fontClasses} suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />

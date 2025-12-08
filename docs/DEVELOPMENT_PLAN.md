@@ -29,7 +29,7 @@ This document outlines the comprehensive development plan for the MWM corporate 
 
 - [x] Connect Blog frontend to backend API
 - [x] Connect Careers frontend to backend API
-- [ ] Newsletter campaigns
+- [x] Newsletter campaigns
 - [ ] E2E tests with Playwright
 - [ ] Production deployment (SSL, domain, CDN)
 
@@ -96,7 +96,7 @@ This document outlines the comprehensive development plan for the MWM corporate 
 | Blog          | /[locale]/admin/blog          | UI Only  |
 | Careers       | /[locale]/admin/careers       | UI Only  |
 | Messages      | /[locale]/admin/messages      | Complete |
-| Newsletter    | /[locale]/admin/newsletter    | Partial  |
+| Newsletter    | /[locale]/admin/newsletter    | Complete |
 | Analytics     | /[locale]/admin/analytics     | UI Only  |
 | Notifications | /[locale]/admin/notifications | UI Only  |
 | Users         | /[locale]/admin/users         | Complete |

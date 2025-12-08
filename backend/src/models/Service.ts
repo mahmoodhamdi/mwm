@@ -331,8 +331,7 @@ const serviceSchema = new Schema<IService>(
   }
 );
 
-// Indexes
-serviceSchema.index({ slug: 1 }, { unique: true });
+// Indexes (slug index is created by unique: true on the field)
 serviceSchema.index({ category: 1, isActive: 1, order: 1 });
 serviceSchema.index({ isActive: 1, isFeatured: 1 });
 serviceSchema.index({

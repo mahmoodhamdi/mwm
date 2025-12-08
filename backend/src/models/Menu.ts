@@ -173,8 +173,7 @@ const menuSchema = new Schema<IMenu>(
   }
 );
 
-// Indexes
-menuSchema.index({ slug: 1 }, { unique: true });
+// Indexes (slug index is created by unique: true on the field)
 menuSchema.index({ location: 1, isActive: 1 });
 
 /**

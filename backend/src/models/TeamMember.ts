@@ -300,8 +300,7 @@ const teamMemberSchema = new Schema<ITeamMember>(
   }
 );
 
-// Indexes
-teamMemberSchema.index({ slug: 1 }, { unique: true });
+// Indexes (slug index is created by unique: true on the field)
 teamMemberSchema.index({ department: 1, isActive: 1, order: 1 });
 teamMemberSchema.index({ isActive: 1, isFeatured: 1 });
 teamMemberSchema.index({ isActive: 1, isLeader: 1 });

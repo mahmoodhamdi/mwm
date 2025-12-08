@@ -104,8 +104,7 @@ const departmentSchema = new Schema<IDepartment>(
   }
 );
 
-// Indexes
-departmentSchema.index({ slug: 1 }, { unique: true });
+// Indexes (slug index is created by unique: true on the field)
 departmentSchema.index({ isActive: 1, order: 1 });
 
 /**

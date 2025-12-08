@@ -227,7 +227,7 @@ export const replyToMessage = asyncHandler(async (req: Request, res: Response) =
       contact.name,
       contact.subject,
       replyMessage,
-      contact.locale || 'ar'
+      (contact.locale as 'ar' | 'en') || 'ar'
     );
   }
 

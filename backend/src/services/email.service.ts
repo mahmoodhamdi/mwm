@@ -24,7 +24,8 @@ interface EmailOptions {
 interface TemplateData {
   name?: string;
   url?: string;
-  [key: string]: string | number | boolean | undefined;
+  data?: Record<string, string>;
+  [key: string]: string | number | boolean | Record<string, string> | undefined;
 }
 
 /**
@@ -374,7 +375,7 @@ class EmailService {
    * الحصول على قالب بريد إشعار المسؤول
    */
   private getAdminNotificationEmailTemplate(data: TemplateData): string {
-    const dataEntries = data.data ? Object.entries(data.data as Record<string, string>) : [];
+    const dataEntries = data.data ? Object.entries(data.data) : [];
     return `
 <!DOCTYPE html>
 <html>

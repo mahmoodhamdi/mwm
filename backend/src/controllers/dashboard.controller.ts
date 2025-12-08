@@ -28,7 +28,7 @@ const CACHE_TTL = 60 * 5;
  * @route GET /api/v1/dashboard/stats
  * @access Private (Admin)
  */
-export const getStats = asyncHandler(async (req: Request, res: Response) => {
+export const getStats = asyncHandler(async (_req: Request, res: Response) => {
   // Check cache
   const cacheKey = 'dashboard:stats';
   const cached = await redis.get(cacheKey);

@@ -30,6 +30,7 @@ import teamRouter from './routes/team.routes';
 import contactRouter from './routes/contact.routes';
 import blogRouter from './routes/blog.routes';
 import careersRouter from './routes/careers.routes';
+import newsletterRouter from './routes/newsletter.routes';
 
 /**
  * Create Express application
@@ -109,6 +110,7 @@ export function createApp(): Express {
   app.use('/api/v1/contact', contactRouter);
   app.use('/api/v1/blog', blogRouter);
   app.use('/api/v1/careers', careersRouter);
+  app.use('/api/v1/newsletter', newsletterRouter);
 
   // Swagger documentation
   app.use(

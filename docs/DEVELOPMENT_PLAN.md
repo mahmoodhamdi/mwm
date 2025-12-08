@@ -13,20 +13,22 @@ This document outlines the comprehensive development plan for the MWM corporate 
 - [x] Project structure (monorepo with npm workspaces)
 - [x] Backend API server with full CRUD operations
 - [x] Frontend Next.js 14 App Router with all public pages
-- [x] MongoDB connection with Mongoose (13 models)
+- [x] MongoDB connection with Mongoose (17 models)
 - [x] Redis caching
 - [x] i18n setup (Arabic/English) with RTL support
 - [x] Dark mode support
 - [x] Complete Admin Dashboard (16 pages)
 - [x] JWT Authentication with refresh tokens
 - [x] Docker Compose development environment
-- [x] Unit and integration tests
+- [x] Unit and integration tests (425 tests)
 - [x] SEO optimization (meta tags, sitemap, robots.txt)
+- [x] Blog backend API (BlogPost, BlogCategory models)
+- [x] Careers backend API (Job, JobApplication models)
 
 ### Pending Items
 
-- [ ] Blog backend API (Post model, Category model)
-- [ ] Careers backend API (Job model, Application model)
+- [ ] Connect Blog frontend to backend API
+- [ ] Connect Careers frontend to backend API
 - [ ] Newsletter campaigns
 - [ ] E2E tests with Playwright
 - [ ] Production deployment (SSL, domain, CDN)
@@ -48,22 +50,22 @@ This document outlines the comprehensive development plan for the MWM corporate 
 
 ## Phase 2: Core Features
 
-### 2.1 Backend API - 10 Route Modules
+### 2.1 Backend API - 12 Route Modules
 
-| Module       | Status   | Models                       |
-| ------------ | -------- | ---------------------------- |
-| Auth         | Complete | User                         |
-| Services     | Complete | Service, ServiceCategory     |
-| Projects     | Complete | Project, ProjectCategory     |
-| Team         | Complete | TeamMember, Department       |
-| Contact      | Complete | Contact                      |
-| Content      | Complete | SiteContent                  |
-| Translations | Complete | Translation                  |
-| Menus        | Complete | Menu                         |
-| Settings     | Complete | Settings                     |
-| Health       | Complete | -                            |
-| Blog         | Pending  | Post, BlogCategory (not yet) |
-| Careers      | Pending  | Job, Application (not yet)   |
+| Module       | Status   | Models                   |
+| ------------ | -------- | ------------------------ |
+| Auth         | Complete | User                     |
+| Services     | Complete | Service, ServiceCategory |
+| Projects     | Complete | Project, ProjectCategory |
+| Team         | Complete | TeamMember, Department   |
+| Contact      | Complete | Contact                  |
+| Content      | Complete | SiteContent              |
+| Translations | Complete | Translation              |
+| Menus        | Complete | Menu                     |
+| Settings     | Complete | Settings                 |
+| Health       | Complete | -                        |
+| Blog         | Complete | BlogPost, BlogCategory   |
+| Careers      | Complete | Job, JobApplication      |
 
 ### 2.2 Public Pages - Frontend
 
@@ -168,12 +170,13 @@ This document outlines the comprehensive development plan for the MWM corporate 
 
 ## Next Steps (Priority Order)
 
-1. **Blog System Backend**: Create Post and BlogCategory models with CRUD API
-2. **Careers System Backend**: Create Job and Application models with CRUD API
-3. **Connect Blog/Careers UI**: Wire frontend pages to backend APIs
-4. **Newsletter Campaigns**: Add email campaign functionality
-5. **E2E Tests**: Implement Playwright tests for critical flows
-6. **Production Deployment**: SSL, domain, monitoring
+1. ~~**Blog System Backend**: Create Post and BlogCategory models with CRUD API~~ ✅
+2. ~~**Careers System Backend**: Create Job and Application models with CRUD API~~ ✅
+3. **Connect Blog Frontend**: Wire blog pages to backend API
+4. **Connect Careers Frontend**: Wire careers pages to backend API
+5. **Newsletter Campaigns**: Add email campaign functionality
+6. **E2E Tests**: Implement Playwright tests for critical flows
+7. **Production Deployment**: SSL, domain, monitoring
 
 ---
 
@@ -186,8 +189,8 @@ mwm/
 │       ├── config/          # Configuration (env, db, redis, swagger)
 │       ├── controllers/     # Route handlers
 │       ├── middlewares/     # Express middlewares
-│       ├── models/          # Mongoose schemas (13 models)
-│       ├── routes/          # API routes (10 modules)
+│       ├── models/          # Mongoose schemas (17 models)
+│       ├── routes/          # API routes (12 modules)
 │       ├── services/        # Business logic
 │       ├── validations/     # Joi schemas
 │       └── utils/           # Utilities

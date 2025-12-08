@@ -8,9 +8,11 @@ WORKDIR /app/packages/shared
 
 # Copy shared package files
 COPY packages/shared/package*.json ./
-COPY packages/shared/tsconfig*.json ./
 COPY packages/shared/tsup.config.ts ./
 COPY packages/shared/src ./src
+
+# Create a standalone tsconfig for Docker build
+RUN echo '{"compilerOptions":{"target":"ES2022","lib":["ES2022"],"module":"NodeNext","moduleResolution":"NodeNext","resolveJsonModule":true,"declaration":true,"declarationMap":true,"sourceMap":true,"outDir":"./dist","rootDir":"./src","strict":true,"esModuleInterop":true,"allowSyntheticDefaultImports":true,"forceConsistentCasingInFileNames":true,"skipLibCheck":true},"include":["src/**/*"],"exclude":["node_modules","dist"]}' > tsconfig.json
 
 # Install and build shared package
 RUN npm install && npm run build

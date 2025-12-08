@@ -77,3 +77,45 @@ export {
   unsubscribeNewsletter,
   contactService,
 } from './contact.service';
+
+// Blog
+export type {
+  BlogSEO,
+  BlogCategory,
+  BlogAuthor,
+  BlogPost,
+  BlogPostsFilters,
+  BlogPostsPagination,
+  BlogPostsResponse,
+} from './blog.service';
+export {
+  getBlogPosts,
+  getBlogPostBySlug,
+  getFeaturedBlogPosts,
+  getRelatedPosts,
+  getBlogCategories,
+  getBlogCategoryBySlug,
+  getBlogTags,
+  blogService,
+} from './blog.service';
+
+// Careers
+export type {
+  SalaryRange,
+  JobType,
+  ExperienceLevel,
+  JobStatus,
+  Job,
+  JobsFilters,
+  JobsPagination,
+  JobsResponse,
+  JobApplication,
+} from './careers.service';
+export {
+  getJobs,
+  getJobBySlug,
+  getFeaturedJobs,
+  submitApplication,
+  careersService,
+} from './careers.service';
+export { getDepartments } from './careers.service';

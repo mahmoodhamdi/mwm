@@ -9,6 +9,7 @@ WORKDIR /app/packages/shared
 # Copy shared package files
 COPY packages/shared/package*.json ./
 COPY packages/shared/tsconfig*.json ./
+COPY packages/shared/tsup.config.ts ./
 COPY packages/shared/src ./src
 
 # Install and build shared package

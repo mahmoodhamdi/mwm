@@ -5,8 +5,10 @@
  * صفحة إدارة المحتوى
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocale } from 'next-intl';
+import { contentService, ContentItem as ApiContentItem, ContentType } from '@/services/admin';
+import { ApiError } from '@/lib/api';
 import {
   Save,
   Eye,
@@ -19,8 +21,9 @@ import {
   Image as ImageIcon,
   Type,
   List,
-  Settings,
+  Settings as SettingsIcon,
   Search,
+  AlertCircle,
 } from 'lucide-react';
 
 // Content item type
@@ -141,7 +144,7 @@ const mockContent: ContentItem[] = [
 const sections = [
   { id: 'home', labelAr: 'الصفحة الرئيسية', labelEn: 'Home', icon: FileText },
   { id: 'about', labelAr: 'من نحن', labelEn: 'About', icon: Globe },
-  { id: 'services', labelAr: 'الخدمات', labelEn: 'Services', icon: Settings },
+  { id: 'services', labelAr: 'الخدمات', labelEn: 'Services', icon: SettingsIcon },
   { id: 'contact', labelAr: 'التواصل', labelEn: 'Contact', icon: FileText },
 ];
 
@@ -151,7 +154,7 @@ const typeIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   html: Edit3,
   image: ImageIcon,
   array: List,
-  object: Settings,
+  object: SettingsIcon,
 };
 
 export default function ContentPage() {
@@ -165,6 +168,9 @@ export default function ContentPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [previewMode, setPreviewMode] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Toggle section expansion
   const toggleSection = (sectionId: string) => {
@@ -217,19 +223,83 @@ export default function ContentPage() {
     setHasChanges(true);
   };
 
+  // Fetch content from API
+  const fetchContent = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const response = await contentService.getAllContent({ limit: 100 });
+      if (response.data) {
+        const apiContent = response.data.map((item: ApiContentItem) => ({
+          id: item._id,
+          key: item.key,
+          type: item.type as ContentItem['type'],
+          section: item.section,
+          content: item.content,
+          isActive: item.isActive,
+          updatedAt: new Date(item.updatedAt),
+        }));
+        setContent(apiContent);
+      }
+    } catch (err) {
+      const apiError = err as ApiError;
+      setError(apiError.message || 'Failed to load content');
+      console.error('Error fetching content:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Fetch content on mount
+  useEffect(() => {
+    fetchContent();
+  }, [fetchContent]);
+
   // Save all changes
-  const saveChanges = () => {
-    // TODO: API call to save changes
-    console.log('Saving changes:', content);
-    setHasChanges(false);
+  const saveChanges = async () => {
+    try {
+      setIsSaving(true);
+      setError(null);
+
+      // Bulk upsert all content items
+      const contentsToSave = content.map(item => ({
+        key: item.key,
+        data: {
+          key: item.key,
+          type: item.type as ContentType,
+          section: item.section,
+          content: item.content,
+          isActive: item.isActive,
+        },
+      }));
+
+      await contentService.bulkUpsertContent(contentsToSave);
+      setHasChanges(false);
+    } catch (err) {
+      const apiError = err as ApiError;
+      setError(apiError.message || 'Failed to save content');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // Refresh content from server
-  const refreshContent = () => {
-    // TODO: API call to refresh
-    setContent(mockContent);
+  const refreshContent = async () => {
+    await fetchContent();
     setHasChanges(false);
   };
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="flex min-h-96 items-center justify-center">
+        <div className="text-center">
+          <RefreshCw className="mx-auto size-8 animate-spin text-blue-600" />
+          <p className="mt-4 text-gray-600">{isArabic ? 'جاري التحميل...' : 'Loading...'}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -248,9 +318,10 @@ export default function ContentPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={refreshContent}
-            className="hover:bg-muted inline-flex items-center justify-center gap-2 rounded-lg border px-4 py-2 transition-colors"
+            disabled={isLoading}
+            className="hover:bg-muted inline-flex items-center justify-center gap-2 rounded-lg border px-4 py-2 transition-colors disabled:opacity-50"
           >
-            <RefreshCw className="size-4" />
+            <RefreshCw className={`size-4 ${isLoading ? 'animate-spin' : ''}`} />
             <span>{isArabic ? 'تحديث' : 'Refresh'}</span>
           </button>
           <button
@@ -264,14 +335,22 @@ export default function ContentPage() {
           </button>
           <button
             onClick={saveChanges}
-            disabled={!hasChanges}
+            disabled={!hasChanges || isSaving}
             className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <Save className="size-4" />
+            {isSaving ? <RefreshCw className="size-4 animate-spin" /> : <Save className="size-4" />}
             <span>{isArabic ? 'حفظ التغييرات' : 'Save Changes'}</span>
           </button>
         </div>
       </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
+          <AlertCircle className="size-5" />
+          {error}
+        </div>
+      )}
 
       {/* Search */}
       <div className="relative">

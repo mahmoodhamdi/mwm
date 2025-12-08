@@ -3,8 +3,6 @@
  * اختبارات نظام المدونة
  */
 
-import React from 'react';
-
 // Mock next-intl
 jest.mock('next-intl', () => ({
   useLocale: () => 'en',

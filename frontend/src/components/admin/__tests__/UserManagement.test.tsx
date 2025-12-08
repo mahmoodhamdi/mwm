@@ -3,8 +3,6 @@
  * اختبارات إدارة المستخدمين
  */
 
-import React from 'react';
-
 // Mock next-intl
 jest.mock('next-intl', () => ({
   useLocale: () => 'en',
@@ -292,7 +290,7 @@ describe('Activity Logs', () => {
         details: 'Updated site settings',
       };
 
-      const logWithoutDetails = {
+      const logWithoutDetails: { id: string; type: string; resource: string; details?: string } = {
         id: '2',
         type: 'login',
         resource: 'auth',

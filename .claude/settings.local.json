@@ -22,7 +22,13 @@
       "Bash(timeout /t 10 /nobreak)",
       "Bash(timeout /t 5 /nobreak)",
       "Bash(fuser:*)",
-      "Bash(lsof:*)"
+      "Bash(lsof:*)",
+      "Bash(npx playwright install --with-deps chromium)",
+      "Bash(npx playwright test:*)",
+      "Bash(npx playwright install chromium)",
+      "Bash(set PLAYWRIGHT_BASE_URL=http://localhost:3001)",
+      "Bash(docker --version:*)",
+      "Bash(mongod:*)"
     ],
     "deny": [],
     "ask": []

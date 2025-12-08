@@ -108,7 +108,7 @@ const ProjectCard = forwardRef<HTMLDivElement, ProjectCardProps>(
             {/* Overlay on hover */}
             <div className="absolute inset-0 flex items-center justify-center gap-3 bg-black/60 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
               <Link
-                href={`/${locale}/portfolio/${slug}`}
+                href={`/${locale}/projects/${slug}`}
                 className="flex size-12 items-center justify-center rounded-full bg-white text-gray-900 transition-transform hover:scale-110"
               >
                 <EyeIcon className="size-5" />
@@ -173,7 +173,7 @@ const ProjectCard = forwardRef<HTMLDivElement, ProjectCardProps>(
             <div className="flex items-center justify-between">
               {showArrow && (
                 <Link
-                  href={`/${locale}/portfolio/${slug}`}
+                  href={`/${locale}/projects/${slug}`}
                   className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 inline-flex items-center gap-2 text-sm font-medium transition-colors"
                 >
                   <span>{isRTL ? 'عرض المشروع' : 'View Project'}</span>
@@ -249,7 +249,7 @@ const ProjectCard = forwardRef<HTMLDivElement, ProjectCardProps>(
             {/* Actions */}
             <div className="flex flex-wrap gap-4">
               <Link
-                href={`/${locale}/portfolio/${slug}`}
+                href={`/${locale}/projects/${slug}`}
                 className="bg-primary-500 hover:bg-primary-600 inline-flex items-center gap-2 rounded-full px-6 py-3 font-medium text-white transition-colors"
               >
                 <span>{isRTL ? 'تفاصيل المشروع' : 'View Details'}</span>
@@ -276,7 +276,7 @@ const ProjectCard = forwardRef<HTMLDivElement, ProjectCardProps>(
     if (variant === 'compact') {
       return (
         <Link
-          href={`/${locale}/portfolio/${slug}`}
+          href={`/${locale}/projects/${slug}`}
           className={cn(
             'group flex items-center gap-4 rounded-xl bg-white p-3 shadow-sm transition-all duration-300',
             'hover:bg-gray-50 hover:shadow-md',
@@ -369,7 +369,7 @@ const ProjectCard = forwardRef<HTMLDivElement, ProjectCardProps>(
             {/* Actions */}
             <div className="flex items-center gap-4">
               <Link
-                href={`/${locale}/portfolio/${slug}`}
+                href={`/${locale}/projects/${slug}`}
                 className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 inline-flex items-center gap-2 font-medium transition-colors"
               >
                 <span>{isRTL ? 'عرض المشروع' : 'View Project'}</span>

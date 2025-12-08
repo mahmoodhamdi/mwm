@@ -36,9 +36,10 @@ cd frontend && npx playwright test file.spec.ts  # Run specific test
 cd backend && npx tsc --noEmit
 cd frontend && npx tsc --noEmit
 
-# Linting
+# Linting & Formatting
 npm run lint                   # Lint all workspaces
 npm run lint:fix               # Auto-fix lint issues
+npm run format:check           # Check formatting (CI uses this)
 
 # Building
 npm run build                  # Build all packages
@@ -114,6 +115,8 @@ All user-facing content uses `LocalizedString` type with `ar` and `en` keys. Ara
 
 Backend routes are versioned under `/api/v1/`. API documentation available at `/api/docs` (Swagger UI).
 
+Default ports: Backend runs on `5000`, Frontend on `3000`.
+
 Current endpoints:
 
 - `/api/v1/auth` - Authentication (login, register, refresh)
@@ -128,6 +131,7 @@ Current endpoints:
 - `/api/v1/blog` - Blog posts and categories
 - `/api/v1/careers` - Job listings and applications
 - `/api/v1/newsletter` - Newsletter subscribers and campaigns
+- `/api/v1/health` - Health check endpoint
 
 ### i18n in Frontend
 
@@ -143,6 +147,7 @@ Current endpoints:
 - Test files colocated in `__tests__/` directories or as `*.test.{ts,tsx}`
 - E2E: Playwright (`npm run test:e2e` in frontend) - tests in `frontend/e2e/` directory
 - Backend coverage threshold: 80% | Frontend coverage threshold: 70%
+- Backend tests run with `maxWorkers: 1` to prevent port binding issues on Windows
 
 ### Frontend Services Pattern
 
@@ -189,6 +194,26 @@ Frontend requires `.env.local`:
 
 - `NEXT_PUBLIC_API_URL` - Backend API URL (default: `http://localhost:5000/api/v1`)
 - `NEXT_PUBLIC_SITE_URL` - Frontend URL (default: `http://localhost:3000`)
+
+## Commit Conventions
+
+Uses [Conventional Commits](https://www.conventionalcommits.org/) with commitlint:
+
+```
+feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert: description
+```
+
+Header max length: 100 characters. Subject case rules are relaxed for Arabic support.
+
+## CI/CD
+
+GitHub Actions runs on push to `main`/`develop` and all PRs:
+
+1. **Lint** - ESLint + Prettier format check
+2. **Test Backend** - Jest with MongoDB/Redis services
+3. **Test Frontend** - Jest with jsdom
+4. **Build** - Shared → Backend → Frontend (order matters)
+5. **Docker** - Build test for production images
 
 ## Workflow Notes
 

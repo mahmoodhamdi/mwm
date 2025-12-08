@@ -16,3 +16,4 @@ export {
   cacheExists,
 } from './redis';
 export { logger, morganStream } from './logger';
+export { initializeFirebase, getFirebaseAdmin, getMessaging } from './firebase';

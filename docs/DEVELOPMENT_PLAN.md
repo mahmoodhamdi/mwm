@@ -27,8 +27,8 @@ This document outlines the comprehensive development plan for the MWM corporate 
 
 ### Pending Items
 
-- [ ] Connect Blog frontend to backend API
-- [ ] Connect Careers frontend to backend API
+- [x] Connect Blog frontend to backend API
+- [x] Connect Careers frontend to backend API
 - [ ] Newsletter campaigns
 - [ ] E2E tests with Playwright
 - [ ] Production deployment (SSL, domain, CDN)
@@ -79,10 +79,10 @@ This document outlines the comprehensive development plan for the MWM corporate 
 | Project Detail | /[locale]/projects/[slug] | Complete        |
 | Team           | /[locale]/team            | Complete        |
 | Team Member    | /[locale]/team/[slug]     | Complete        |
-| Blog           | /[locale]/blog            | UI Only         |
-| Blog Post      | /[locale]/blog/[slug]     | UI Only         |
-| Careers        | /[locale]/careers         | UI Only         |
-| Career Detail  | /[locale]/careers/[slug]  | UI Only         |
+| Blog           | /[locale]/blog            | Complete        |
+| Blog Post      | /[locale]/blog/[slug]     | Complete        |
+| Careers        | /[locale]/careers         | Complete        |
+| Career Detail  | /[locale]/careers/[slug]  | Complete        |
 | Contact        | /[locale]/contact         | Complete        |
 
 ### 2.3 Admin Dashboard - 16 Pages
@@ -172,8 +172,8 @@ This document outlines the comprehensive development plan for the MWM corporate 
 
 1. ~~**Blog System Backend**: Create Post and BlogCategory models with CRUD API~~ ✅
 2. ~~**Careers System Backend**: Create Job and Application models with CRUD API~~ ✅
-3. **Connect Blog Frontend**: Wire blog pages to backend API
-4. **Connect Careers Frontend**: Wire careers pages to backend API
+3. ~~**Connect Blog Frontend**: Wire blog pages to backend API~~ ✅
+4. ~~**Connect Careers Frontend**: Wire careers pages to backend API~~ ✅
 5. **Newsletter Campaigns**: Add email campaign functionality
 6. **E2E Tests**: Implement Playwright tests for critical flows
 7. **Production Deployment**: SSL, domain, monitoring

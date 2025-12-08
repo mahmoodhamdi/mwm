@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocale } from 'next-intl';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   MapPin,
@@ -17,152 +18,48 @@ import {
   Twitter,
   Linkedin,
   Link as LinkIcon,
+  Loader2,
+  ArrowLeft,
+  ArrowRight,
 } from 'lucide-react';
+import {
+  getJobBySlug,
+  getJobs,
+  submitApplication,
+  type Job,
+  type JobType,
+  type JobApplication,
+} from '@/services/public';
 
-// Types
-interface Job {
-  id: string;
-  title: { ar: string; en: string };
-  slug: string;
-  department: { id: string; nameAr: string; nameEn: string };
-  location: { ar: string; en: string };
-  type: 'full-time' | 'part-time' | 'contract' | 'remote' | 'internship';
-  experience: string;
-  salary?: { min: number; max: number; currency: string };
-  description: { ar: string; en: string };
-  requirements: { ar: string[]; en: string[] };
-  responsibilities: { ar: string[]; en: string[] };
-  benefits: { ar: string[]; en: string[] };
-  postedAt: string;
-  deadline?: string;
-  applicationsCount: number;
-}
-
-// Mock job data
-const mockJob: Job = {
-  id: '1',
-  title: { ar: 'مطور واجهات أمامية - React', en: 'Frontend Developer - React' },
-  slug: 'frontend-developer-react',
-  department: { id: '1', nameAr: 'الهندسة', nameEn: 'Engineering' },
-  location: { ar: 'القاهرة، مصر', en: 'Cairo, Egypt' },
-  type: 'full-time',
-  experience: '3-5 years',
-  salary: { min: 15000, max: 25000, currency: 'EGP' },
-  description: {
-    ar: `نحن نبحث عن مطور واجهات أمامية متميز للانضمام إلى فريقنا المتنامي. ستعمل على مشاريع مثيرة باستخدام أحدث التقنيات مثل React و Next.js و TypeScript.
-
-في هذا الدور، ستكون مسؤولاً عن بناء واجهات مستخدم عالية الجودة وسريعة الاستجابة. ستعمل بشكل وثيق مع فريق التصميم وفريق الخلفية لتقديم تجارب مستخدم استثنائية.
-
-نحن نبحث عن شخص شغوف بالتقنية ويحب التعلم المستمر. إذا كنت تستمتع بحل المشاكل المعقدة وبناء منتجات رائعة، فهذه الوظيفة مناسبة لك!`,
-    en: `We are looking for an exceptional frontend developer to join our growing team. You will work on exciting projects using the latest technologies like React, Next.js, and TypeScript.
-
-In this role, you will be responsible for building high-quality, responsive user interfaces. You will work closely with the design team and backend team to deliver exceptional user experiences.
-
-We are looking for someone who is passionate about technology and loves continuous learning. If you enjoy solving complex problems and building great products, this job is for you!`,
-  },
-  requirements: {
-    ar: [
-      'خبرة 3+ سنوات في تطوير الواجهات الأمامية',
-      'إتقان React.js و TypeScript',
-      'خبرة في Next.js و Server-Side Rendering',
-      'معرفة جيدة بـ HTML5، CSS3، و JavaScript ES6+',
-      'خبرة في استخدام Git و GitHub',
-      'معرفة بأدوات إدارة الحالة مثل Redux أو Zustand',
-      'فهم جيد لمبادئ تصميم واجهات المستخدم و UX',
-      'القدرة على العمل ضمن فريق والتواصل الفعال',
-      'إجادة اللغة الإنجليزية تحدثاً وكتابة',
-    ],
-    en: [
-      '3+ years of frontend development experience',
-      'Proficiency in React.js and TypeScript',
-      'Experience with Next.js and Server-Side Rendering',
-      'Strong knowledge of HTML5, CSS3, and JavaScript ES6+',
-      'Experience with Git and GitHub',
-      'Knowledge of state management tools like Redux or Zustand',
-      'Good understanding of UI design principles and UX',
-      'Ability to work in a team and communicate effectively',
-      'Fluent in English (spoken and written)',
-    ],
-  },
-  responsibilities: {
-    ar: [
-      'تطوير وصيانة تطبيقات الويب باستخدام React و Next.js',
-      'كتابة كود نظيف وقابل للصيانة وإعادة الاستخدام',
-      'تحسين أداء التطبيقات وضمان سرعة التحميل',
-      'التعاون مع فريق التصميم لتحويل التصاميم إلى كود',
-      'مراجعة كود الزملاء وتقديم ملاحظات بناءة',
-      'المشاركة في اجتماعات التخطيط وتقدير المهام',
-      'البقاء على اطلاع بأحدث التقنيات والممارسات',
-      'توثيق الكود والمكونات للفريق',
-    ],
-    en: [
-      'Develop and maintain web applications using React and Next.js',
-      'Write clean, maintainable, and reusable code',
-      'Optimize application performance and ensure fast loading',
-      'Collaborate with design team to convert designs into code',
-      'Review colleagues code and provide constructive feedback',
-      'Participate in planning meetings and task estimation',
-      'Stay up-to-date with latest technologies and practices',
-      'Document code and components for the team',
-    ],
-  },
-  benefits: {
-    ar: [
-      'تأمين صحي شامل للفرد والعائلة',
-      'راتب تنافسي مع مراجعة سنوية',
-      'بيئة عمل مرنة (هجين أو عن بعد)',
-      'إجازة سنوية مدفوعة 21 يوم',
-      'برامج تدريب وتطوير مستمر',
-      'اشتراك في منصات التعلم الإلكتروني',
-      'بيئة عمل ودية وداعمة',
-      'فرص للترقي والنمو المهني',
-    ],
-    en: [
-      'Comprehensive health insurance for individual and family',
-      'Competitive salary with annual review',
-      'Flexible work environment (hybrid or remote)',
-      '21 days paid annual leave',
-      'Continuous training and development programs',
-      'Subscription to e-learning platforms',
-      'Friendly and supportive work environment',
-      'Opportunities for promotion and career growth',
-    ],
-  },
-  postedAt: '2024-01-15',
-  deadline: '2024-02-15',
-  applicationsCount: 24,
+const jobTypeLabels: Record<JobType, { ar: string; en: string }> = {
+  'full-time': { ar: 'دوام كامل', en: 'Full-time' },
+  'part-time': { ar: 'دوام جزئي', en: 'Part-time' },
+  contract: { ar: 'عقد', en: 'Contract' },
+  remote: { ar: 'عن بعد', en: 'Remote' },
+  internship: { ar: 'تدريب', en: 'Internship' },
 };
 
-// Related jobs
-const relatedJobs = [
-  {
-    id: '2',
-    title: { ar: 'مطور خلفي - Node.js', en: 'Backend Developer - Node.js' },
-    slug: 'backend-developer-nodejs',
-    location: { ar: 'القاهرة، مصر', en: 'Cairo, Egypt' },
-    type: 'full-time' as const,
-  },
-  {
-    id: '3',
-    title: { ar: 'مطور Full Stack', en: 'Full Stack Developer' },
-    slug: 'full-stack-developer',
-    location: { ar: 'عن بعد', en: 'Remote' },
-    type: 'remote' as const,
-  },
-];
-
 export default function JobDetailPage() {
-  const locale = useLocale();
+  const locale = useLocale() as 'ar' | 'en';
   const isRTL = locale === 'ar';
+  const params = useParams();
+  const slug = params.slug as string;
+
+  const [job, setJob] = useState<Job | null>(null);
+  const [relatedJobs, setRelatedJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [isApplying, setIsApplying] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     phone: '',
     linkedin: '',
@@ -171,20 +68,52 @@ export default function JobDetailPage() {
     expectedSalary: '',
     availableFrom: '',
     coverLetter: '',
-    resume: null as File | null,
+    education: '',
+    resume: '',
   });
 
-  const job = mockJob;
+  useEffect(() => {
+    const fetchJob = async () => {
+      if (!slug) return;
 
-  const jobTypes: Record<string, { ar: string; en: string }> = {
-    'full-time': { ar: 'دوام كامل', en: 'Full-time' },
-    'part-time': { ar: 'دوام جزئي', en: 'Part-time' },
-    contract: { ar: 'عقد', en: 'Contract' },
-    remote: { ar: 'عن بعد', en: 'Remote' },
-    internship: { ar: 'تدريب', en: 'Internship' },
-  };
+      setLoading(true);
+      setError(null);
 
-  const formatDate = (dateString: string) => {
+      try {
+        const jobData = await getJobBySlug(slug, locale);
+
+        if (!jobData) {
+          setError(isRTL ? 'الوظيفة غير موجودة' : 'Job not found');
+          return;
+        }
+
+        setJob(jobData);
+
+        // Fetch related jobs (same department)
+        if (typeof jobData.department !== 'string') {
+          const response = await getJobs({
+            department: jobData.department._id,
+            status: 'open',
+            limit: 3,
+            locale,
+          });
+          if (response.data) {
+            setRelatedJobs(response.data.jobs.filter(j => j._id !== jobData._id).slice(0, 2));
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching job:', err);
+        setError(isRTL ? 'حدث خطأ أثناء تحميل الوظيفة' : 'Error loading job');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJob();
+  }, [slug, locale, isRTL]);
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '';
     return new Date(dateString).toLocaleDateString(isRTL ? 'ar-EG' : 'en-US', {
       year: 'numeric',
       month: 'long',
@@ -192,9 +121,35 @@ export default function JobDetailPage() {
     });
   };
 
-  const formatSalary = (salary: Job['salary']) => {
-    if (!salary) return isRTL ? 'تنافسي' : 'Competitive';
-    return `${salary.min.toLocaleString()} - ${salary.max.toLocaleString()} ${salary.currency}`;
+  const formatSalary = (salaryRange?: Job['salaryRange']) => {
+    if (!salaryRange || !salaryRange.isPublic) return isRTL ? 'تنافسي' : 'Competitive';
+    return `${salaryRange.min.toLocaleString()} - ${salaryRange.max.toLocaleString()} ${salaryRange.currency}`;
+  };
+
+  const getLocalizedText = (text: { ar: string; en: string } | string): string => {
+    if (typeof text === 'string') return text;
+    return text[locale] || text.en || '';
+  };
+
+  const getDepartmentName = (department: Job['department']): string => {
+    if (typeof department === 'string') return department;
+    return getLocalizedText(department.name);
+  };
+
+  const getTypeLabel = (type: JobType) => {
+    const labels = jobTypeLabels[type];
+    return isRTL ? labels?.ar : labels?.en;
+  };
+
+  const getExperienceLabel = (level: Job['experienceLevel']) => {
+    const labels: Record<string, { ar: string; en: string }> = {
+      entry: { ar: 'مبتدئ', en: 'Entry Level' },
+      mid: { ar: 'متوسط', en: 'Mid Level' },
+      senior: { ar: 'خبير', en: 'Senior' },
+      lead: { ar: 'قائد', en: 'Lead' },
+      executive: { ar: 'تنفيذي', en: 'Executive' },
+    };
+    return isRTL ? labels[level]?.ar : labels[level]?.en;
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -202,26 +157,43 @@ export default function JobDetailPage() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFormData(prev => ({ ...prev, resume: e.target.files![0] }));
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!job) return;
+
     setIsSubmitting(true);
+    setSubmitError(null);
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      const applicationData: JobApplication = {
+        job: job._id,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        resume: formData.resume || 'https://placeholder.resume.url',
+        coverLetter: formData.coverLetter,
+        linkedIn: formData.linkedin,
+        portfolio: formData.portfolio,
+        expectedSalary: formData.expectedSalary ? parseInt(formData.expectedSalary) : undefined,
+        availableFrom: formData.availableFrom || undefined,
+        experience: parseInt(formData.experience) || 0,
+        education: formData.education,
+      };
 
-    setIsSubmitting(false);
-    setIsSubmitted(true);
+      await submitApplication(applicationData);
+      setIsSubmitted(true);
+    } catch (err) {
+      console.error('Error submitting application:', err);
+      setSubmitError(isRTL ? 'حدث خطأ أثناء إرسال الطلب' : 'Error submitting application');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleShare = async (platform: string) => {
     const url = window.location.href;
-    const title = isRTL ? job.title.ar : job.title.en;
+    const title = job ? getLocalizedText(job.title) : '';
 
     switch (platform) {
       case 'facebook':
@@ -250,8 +222,35 @@ export default function JobDetailPage() {
     }
   };
 
-  const daysUntilDeadline = job.deadline
-    ? Math.ceil((new Date(job.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="size-12 animate-spin text-blue-600" />
+      </div>
+    );
+  }
+
+  if (error || !job) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center">
+        <h1 className="mb-4 text-2xl font-bold text-gray-900">
+          {error || (isRTL ? 'الوظيفة غير موجودة' : 'Job not found')}
+        </h1>
+        <Link
+          href={`/${locale}/careers`}
+          className="flex items-center gap-2 text-blue-600 hover:text-blue-800"
+        >
+          {isRTL ? <ArrowRight className="size-5" /> : <ArrowLeft className="size-5" />}
+          {isRTL ? 'العودة إلى الوظائف' : 'Back to Careers'}
+        </Link>
+      </div>
+    );
+  }
+
+  const daysUntilDeadline = job.applicationDeadline
+    ? Math.ceil(
+        (new Date(job.applicationDeadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
+      )
     : null;
 
   return (
@@ -268,7 +267,7 @@ export default function JobDetailPage() {
               {isRTL ? 'الوظائف' : 'Careers'}
             </Link>
             <span className="text-gray-400">/</span>
-            <span className="text-gray-900">{isRTL ? job.title.ar : job.title.en}</span>
+            <span className="text-gray-900">{getLocalizedText(job.title)}</span>
           </nav>
         </div>
       </div>
@@ -289,30 +288,30 @@ export default function JobDetailPage() {
                         : 'bg-blue-100 text-blue-800'
                   }`}
                 >
-                  {isRTL ? jobTypes[job.type].ar : jobTypes[job.type].en}
+                  {getTypeLabel(job.type)}
                 </span>
                 <span className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-600">
-                  {isRTL ? job.department.nameAr : job.department.nameEn}
+                  {getDepartmentName(job.department)}
                 </span>
               </div>
 
               <h1 className="mb-4 text-3xl font-bold text-gray-900">
-                {isRTL ? job.title.ar : job.title.en}
+                {getLocalizedText(job.title)}
               </h1>
 
               <div className="mb-6 flex flex-wrap items-center gap-6 text-gray-600">
                 <span className="flex items-center gap-2">
                   <MapPin className="size-5" />
-                  {isRTL ? job.location.ar : job.location.en}
+                  {getLocalizedText(job.location)}
                 </span>
                 <span className="flex items-center gap-2">
                   <Clock className="size-5" />
-                  {job.experience}
+                  {getExperienceLabel(job.experienceLevel)}
                 </span>
-                {job.salary && (
+                {job.salaryRange && (
                   <span className="flex items-center gap-2">
                     <DollarSign className="size-5" />
-                    {formatSalary(job.salary)}
+                    {formatSalary(job.salaryRange)}
                   </span>
                 )}
               </div>
@@ -372,54 +371,60 @@ export default function JobDetailPage() {
                 {isRTL ? 'وصف الوظيفة' : 'Job Description'}
               </h2>
               <div className="whitespace-pre-line text-gray-600">
-                {isRTL ? job.description.ar : job.description.en}
+                {getLocalizedText(job.description)}
               </div>
             </div>
 
             {/* Requirements */}
-            <div className="mb-8 rounded-xl bg-white p-6 shadow-md">
-              <h2 className="mb-4 text-xl font-bold text-gray-900">
-                {isRTL ? 'المتطلبات' : 'Requirements'}
-              </h2>
-              <ul className="space-y-3">
-                {(isRTL ? job.requirements.ar : job.requirements.en).map((req, index) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <CheckCircle className="mt-0.5 size-5 shrink-0 text-green-500" />
-                    <span className="text-gray-600">{req}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {job.requirements && job.requirements.length > 0 && (
+              <div className="mb-8 rounded-xl bg-white p-6 shadow-md">
+                <h2 className="mb-4 text-xl font-bold text-gray-900">
+                  {isRTL ? 'المتطلبات' : 'Requirements'}
+                </h2>
+                <ul className="space-y-3">
+                  {job.requirements.map((req, index) => (
+                    <li key={index} className="flex items-start gap-3">
+                      <CheckCircle className="mt-0.5 size-5 shrink-0 text-green-500" />
+                      <span className="text-gray-600">{getLocalizedText(req)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {/* Responsibilities */}
-            <div className="mb-8 rounded-xl bg-white p-6 shadow-md">
-              <h2 className="mb-4 text-xl font-bold text-gray-900">
-                {isRTL ? 'المسؤوليات' : 'Responsibilities'}
-              </h2>
-              <ul className="space-y-3">
-                {(isRTL ? job.responsibilities.ar : job.responsibilities.en).map((resp, index) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <CheckCircle className="mt-0.5 size-5 shrink-0 text-blue-500" />
-                    <span className="text-gray-600">{resp}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {job.responsibilities && job.responsibilities.length > 0 && (
+              <div className="mb-8 rounded-xl bg-white p-6 shadow-md">
+                <h2 className="mb-4 text-xl font-bold text-gray-900">
+                  {isRTL ? 'المسؤوليات' : 'Responsibilities'}
+                </h2>
+                <ul className="space-y-3">
+                  {job.responsibilities.map((resp, index) => (
+                    <li key={index} className="flex items-start gap-3">
+                      <CheckCircle className="mt-0.5 size-5 shrink-0 text-blue-500" />
+                      <span className="text-gray-600">{getLocalizedText(resp)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {/* Benefits */}
-            <div className="mb-8 rounded-xl bg-white p-6 shadow-md">
-              <h2 className="mb-4 text-xl font-bold text-gray-900">
-                {isRTL ? 'المميزات' : 'Benefits'}
-              </h2>
-              <ul className="grid gap-3 md:grid-cols-2">
-                {(isRTL ? job.benefits.ar : job.benefits.en).map((benefit, index) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <CheckCircle className="mt-0.5 size-5 shrink-0 text-purple-500" />
-                    <span className="text-gray-600">{benefit}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {job.benefits && job.benefits.length > 0 && (
+              <div className="mb-8 rounded-xl bg-white p-6 shadow-md">
+                <h2 className="mb-4 text-xl font-bold text-gray-900">
+                  {isRTL ? 'المميزات' : 'Benefits'}
+                </h2>
+                <ul className="grid gap-3 md:grid-cols-2">
+                  {job.benefits.map((benefit, index) => (
+                    <li key={index} className="flex items-start gap-3">
+                      <CheckCircle className="mt-0.5 size-5 shrink-0 text-purple-500" />
+                      <span className="text-gray-600">{getLocalizedText(benefit)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
           {/* Sidebar */}
@@ -437,10 +442,10 @@ export default function JobDetailPage() {
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">{isRTL ? 'تاريخ النشر' : 'Posted On'}</p>
-                      <p className="font-medium">{formatDate(job.postedAt)}</p>
+                      <p className="font-medium">{formatDate(job.createdAt)}</p>
                     </div>
                   </div>
-                  {job.deadline && (
+                  {job.applicationDeadline && (
                     <div className="flex items-center gap-3">
                       <div className="flex size-10 items-center justify-center rounded-lg bg-red-100">
                         <Clock className="size-5 text-red-600" />
@@ -449,7 +454,7 @@ export default function JobDetailPage() {
                         <p className="text-sm text-gray-500">
                           {isRTL ? 'آخر موعد للتقديم' : 'Application Deadline'}
                         </p>
-                        <p className="font-medium">{formatDate(job.deadline)}</p>
+                        <p className="font-medium">{formatDate(job.applicationDeadline)}</p>
                         {daysUntilDeadline !== null && daysUntilDeadline > 0 && (
                           <p className="text-sm text-red-600">
                             {isRTL
@@ -460,28 +465,28 @@ export default function JobDetailPage() {
                       </div>
                     </div>
                   )}
-                  <div className="flex items-center gap-3">
-                    <div className="flex size-10 items-center justify-center rounded-lg bg-purple-100">
-                      <Users className="size-5 text-purple-600" />
+                  {job.applicationsCount !== undefined && (
+                    <div className="flex items-center gap-3">
+                      <div className="flex size-10 items-center justify-center rounded-lg bg-purple-100">
+                        <Users className="size-5 text-purple-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">
+                          {isRTL ? 'عدد المتقدمين' : 'Applications'}
+                        </p>
+                        <p className="font-medium">
+                          {job.applicationsCount} {isRTL ? 'متقدم' : 'applicants'}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-500">
-                        {isRTL ? 'عدد المتقدمين' : 'Applications'}
-                      </p>
-                      <p className="font-medium">
-                        {job.applicationsCount} {isRTL ? 'متقدم' : 'applicants'}
-                      </p>
-                    </div>
-                  </div>
+                  )}
                   <div className="flex items-center gap-3">
                     <div className="flex size-10 items-center justify-center rounded-lg bg-green-100">
                       <Building className="size-5 text-green-600" />
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">{isRTL ? 'القسم' : 'Department'}</p>
-                      <p className="font-medium">
-                        {isRTL ? job.department.nameAr : job.department.nameEn}
-                      </p>
+                      <p className="font-medium">{getDepartmentName(job.department)}</p>
                     </div>
                   </div>
                 </div>
@@ -504,16 +509,16 @@ export default function JobDetailPage() {
                   <div className="space-y-4">
                     {relatedJobs.map(relatedJob => (
                       <Link
-                        key={relatedJob.id}
+                        key={relatedJob._id}
                         href={`/${locale}/careers/${relatedJob.slug}`}
                         className="block rounded-lg border p-4 transition-colors hover:border-blue-500"
                       >
                         <h4 className="mb-1 font-medium text-gray-900">
-                          {isRTL ? relatedJob.title.ar : relatedJob.title.en}
+                          {getLocalizedText(relatedJob.title)}
                         </h4>
                         <p className="flex items-center gap-1 text-sm text-gray-500">
                           <MapPin className="size-3" />
-                          {isRTL ? relatedJob.location.ar : relatedJob.location.en}
+                          {getLocalizedText(relatedJob.location)}
                         </p>
                       </Link>
                     ))}
@@ -543,10 +548,14 @@ export default function JobDetailPage() {
                       ×
                     </button>
                   </div>
-                  <p className="mt-1 text-gray-600">{isRTL ? job.title.ar : job.title.en}</p>
+                  <p className="mt-1 text-gray-600">{getLocalizedText(job.title)}</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6">
+                  {submitError && (
+                    <div className="mb-4 rounded-lg bg-red-50 p-4 text-red-700">{submitError}</div>
+                  )}
+
                   <div className="space-y-6">
                     {/* Personal Info */}
                     <div>
@@ -556,12 +565,25 @@ export default function JobDetailPage() {
                       <div className="grid gap-4 md:grid-cols-2">
                         <div>
                           <label className="mb-1 block text-sm font-medium">
-                            {isRTL ? 'الاسم الكامل' : 'Full Name'} *
+                            {isRTL ? 'الاسم الأول' : 'First Name'} *
                           </label>
                           <input
                             type="text"
-                            name="name"
-                            value={formData.name}
+                            name="firstName"
+                            value={formData.firstName}
+                            onChange={handleInputChange}
+                            required
+                            className="w-full rounded-lg border p-3"
+                          />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-sm font-medium">
+                            {isRTL ? 'اسم العائلة' : 'Last Name'} *
+                          </label>
+                          <input
+                            type="text"
+                            name="lastName"
+                            value={formData.lastName}
                             onChange={handleInputChange}
                             required
                             className="w-full rounded-lg border p-3"
@@ -593,17 +615,6 @@ export default function JobDetailPage() {
                             className="w-full rounded-lg border p-3"
                           />
                         </div>
-                        <div>
-                          <label className="mb-1 block text-sm font-medium">LinkedIn</label>
-                          <input
-                            type="url"
-                            name="linkedin"
-                            value={formData.linkedin}
-                            onChange={handleInputChange}
-                            className="w-full rounded-lg border p-3"
-                            placeholder="https://linkedin.com/in/..."
-                          />
-                        </div>
                       </div>
                     </div>
 
@@ -618,13 +629,13 @@ export default function JobDetailPage() {
                             {isRTL ? 'سنوات الخبرة' : 'Years of Experience'} *
                           </label>
                           <input
-                            type="text"
+                            type="number"
                             name="experience"
                             value={formData.experience}
                             onChange={handleInputChange}
                             required
+                            min="0"
                             className="w-full rounded-lg border p-3"
-                            placeholder={isRTL ? 'مثال: 4 سنوات' : 'e.g., 4 years'}
                           />
                         </div>
                         <div>
@@ -632,12 +643,22 @@ export default function JobDetailPage() {
                             {isRTL ? 'الراتب المتوقع' : 'Expected Salary'}
                           </label>
                           <input
-                            type="text"
+                            type="number"
                             name="expectedSalary"
                             value={formData.expectedSalary}
                             onChange={handleInputChange}
                             className="w-full rounded-lg border p-3"
-                            placeholder={isRTL ? 'مثال: 20000 جنيه' : 'e.g., 20000 EGP'}
+                          />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-sm font-medium">LinkedIn</label>
+                          <input
+                            type="url"
+                            name="linkedin"
+                            value={formData.linkedin}
+                            onChange={handleInputChange}
+                            className="w-full rounded-lg border p-3"
+                            placeholder="https://linkedin.com/in/..."
                           />
                         </div>
                         <div>
@@ -665,36 +686,39 @@ export default function JobDetailPage() {
                             className="w-full rounded-lg border p-3"
                           />
                         </div>
+                        <div>
+                          <label className="mb-1 block text-sm font-medium">
+                            {isRTL ? 'المؤهل الدراسي' : 'Education'}
+                          </label>
+                          <input
+                            type="text"
+                            name="education"
+                            value={formData.education}
+                            onChange={handleInputChange}
+                            className="w-full rounded-lg border p-3"
+                          />
+                        </div>
                       </div>
                     </div>
 
-                    {/* Resume Upload */}
+                    {/* Resume URL */}
                     <div>
                       <label className="mb-1 block text-sm font-medium">
-                        {isRTL ? 'السيرة الذاتية' : 'Resume'} * (PDF, DOC, DOCX)
+                        {isRTL ? 'رابط السيرة الذاتية' : 'Resume URL'} *
                       </label>
-                      <div className="rounded-lg border-2 border-dashed p-6 text-center">
+                      <div className="flex items-center gap-2 rounded-lg border p-3">
+                        <Upload className="size-5 text-gray-400" />
                         <input
-                          type="file"
-                          accept=".pdf,.doc,.docx"
-                          onChange={handleFileChange}
-                          className="hidden"
-                          id="resume-upload"
+                          type="url"
+                          name="resume"
+                          value={formData.resume}
+                          onChange={handleInputChange}
                           required
+                          className="w-full outline-none"
+                          placeholder={
+                            isRTL ? 'رابط Google Drive أو Dropbox' : 'Google Drive or Dropbox link'
+                          }
                         />
-                        <label
-                          htmlFor="resume-upload"
-                          className="flex cursor-pointer flex-col items-center gap-2"
-                        >
-                          <Upload className="size-8 text-gray-400" />
-                          {formData.resume ? (
-                            <span className="text-green-600">{formData.resume.name}</span>
-                          ) : (
-                            <span className="text-gray-600">
-                              {isRTL ? 'اضغط لرفع ملف' : 'Click to upload file'}
-                            </span>
-                          )}
-                        </label>
                       </div>
                     </div>
 
@@ -759,7 +783,8 @@ export default function JobDetailPage() {
                     setIsApplying(false);
                     setIsSubmitted(false);
                     setFormData({
-                      name: '',
+                      firstName: '',
+                      lastName: '',
                       email: '',
                       phone: '',
                       linkedin: '',
@@ -768,7 +793,8 @@ export default function JobDetailPage() {
                       expectedSalary: '',
                       availableFrom: '',
                       coverLetter: '',
-                      resume: null,
+                      education: '',
+                      resume: '',
                     });
                   }}
                   className="rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700"

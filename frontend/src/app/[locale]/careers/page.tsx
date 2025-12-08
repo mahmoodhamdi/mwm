@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocale } from 'next-intl';
 import Link from 'next/link';
 import {
@@ -18,118 +18,15 @@ import {
   Zap,
   Globe,
   Award,
+  Loader2,
 } from 'lucide-react';
-
-// Types
-interface Job {
-  id: string;
-  title: { ar: string; en: string };
-  slug: string;
-  department: { id: string; nameAr: string; nameEn: string };
-  location: { ar: string; en: string };
-  type: 'full-time' | 'part-time' | 'contract' | 'remote' | 'internship';
-  experience: string;
-  salary?: { min: number; max: number; currency: string };
-  description: { ar: string; en: string };
-  postedAt: string;
-  deadline?: string;
-}
-
-interface Department {
-  id: string;
-  nameAr: string;
-  nameEn: string;
-  jobsCount: number;
-}
-
-// Mock data
-const departments: Department[] = [
-  { id: '1', nameAr: 'الهندسة', nameEn: 'Engineering', jobsCount: 5 },
-  { id: '2', nameAr: 'التصميم', nameEn: 'Design', jobsCount: 3 },
-  { id: '3', nameAr: 'التسويق', nameEn: 'Marketing', jobsCount: 2 },
-  { id: '4', nameAr: 'العمليات', nameEn: 'Operations', jobsCount: 1 },
-];
-
-const jobs: Job[] = [
-  {
-    id: '1',
-    title: { ar: 'مطور واجهات أمامية - React', en: 'Frontend Developer - React' },
-    slug: 'frontend-developer-react',
-    department: departments[0],
-    location: { ar: 'القاهرة، مصر', en: 'Cairo, Egypt' },
-    type: 'full-time',
-    experience: '3-5 years',
-    salary: { min: 15000, max: 25000, currency: 'EGP' },
-    description: {
-      ar: 'نبحث عن مطور واجهات أمامية متميز للانضمام إلى فريقنا المتنامي. ستعمل على مشاريع مثيرة باستخدام أحدث التقنيات...',
-      en: 'We are looking for an exceptional frontend developer to join our growing team. You will work on exciting projects using the latest technologies...',
-    },
-    postedAt: '2024-01-15',
-    deadline: '2024-02-15',
-  },
-  {
-    id: '2',
-    title: { ar: 'مصمم UI/UX', en: 'UI/UX Designer' },
-    slug: 'ui-ux-designer',
-    department: departments[1],
-    location: { ar: 'عن بعد', en: 'Remote' },
-    type: 'remote',
-    experience: '2-4 years',
-    salary: { min: 12000, max: 18000, currency: 'EGP' },
-    description: {
-      ar: 'نبحث عن مصمم UI/UX مبدع لتصميم تجارب مستخدم استثنائية لعملائنا...',
-      en: 'We are looking for a creative UI/UX designer to design exceptional user experiences for our clients...',
-    },
-    postedAt: '2024-01-18',
-    deadline: '2024-02-20',
-  },
-  {
-    id: '3',
-    title: { ar: 'مطور خلفي - Node.js', en: 'Backend Developer - Node.js' },
-    slug: 'backend-developer-nodejs',
-    department: departments[0],
-    location: { ar: 'القاهرة، مصر', en: 'Cairo, Egypt' },
-    type: 'full-time',
-    experience: '3-5 years',
-    salary: { min: 18000, max: 28000, currency: 'EGP' },
-    description: {
-      ar: 'نبحث عن مطور خلفي ماهر في Node.js لبناء APIs قوية وقابلة للتوسع...',
-      en: 'We are looking for a skilled Node.js backend developer to build robust and scalable APIs...',
-    },
-    postedAt: '2024-01-20',
-    deadline: '2024-02-25',
-  },
-  {
-    id: '4',
-    title: { ar: 'مدير مشاريع', en: 'Project Manager' },
-    slug: 'project-manager',
-    department: departments[3],
-    location: { ar: 'القاهرة، مصر', en: 'Cairo, Egypt' },
-    type: 'full-time',
-    experience: '5+ years',
-    description: {
-      ar: 'نبحث عن مدير مشاريع ذو خبرة لقيادة فرق المشاريع وضمان التسليم في الوقت المحدد...',
-      en: 'We are looking for an experienced project manager to lead project teams and ensure on-time delivery...',
-    },
-    postedAt: '2024-01-22',
-  },
-  {
-    id: '5',
-    title: { ar: 'أخصائي تسويق رقمي', en: 'Digital Marketing Specialist' },
-    slug: 'digital-marketing-specialist',
-    department: departments[2],
-    location: { ar: 'هجين', en: 'Hybrid' },
-    type: 'full-time',
-    experience: '2-3 years',
-    salary: { min: 10000, max: 15000, currency: 'EGP' },
-    description: {
-      ar: 'نبحث عن أخصائي تسويق رقمي لإدارة حملاتنا الإعلانية وتحسين تواجدنا على الإنترنت...',
-      en: 'We are looking for a digital marketing specialist to manage our ad campaigns and improve our online presence...',
-    },
-    postedAt: '2024-01-25',
-    deadline: '2024-02-28',
-  },
-];
+import {
+  getJobs,
+  getDepartments,
+  type Job,
+  type Department,
+  type JobType,
+} from '@/services/public';
 
 const benefits = [
   {
@@ -176,8 +73,16 @@ const benefits = [
   },
 ];
 
+const jobTypeLabels: Record<JobType, { ar: string; en: string }> = {
+  'full-time': { ar: 'دوام كامل', en: 'Full-time' },
+  'part-time': { ar: 'دوام جزئي', en: 'Part-time' },
+  contract: { ar: 'عقد', en: 'Contract' },
+  remote: { ar: 'عن بعد', en: 'Remote' },
+  internship: { ar: 'تدريب', en: 'Internship' },
+};
+
 export default function CareersPage() {
-  const locale = useLocale();
+  const locale = useLocale() as 'ar' | 'en';
   const isRTL = locale === 'ar';
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -185,27 +90,58 @@ export default function CareersPage() {
   const [selectedType, setSelectedType] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
 
-  const jobTypes = [
-    { value: 'all', labelAr: 'الكل', labelEn: 'All' },
-    { value: 'full-time', labelAr: 'دوام كامل', labelEn: 'Full-time' },
-    { value: 'part-time', labelAr: 'دوام جزئي', labelEn: 'Part-time' },
-    { value: 'contract', labelAr: 'عقد', labelEn: 'Contract' },
-    { value: 'remote', labelAr: 'عن بعد', labelEn: 'Remote' },
-    { value: 'internship', labelAr: 'تدريب', labelEn: 'Internship' },
-  ];
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [totalJobs, setTotalJobs] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Filter jobs
-  const filteredJobs = jobs.filter(job => {
-    const matchesSearch =
-      job.title.ar.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.title.en.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesDepartment =
-      selectedDepartment === 'all' || job.department.id === selectedDepartment;
-    const matchesType = selectedType === 'all' || job.type === selectedType;
-    return matchesSearch && matchesDepartment && matchesType;
-  });
+  // Fetch departments on mount
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const data = await getDepartments();
+        setDepartments(data);
+      } catch (err) {
+        console.error('Error fetching departments:', err);
+      }
+    };
 
-  const formatDate = (dateString: string) => {
+    fetchDepartments();
+  }, []);
+
+  // Fetch jobs when filters change
+  const fetchJobs = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await getJobs({
+        department: selectedDepartment !== 'all' ? selectedDepartment : undefined,
+        type: selectedType !== 'all' ? (selectedType as JobType) : undefined,
+        search: searchQuery || undefined,
+        status: 'open',
+        locale,
+      });
+
+      if (response.data) {
+        setJobs(response.data.jobs);
+        setTotalJobs(response.data.pagination.total);
+      }
+    } catch (err) {
+      console.error('Error fetching jobs:', err);
+      setError(isRTL ? 'حدث خطأ أثناء تحميل الوظائف' : 'Error loading jobs');
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedDepartment, selectedType, searchQuery, locale, isRTL]);
+
+  useEffect(() => {
+    fetchJobs();
+  }, [fetchJobs]);
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '';
     const date = new Date(dateString);
     const now = new Date();
     const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
@@ -224,17 +160,27 @@ export default function CareersPage() {
     });
   };
 
-  const formatSalary = (salary: Job['salary']) => {
-    if (!salary) return isRTL ? 'تنافسي' : 'Competitive';
-    return `${salary.min.toLocaleString()} - ${salary.max.toLocaleString()} ${salary.currency}`;
+  const formatSalary = (salaryRange?: Job['salaryRange']) => {
+    if (!salaryRange || !salaryRange.isPublic) return isRTL ? 'تنافسي' : 'Competitive';
+    return `${salaryRange.min.toLocaleString()} - ${salaryRange.max.toLocaleString()} ${salaryRange.currency}`;
   };
 
-  const getTypeLabel = (type: Job['type']) => {
-    const found = jobTypes.find(t => t.value === type);
-    return isRTL ? found?.labelAr : found?.labelEn;
+  const getLocalizedText = (text: { ar: string; en: string } | string): string => {
+    if (typeof text === 'string') return text;
+    return text[locale] || text.en || '';
   };
 
-  const getTypeColor = (type: Job['type']) => {
+  const getDepartmentName = (department: Department | string): string => {
+    if (typeof department === 'string') return department;
+    return getLocalizedText(department.name);
+  };
+
+  const getTypeLabel = (type: JobType) => {
+    const labels = jobTypeLabels[type];
+    return isRTL ? labels?.ar : labels?.en;
+  };
+
+  const getTypeColor = (type: JobType) => {
     const colors: Record<string, string> = {
       'full-time': 'bg-green-100 text-green-800',
       'part-time': 'bg-blue-100 text-blue-800',
@@ -243,6 +189,17 @@ export default function CareersPage() {
       internship: 'bg-orange-100 text-orange-800',
     };
     return colors[type] || 'bg-gray-100 text-gray-800';
+  };
+
+  const getExperienceLabel = (level: Job['experienceLevel']) => {
+    const labels: Record<string, { ar: string; en: string }> = {
+      entry: { ar: 'مبتدئ', en: 'Entry Level' },
+      mid: { ar: 'متوسط', en: 'Mid Level' },
+      senior: { ar: 'خبير', en: 'Senior' },
+      lead: { ar: 'قائد', en: 'Lead' },
+      executive: { ar: 'تنفيذي', en: 'Executive' },
+    };
+    return isRTL ? labels[level]?.ar : labels[level]?.en;
   };
 
   return (
@@ -263,7 +220,7 @@ export default function CareersPage() {
               <div className="flex items-center gap-2">
                 <Briefcase className="size-5" />
                 <span>
-                  {jobs.length} {isRTL ? 'وظيفة متاحة' : 'Open Positions'}
+                  {totalJobs} {isRTL ? 'وظيفة متاحة' : 'Open Positions'}
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -309,8 +266,8 @@ export default function CareersPage() {
               >
                 <option value="all">{isRTL ? 'كل الأقسام' : 'All Departments'}</option>
                 {departments.map(dept => (
-                  <option key={dept.id} value={dept.id}>
-                    {isRTL ? dept.nameAr : dept.nameEn} ({dept.jobsCount})
+                  <option key={dept._id} value={dept._id}>
+                    {getLocalizedText(dept.name)}
                   </option>
                 ))}
               </select>
@@ -319,9 +276,10 @@ export default function CareersPage() {
                 onChange={e => setSelectedType(e.target.value)}
                 className="rounded-lg border border-gray-200 px-4 py-2"
               >
-                {jobTypes.map(type => (
-                  <option key={type.value} value={type.value}>
-                    {isRTL ? type.labelAr : type.labelEn}
+                <option value="all">{isRTL ? 'كل الأنواع' : 'All Types'}</option>
+                {Object.entries(jobTypeLabels).map(([value, labels]) => (
+                  <option key={value} value={value}>
+                    {isRTL ? labels.ar : labels.en}
                   </option>
                 ))}
               </select>
@@ -335,14 +293,20 @@ export default function CareersPage() {
         <div className="mb-8 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-900">
             {isRTL ? 'الوظائف المتاحة' : 'Open Positions'}
-            <span className="ms-2 text-lg font-normal text-gray-500">({filteredJobs.length})</span>
+            <span className="ms-2 text-lg font-normal text-gray-500">({jobs.length})</span>
           </h2>
         </div>
 
-        {filteredJobs.length > 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="size-8 animate-spin text-blue-600" />
+          </div>
+        ) : error ? (
+          <div className="py-16 text-center text-red-500">{error}</div>
+        ) : jobs.length > 0 ? (
           <div className="space-y-4">
-            {filteredJobs.map(job => (
-              <Link key={job.id} href={`/${locale}/careers/${job.slug}`}>
+            {jobs.map(job => (
+              <Link key={job._id} href={`/${locale}/careers/${job.slug}`}>
                 <div className="group rounded-xl bg-white p-6 shadow-md transition-all hover:shadow-lg">
                   <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div className="flex-1">
@@ -353,34 +317,34 @@ export default function CareersPage() {
                           {getTypeLabel(job.type)}
                         </span>
                         <span className="text-sm text-gray-500">
-                          {isRTL ? job.department.nameAr : job.department.nameEn}
+                          {getDepartmentName(job.department)}
                         </span>
                       </div>
                       <h3 className="mb-2 text-xl font-bold text-gray-900 transition-colors group-hover:text-blue-600">
-                        {isRTL ? job.title.ar : job.title.en}
+                        {getLocalizedText(job.title)}
                       </h3>
                       <p className="mb-3 line-clamp-2 text-gray-600">
-                        {isRTL ? job.description.ar : job.description.en}
+                        {getLocalizedText(job.description)}
                       </p>
                       <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
                         <span className="flex items-center gap-1">
                           <MapPin className="size-4" />
-                          {isRTL ? job.location.ar : job.location.en}
+                          {getLocalizedText(job.location)}
                         </span>
                         <span className="flex items-center gap-1">
                           <Clock className="size-4" />
-                          {job.experience}
+                          {getExperienceLabel(job.experienceLevel)}
                         </span>
-                        {job.salary && (
+                        {job.salaryRange && (
                           <span className="flex items-center gap-1">
                             <DollarSign className="size-4" />
-                            {formatSalary(job.salary)}
+                            {formatSalary(job.salaryRange)}
                           </span>
                         )}
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
-                      <div className="text-sm text-gray-500">{formatDate(job.postedAt)}</div>
+                      <div className="text-sm text-gray-500">{formatDate(job.createdAt)}</div>
                       <div className="flex items-center gap-1 font-medium text-blue-600 transition-colors group-hover:text-blue-700">
                         {isRTL ? 'التفاصيل' : 'View Details'}
                         {isRTL ? (

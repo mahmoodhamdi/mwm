@@ -1,47 +1,21 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocale } from 'next-intl';
 import Link from 'next/link';
-import { Search, Calendar, Clock, Tag, ArrowRight, ArrowLeft } from 'lucide-react';
-
-// Types
-interface Category {
-  id: string;
-  nameAr: string;
-  nameEn: string;
-  slug: string;
-  postsCount: number;
-}
-
-interface BlogTag {
-  id: string;
-  nameAr: string;
-  nameEn: string;
-  slug: string;
-}
-
-interface Author {
-  id: string;
-  name: string;
-  avatar: string;
-}
-
-interface BlogPost {
-  id: string;
-  title: { ar: string; en: string };
-  slug: string;
-  excerpt: { ar: string; en: string };
-  featuredImage: string;
-  category: Category;
-  tags: BlogTag[];
-  author: Author;
-  publishedAt: string;
-  readingTime: number;
-}
+import Image from 'next/image';
+import { Search, Calendar, Clock, Tag, ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
+import {
+  getBlogPosts,
+  getBlogCategories,
+  getFeaturedBlogPosts,
+  getBlogTags,
+  type BlogPost,
+  type BlogCategory,
+} from '@/services/public';
 
 export default function BlogListingPage() {
-  const locale = useLocale();
+  const locale = useLocale() as 'ar' | 'en';
   const isRTL = locale === 'ar';
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -49,176 +23,97 @@ export default function BlogListingPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 6;
 
-  // Sample data
-  const categories: Category[] = [
-    { id: '1', nameAr: 'التقنية', nameEn: 'Technology', slug: 'technology', postsCount: 15 },
-    { id: '2', nameAr: 'التصميم', nameEn: 'Design', slug: 'design', postsCount: 8 },
-    { id: '3', nameAr: 'التسويق', nameEn: 'Marketing', slug: 'marketing', postsCount: 12 },
-    { id: '4', nameAr: 'الأعمال', nameEn: 'Business', slug: 'business', postsCount: 6 },
-  ];
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [categories, setCategories] = useState<BlogCategory[]>([]);
+  const [featuredPost, setFeaturedPost] = useState<BlogPost | null>(null);
+  const [tags, setTags] = useState<string[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const popularTags: BlogTag[] = [
-    { id: '1', nameAr: 'ويب', nameEn: 'Web', slug: 'web' },
-    { id: '2', nameAr: 'موبايل', nameEn: 'Mobile', slug: 'mobile' },
-    { id: '3', nameAr: 'AI', nameEn: 'AI', slug: 'ai' },
-    { id: '4', nameAr: 'سيو', nameEn: 'SEO', slug: 'seo' },
-    { id: '5', nameAr: 'UX', nameEn: 'UX', slug: 'ux' },
-  ];
+  // Fetch categories and tags on mount
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      try {
+        const [categoriesData, tagsData, featuredData] = await Promise.all([
+          getBlogCategories(locale),
+          getBlogTags(locale),
+          getFeaturedBlogPosts(1, locale),
+        ]);
+        setCategories(categoriesData);
+        setTags(tagsData);
+        setFeaturedPost(featuredData[0] || null);
+      } catch (err) {
+        console.error('Error fetching initial data:', err);
+      }
+    };
 
-  const posts: BlogPost[] = [
-    {
-      id: '1',
-      title: { ar: 'مستقبل تطوير الويب في 2024', en: 'Future of Web Development in 2024' },
-      slug: 'future-of-web-development-2024',
-      excerpt: {
-        ar: 'نظرة شاملة على أهم التقنيات والاتجاهات التي ستشكل مستقبل تطوير الويب في العام القادم...',
-        en: 'A comprehensive look at the key technologies and trends that will shape the future of web development...',
-      },
-      featuredImage:
-        'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=500&fit=crop',
-      category: categories[0],
-      tags: [popularTags[0], popularTags[2]],
-      author: {
-        id: '1',
-        name: 'Ahmed Hassan',
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
-      },
-      publishedAt: '2024-01-20',
-      readingTime: 8,
-    },
-    {
-      id: '2',
-      title: { ar: 'أفضل ممارسات تصميم UI/UX', en: 'Best UI/UX Design Practices' },
-      slug: 'best-ui-ux-design-practices',
-      excerpt: {
-        ar: 'دليل شامل لأفضل الممارسات في تصميم واجهات المستخدم وتجربة المستخدم...',
-        en: 'A comprehensive guide to best practices in user interface and user experience design...',
-      },
-      featuredImage:
-        'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&h=500&fit=crop',
-      category: categories[1],
-      tags: [popularTags[4]],
-      author: {
-        id: '2',
-        name: 'Sarah Ali',
-        avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&h=100&fit=crop',
-      },
-      publishedAt: '2024-01-18',
-      readingTime: 12,
-    },
-    {
-      id: '3',
-      title: {
-        ar: 'استراتيجيات التسويق الرقمي الفعالة',
-        en: 'Effective Digital Marketing Strategies',
-      },
-      slug: 'effective-digital-marketing-strategies',
-      excerpt: {
-        ar: 'كيف تبني استراتيجية تسويق رقمي ناجحة لعملك في العصر الحديث...',
-        en: 'How to build a successful digital marketing strategy for your business in the modern era...',
-      },
-      featuredImage:
-        'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=500&fit=crop',
-      category: categories[2],
-      tags: [popularTags[3]],
-      author: {
-        id: '1',
-        name: 'Ahmed Hassan',
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
-      },
-      publishedAt: '2024-01-15',
-      readingTime: 6,
-    },
-    {
-      id: '4',
-      title: { ar: 'الذكاء الاصطناعي في الأعمال', en: 'AI in Business' },
-      slug: 'ai-in-business',
-      excerpt: {
-        ar: 'كيف يغير الذكاء الاصطناعي طريقة عمل الشركات وما هي الفرص المتاحة...',
-        en: 'How AI is changing the way businesses operate and what opportunities are available...',
-      },
-      featuredImage:
-        'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=500&fit=crop',
-      category: categories[3],
-      tags: [popularTags[2]],
-      author: {
-        id: '2',
-        name: 'Sarah Ali',
-        avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&h=100&fit=crop',
-      },
-      publishedAt: '2024-01-12',
-      readingTime: 10,
-    },
-    {
-      id: '5',
-      title: { ar: 'تطوير تطبيقات الموبايل', en: 'Mobile App Development' },
-      slug: 'mobile-app-development',
-      excerpt: {
-        ar: 'دليل شامل لتطوير تطبيقات الهاتف المحمول باستخدام أحدث التقنيات...',
-        en: 'A comprehensive guide to mobile app development using the latest technologies...',
-      },
-      featuredImage:
-        'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800&h=500&fit=crop',
-      category: categories[0],
-      tags: [popularTags[1]],
-      author: {
-        id: '1',
-        name: 'Ahmed Hassan',
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
-      },
-      publishedAt: '2024-01-10',
-      readingTime: 9,
-    },
-    {
-      id: '6',
-      title: { ar: 'تحسين محركات البحث للمبتدئين', en: 'SEO for Beginners' },
-      slug: 'seo-for-beginners',
-      excerpt: {
-        ar: 'كل ما تحتاج معرفته عن تحسين محركات البحث لموقعك الإلكتروني...',
-        en: 'Everything you need to know about search engine optimization for your website...',
-      },
-      featuredImage:
-        'https://images.unsplash.com/photo-1432888622747-4eb9a8efeb07?w=800&h=500&fit=crop',
-      category: categories[2],
-      tags: [popularTags[3], popularTags[0]],
-      author: {
-        id: '2',
-        name: 'Sarah Ali',
-        avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&h=100&fit=crop',
-      },
-      publishedAt: '2024-01-08',
-      readingTime: 7,
-    },
-  ];
+    fetchInitialData();
+  }, [locale]);
 
-  // Filter posts
-  const filteredPosts = posts.filter(post => {
-    const matchesSearch =
-      post.title.ar.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.title.en.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.excerpt.ar.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.excerpt.en.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || post.category.id === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  // Fetch posts when filters change
+  const fetchPosts = useCallback(async () => {
+    setLoading(true);
+    setError(null);
 
-  // Pagination
-  const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
-  const paginatedPosts = filteredPosts.slice(
-    (currentPage - 1) * postsPerPage,
-    currentPage * postsPerPage
-  );
+    try {
+      const response = await getBlogPosts({
+        page: currentPage,
+        limit: postsPerPage,
+        category: selectedCategory !== 'all' ? selectedCategory : undefined,
+        search: searchQuery || undefined,
+        locale,
+      });
 
-  // Featured post (first published post)
-  const featuredPost = posts[0];
+      if (response.data) {
+        setPosts(response.data.posts);
+        setTotalPages(response.data.pagination.pages);
+      }
+    } catch (err) {
+      console.error('Error fetching posts:', err);
+      setError(isRTL ? 'حدث خطأ أثناء تحميل المقالات' : 'Error loading articles');
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage, selectedCategory, searchQuery, locale, isRTL]);
 
-  const formatDate = (dateString: string) => {
+  useEffect(() => {
+    fetchPosts();
+  }, [fetchPosts]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, searchQuery]);
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString(isRTL ? 'ar-SA' : 'en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
     });
+  };
+
+  const getLocalizedText = (text: { ar: string; en: string } | string): string => {
+    if (typeof text === 'string') return text;
+    return text[locale] || text.en || '';
+  };
+
+  const getCategoryName = (category: BlogCategory | string): string => {
+    if (typeof category === 'string') return category;
+    return getLocalizedText(category.name);
+  };
+
+  const getAuthorName = (author: BlogPost['author']): string => {
+    if (typeof author === 'string') return author;
+    return author.name || '';
+  };
+
+  const getAuthorAvatar = (author: BlogPost['author']): string | undefined => {
+    if (typeof author === 'string') return undefined;
+    return author.avatar;
   };
 
   return (
@@ -263,17 +158,20 @@ export default function BlogListingPage() {
                 </h2>
                 <Link href={`/${locale}/blog/${featuredPost.slug}`}>
                   <div className="group overflow-hidden rounded-2xl bg-white shadow-lg transition-shadow hover:shadow-xl">
-                    <div className="aspect-video overflow-hidden">
-                      <img
-                        src={featuredPost.featuredImage}
-                        alt={isRTL ? featuredPost.title.ar : featuredPost.title.en}
-                        className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
+                    <div className="relative aspect-video overflow-hidden bg-gray-200">
+                      {featuredPost.featuredImage && (
+                        <Image
+                          src={featuredPost.featuredImage}
+                          alt={getLocalizedText(featuredPost.title)}
+                          fill
+                          className="object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                      )}
                     </div>
                     <div className="p-6">
                       <div className="mb-3 flex items-center gap-4">
                         <span className="rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-800">
-                          {isRTL ? featuredPost.category.nameAr : featuredPost.category.nameEn}
+                          {getCategoryName(featuredPost.category)}
                         </span>
                         <span className="flex items-center gap-1 text-sm text-gray-500">
                           <Calendar className="size-4" />
@@ -281,20 +179,29 @@ export default function BlogListingPage() {
                         </span>
                       </div>
                       <h3 className="mb-3 text-2xl font-bold text-gray-900 transition-colors group-hover:text-blue-600">
-                        {isRTL ? featuredPost.title.ar : featuredPost.title.en}
+                        {getLocalizedText(featuredPost.title)}
                       </h3>
-                      <p className="mb-4 text-gray-600">
-                        {isRTL ? featuredPost.excerpt.ar : featuredPost.excerpt.en}
-                      </p>
+                      <p className="mb-4 text-gray-600">{getLocalizedText(featuredPost.excerpt)}</p>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <img
-                            src={featuredPost.author.avatar}
-                            alt={featuredPost.author.name}
-                            className="size-10 rounded-full object-cover"
-                          />
+                          <div className="relative size-10 overflow-hidden rounded-full bg-gray-200">
+                            {getAuthorAvatar(featuredPost.author) ? (
+                              <Image
+                                src={getAuthorAvatar(featuredPost.author)!}
+                                alt={getAuthorName(featuredPost.author)}
+                                fill
+                                className="object-cover"
+                              />
+                            ) : (
+                              <div className="flex size-full items-center justify-center text-gray-400">
+                                {getAuthorName(featuredPost.author).charAt(0)}
+                              </div>
+                            )}
+                          </div>
                           <div>
-                            <p className="font-medium text-gray-900">{featuredPost.author.name}</p>
+                            <p className="font-medium text-gray-900">
+                              {getAuthorName(featuredPost.author)}
+                            </p>
                             <p className="flex items-center gap-1 text-sm text-gray-500">
                               <Clock className="size-3" />
                               {featuredPost.readingTime} {isRTL ? 'دقيقة قراءة' : 'min read'}
@@ -321,55 +228,76 @@ export default function BlogListingPage() {
               <h2 className="mb-6 text-2xl font-bold">
                 {isRTL ? 'أحدث المقالات' : 'Latest Articles'}
               </h2>
-              <div className="grid gap-6 md:grid-cols-2">
-                {paginatedPosts.map(post => (
-                  <Link key={post.id} href={`/${locale}/blog/${post.slug}`}>
-                    <article className="group h-full overflow-hidden rounded-xl bg-white shadow-md transition-shadow hover:shadow-lg">
-                      <div className="aspect-video overflow-hidden">
-                        <img
-                          src={post.featuredImage}
-                          alt={isRTL ? post.title.ar : post.title.en}
-                          className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        />
-                      </div>
-                      <div className="p-5">
-                        <div className="mb-3 flex items-center gap-3">
-                          <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-700">
-                            {isRTL ? post.category.nameAr : post.category.nameEn}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            {formatDate(post.publishedAt)}
-                          </span>
-                        </div>
-                        <h3 className="mb-2 line-clamp-2 font-bold text-gray-900 transition-colors group-hover:text-blue-600">
-                          {isRTL ? post.title.ar : post.title.en}
-                        </h3>
-                        <p className="mb-4 line-clamp-2 text-sm text-gray-600">
-                          {isRTL ? post.excerpt.ar : post.excerpt.en}
-                        </p>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <img
-                              src={post.author.avatar}
-                              alt={post.author.name}
-                              className="size-8 rounded-full object-cover"
-                            />
-                            <span className="text-sm text-gray-700">{post.author.name}</span>
-                          </div>
-                          <span className="flex items-center gap-1 text-xs text-gray-500">
-                            <Clock className="size-3" />
-                            {post.readingTime} {isRTL ? 'د' : 'min'}
-                          </span>
-                        </div>
-                      </div>
-                    </article>
-                  </Link>
-                ))}
-              </div>
 
-              {filteredPosts.length === 0 && (
+              {loading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="size-8 animate-spin text-blue-600" />
+                </div>
+              ) : error ? (
+                <div className="py-12 text-center text-red-500">{error}</div>
+              ) : posts.length === 0 ? (
                 <div className="py-12 text-center text-gray-500">
                   {isRTL ? 'لا توجد مقالات' : 'No articles found'}
+                </div>
+              ) : (
+                <div className="grid gap-6 md:grid-cols-2">
+                  {posts.map(post => (
+                    <Link key={post._id} href={`/${locale}/blog/${post.slug}`}>
+                      <article className="group h-full overflow-hidden rounded-xl bg-white shadow-md transition-shadow hover:shadow-lg">
+                        <div className="relative aspect-video overflow-hidden bg-gray-200">
+                          {post.featuredImage && (
+                            <Image
+                              src={post.featuredImage}
+                              alt={getLocalizedText(post.title)}
+                              fill
+                              className="object-cover transition-transform duration-300 group-hover:scale-105"
+                            />
+                          )}
+                        </div>
+                        <div className="p-5">
+                          <div className="mb-3 flex items-center gap-3">
+                            <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-700">
+                              {getCategoryName(post.category)}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {formatDate(post.publishedAt)}
+                            </span>
+                          </div>
+                          <h3 className="mb-2 line-clamp-2 font-bold text-gray-900 transition-colors group-hover:text-blue-600">
+                            {getLocalizedText(post.title)}
+                          </h3>
+                          <p className="mb-4 line-clamp-2 text-sm text-gray-600">
+                            {getLocalizedText(post.excerpt)}
+                          </p>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className="relative size-8 overflow-hidden rounded-full bg-gray-200">
+                                {getAuthorAvatar(post.author) ? (
+                                  <Image
+                                    src={getAuthorAvatar(post.author)!}
+                                    alt={getAuthorName(post.author)}
+                                    fill
+                                    className="object-cover"
+                                  />
+                                ) : (
+                                  <div className="flex size-full items-center justify-center text-xs text-gray-400">
+                                    {getAuthorName(post.author).charAt(0)}
+                                  </div>
+                                )}
+                              </div>
+                              <span className="text-sm text-gray-700">
+                                {getAuthorName(post.author)}
+                              </span>
+                            </div>
+                            <span className="flex items-center gap-1 text-xs text-gray-500">
+                              <Clock className="size-3" />
+                              {post.readingTime} {isRTL ? 'د' : 'min'}
+                            </span>
+                          </div>
+                        </div>
+                      </article>
+                    </Link>
+                  ))}
                 </div>
               )}
             </div>
@@ -420,25 +348,24 @@ export default function BlogListingPage() {
                     }`}
                   >
                     <span>{isRTL ? 'الكل' : 'All'}</span>
-                    <span className="rounded-full bg-gray-100 px-2 text-sm text-gray-600">
-                      {posts.length}
-                    </span>
                   </button>
                 </li>
                 {categories.map(category => (
-                  <li key={category.id}>
+                  <li key={category._id}>
                     <button
-                      onClick={() => setSelectedCategory(category.id)}
+                      onClick={() => setSelectedCategory(category._id)}
                       className={`flex w-full items-center justify-between rounded-lg px-3 py-2 ${
-                        selectedCategory === category.id
+                        selectedCategory === category._id
                           ? 'bg-blue-50 text-blue-600'
                           : 'hover:bg-gray-50'
                       }`}
                     >
-                      <span>{isRTL ? category.nameAr : category.nameEn}</span>
-                      <span className="rounded-full bg-gray-100 px-2 text-sm text-gray-600">
-                        {category.postsCount}
-                      </span>
+                      <span>{getLocalizedText(category.name)}</span>
+                      {category.postCount !== undefined && (
+                        <span className="rounded-full bg-gray-100 px-2 text-sm text-gray-600">
+                          {category.postCount}
+                        </span>
+                      )}
                     </button>
                   </li>
                 ))}
@@ -451,14 +378,14 @@ export default function BlogListingPage() {
                 {isRTL ? 'الوسوم الشائعة' : 'Popular Tags'}
               </h3>
               <div className="flex flex-wrap gap-2">
-                {popularTags.map(tag => (
+                {tags.map((tag, index) => (
                   <Link
-                    key={tag.id}
-                    href={`/${locale}/blog/tag/${tag.slug}`}
+                    key={index}
+                    href={`/${locale}/blog?tag=${encodeURIComponent(tag)}`}
                     className="flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm transition-colors hover:border-blue-500 hover:text-blue-600"
                   >
                     <Tag className="size-3" />
-                    {isRTL ? tag.nameAr : tag.nameEn}
+                    {tag}
                   </Link>
                 ))}
               </div>

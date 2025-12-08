@@ -78,3 +78,18 @@ export {
   type IJobApplicationModel,
   type ApplicationStatus,
 } from './JobApplication';
+export {
+  Subscriber,
+  type ISubscriber,
+  type ISubscriberModel,
+  type SubscriberStatus,
+  type SubscriberSource,
+} from './Subscriber';
+export {
+  Newsletter,
+  type INewsletter,
+  type INewsletterModel,
+  type CampaignStatus,
+  type RecipientType,
+  type ICampaignMetrics,
+} from './Newsletter';

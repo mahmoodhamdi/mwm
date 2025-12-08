@@ -1,0 +1,349 @@
+paths:
+  /content/sections:
+    get:
+      tags:
+        - Content
+      summary: Get all sections
+      description: Returns a list of all content sections
+      responses:
+        '200':
+          description: List of sections
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: string
+
+  /content/section/{section}:
+    get:
+      tags:
+        - Content
+      summary: Get content by section
+      description: Returns all content entries for a specific section
+      parameters:
+        - name: section
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: locale
+          in: query
+          schema:
+            type: string
+            enum: [ar, en]
+      responses:
+        '200':
+          description: Content entries for section
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+
+  /content:
+    get:
+      tags:
+        - Content
+      summary: Get all site content (Admin)
+      description: Returns all site content entries (Admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: section
+          in: query
+          schema:
+            type: string
+          description: Filter by section
+        - name: locale
+          in: query
+          schema:
+            type: string
+            enum: [ar, en]
+      responses:
+        '200':
+          description: List of content entries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                        key:
+                          type: string
+                        type:
+                          type: string
+                        content:
+                          $ref: '#/components/schemas/LocalizedContent'
+                        section:
+                          type: string
+                        order:
+                          type: integer
+                        isActive:
+                          type: boolean
+
+    post:
+      tags:
+        - Content
+      summary: Create new content
+      description: Creates a new content entry (Admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - key
+                - type
+                - section
+                - content
+              properties:
+                key:
+                  type: string
+                type:
+                  type: string
+                  enum: [text, html, image, video, array, object, number, boolean]
+                section:
+                  type: string
+                content:
+                  $ref: '#/components/schemas/LocalizedContent'
+                description:
+                  type: string
+                order:
+                  type: integer
+      responses:
+        '201':
+          description: Content created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /content/bulk:
+    post:
+      tags:
+        - Content
+      summary: Bulk upsert content
+      description: Creates or updates multiple content entries at once (Admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - items
+              properties:
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      key:
+                        type: string
+                      type:
+                        type: string
+                      section:
+                        type: string
+                      content:
+                        $ref: '#/components/schemas/LocalizedContent'
+      responses:
+        '200':
+          description: Content entries upserted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      modified:
+                        type: integer
+                      upserted:
+                        type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /content/{key}:
+    get:
+      tags:
+        - Content
+      summary: Get content by key
+      description: Returns a single content entry by key
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: locale
+          in: query
+          schema:
+            type: string
+            enum: [ar, en]
+      responses:
+        '200':
+          description: Content entry
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags:
+        - Content
+      summary: Update content
+      description: Updates a content entry (Admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  $ref: '#/components/schemas/LocalizedContent'
+                type:
+                  type: string
+                description:
+                  type: string
+                order:
+                  type: integer
+                isActive:
+                  type: boolean
+      responses:
+        '200':
+          description: Content updated successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags:
+        - Content
+      summary: Delete content
+      description: Deletes a content entry (Admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Content deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /content/{key}/upsert:
+    put:
+      tags:
+        - Content
+      summary: Upsert content
+      description: Creates or updates a content entry by key (Admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - type
+                - section
+                - content
+              properties:
+                type:
+                  type: string
+                  enum: [text, html, image, video, array, object, number, boolean]
+                section:
+                  type: string
+                content:
+                  $ref: '#/components/schemas/LocalizedContent'
+                description:
+                  type: string
+                order:
+                  type: integer
+                isActive:
+                  type: boolean
+      responses:
+        '200':
+          description: Content upserted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'

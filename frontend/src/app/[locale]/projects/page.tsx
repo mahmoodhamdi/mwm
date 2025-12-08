@@ -39,8 +39,13 @@ const projects = [
       en: 'Full-featured e-commerce platform with secure payment and inventory management',
     },
     category: { ar: 'ويب', en: 'Web' },
-    image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=600&fit=crop',
-    technologies: ['Next.js', 'Node.js', 'MongoDB', 'Stripe'],
+    thumbnail: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=600&fit=crop',
+    technologies: [
+      { name: 'Next.js' },
+      { name: 'Node.js' },
+      { name: 'MongoDB' },
+      { name: 'Stripe' },
+    ],
   },
   {
     id: '2',
@@ -51,8 +56,8 @@ const projects = [
       en: 'Secure mobile banking app with multiple services',
     },
     category: { ar: 'موبايل', en: 'Mobile' },
-    image: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&h=600&fit=crop',
-    technologies: ['React Native', 'Node.js', 'PostgreSQL'],
+    thumbnail: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&h=600&fit=crop',
+    technologies: [{ name: 'React Native' }, { name: 'Node.js' }, { name: 'PostgreSQL' }],
   },
   {
     id: '3',
@@ -63,8 +68,13 @@ const projects = [
       en: 'Comprehensive hospital and clinic management system',
     },
     category: { ar: 'ويب', en: 'Web' },
-    image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&h=600&fit=crop',
-    technologies: ['React', 'Express.js', 'MySQL', 'Docker'],
+    thumbnail: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&h=600&fit=crop',
+    technologies: [
+      { name: 'React' },
+      { name: 'Express.js' },
+      { name: 'MySQL' },
+      { name: 'Docker' },
+    ],
   },
   {
     id: '4',
@@ -75,8 +85,8 @@ const projects = [
       en: 'Property search and management application',
     },
     category: { ar: 'موبايل', en: 'Mobile' },
-    image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&h=600&fit=crop',
-    technologies: ['Flutter', 'Firebase', 'Google Maps'],
+    thumbnail: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&h=600&fit=crop',
+    technologies: [{ name: 'Flutter' }, { name: 'Firebase' }, { name: 'Google Maps' }],
   },
   {
     id: '5',
@@ -87,8 +97,8 @@ const projects = [
       en: 'Interactive learning platform with courses and certificates',
     },
     category: { ar: 'ويب', en: 'Web' },
-    image: 'https://images.unsplash.com/photo-1501504905252-473c47e087f8?w=800&h=600&fit=crop',
-    technologies: ['Next.js', 'Prisma', 'AWS', 'WebRTC'],
+    thumbnail: 'https://images.unsplash.com/photo-1501504905252-473c47e087f8?w=800&h=600&fit=crop',
+    technologies: [{ name: 'Next.js' }, { name: 'Prisma' }, { name: 'AWS' }, { name: 'WebRTC' }],
   },
   {
     id: '6',
@@ -99,8 +109,13 @@ const projects = [
       en: 'Complete point of sale system for restaurants and cafes',
     },
     category: { ar: 'ويب', en: 'Web' },
-    image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&h=600&fit=crop',
-    technologies: ['Vue.js', 'Laravel', 'Redis', 'Electron'],
+    thumbnail: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&h=600&fit=crop',
+    technologies: [
+      { name: 'Vue.js' },
+      { name: 'Laravel' },
+      { name: 'Redis' },
+      { name: 'Electron' },
+    ],
   },
 ];
 
@@ -146,7 +161,7 @@ export default function ProjectsPage({ params: { locale } }: { params: { locale:
                 title={project.title[locale as 'ar' | 'en']}
                 description={project.description[locale as 'ar' | 'en']}
                 slug={project.slug}
-                image={project.image}
+                thumbnail={project.thumbnail}
                 category={project.category[locale as 'ar' | 'en']}
                 technologies={project.technologies}
               />

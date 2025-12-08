@@ -1,0 +1,395 @@
+paths:
+  /translations:
+    get:
+      tags:
+        - Translations
+      summary: Get all translations (Admin)
+      description: Returns all translations with pagination
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: namespace
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of translations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      translations:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Translation'
+                      total:
+                        type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags:
+        - Translations
+      summary: Create translation
+      description: Creates a new translation entry (Admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - key
+                - namespace
+                - value
+              properties:
+                key:
+                  type: string
+                namespace:
+                  type: string
+                value:
+                  $ref: '#/components/schemas/LocalizedContent'
+      responses:
+        '201':
+          description: Translation created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Translation'
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /translations/all:
+    get:
+      tags:
+        - Translations
+      summary: Get all translations for a locale
+      description: Returns all translations grouped by namespace for a specific locale
+      parameters:
+        - name: locale
+          in: query
+          schema:
+            type: string
+            enum: [ar, en]
+      responses:
+        '200':
+          description: Translations grouped by namespace
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    additionalProperties:
+                      type: object
+
+  /translations/namespaces:
+    get:
+      tags:
+        - Translations
+      summary: Get namespaces list
+      description: Returns a list of all translation namespaces
+      responses:
+        '200':
+          description: List of namespaces
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: string
+
+  /translations/namespace/{namespace}:
+    get:
+      tags:
+        - Translations
+      summary: Get translations by namespace
+      description: Returns all translations for a specific namespace
+      parameters:
+        - name: namespace
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: locale
+          in: query
+          schema:
+            type: string
+            enum: [ar, en]
+      responses:
+        '200':
+          description: Translations for namespace
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+
+  /translations/search:
+    get:
+      tags:
+        - Translations
+      summary: Search translations
+      description: Search translations by key or value
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: namespace
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Translation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /translations/upsert:
+    post:
+      tags:
+        - Translations
+      summary: Upsert translation
+      description: Creates or updates a translation entry
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - key
+                - namespace
+                - value
+              properties:
+                key:
+                  type: string
+                namespace:
+                  type: string
+                value:
+                  $ref: '#/components/schemas/LocalizedContent'
+      responses:
+        '200':
+          description: Translation upserted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Translation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /translations/bulk:
+    post:
+      tags:
+        - Translations
+      summary: Bulk upsert translations
+      description: Creates or updates multiple translations at once
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - translations
+              properties:
+                translations:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      key:
+                        type: string
+                      namespace:
+                        type: string
+                      value:
+                        $ref: '#/components/schemas/LocalizedContent'
+      responses:
+        '200':
+          description: Translations upserted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      modified:
+                        type: integer
+                      upserted:
+                        type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /translations/{id}:
+    get:
+      tags:
+        - Translations
+      summary: Get single translation
+      description: Returns a single translation by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Translation details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Translation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags:
+        - Translations
+      summary: Update translation
+      description: Updates a translation entry
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key:
+                  type: string
+                namespace:
+                  type: string
+                value:
+                  $ref: '#/components/schemas/LocalizedContent'
+      responses:
+        '200':
+          description: Translation updated successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags:
+        - Translations
+      summary: Delete translation
+      description: Deletes a translation entry
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Translation deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  schemas:
+    Translation:
+      type: object
+      properties:
+        _id:
+          type: string
+        key:
+          type: string
+        namespace:
+          type: string
+        value:
+          $ref: '#/components/schemas/LocalizedContent'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time

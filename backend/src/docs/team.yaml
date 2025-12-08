@@ -1,0 +1,663 @@
+paths:
+  /team:
+    get:
+      tags:
+        - Team
+      summary: Get all active team members
+      description: Returns a list of active team members with pagination
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: department
+          in: query
+          schema:
+            type: string
+        - name: locale
+          in: query
+          schema:
+            type: string
+            enum: [ar, en]
+      responses:
+        '200':
+          description: List of team members
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      members:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/TeamMember'
+                      total:
+                        type: integer
+
+  /team/departments:
+    get:
+      tags:
+        - Team
+      summary: Get all departments
+      description: Returns a list of active departments
+      parameters:
+        - name: locale
+          in: query
+          schema:
+            type: string
+            enum: [ar, en]
+      responses:
+        '200':
+          description: List of departments
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                        name:
+                          $ref: '#/components/schemas/LocalizedContent'
+                        slug:
+                          type: string
+
+  /team/featured:
+    get:
+      tags:
+        - Team
+      summary: Get featured team members
+      description: Returns featured team members
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 6
+        - name: locale
+          in: query
+          schema:
+            type: string
+            enum: [ar, en]
+      responses:
+        '200':
+          description: List of featured members
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TeamMember'
+
+  /team/leaders:
+    get:
+      tags:
+        - Team
+      summary: Get team leaders
+      description: Returns team leaders
+      responses:
+        '200':
+          description: List of team leaders
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TeamMember'
+
+  /team/{slug}:
+    get:
+      tags:
+        - Team
+      summary: Get team member by slug
+      description: Returns a single team member by their slug
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: locale
+          in: query
+          schema:
+            type: string
+            enum: [ar, en]
+      responses:
+        '200':
+          description: Team member details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/TeamMember'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ============================================
+  # Admin Routes - Departments
+  # ============================================
+
+  /team/admin/departments:
+    get:
+      tags:
+        - Team
+      summary: Get all departments (Admin)
+      description: Returns all departments including inactive ones
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of all departments
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                        name:
+                          $ref: '#/components/schemas/LocalizedContent'
+                        slug:
+                          type: string
+                        description:
+                          $ref: '#/components/schemas/LocalizedContent'
+                        order:
+                          type: integer
+                        isActive:
+                          type: boolean
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    post:
+      tags:
+        - Team
+      summary: Create department
+      description: Creates a new department
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  $ref: '#/components/schemas/LocalizedContent'
+                description:
+                  $ref: '#/components/schemas/LocalizedContent'
+                order:
+                  type: integer
+                isActive:
+                  type: boolean
+                  default: true
+      responses:
+        '201':
+          description: Department created successfully
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /team/admin/departments/{id}:
+    put:
+      tags:
+        - Team
+      summary: Update department
+      description: Updates an existing department
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  $ref: '#/components/schemas/LocalizedContent'
+                description:
+                  $ref: '#/components/schemas/LocalizedContent'
+                order:
+                  type: integer
+                isActive:
+                  type: boolean
+      responses:
+        '200':
+          description: Department updated successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags:
+        - Team
+      summary: Delete department
+      description: Deletes a department
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Department deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ============================================
+  # Admin Routes - Team Members
+  # ============================================
+
+  /team/admin:
+    get:
+      tags:
+        - Team
+      summary: Get all team members (Admin)
+      description: Returns all team members with pagination including inactive ones
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: department
+          in: query
+          schema:
+            type: string
+        - name: isActive
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Paginated list of team members
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      members:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/TeamMember'
+                      total:
+                        type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    post:
+      tags:
+        - Team
+      summary: Create team member
+      description: Creates a new team member
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - position
+              properties:
+                name:
+                  $ref: '#/components/schemas/LocalizedContent'
+                position:
+                  $ref: '#/components/schemas/LocalizedContent'
+                bio:
+                  $ref: '#/components/schemas/LocalizedContent'
+                image:
+                  type: string
+                department:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                phone:
+                  type: string
+                socialLinks:
+                  type: object
+                  properties:
+                    linkedin:
+                      type: string
+                    twitter:
+                      type: string
+                    github:
+                      type: string
+                order:
+                  type: integer
+                isActive:
+                  type: boolean
+                  default: true
+                isFeatured:
+                  type: boolean
+                  default: false
+                isLeader:
+                  type: boolean
+                  default: false
+      responses:
+        '201':
+          description: Team member created successfully
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /team/admin/reorder:
+    put:
+      tags:
+        - Team
+      summary: Reorder team members
+      description: Updates the order of team members
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - items
+              properties:
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      order:
+                        type: integer
+      responses:
+        '200':
+          description: Team members reordered successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /team/admin/{id}:
+    get:
+      tags:
+        - Team
+      summary: Get team member by ID (Admin)
+      description: Returns a single team member by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Team member details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/TeamMember'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags:
+        - Team
+      summary: Update team member
+      description: Updates an existing team member
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  $ref: '#/components/schemas/LocalizedContent'
+                position:
+                  $ref: '#/components/schemas/LocalizedContent'
+                bio:
+                  $ref: '#/components/schemas/LocalizedContent'
+                image:
+                  type: string
+                department:
+                  type: string
+                email:
+                  type: string
+                phone:
+                  type: string
+                socialLinks:
+                  type: object
+                order:
+                  type: integer
+                isActive:
+                  type: boolean
+                isFeatured:
+                  type: boolean
+                isLeader:
+                  type: boolean
+      responses:
+        '200':
+          description: Team member updated successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags:
+        - Team
+      summary: Delete team member
+      description: Deletes a team member
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Team member deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /team/admin/{id}/active:
+    put:
+      tags:
+        - Team
+      summary: Toggle active status
+      description: Toggles the active status of a team member
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Active status toggled
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /team/admin/{id}/featured:
+    put:
+      tags:
+        - Team
+      summary: Toggle featured status
+      description: Toggles the featured status of a team member
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Featured status toggled
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /team/admin/{id}/leader:
+    put:
+      tags:
+        - Team
+      summary: Toggle leader status
+      description: Toggles the leader status of a team member
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Leader status toggled
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /team/departments/{slug}:
+    get:
+      tags:
+        - Team
+      summary: Get department by slug
+      description: Returns a single department by its slug
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: locale
+          in: query
+          schema:
+            type: string
+            enum: [ar, en]
+      responses:
+        '200':
+          description: Department details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+        '404':
+          $ref: '#/components/responses/NotFound'

@@ -1,0 +1,231 @@
+paths:
+  /settings/public:
+    get:
+      tags:
+        - Settings
+      summary: Get public settings
+      description: Returns public site settings (no authentication required)
+      responses:
+        '200':
+          description: Public site settings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      general:
+                        type: object
+                        properties:
+                          siteName:
+                            $ref: '#/components/schemas/LocalizedContent'
+                          siteTagline:
+                            $ref: '#/components/schemas/LocalizedContent'
+                          logo:
+                            type: object
+                          favicon:
+                            type: string
+                          defaultLanguage:
+                            type: string
+                      contact:
+                        type: object
+                        properties:
+                          email:
+                            type: string
+                          phone:
+                            type: string
+                          whatsapp:
+                            type: string
+                          address:
+                            $ref: '#/components/schemas/LocalizedContent'
+                      social:
+                        type: object
+                      features:
+                        type: object
+
+  /settings:
+    get:
+      tags:
+        - Settings
+      summary: Get all settings (Admin)
+      description: Returns all site settings (Admin only)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Site settings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      general:
+                        type: object
+                        properties:
+                          siteName:
+                            $ref: '#/components/schemas/LocalizedContent'
+                          siteTagline:
+                            $ref: '#/components/schemas/LocalizedContent'
+                          logo:
+                            type: object
+                          favicon:
+                            type: string
+                          defaultLanguage:
+                            type: string
+                          maintenanceMode:
+                            type: boolean
+                      contact:
+                        type: object
+                        properties:
+                          email:
+                            type: string
+                          phone:
+                            type: string
+                          whatsapp:
+                            type: string
+                          address:
+                            $ref: '#/components/schemas/LocalizedContent'
+                      social:
+                        type: object
+                        properties:
+                          facebook:
+                            type: string
+                          twitter:
+                            type: string
+                          instagram:
+                            type: string
+                          linkedin:
+                            type: string
+                      seo:
+                        type: object
+                        properties:
+                          defaultTitle:
+                            $ref: '#/components/schemas/LocalizedContent'
+                          defaultDescription:
+                            $ref: '#/components/schemas/LocalizedContent'
+                      features:
+                        type: object
+                        properties:
+                          blog:
+                            type: boolean
+                          careers:
+                            type: boolean
+                          newsletter:
+                            type: boolean
+
+    put:
+      tags:
+        - Settings
+      summary: Update site settings
+      description: Updates site settings (Admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                general:
+                  type: object
+                contact:
+                  type: object
+                social:
+                  type: object
+                seo:
+                  type: object
+                features:
+                  type: object
+      responses:
+        '200':
+          description: Settings updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /settings/{section}:
+    put:
+      tags:
+        - Settings
+      summary: Update specific section
+      description: Updates a specific settings section (Admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: section
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [general, contact, social, seo, features]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Settings section updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /settings/reset:
+    post:
+      tags:
+        - Settings
+      summary: Reset settings to defaults
+      description: Resets all settings to default values (Super Admin only)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Settings reset successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

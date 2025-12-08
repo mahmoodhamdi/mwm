@@ -1,0 +1,423 @@
+paths:
+  /menus:
+    get:
+      tags:
+        - Menus
+      summary: Get all menus (Admin)
+      description: Returns all menus with pagination
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: List of menus
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      menus:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Menu'
+                      total:
+                        type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags:
+        - Menus
+      summary: Create menu
+      description: Creates a new menu (Admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - location
+              properties:
+                name:
+                  $ref: '#/components/schemas/LocalizedContent'
+                slug:
+                  type: string
+                location:
+                  type: string
+                  enum: [header, footer, sidebar, mobile]
+                items:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/MenuItem'
+      responses:
+        '201':
+          description: Menu created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Menu'
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /menus/location/{location}:
+    get:
+      tags:
+        - Menus
+      summary: Get menu by location
+      description: Returns the active menu for a specific location
+      parameters:
+        - name: location
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [header, footer, sidebar, mobile]
+        - name: locale
+          in: query
+          schema:
+            type: string
+            enum: [ar, en]
+      responses:
+        '200':
+          description: Menu for location
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Menu'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /menus/slug/{slug}:
+    get:
+      tags:
+        - Menus
+      summary: Get menu by slug
+      description: Returns a menu by its slug
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: locale
+          in: query
+          schema:
+            type: string
+            enum: [ar, en]
+      responses:
+        '200':
+          description: Menu details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Menu'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /menus/{id}:
+    get:
+      tags:
+        - Menus
+      summary: Get single menu
+      description: Returns a single menu by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Menu details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Menu'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags:
+        - Menus
+      summary: Update menu
+      description: Updates a menu (Admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  $ref: '#/components/schemas/LocalizedContent'
+                location:
+                  type: string
+                items:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/MenuItem'
+                isActive:
+                  type: boolean
+      responses:
+        '200':
+          description: Menu updated successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags:
+        - Menus
+      summary: Delete menu
+      description: Deletes a menu (Admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Menu deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /menus/{id}/items:
+    post:
+      tags:
+        - Menus
+      summary: Add menu item
+      description: Adds a new item to a menu
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MenuItem'
+      responses:
+        '200':
+          description: Menu item added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Menu'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /menus/{id}/items/{itemId}:
+    put:
+      tags:
+        - Menus
+      summary: Update menu item
+      description: Updates a specific menu item
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MenuItem'
+      responses:
+        '200':
+          description: Menu item updated successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags:
+        - Menus
+      summary: Remove menu item
+      description: Removes a menu item
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Menu item removed successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /menus/{id}/reorder:
+    post:
+      tags:
+        - Menus
+      summary: Reorder menu items
+      description: Reorders the items in a menu
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - itemIds
+              properties:
+                itemIds:
+                  type: array
+                  items:
+                    type: string
+                  description: Array of item IDs in the new order
+      responses:
+        '200':
+          description: Menu items reordered successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  schemas:
+    Menu:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          $ref: '#/components/schemas/LocalizedContent'
+        slug:
+          type: string
+        location:
+          type: string
+          enum: [header, footer, sidebar, mobile]
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MenuItem'
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    MenuItem:
+      type: object
+      properties:
+        _id:
+          type: string
+        label:
+          $ref: '#/components/schemas/LocalizedContent'
+        url:
+          type: string
+        target:
+          type: string
+          enum: [_self, _blank]
+        icon:
+          type: string
+        order:
+          type: integer
+        isActive:
+          type: boolean
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/MenuItem'

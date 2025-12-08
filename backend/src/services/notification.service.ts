@@ -8,7 +8,7 @@ import { getMessaging } from '../config/firebase';
 import { logger } from '../config';
 import { Notification, INotification } from '../models/Notification';
 import { User } from '../models';
-import { DeviceToken, IDeviceToken } from '../models/DeviceToken';
+import { DeviceToken } from '../models/DeviceToken';
 
 /**
  * Notification payload interface
@@ -161,7 +161,8 @@ export async function sendNotification(options: SendNotificationOptions): Promis
   const { userId, userIds, userRole, topic, payload, saveToDatabase = true } = options;
 
   let targetUserIds: string[] = [];
-  let savedNotifications: INotification[] = [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let savedNotifications: any[] = [];
 
   // Determine target users
   if (userId) {

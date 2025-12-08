@@ -149,24 +149,24 @@ export function Footer({ className }: FooterProps) {
             <ul className="mb-6 space-y-3">
               <li className="flex items-start gap-3">
                 <MapPin className="text-primary-400 mt-1 size-5 shrink-0" />
-                <span className="text-gray-400">123 Business Street, Tech City</span>
+                <span className="text-gray-400">Cairo, Egypt</span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="text-primary-400 size-5 shrink-0" />
                 <a
-                  href="tel:+966500000000"
+                  href="tel:+201019793768"
                   className="hover:text-primary-400 text-gray-400 transition-colors"
                 >
-                  +966 50 000 0000
+                  +20 101 979 3768
                 </a>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="text-primary-400 size-5 shrink-0" />
                 <a
-                  href="mailto:info@mwm.com"
+                  href="mailto:mwm.softwars.solutions@gmail.com"
                   className="hover:text-primary-400 text-gray-400 transition-colors"
                 >
-                  info@mwm.com
+                  mwm.softwars.solutions@gmail.com
                 </a>
               </li>
             </ul>

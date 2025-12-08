@@ -75,7 +75,8 @@ describe('Footer', () => {
 
   it('renders services section', () => {
     render(<Footer />);
-    expect(screen.getByText('Services')).toBeInTheDocument();
+    // 'Services' appears in both nav links and section header, so use getAllByText
+    expect(screen.getAllByText('Services').length).toBeGreaterThan(0);
     expect(screen.getByText('Web Development')).toBeInTheDocument();
     expect(screen.getByText('Mobile Development')).toBeInTheDocument();
   });

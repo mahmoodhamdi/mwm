@@ -18,19 +18,28 @@ import { User } from '../../src/models';
 import { Express } from 'express';
 
 describe('Auth API', () => {
-  let app: Express;
+  let app: Express | null = null;
   let mongoServer: MongoMemoryServer | null = null;
+  let isConnected = false;
 
   beforeAll(async () => {
     try {
-      mongoServer = await MongoMemoryServer.create();
+      // Ensure no existing connection
+      if (mongoose.connection.readyState !== 0) {
+        await mongoose.disconnect();
+      }
+      mongoServer = await MongoMemoryServer.create({
+        instance: { ip: '127.0.0.1' },
+      });
       const mongoUri = mongoServer.getUri();
       await mongoose.connect(mongoUri);
       app = createApp();
+      isConnected = true;
     } catch {
       console.warn('MongoMemoryServer could not start');
+      isConnected = false;
     }
-  });
+  }, 120000);
 
   afterAll(async () => {
     if (mongoose.connection.readyState === 1) {
@@ -42,14 +51,14 @@ describe('Auth API', () => {
   });
 
   beforeEach(async () => {
-    if (mongoose.connection.readyState === 1) {
+    if (isConnected && mongoose.connection.readyState === 1) {
       await User.deleteMany({});
     }
   });
 
   describe('POST /api/v1/auth/register', () => {
     it('should register a new user', async () => {
-      if (mongoose.connection.readyState !== 1) return;
+      if (!isConnected || !app) return;
 
       const response = await request(app)
         .post('/api/v1/auth/register')

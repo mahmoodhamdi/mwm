@@ -9,7 +9,6 @@ module.exports = {
       'ts-jest',
       {
         tsconfig: 'tsconfig.json',
-        isolatedModules: true,
       },
     ],
   },
@@ -44,4 +43,6 @@ module.exports = {
   clearMocks: true,
   resetMocks: true,
   restoreMocks: true,
+  // Use single worker to prevent port binding issues on Windows
+  maxWorkers: 1,
 };

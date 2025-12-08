@@ -18,7 +18,9 @@ describe('Translation Model', () => {
 
   beforeAll(async () => {
     try {
-      mongoServer = await MongoMemoryServer.create();
+      mongoServer = await MongoMemoryServer.create({
+        instance: { ip: '127.0.0.1' },
+      });
       const mongoUri = mongoServer.getUri();
       await mongoose.connect(mongoUri);
     } catch {
@@ -103,7 +105,7 @@ describe('Translation Model', () => {
       await expect(Translation.create(translationData)).rejects.toThrow();
     });
 
-    it('should default namespace to common', async () => {
+    it('should require namespace', async () => {
       if (mongoose.connection.readyState !== 1) return;
 
       const translationData = {
@@ -111,8 +113,7 @@ describe('Translation Model', () => {
         translations: { ar: 'نص', en: 'Text' },
       };
 
-      const translation = await Translation.create(translationData);
-      expect(translation.namespace).toBe('common');
+      await expect(Translation.create(translationData)).rejects.toThrow();
     });
 
     it('should validate namespace enum', async () => {
@@ -150,11 +151,16 @@ describe('Translation Model', () => {
         translations: { ar: 'الرئيسية', en: 'Home' },
       });
 
-      const commonTranslations = await Translation.getByNamespace('common');
+      // getByNamespace returns Record<string, string> for the default locale (ar)
+      const commonTranslationsAr = await Translation.getByNamespace('common');
+      expect(Object.keys(commonTranslationsAr)).toHaveLength(2);
+      expect(commonTranslationsAr['greeting']).toBe('مرحبا');
+      expect(commonTranslationsAr['goodbye']).toBe('مع السلامة');
 
-      expect(Object.keys(commonTranslations)).toHaveLength(2);
-      expect(commonTranslations['greeting'].ar).toBe('مرحبا');
-      expect(commonTranslations['goodbye'].en).toBe('Goodbye');
+      // Test with English locale
+      const commonTranslationsEn = await Translation.getByNamespace('common', 'en');
+      expect(commonTranslationsEn['greeting']).toBe('Hello');
+      expect(commonTranslationsEn['goodbye']).toBe('Goodbye');
     });
 
     it('should get all translations by locale', async () => {

@@ -22,7 +22,9 @@ describe('Service Model', () => {
 
   beforeAll(async () => {
     try {
-      mongoServer = await MongoMemoryServer.create();
+      mongoServer = await MongoMemoryServer.create({
+        instance: { ip: '127.0.0.1' },
+      });
       const mongoUri = mongoServer.getUri();
       await mongoose.connect(mongoUri);
     } catch {
@@ -259,10 +261,11 @@ describe('Service Model', () => {
     it('should get active services with getActiveServices()', async () => {
       if (mongoose.connection.readyState !== 1) return;
 
-      const services = await Service.getActiveServices();
+      const result = await Service.getActiveServices();
 
-      expect(services).toHaveLength(2);
-      expect(services.every(s => s.isActive)).toBe(true);
+      expect(result.services).toHaveLength(2);
+      expect(result.total).toBe(2);
+      expect(result.services.every(s => s.isActive)).toBe(true);
     });
 
     it('should get service by slug with getBySlug()', async () => {

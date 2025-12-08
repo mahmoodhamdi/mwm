@@ -3,8 +3,15 @@
  * إعداد اختبارات Jest
  */
 
-import { MongoMemoryServer } from 'mongodb-memory-server';
-import mongoose from 'mongoose';
+// Import all models to register schemas before tests run
+import '../src/models';
+
+// Configure MongoMemoryServer to skip MD5 check (fixes corrupted binary issues)
+process.env['MONGOMS_MD5_CHECK'] = '0';
+process.env['MONGOMS_SKIP_MD5_CHECK'] = '1';
+
+// Configure MongoMemoryServer to bind to localhost (fixes EACCES on Windows)
+process.env['MONGOMS_IP'] = '127.0.0.1';
 
 // Set test environment
 process.env['NODE_ENV'] = 'test';
@@ -16,59 +23,8 @@ process.env['CLIENT_URL'] = 'http://localhost:3000';
 process.env['MONGODB_URI'] = 'mongodb://localhost:27017/test';
 process.env['REDIS_URL'] = 'redis://localhost:6379';
 
-let mongoServer: MongoMemoryServer | null = null;
-let isMongoConnected = false;
-
-// Setup before all tests
-beforeAll(async () => {
-  try {
-    // Create in-memory MongoDB instance
-    mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
-    process.env['MONGODB_URI'] = mongoUri;
-
-    // Connect to the in-memory database
-    await mongoose.connect(mongoUri);
-    isMongoConnected = true;
-  } catch (error) {
-    // If MongoMemoryServer fails (e.g., port permission issues on Windows),
-    // set a flag to skip MongoDB-dependent tests
-    console.warn('MongoMemoryServer could not start. MongoDB-dependent tests will be skipped.');
-    console.warn('Error:', error instanceof Error ? error.message : error);
-    isMongoConnected = false;
-  }
-});
-
-// Cleanup after each test
-afterEach(async () => {
-  // Clear all collections only if connected
-  if (isMongoConnected && mongoose.connection.readyState === 1) {
-    const collections = mongoose.connection.collections;
-    for (const key in collections) {
-      const collection = collections[key];
-      if (collection) {
-        await collection.deleteMany({});
-      }
-    }
-  }
-});
-
-// Cleanup after all tests
-afterAll(async () => {
-  // Disconnect and stop the in-memory server only if it was started
-  if (isMongoConnected && mongoose.connection.readyState === 1) {
-    await mongoose.disconnect();
-  }
-  if (mongoServer) {
-    await mongoServer.stop();
-  }
-});
-
-// Export helper to check if MongoDB is available
-export const isMongoAvailable = (): boolean => isMongoConnected;
-
-// Global test timeout
-jest.setTimeout(30000);
+// Global test timeout - 120s to allow MongoDB binary download on slow connections
+jest.setTimeout(120000);
 
 // Mock Redis
 jest.mock('ioredis', () => {

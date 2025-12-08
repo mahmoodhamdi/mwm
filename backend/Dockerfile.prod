@@ -1,25 +1,44 @@
 # Backend Dockerfile - Production
-# Multi-stage build for optimized image
+# Multi-stage build for monorepo with shared package
 
-# Stage 1: Build
+# Stage 1: Build shared package
+FROM node:20-alpine AS shared-builder
+
+WORKDIR /app/packages/shared
+
+# Copy shared package files
+COPY packages/shared/package*.json ./
+COPY packages/shared/tsconfig*.json ./
+COPY packages/shared/src ./src
+
+# Install and build shared package
+RUN npm install && npm run build
+
+# Stage 2: Build backend
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Copy shared package from previous stage
+COPY --from=shared-builder /app/packages/shared /app/packages/shared
 
-# Install ALL dependencies (including devDependencies for build)
-# Use npm install for monorepo packages without package-lock.json
+# Copy backend package files
+COPY backend/package*.json ./
+
+# Update package.json to use local shared package path
+RUN sed -i 's|"@mwm/shared": "\*"|"@mwm/shared": "file:../packages/shared"|g' package.json || true
+
+# Install dependencies
 RUN npm install
 
-# Copy source code
-COPY . .
+# Copy backend source code
+COPY backend/src ./src
+COPY backend/tsconfig*.json ./
 
 # Build TypeScript
 RUN npm run build
 
-# Stage 2: Production
+# Stage 3: Production
 FROM node:20-alpine AS production
 
 WORKDIR /app
@@ -28,8 +47,14 @@ WORKDIR /app
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
 
-# Copy package files
-COPY package*.json ./
+# Copy shared package (built)
+COPY --from=shared-builder /app/packages/shared /app/packages/shared
+
+# Copy backend package files
+COPY backend/package*.json ./
+
+# Update package.json to use local shared package path
+RUN sed -i 's|"@mwm/shared": "\*"|"@mwm/shared": "file:../packages/shared"|g' package.json || true
 
 # Install only production dependencies
 RUN npm install --omit=dev && npm cache clean --force

@@ -95,14 +95,10 @@ export function ThemeProvider({
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [theme, applyTheme, getSystemTheme]);
 
-  // Prevent flash of wrong theme
-  if (!mounted) {
-    return <div style={{ visibility: 'hidden' }}>{children}</div>;
-  }
-
   return (
     <ThemeContext.Provider value={{ theme, setTheme, resolvedTheme, toggleTheme }}>
-      {children}
+      {/* Prevent flash of wrong theme by hiding content until mounted */}
+      {mounted ? children : <div style={{ visibility: 'hidden' }}>{children}</div>}
     </ThemeContext.Provider>
   );
 }

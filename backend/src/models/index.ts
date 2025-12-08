@@ -64,3 +64,17 @@ export {
 } from './Contact';
 export { BlogCategory, type IBlogCategory, type IBlogCategoryModel } from './BlogCategory';
 export { BlogPost, type IBlogPost, type IBlogPostModel, type BlogPostStatus } from './BlogPost';
+export {
+  Job,
+  type IJob,
+  type IJobModel,
+  type JobType,
+  type ExperienceLevel,
+  type JobStatus,
+} from './Job';
+export {
+  JobApplication,
+  type IJobApplication,
+  type IJobApplicationModel,
+  type ApplicationStatus,
+} from './JobApplication';

@@ -13,3 +13,4 @@ export { projectValidation } from './project.validation';
 export { teamValidation } from './team.validation';
 export { contactValidation } from './contact.validation';
 export { blogValidation } from './blog.validation';
+export { careersValidation } from './careers.validation';

@@ -29,6 +29,7 @@ import projectRouter from './routes/project.routes';
 import teamRouter from './routes/team.routes';
 import contactRouter from './routes/contact.routes';
 import blogRouter from './routes/blog.routes';
+import careersRouter from './routes/careers.routes';
 
 /**
  * Create Express application
@@ -107,6 +108,7 @@ export function createApp(): Express {
   app.use('/api/v1/team', teamRouter);
   app.use('/api/v1/contact', contactRouter);
   app.use('/api/v1/blog', blogRouter);
+  app.use('/api/v1/careers', careersRouter);
 
   // Swagger documentation
   app.use(

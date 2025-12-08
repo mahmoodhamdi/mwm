@@ -91,3 +91,50 @@ export {
 } from './menus.service';
 
 export { menusService } from './menus.service';
+
+// Newsletter service
+export type {
+  BilingualText as NewsletterBilingualText,
+  Subscriber,
+  SubscriberStatus,
+  SubscriberSource,
+  SubscriberFilters,
+  SubscriberStats,
+  CreateSubscriberData,
+  UpdateSubscriberData,
+  BulkAction,
+  BulkActionData,
+  ImportResult,
+  Campaign,
+  CampaignStatus,
+  RecipientType,
+  CampaignMetrics,
+  CampaignFilters,
+  CampaignStats,
+  CreateCampaignData,
+  UpdateCampaignData,
+} from './newsletter.service';
+
+export {
+  getSubscribers,
+  getSubscriberStats,
+  getSubscriberTags,
+  createSubscriber,
+  updateSubscriber,
+  deleteSubscriber,
+  bulkSubscriberAction,
+  importSubscribers,
+  exportSubscribers,
+  getCampaigns,
+  getCampaignStats,
+  getCampaign,
+  createCampaign,
+  updateCampaign,
+  deleteCampaign,
+  sendCampaign,
+  scheduleCampaign,
+  cancelCampaign,
+  duplicateCampaign,
+} from './newsletter.service';
+
+export { newsletterService } from './newsletter.service';

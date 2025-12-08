@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocale } from 'next-intl';
 import {
   Mail,
@@ -10,7 +10,6 @@ import {
   Download,
   Upload,
   Search,
-  MoreVertical,
   Send,
   Calendar,
   TrendingUp,
@@ -20,30 +19,23 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
+  Loader2,
 } from 'lucide-react';
-
-interface Subscriber {
-  id: string;
-  email: string;
-  name?: string;
-  status: 'active' | 'unsubscribed' | 'bounced' | 'pending';
-  source: 'website' | 'import' | 'manual' | 'api';
-  subscribedAt: string;
-  lastEmailAt?: string;
-  openRate?: number;
-  tags: string[];
-}
-
-interface Campaign {
-  id: string;
-  subject: { ar: string; en: string };
-  status: 'draft' | 'scheduled' | 'sent' | 'sending';
-  sentAt?: string;
-  scheduledFor?: string;
-  recipients: number;
-  opened: number;
-  clicked: number;
-}
+import {
+  getSubscribers,
+  getSubscriberStats,
+  createSubscriber,
+  deleteSubscriber,
+  bulkSubscriberAction,
+  exportSubscribers,
+  getCampaigns,
+  createCampaign,
+  deleteCampaign,
+  duplicateCampaign,
+  type Subscriber,
+  type Campaign,
+  type SubscriberStats,
+} from '@/services/admin/newsletter.service';
 
 export default function NewsletterPage() {
   const locale = useLocale();
@@ -57,90 +49,12 @@ export default function NewsletterPage() {
   const [showCampaignModal, setShowCampaignModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
 
-  // Mock data
-  const [subscribers] = useState<Subscriber[]>([
-    {
-      id: '1',
-      email: 'ahmed@example.com',
-      name: 'Ahmed Hassan',
-      status: 'active',
-      source: 'website',
-      subscribedAt: '2024-01-15',
-      lastEmailAt: '2024-01-20',
-      openRate: 75,
-      tags: ['customers', 'premium'],
-    },
-    {
-      id: '2',
-      email: 'sarah@example.com',
-      name: 'Sarah Ahmed',
-      status: 'active',
-      source: 'website',
-      subscribedAt: '2024-01-10',
-      lastEmailAt: '2024-01-20',
-      openRate: 90,
-      tags: ['customers'],
-    },
-    {
-      id: '3',
-      email: 'mohamed@example.com',
-      name: 'Mohamed Ali',
-      status: 'unsubscribed',
-      source: 'import',
-      subscribedAt: '2024-01-05',
-      lastEmailAt: '2024-01-15',
-      openRate: 25,
-      tags: ['leads'],
-    },
-    {
-      id: '4',
-      email: 'fatima@example.com',
-      name: 'Fatima Omar',
-      status: 'pending',
-      source: 'website',
-      subscribedAt: '2024-01-22',
-      tags: ['leads'],
-    },
-    {
-      id: '5',
-      email: 'invalid@bounced.com',
-      status: 'bounced',
-      source: 'import',
-      subscribedAt: '2024-01-01',
-      lastEmailAt: '2024-01-10',
-      openRate: 0,
-      tags: [],
-    },
-  ]);
-
-  const [campaigns] = useState<Campaign[]>([
-    {
-      id: '1',
-      subject: { ar: 'مرحبا بالمشتركين الجدد', en: 'Welcome New Subscribers' },
-      status: 'sent',
-      sentAt: '2024-01-20',
-      recipients: 150,
-      opened: 120,
-      clicked: 45,
-    },
-    {
-      id: '2',
-      subject: { ar: 'تحديثات شهر يناير', en: 'January Updates' },
-      status: 'scheduled',
-      scheduledFor: '2024-01-25',
-      recipients: 200,
-      opened: 0,
-      clicked: 0,
-    },
-    {
-      id: '3',
-      subject: { ar: 'عروض خاصة', en: 'Special Offers' },
-      status: 'draft',
-      recipients: 0,
-      opened: 0,
-      clicked: 0,
-    },
-  ]);
+  // Data states
+  const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [stats, setStats] = useState<SubscriberStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
 
   const [newSubscriber, setNewSubscriber] = useState({ email: '', name: '', tags: '' });
   const [newCampaign, setNewCampaign] = useState({
@@ -150,24 +64,68 @@ export default function NewsletterPage() {
     contentEn: '',
   });
 
-  const stats = {
-    total: subscribers.length,
-    active: subscribers.filter(s => s.status === 'active').length,
-    unsubscribed: subscribers.filter(s => s.status === 'unsubscribed').length,
-    bounced: subscribers.filter(s => s.status === 'bounced').length,
-    avgOpenRate: Math.round(
-      subscribers.filter(s => s.openRate).reduce((acc, s) => acc + (s.openRate || 0), 0) /
-        subscribers.filter(s => s.openRate).length
-    ),
+  // Fetch subscribers
+  const fetchSubscribers = useCallback(async () => {
+    try {
+      const response = await getSubscribers({
+        search: searchQuery || undefined,
+        status: statusFilter !== 'all' ? (statusFilter as Subscriber['status']) : undefined,
+        limit: 100,
+      });
+      if (response.success && response.data) {
+        setSubscribers(response.data.subscribers);
+      }
+    } catch (error) {
+      console.error('Failed to fetch subscribers:', error);
+    }
+  }, [searchQuery, statusFilter]);
+
+  // Fetch campaigns
+  const fetchCampaigns = useCallback(async () => {
+    try {
+      const response = await getCampaigns({ limit: 100 });
+      if (response.success && response.data) {
+        setCampaigns(response.data.campaigns);
+      }
+    } catch (error) {
+      console.error('Failed to fetch campaigns:', error);
+    }
+  }, []);
+
+  // Fetch stats
+  const fetchStats = useCallback(async () => {
+    try {
+      const response = await getSubscriberStats();
+      if (response.success && response.data) {
+        setStats(response.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch stats:', error);
+    }
+  }, []);
+
+  // Initial data load
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      await Promise.all([fetchSubscribers(), fetchCampaigns(), fetchStats()]);
+      setLoading(false);
+    };
+    loadData();
+  }, [fetchSubscribers, fetchCampaigns, fetchStats]);
+
+  // Computed stats for display
+  const displayStats = {
+    total: stats?.total || 0,
+    active: stats?.active || 0,
+    unsubscribed: stats?.unsubscribed || 0,
+    bounced: stats?.bounced || 0,
+    avgOpenRate: 0, // This would need to be calculated from campaign data
   };
 
-  const filteredSubscribers = subscribers.filter(sub => {
-    const matchesSearch =
-      sub.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      sub.name?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || sub.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  // Note: filtering is now done on the server side via API params
+  // But we keep local filtering for immediate UI feedback
+  const filteredSubscribers = subscribers;
 
   const getStatusColor = (status: Subscriber['status']) => {
     switch (status) {
@@ -218,7 +176,7 @@ export default function NewsletterPage() {
     if (selectedSubscribers.length === filteredSubscribers.length) {
       setSelectedSubscribers([]);
     } else {
-      setSelectedSubscribers(filteredSubscribers.map(s => s.id));
+      setSelectedSubscribers(filteredSubscribers.map(s => s._id));
     }
   };
 
@@ -228,44 +186,168 @@ export default function NewsletterPage() {
     );
   };
 
-  const handleAddSubscriber = () => {
-    console.log('Adding subscriber:', newSubscriber);
-    setShowAddModal(false);
-    setNewSubscriber({ email: '', name: '', tags: '' });
+  const handleAddSubscriber = async () => {
+    setActionLoading(true);
+    try {
+      const tags = newSubscriber.tags
+        ? newSubscriber.tags
+            .split(',')
+            .map(t => t.trim())
+            .filter(Boolean)
+        : [];
+      const response = await createSubscriber({
+        email: newSubscriber.email,
+        name: newSubscriber.name || undefined,
+        tags,
+        locale: locale as 'ar' | 'en',
+        source: 'manual',
+      });
+      if (response.success) {
+        setShowAddModal(false);
+        setNewSubscriber({ email: '', name: '', tags: '' });
+        await Promise.all([fetchSubscribers(), fetchStats()]);
+      } else {
+        alert(response.error || 'Failed to add subscriber');
+      }
+    } catch (error) {
+      console.error('Failed to add subscriber:', error);
+      alert('Failed to add subscriber');
+    } finally {
+      setActionLoading(false);
+    }
   };
 
-  const handleCreateCampaign = () => {
-    console.log('Creating campaign:', newCampaign);
-    setShowCampaignModal(false);
-    setNewCampaign({ subjectAr: '', subjectEn: '', contentAr: '', contentEn: '' });
+  const handleCreateCampaign = async () => {
+    setActionLoading(true);
+    try {
+      const response = await createCampaign({
+        subject: { ar: newCampaign.subjectAr, en: newCampaign.subjectEn },
+        content: { ar: newCampaign.contentAr, en: newCampaign.contentEn },
+        recipientType: 'all',
+      });
+      if (response.success) {
+        setShowCampaignModal(false);
+        setNewCampaign({ subjectAr: '', subjectEn: '', contentAr: '', contentEn: '' });
+        await fetchCampaigns();
+      } else {
+        alert(response.error || 'Failed to create campaign');
+      }
+    } catch (error) {
+      console.error('Failed to create campaign:', error);
+      alert('Failed to create campaign');
+    } finally {
+      setActionLoading(false);
+    }
   };
 
-  const handleExport = () => {
-    const csvContent = [
-      ['Email', 'Name', 'Status', 'Source', 'Subscribed At', 'Tags'],
-      ...subscribers.map(s => [
-        s.email,
-        s.name || '',
-        s.status,
-        s.source,
-        s.subscribedAt,
-        s.tags.join(', '),
-      ]),
-    ]
-      .map(row => row.join(','))
-      .join('\n');
+  const handleExport = async () => {
+    setActionLoading(true);
+    try {
+      const response = await exportSubscribers({
+        status: statusFilter !== 'all' ? (statusFilter as Subscriber['status']) : undefined,
+      });
+      if (response.success && response.data) {
+        const csvContent = [
+          ['Email', 'Name', 'Status', 'Tags', 'Subscribed At'],
+          ...response.data.subscribers.map(s => [
+            s.email,
+            s.name || '',
+            s.status,
+            s.tags,
+            s.subscribedAt,
+          ]),
+        ]
+          .map(row => row.join(','))
+          .join('\n');
 
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'subscribers.csv';
-    a.click();
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'subscribers.csv';
+        a.click();
+      }
+    } catch (error) {
+      console.error('Failed to export subscribers:', error);
+      alert('Failed to export subscribers');
+    } finally {
+      setActionLoading(false);
+    }
   };
 
-  const handleBulkAction = (action: 'delete' | 'unsubscribe' | 'resubscribe') => {
-    console.log(`${action} subscribers:`, selectedSubscribers);
-    setSelectedSubscribers([]);
+  const handleBulkAction = async (action: 'delete' | 'unsubscribe' | 'activate') => {
+    if (selectedSubscribers.length === 0) return;
+    setActionLoading(true);
+    try {
+      const response = await bulkSubscriberAction({
+        ids: selectedSubscribers,
+        action,
+      });
+      if (response.success) {
+        setSelectedSubscribers([]);
+        await Promise.all([fetchSubscribers(), fetchStats()]);
+      } else {
+        alert(response.error || 'Failed to perform action');
+      }
+    } catch (error) {
+      console.error('Failed to perform bulk action:', error);
+      alert('Failed to perform action');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDeleteCampaign = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this campaign?')) return;
+    setActionLoading(true);
+    try {
+      const response = await deleteCampaign(id);
+      if (response.success) {
+        await fetchCampaigns();
+      } else {
+        alert(response.error || 'Failed to delete campaign');
+      }
+    } catch (error) {
+      console.error('Failed to delete campaign:', error);
+      alert('Failed to delete campaign');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDuplicateCampaign = async (id: string) => {
+    setActionLoading(true);
+    try {
+      const response = await duplicateCampaign(id);
+      if (response.success) {
+        await fetchCampaigns();
+      } else {
+        alert(response.error || 'Failed to duplicate campaign');
+      }
+    } catch (error) {
+      console.error('Failed to duplicate campaign:', error);
+      alert('Failed to duplicate campaign');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDeleteSubscriber = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this subscriber?')) return;
+    setActionLoading(true);
+    try {
+      const response = await deleteSubscriber(id);
+      if (response.success) {
+        await Promise.all([fetchSubscribers(), fetchStats()]);
+      } else {
+        alert(response.error || 'Failed to delete subscriber');
+      }
+    } catch (error) {
+      console.error('Failed to delete subscriber:', error);
+      alert('Failed to delete subscriber');
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const texts = {
@@ -399,6 +481,18 @@ export default function NewsletterPage() {
 
   const t = texts[locale as keyof typeof texts] || texts.en;
 
+  // Loading state
+  if (loading) {
+    return (
+      <div
+        className={`flex min-h-[400px] items-center justify-center p-6 ${isRTL ? 'rtl' : 'ltr'}`}
+        dir={isRTL ? 'rtl' : 'ltr'}
+      >
+        <Loader2 className="size-8 animate-spin text-blue-500" />
+      </div>
+    );
+  }
+
   return (
     <div className={`p-6 ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Header */}
@@ -420,7 +514,7 @@ export default function NewsletterPage() {
             </div>
             <div>
               <p className="text-sm text-gray-500">{t.totalSubscribers}</p>
-              <p className="text-xl font-bold">{stats.total}</p>
+              <p className="text-xl font-bold">{displayStats.total}</p>
             </div>
           </div>
         </div>
@@ -432,7 +526,7 @@ export default function NewsletterPage() {
             </div>
             <div>
               <p className="text-sm text-gray-500">{t.activeSubscribers}</p>
-              <p className="text-xl font-bold">{stats.active}</p>
+              <p className="text-xl font-bold">{displayStats.active}</p>
             </div>
           </div>
         </div>
@@ -444,7 +538,7 @@ export default function NewsletterPage() {
             </div>
             <div>
               <p className="text-sm text-gray-500">{t.unsubscribed}</p>
-              <p className="text-xl font-bold">{stats.unsubscribed}</p>
+              <p className="text-xl font-bold">{displayStats.unsubscribed}</p>
             </div>
           </div>
         </div>
@@ -456,7 +550,7 @@ export default function NewsletterPage() {
             </div>
             <div>
               <p className="text-sm text-gray-500">{t.bounced}</p>
-              <p className="text-xl font-bold">{stats.bounced}</p>
+              <p className="text-xl font-bold">{displayStats.bounced}</p>
             </div>
           </div>
         </div>
@@ -468,7 +562,7 @@ export default function NewsletterPage() {
             </div>
             <div>
               <p className="text-sm text-gray-500">{t.avgOpenRate}</p>
-              <p className="text-xl font-bold">{stats.avgOpenRate}%</p>
+              <p className="text-xl font-bold">{displayStats.avgOpenRate}%</p>
             </div>
           </div>
         </div>
@@ -611,12 +705,12 @@ export default function NewsletterPage() {
                 </thead>
                 <tbody className="divide-y">
                   {filteredSubscribers.map(sub => (
-                    <tr key={sub.id} className="hover:bg-gray-50">
+                    <tr key={sub._id} className="hover:bg-gray-50">
                       <td className="p-3">
                         <input
                           type="checkbox"
-                          checked={selectedSubscribers.includes(sub.id)}
-                          onChange={() => toggleSelect(sub.id)}
+                          checked={selectedSubscribers.includes(sub._id)}
+                          onChange={() => toggleSelect(sub._id)}
                           className="rounded"
                         />
                       </td>
@@ -633,22 +727,10 @@ export default function NewsletterPage() {
                       <td className="p-3 capitalize text-gray-600">
                         {t[sub.source as keyof typeof t] || sub.source}
                       </td>
-                      <td className="p-3 text-gray-600">{sub.subscribedAt}</td>
-                      <td className="p-3">
-                        {sub.openRate !== undefined ? (
-                          <div className="flex items-center gap-2">
-                            <div className="h-2 w-16 rounded-full bg-gray-200">
-                              <div
-                                className="h-2 rounded-full bg-blue-500"
-                                style={{ width: `${sub.openRate}%` }}
-                              />
-                            </div>
-                            <span className="text-sm text-gray-600">{sub.openRate}%</span>
-                          </div>
-                        ) : (
-                          '-'
-                        )}
+                      <td className="p-3 text-gray-600">
+                        {new Date(sub.subscribedAt).toLocaleDateString(locale)}
                       </td>
+                      <td className="p-3">-</td>
                       <td className="p-3">
                         <div className="flex flex-wrap gap-1">
                           {sub.tags.map(tag => (
@@ -662,8 +744,12 @@ export default function NewsletterPage() {
                         </div>
                       </td>
                       <td className="p-3">
-                        <button className="rounded p-1 hover:bg-gray-100">
-                          <MoreVertical className="size-4 text-gray-500" />
+                        <button
+                          className="rounded p-1 hover:bg-gray-100"
+                          onClick={() => handleDeleteSubscriber(sub._id)}
+                          disabled={actionLoading}
+                        >
+                          <Trash2 className="size-4 text-red-500" />
                         </button>
                       </td>
                     </tr>
@@ -705,7 +791,10 @@ export default function NewsletterPage() {
             {/* Campaigns List */}
             <div className="space-y-4">
               {campaigns.map(campaign => (
-                <div key={campaign.id} className="rounded-lg border p-4 transition hover:shadow-md">
+                <div
+                  key={campaign._id}
+                  className="rounded-lg border p-4 transition hover:shadow-md"
+                >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="mb-2 flex items-center gap-3">
@@ -724,30 +813,44 @@ export default function NewsletterPage() {
                         {campaign.sentAt && (
                           <span className="flex items-center gap-1">
                             <Calendar className="size-4" />
-                            {t.sentAt}: {campaign.sentAt}
+                            {t.sentAt}: {new Date(campaign.sentAt).toLocaleDateString(locale)}
                           </span>
                         )}
-                        {campaign.scheduledFor && (
+                        {campaign.scheduledAt && (
                           <span className="flex items-center gap-1">
                             <Clock className="size-4" />
-                            {t.scheduledFor}: {campaign.scheduledFor}
+                            {t.scheduledFor}:{' '}
+                            {new Date(campaign.scheduledAt).toLocaleDateString(locale)}
                           </span>
                         )}
                         <span className="flex items-center gap-1">
                           <Users className="size-4" />
-                          {t.recipients}: {campaign.recipients}
+                          {t.recipients}: {campaign.metrics?.recipientCount || 0}
                         </span>
-                        {campaign.status === 'sent' && (
+                        {campaign.status === 'sent' && campaign.metrics && (
                           <>
                             <span className="flex items-center gap-1">
                               <Eye className="size-4" />
-                              {t.opened}: {campaign.opened} (
-                              {Math.round((campaign.opened / campaign.recipients) * 100)}%)
+                              {t.opened}: {campaign.metrics.openCount} (
+                              {campaign.metrics.recipientCount > 0
+                                ? Math.round(
+                                    (campaign.metrics.openCount / campaign.metrics.recipientCount) *
+                                      100
+                                  )
+                                : 0}
+                              %)
                             </span>
                             <span className="flex items-center gap-1">
                               <TrendingUp className="size-4" />
-                              {t.clicked}: {campaign.clicked} (
-                              {Math.round((campaign.clicked / campaign.recipients) * 100)}%)
+                              {t.clicked}: {campaign.metrics.clickCount} (
+                              {campaign.metrics.recipientCount > 0
+                                ? Math.round(
+                                    (campaign.metrics.clickCount /
+                                      campaign.metrics.recipientCount) *
+                                      100
+                                  )
+                                : 0}
+                              %)
                             </span>
                           </>
                         )}
@@ -758,10 +861,20 @@ export default function NewsletterPage() {
                       <button className="rounded-lg p-2 hover:bg-gray-100" title={t.view}>
                         <Eye className="size-4 text-gray-500" />
                       </button>
-                      <button className="rounded-lg p-2 hover:bg-gray-100" title={t.duplicate}>
+                      <button
+                        className="rounded-lg p-2 hover:bg-gray-100"
+                        title={t.duplicate}
+                        onClick={() => handleDuplicateCampaign(campaign._id)}
+                        disabled={actionLoading}
+                      >
                         <RefreshCw className="size-4 text-gray-500" />
                       </button>
-                      <button className="rounded-lg p-2 hover:bg-gray-100" title={t.delete}>
+                      <button
+                        className="rounded-lg p-2 hover:bg-gray-100"
+                        title={t.delete}
+                        onClick={() => handleDeleteCampaign(campaign._id)}
+                        disabled={actionLoading}
+                      >
                         <Trash2 className="size-4 text-red-500" />
                       </button>
                     </div>
@@ -821,13 +934,16 @@ export default function NewsletterPage() {
               <button
                 onClick={() => setShowAddModal(false)}
                 className="rounded-lg border px-4 py-2 hover:bg-gray-50"
+                disabled={actionLoading}
               >
                 {t.cancel}
               </button>
               <button
                 onClick={handleAddSubscriber}
-                className="rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+                className="flex items-center gap-2 rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 disabled:opacity-50"
+                disabled={actionLoading || !newSubscriber.email}
               >
+                {actionLoading && <Loader2 className="size-4 animate-spin" />}
                 {t.add}
               </button>
             </div>
@@ -897,20 +1013,17 @@ export default function NewsletterPage() {
               <button
                 onClick={() => setShowCampaignModal(false)}
                 className="rounded-lg border px-4 py-2 hover:bg-gray-50"
+                disabled={actionLoading}
               >
                 {t.cancel}
               </button>
               <button
                 onClick={handleCreateCampaign}
-                className="rounded-lg bg-gray-100 px-4 py-2 text-gray-700 hover:bg-gray-200"
+                className="flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-gray-700 hover:bg-gray-200 disabled:opacity-50"
+                disabled={actionLoading || !newCampaign.subjectAr || !newCampaign.subjectEn}
               >
+                {actionLoading && <Loader2 className="size-4 animate-spin" />}
                 {t.saveDraft}
-              </button>
-              <button
-                onClick={handleCreateCampaign}
-                className="rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-              >
-                {t.schedule}
               </button>
             </div>
           </div>

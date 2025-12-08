@@ -6,11 +6,12 @@
  */
 
 import { useState, useCallback, FormEvent } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Send, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { subscribeNewsletter } from '@/services/public/contact.service';
 
 interface NewsletterProps {
   variant?: 'default' | 'compact' | 'card';
@@ -28,6 +29,7 @@ export function Newsletter({
   showDescription = false,
 }: NewsletterProps) {
   const t = useTranslations('footer');
+  const locale = useLocale() as 'ar' | 'en';
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<SubmitStatus>('idle');
   const [errorMessage, setErrorMessage] = useState('');
@@ -46,23 +48,23 @@ export function Newsletter({
       setErrorMessage('');
 
       try {
-        // TODO: Implement actual API call
-        // const response = await api.post('/newsletter/subscribe', { email });
+        const response = await subscribeNewsletter({ email, locale });
 
-        // Simulating API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        setStatus('success');
-        setEmail('');
-
-        // Reset to idle after 5 seconds
-        setTimeout(() => setStatus('idle'), 5000);
+        if (response.success) {
+          setStatus('success');
+          setEmail('');
+          // Reset to idle after 5 seconds
+          setTimeout(() => setStatus('idle'), 5000);
+        } else {
+          setStatus('error');
+          setErrorMessage(response.message || 'Failed to subscribe. Please try again.');
+        }
       } catch (error) {
         setStatus('error');
         setErrorMessage('Failed to subscribe. Please try again.');
       }
     },
-    [email]
+    [email, locale]
   );
 
   // Compact variant - single line

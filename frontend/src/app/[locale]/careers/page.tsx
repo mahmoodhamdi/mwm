@@ -22,9 +22,9 @@ import {
 } from 'lucide-react';
 import {
   getJobs,
-  getDepartments,
+  getCareersDepartments,
   type Job,
-  type Department,
+  type CareersDepartment as Department,
   type JobType,
 } from '@/services/public';
 
@@ -100,7 +100,7 @@ export default function CareersPage() {
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
-        const data = await getDepartments();
+        const data = await getCareersDepartments();
         setDepartments(data);
       } catch (err) {
         console.error('Error fetching departments:', err);

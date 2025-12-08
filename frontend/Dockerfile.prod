@@ -25,6 +25,9 @@ WORKDIR /app
 # Copy shared package from previous stage
 COPY --from=shared-builder /app/packages/shared /app/packages/shared
 
+# Set up frontend in its directory
+WORKDIR /app/frontend
+
 # Copy frontend package files
 COPY frontend/package*.json ./
 
@@ -42,8 +45,11 @@ WORKDIR /app
 # Copy shared package
 COPY --from=shared-builder /app/packages/shared /app/packages/shared
 
+# Set up frontend in its directory
+WORKDIR /app/frontend
+
 # Copy dependencies
-COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/frontend/node_modules ./node_modules
 
 # Copy frontend source
 COPY frontend/ .
@@ -75,9 +81,9 @@ ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
 
 # Copy necessary files
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/frontend/public ./public
+COPY --from=builder /app/frontend/.next/standalone ./
+COPY --from=builder /app/frontend/.next/static ./.next/static
 
 # Change ownership
 RUN chown -R nextjs:nodejs /app

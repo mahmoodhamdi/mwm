@@ -3,12 +3,46 @@
  * صفحة الفريق
  */
 
-import { useTranslations } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { Link } from '@/i18n/routing';
-import { Container } from '@/components/ui';
+import { Container, Spinner } from '@/components/ui';
 import { TeamCard } from '@/components/team';
+import { Suspense } from 'react';
+
+// Types
+interface BilingualText {
+  ar: string;
+  en: string;
+}
+
+interface SocialLinks {
+  linkedin?: string;
+  twitter?: string;
+  github?: string;
+  facebook?: string;
+  instagram?: string;
+  website?: string;
+}
+
+interface Department {
+  _id: string;
+  name: BilingualText;
+  slug: string;
+}
+
+interface TeamMember {
+  _id: string;
+  name: BilingualText;
+  slug: string;
+  position: BilingualText;
+  bio: BilingualText;
+  department?: Department | null;
+  avatar: string;
+  socialLinks?: SocialLinks;
+  isActive: boolean;
+  isFeatured: boolean;
+}
 
 // Generate metadata
 export async function generateMetadata({
@@ -28,100 +62,119 @@ export async function generateMetadata({
   };
 }
 
-// Sample team data (will be replaced with API call)
-const teamMembers = [
-  {
-    id: '1',
-    slug: 'ahmed-mohamed',
-    name: { ar: 'أحمد محمد', en: 'Ahmed Mohamed' },
-    position: { ar: 'المؤسس والرئيس التنفيذي', en: 'Founder & CEO' },
-    shortBio: {
-      ar: 'خبرة أكثر من 10 سنوات في مجال تطوير البرمجيات وإدارة المشاريع التقنية',
-      en: 'Over 10 years of experience in software development and technical project management',
-    },
-    avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop',
-    socialLinks: {
-      linkedin: 'https://linkedin.com',
-      twitter: 'https://twitter.com',
-    },
-  },
-  {
-    id: '2',
-    slug: 'sara-ahmed',
-    name: { ar: 'سارة أحمد', en: 'Sara Ahmed' },
-    position: { ar: 'مدير التقنية', en: 'CTO' },
-    shortBio: {
-      ar: 'متخصصة في هندسة البرمجيات والذكاء الاصطناعي',
-      en: 'Specialized in software engineering and artificial intelligence',
-    },
-    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop',
-    socialLinks: {
-      linkedin: 'https://linkedin.com',
-    },
-  },
-  {
-    id: '3',
-    slug: 'mohamed-ali',
-    name: { ar: 'محمد علي', en: 'Mohamed Ali' },
-    position: { ar: 'مطور واجهات أمامية', en: 'Senior Frontend Developer' },
-    shortBio: {
-      ar: 'متخصص في React و Next.js مع خبرة 5 سنوات',
-      en: 'Specialized in React and Next.js with 5 years of experience',
-    },
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop',
-    socialLinks: {
-      linkedin: 'https://linkedin.com',
-      github: 'https://github.com',
-    },
-  },
-  {
-    id: '4',
-    slug: 'nora-hassan',
-    name: { ar: 'نورا حسن', en: 'Nora Hassan' },
-    position: { ar: 'مصممة UI/UX', en: 'UI/UX Designer' },
-    shortBio: {
-      ar: 'شغوفة بتصميم تجارب مستخدم استثنائية ومبتكرة',
-      en: 'Passionate about designing exceptional and innovative user experiences',
-    },
-    avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&h=400&fit=crop',
-    socialLinks: {
-      linkedin: 'https://linkedin.com',
-      website: 'https://dribbble.com',
-    },
-  },
-  {
-    id: '5',
-    slug: 'khaled-ibrahim',
-    name: { ar: 'خالد إبراهيم', en: 'Khaled Ibrahim' },
-    position: { ar: 'مطور خوادم', en: 'Backend Developer' },
-    shortBio: {
-      ar: 'متخصص في Node.js و Python مع خبرة في قواعد البيانات',
-      en: 'Specialized in Node.js and Python with database expertise',
-    },
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop',
-    socialLinks: {
-      linkedin: 'https://linkedin.com',
-      github: 'https://github.com',
-    },
-  },
-  {
-    id: '6',
-    slug: 'mariam-abdullah',
-    name: { ar: 'مريم عبدالله', en: 'Mariam Abdullah' },
-    position: { ar: 'مطورة تطبيقات موبايل', en: 'Mobile Developer' },
-    shortBio: {
-      ar: 'متخصصة في React Native و Flutter',
-      en: 'Specialized in React Native and Flutter',
-    },
-    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop',
-    socialLinks: {
-      linkedin: 'https://linkedin.com',
-    },
-  },
-];
+// Fetch team members from API
+async function getTeamMembers() {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+    const res = await fetch(`${baseUrl}/team`, {
+      next: { revalidate: 60 },
+    });
 
-export default function TeamPage({ params: { locale } }: { params: { locale: string } }) {
-  const t = useTranslations('about');
+    if (!res.ok) {
+      console.error('Failed to fetch team members:', res.status);
+      return { members: [], total: 0 };
+    }
+
+    const data = await res.json();
+    return data.data || { members: [], total: 0 };
+  } catch (error) {
+    console.error('Error fetching team members:', error);
+    return { members: [], total: 0 };
+  }
+}
+
+// Fetch departments from API
+async function getDepartments(): Promise<Department[]> {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+    const res = await fetch(`${baseUrl}/team/departments`, {
+      next: { revalidate: 60 },
+    });
+
+    if (!res.ok) {
+      return [];
+    }
+
+    const data = await res.json();
+    return data.data?.departments || [];
+  } catch (error) {
+    console.error('Error fetching departments:', error);
+    return [];
+  }
+}
+
+// Team Grid Component
+async function TeamGrid({ locale }: { locale: string }) {
+  const { members } = await getTeamMembers();
+
+  if (!members || members.length === 0) {
+    return (
+      <div className="py-12 text-center">
+        <p className="text-gray-500 dark:text-gray-400">
+          {locale === 'ar'
+            ? 'لا يوجد أعضاء فريق متاحين حالياً'
+            : 'No team members available at the moment'}
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+      {members.map((member: TeamMember) => (
+        <TeamCard
+          key={member._id}
+          slug={member.slug}
+          name={member.name[locale as 'ar' | 'en']}
+          position={member.position[locale as 'ar' | 'en']}
+          shortBio={member.bio[locale as 'ar' | 'en']}
+          avatar={
+            member.avatar ||
+            'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop'
+          }
+          socialLinks={member.socialLinks}
+        />
+      ))}
+    </div>
+  );
+}
+
+// Department Filter Component
+async function DepartmentFilter({ locale }: { locale: string }) {
+  const departments = await getDepartments();
+
+  if (departments.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="mb-12 flex flex-wrap justify-center gap-3">
+      <button className="border-primary-500 bg-primary-500 rounded-full border px-6 py-2 text-sm font-medium text-white transition-colors">
+        {locale === 'ar' ? 'الكل' : 'All'}
+      </button>
+      {departments.map(department => (
+        <button
+          key={department._id}
+          className="rounded-full border border-gray-200 bg-white px-6 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600"
+        >
+          {department.name[locale as 'ar' | 'en']}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// Loading Component
+function TeamLoading() {
+  return (
+    <div className="flex items-center justify-center py-12">
+      <Spinner size="lg" />
+    </div>
+  );
+}
+
+export default async function TeamPage({ params: { locale } }: { params: { locale: string } }) {
+  const t = await getTranslations({ locale, namespace: 'about' });
   const isRTL = locale === 'ar';
 
   return (
@@ -143,19 +196,12 @@ export default function TeamPage({ params: { locale } }: { params: { locale: str
       {/* Team Grid */}
       <section className="py-16">
         <Container>
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {teamMembers.map(member => (
-              <TeamCard
-                key={member.id}
-                slug={member.slug}
-                name={member.name[locale as 'ar' | 'en']}
-                position={member.position[locale as 'ar' | 'en']}
-                shortBio={member.shortBio[locale as 'ar' | 'en']}
-                avatar={member.avatar}
-                socialLinks={member.socialLinks}
-              />
-            ))}
-          </div>
+          <Suspense fallback={<div className="h-10" />}>
+            <DepartmentFilter locale={locale} />
+          </Suspense>
+          <Suspense fallback={<TeamLoading />}>
+            <TeamGrid locale={locale} />
+          </Suspense>
         </Container>
       </section>
 

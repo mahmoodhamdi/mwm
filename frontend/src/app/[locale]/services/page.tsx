@@ -3,12 +3,12 @@
  * صفحة قائمة الخدمات
  */
 
-import { useTranslations } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { Link } from '@/i18n/routing';
 import { ServiceCard } from '@/components/services';
-import { Container } from '@/components/ui';
+import { Container, Spinner } from '@/components/ui';
+import { Suspense } from 'react';
 
 // Generate metadata
 export async function generateMetadata({
@@ -28,48 +28,78 @@ export async function generateMetadata({
   };
 }
 
-// Static services data (will be replaced with API call)
-const services = [
-  {
-    id: '1',
-    slug: 'web-development',
-    icon: 'code',
-    category: { ar: 'تطوير', en: 'Development' },
-  },
-  {
-    id: '2',
-    slug: 'mobile-development',
-    icon: 'mobile',
-    category: { ar: 'تطوير', en: 'Development' },
-  },
-  {
-    id: '3',
-    slug: 'ui-ux-design',
-    icon: 'design',
-    category: { ar: 'تصميم', en: 'Design' },
-  },
-  {
-    id: '4',
-    slug: 'backend-development',
-    icon: 'server',
-    category: { ar: 'تطوير', en: 'Development' },
-  },
-  {
-    id: '5',
-    slug: 'consulting',
-    icon: 'analytics',
-    category: { ar: 'استشارات', en: 'Consulting' },
-  },
-  {
-    id: '6',
-    slug: 'support',
-    icon: 'support',
-    category: { ar: 'دعم', en: 'Support' },
-  },
-];
+// Fetch services from API
+async function getServices() {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+    const res = await fetch(`${baseUrl}/services`, {
+      next: { revalidate: 60 }, // Revalidate every 60 seconds
+    });
 
-export default function ServicesPage({ params: { locale } }: { params: { locale: string } }) {
-  const t = useTranslations('services');
+    if (!res.ok) {
+      console.error('Failed to fetch services:', res.status);
+      return { services: [], total: 0 };
+    }
+
+    const data = await res.json();
+    return data.data || { services: [], total: 0 };
+  } catch (error) {
+    console.error('Error fetching services:', error);
+    return { services: [], total: 0 };
+  }
+}
+
+// Services Grid Component
+async function ServicesGrid({ locale }: { locale: string }) {
+  const { services } = await getServices();
+
+  if (!services || services.length === 0) {
+    return (
+      <div className="py-12 text-center">
+        <p className="text-gray-500 dark:text-gray-400">
+          {locale === 'ar' ? 'لا توجد خدمات متاحة حالياً' : 'No services available at the moment'}
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+      {services.map(
+        (service: {
+          _id: string;
+          title: { ar: string; en: string };
+          shortDescription: { ar: string; en: string };
+          slug: string;
+          icon?: string;
+          category?: { name: { ar: string; en: string } } | null;
+        }) => (
+          <ServiceCard
+            key={service._id}
+            title={service.title[locale as 'ar' | 'en']}
+            description={service.shortDescription[locale as 'ar' | 'en']}
+            slug={service.slug}
+            icon={service.icon || 'code'}
+            category={service.category?.name?.[locale as 'ar' | 'en'] || ''}
+            variant="default"
+          />
+        )
+      )}
+    </div>
+  );
+}
+
+// Loading Component
+function ServicesLoading() {
+  return (
+    <div className="flex items-center justify-center py-12">
+      <Spinner size="lg" />
+    </div>
+  );
+}
+
+export default async function ServicesPage({ params: { locale } }: { params: { locale: string } }) {
+  const t = await getTranslations({ locale, namespace: 'services' });
   const isRTL = locale === 'ar';
 
   return (
@@ -87,19 +117,9 @@ export default function ServicesPage({ params: { locale } }: { params: { locale:
       {/* Services Grid */}
       <section className="py-16">
         <Container>
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {services.map(service => (
-              <ServiceCard
-                key={service.id}
-                title={t(`${service.slug.replace(/-/g, '')}.title`)}
-                description={t(`${service.slug.replace(/-/g, '')}.description`)}
-                slug={service.slug}
-                icon={service.icon}
-                category={service.category[locale as 'ar' | 'en']}
-                variant="default"
-              />
-            ))}
-          </div>
+          <Suspense fallback={<ServicesLoading />}>
+            <ServicesGrid locale={locale} />
+          </Suspense>
         </Container>
       </section>
 

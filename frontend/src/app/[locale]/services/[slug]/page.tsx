@@ -4,186 +4,108 @@
  */
 
 import { notFound } from 'next/navigation';
-import { useTranslations } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { Link } from '@/i18n/routing';
 import { FAQAccordion, PricingCard, ProcessSteps, ServiceCard } from '@/components/services';
 import { ServiceJsonLd, FAQJsonLd, BreadcrumbJsonLd } from '@/components/seo';
-import { Container } from '@/components/ui';
+import { Container, Spinner } from '@/components/ui';
 import { CheckCircleIcon, ArrowRightIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { Suspense } from 'react';
 
-// Static service data (will be replaced with API call)
-const servicesData: Record<
-  string,
-  {
-    icon: string;
-    features: { ar: string; en: string }[];
-    pricingPlans?: {
-      name: { ar: string; en: string };
-      description?: { ar: string; en: string };
-      price: number;
-      features: { ar: string; en: string }[];
-      isPopular?: boolean;
-    }[];
-    faqs?: { question: { ar: string; en: string }; answer: { ar: string; en: string } }[];
-    processSteps?: {
-      title: { ar: string; en: string };
-      description: { ar: string; en: string };
-      icon?: string;
-    }[];
+// Types
+interface BilingualText {
+  ar: string;
+  en: string;
+}
+
+interface ServiceFeature {
+  title: BilingualText;
+  description: BilingualText;
+  icon?: string;
+}
+
+interface PricingPlan {
+  name: BilingualText;
+  description?: BilingualText;
+  price: number;
+  currency?: string;
+  period?: string;
+  features: BilingualText[];
+  isPopular?: boolean;
+  order: number;
+}
+
+interface FAQ {
+  question: BilingualText;
+  answer: BilingualText;
+  order: number;
+}
+
+interface ProcessStep {
+  title: BilingualText;
+  description: BilingualText;
+  icon?: string;
+  order: number;
+}
+
+interface Service {
+  _id: string;
+  title: BilingualText;
+  slug: string;
+  shortDescription: BilingualText;
+  description: BilingualText;
+  category?: { _id: string; name: BilingualText; slug: string } | null;
+  icon?: string;
+  image?: string;
+  features: ServiceFeature[];
+  pricingPlans?: PricingPlan[];
+  faqs?: FAQ[];
+  processSteps?: ProcessStep[];
+  technologies?: string[];
+  isActive: boolean;
+  isFeatured: boolean;
+}
+
+// Fetch service by slug
+async function getService(slug: string): Promise<Service | null> {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+    const res = await fetch(`${baseUrl}/services/${slug}`, {
+      next: { revalidate: 60 },
+    });
+
+    if (!res.ok) {
+      return null;
+    }
+
+    const data = await res.json();
+    return data.data?.service || null;
+  } catch (error) {
+    console.error('Error fetching service:', error);
+    return null;
   }
-> = {
-  'web-development': {
-    icon: 'code',
-    features: [
-      { ar: 'مواقع ويب متجاوبة وحديثة', en: 'Responsive and modern websites' },
-      { ar: 'تطوير React و Next.js', en: 'React and Next.js development' },
-      { ar: 'تحسين محركات البحث SEO', en: 'SEO optimization' },
-      { ar: 'دعم فني وصيانة', en: 'Technical support and maintenance' },
-    ],
-    pricingPlans: [
-      {
-        name: { ar: 'الأساسية', en: 'Basic' },
-        description: { ar: 'للمشاريع الصغيرة', en: 'For small projects' },
-        price: 5000,
-        features: [
-          { ar: 'صفحة واحدة', en: 'Single page' },
-          { ar: 'تصميم متجاوب', en: 'Responsive design' },
-          { ar: 'دعم لمدة شهر', en: '1 month support' },
-        ],
-      },
-      {
-        name: { ar: 'المتقدمة', en: 'Professional' },
-        description: { ar: 'للأعمال المتوسطة', en: 'For medium businesses' },
-        price: 15000,
-        features: [
-          { ar: 'حتى 10 صفحات', en: 'Up to 10 pages' },
-          { ar: 'لوحة تحكم CMS', en: 'CMS dashboard' },
-          { ar: 'تحسين SEO', en: 'SEO optimization' },
-          { ar: 'دعم لمدة 3 أشهر', en: '3 months support' },
-        ],
-        isPopular: true,
-      },
-      {
-        name: { ar: 'المؤسسية', en: 'Enterprise' },
-        description: { ar: 'للشركات الكبيرة', en: 'For large enterprises' },
-        price: 50000,
-        features: [
-          { ar: 'صفحات غير محدودة', en: 'Unlimited pages' },
-          { ar: 'نظام متكامل', en: 'Full system' },
-          { ar: 'API مخصصة', en: 'Custom API' },
-          { ar: 'دعم سنوي', en: 'Yearly support' },
-        ],
-      },
-    ],
-    faqs: [
-      {
-        question: {
-          ar: 'كم يستغرق تطوير موقع ويب؟',
-          en: 'How long does it take to develop a website?',
-        },
-        answer: {
-          ar: 'يعتمد ذلك على حجم المشروع. المواقع البسيطة تستغرق 2-4 أسابيع، بينما المشاريع الكبيرة قد تستغرق 2-3 أشهر.',
-          en: 'It depends on the project size. Simple websites take 2-4 weeks, while larger projects may take 2-3 months.',
-        },
-      },
-      {
-        question: {
-          ar: 'هل تقدمون الدعم بعد التسليم؟',
-          en: 'Do you provide support after delivery?',
-        },
-        answer: {
-          ar: 'نعم، نقدم دعم فني وصيانة حسب الباقة المختارة، مع إمكانية تمديد فترة الدعم.',
-          en: 'Yes, we provide technical support and maintenance according to the chosen plan, with the option to extend.',
-        },
-      },
-    ],
-    processSteps: [
-      {
-        title: { ar: 'التحليل والتخطيط', en: 'Analysis & Planning' },
-        description: {
-          ar: 'نفهم متطلباتك ونضع خطة تفصيلية',
-          en: 'We understand your requirements and create a detailed plan',
-        },
-        icon: 'clipboard',
-      },
-      {
-        title: { ar: 'التصميم', en: 'Design' },
-        description: {
-          ar: 'نصمم واجهات مستخدم جذابة ومتجاوبة',
-          en: 'We design attractive and responsive UI',
-        },
-        icon: 'design',
-      },
-      {
-        title: { ar: 'التطوير', en: 'Development' },
-        description: {
-          ar: 'نبني موقعك باستخدام أحدث التقنيات',
-          en: 'We build your site using latest technologies',
-        },
-        icon: 'code',
-      },
-      {
-        title: { ar: 'الإطلاق', en: 'Launch' },
-        description: {
-          ar: 'نختبر ونطلق موقعك بنجاح',
-          en: 'We test and launch your site successfully',
-        },
-        icon: 'rocket',
-      },
-    ],
-  },
-  'mobile-development': {
-    icon: 'mobile',
-    features: [
-      { ar: 'تطبيقات iOS و Android', en: 'iOS and Android apps' },
-      { ar: 'تطوير React Native', en: 'React Native development' },
-      { ar: 'أداء عالي وسرعة', en: 'High performance and speed' },
-      { ar: 'نشر على المتاجر', en: 'App store publishing' },
-    ],
-  },
-  'ui-ux-design': {
-    icon: 'design',
-    features: [
-      { ar: 'تصميم واجهات مستخدم', en: 'UI design' },
-      { ar: 'تجربة مستخدم محسنة', en: 'Optimized UX' },
-      { ar: 'نماذج تفاعلية', en: 'Interactive prototypes' },
-      { ar: 'اختبارات المستخدم', en: 'User testing' },
-    ],
-  },
-  'backend-development': {
-    icon: 'server',
-    features: [
-      { ar: 'تطوير APIs', en: 'API development' },
-      { ar: 'قواعد بيانات', en: 'Database design' },
-      { ar: 'أمان متقدم', en: 'Advanced security' },
-      { ar: 'قابلية التوسع', en: 'Scalability' },
-    ],
-  },
-  consulting: {
-    icon: 'analytics',
-    features: [
-      { ar: 'استشارات تقنية', en: 'Technical consulting' },
-      { ar: 'تحليل الأعمال', en: 'Business analysis' },
-      { ar: 'استراتيجية رقمية', en: 'Digital strategy' },
-      { ar: 'تقييم التقنيات', en: 'Technology assessment' },
-    ],
-  },
-  support: {
-    icon: 'support',
-    features: [
-      { ar: 'دعم فني 24/7', en: '24/7 technical support' },
-      { ar: 'صيانة دورية', en: 'Regular maintenance' },
-      { ar: 'تحديثات أمنية', en: 'Security updates' },
-      { ar: 'مراقبة الأداء', en: 'Performance monitoring' },
-    ],
-  },
-};
+}
 
-// Generate static params
-export async function generateStaticParams() {
-  return Object.keys(servicesData).map(slug => ({ slug }));
+// Fetch related services
+async function getRelatedServices(currentSlug: string): Promise<Service[]> {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+    const res = await fetch(`${baseUrl}/services?limit=4`, {
+      next: { revalidate: 60 },
+    });
+
+    if (!res.ok) {
+      return [];
+    }
+
+    const data = await res.json();
+    const services = data.data?.services || [];
+    return services.filter((s: Service) => s.slug !== currentSlug).slice(0, 3);
+  } catch (error) {
+    console.error('Error fetching related services:', error);
+    return [];
+  }
 }
 
 // Generate metadata
@@ -192,11 +114,16 @@ export async function generateMetadata({
 }: {
   params: { locale: string; slug: string };
 }): Promise<Metadata> {
-  const t = await getTranslations({ locale, namespace: 'services' });
-  const serviceKey = slug.replace(/-/g, '');
+  const service = await getService(slug);
 
-  const title = t(`${serviceKey}.title`);
-  const description = t(`${serviceKey}.description`);
+  if (!service) {
+    return {
+      title: 'Service Not Found',
+    };
+  }
+
+  const title = service.title[locale as 'ar' | 'en'];
+  const description = service.shortDescription[locale as 'ar' | 'en'];
 
   return {
     title: `${title} | MWM`,
@@ -204,45 +131,38 @@ export async function generateMetadata({
     openGraph: {
       title: `${title} | MWM`,
       description,
+      images: service.image ? [service.image] : undefined,
     },
   };
 }
 
-export default function ServiceDetailPage({
-  params: { locale, slug },
-}: {
-  params: { locale: string; slug: string };
-}) {
-  const t = useTranslations('services');
-  const tCommon = useTranslations('common');
+// Service Content Component
+async function ServiceContent({ slug, locale }: { slug: string; locale: string }) {
+  const tCommon = await getTranslations({ locale, namespace: 'common' });
   const isRTL = locale === 'ar';
   const ArrowIcon = isRTL ? ArrowLeftIcon : ArrowRightIcon;
 
-  // Get service data
-  const service = servicesData[slug];
+  const service = await getService(slug);
+  const relatedServices = await getRelatedServices(slug);
+
   if (!service) {
     notFound();
   }
 
-  const serviceKey = slug.replace(/-/g, '');
-  const title = t(`${serviceKey}.title`);
-  const description = t(`${serviceKey}.description`);
+  const title = service.title[locale as 'ar' | 'en'];
+  const description = service.description[locale as 'ar' | 'en'];
+  const shortDescription = service.shortDescription[locale as 'ar' | 'en'];
   const features = service.features || [];
   const pricingPlans = service.pricingPlans || [];
   const faqs = service.faqs || [];
   const processSteps = service.processSteps || [];
 
-  // Related services (excluding current)
-  const relatedServices = Object.keys(servicesData)
-    .filter(s => s !== slug)
-    .slice(0, 3);
-
   return (
-    <main className="min-h-screen">
+    <>
       {/* Structured Data */}
       <ServiceJsonLd
         name={title}
-        description={description}
+        description={shortDescription}
         provider={{ name: 'MWM - Integrated Software Solutions', url: 'https://mwm.com' }}
         url={`https://mwm.com/${locale}/services/${slug}`}
       />
@@ -280,46 +200,69 @@ export default function ServiceDetailPage({
             </nav>
 
             <h1 className="mb-4 text-4xl font-bold md:text-5xl">{title}</h1>
-            <p className="text-primary-100 text-lg md:text-xl">{description}</p>
+            <p className="text-primary-100 text-lg md:text-xl">{shortDescription}</p>
           </div>
         </Container>
       </section>
 
-      {/* Features Section */}
-      <section className="py-16">
-        <Container>
-          <h2 className="mb-8 text-center text-3xl font-bold text-gray-900 dark:text-white">
-            {isRTL ? 'ما نقدمه' : 'What We Offer'}
-          </h2>
-          <div className="grid gap-6 md:grid-cols-2">
-            {features.map((feature, index) => (
+      {/* Description Section */}
+      {description && (
+        <section className="py-16">
+          <Container>
+            <div className="mx-auto max-w-4xl">
               <div
-                key={index}
-                className="flex items-start gap-4 rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800"
-              >
-                <CheckCircleIcon className="text-primary-500 size-6 shrink-0" />
-                <span className="text-gray-700 dark:text-gray-300">
-                  {feature[locale as 'ar' | 'en']}
-                </span>
-              </div>
-            ))}
-          </div>
-        </Container>
-      </section>
+                className="prose prose-lg dark:prose-invert max-w-none text-gray-700 dark:text-gray-300"
+                dangerouslySetInnerHTML={{ __html: description }}
+              />
+            </div>
+          </Container>
+        </section>
+      )}
+
+      {/* Features Section */}
+      {features.length > 0 && (
+        <section className="bg-gray-50 py-16 dark:bg-gray-900">
+          <Container>
+            <h2 className="mb-8 text-center text-3xl font-bold text-gray-900 dark:text-white">
+              {isRTL ? 'ما نقدمه' : 'What We Offer'}
+            </h2>
+            <div className="grid gap-6 md:grid-cols-2">
+              {features.map((feature, index) => (
+                <div
+                  key={index}
+                  className="flex items-start gap-4 rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800"
+                >
+                  <CheckCircleIcon className="text-primary-500 size-6 shrink-0" />
+                  <div>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">
+                      {feature.title[locale as 'ar' | 'en']}
+                    </h3>
+                    <p className="mt-1 text-gray-600 dark:text-gray-400">
+                      {feature.description[locale as 'ar' | 'en']}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Container>
+        </section>
+      )}
 
       {/* Process Steps Section */}
       {processSteps.length > 0 && (
-        <section className="bg-gray-50 py-16 dark:bg-gray-900">
+        <section className="py-16">
           <Container>
             <h2 className="mb-12 text-center text-3xl font-bold text-gray-900 dark:text-white">
               {isRTL ? 'كيف نعمل' : 'How We Work'}
             </h2>
             <ProcessSteps
-              steps={processSteps.map(step => ({
-                title: step.title[locale as 'ar' | 'en'],
-                description: step.description[locale as 'ar' | 'en'],
-                icon: step.icon,
-              }))}
+              steps={processSteps
+                .sort((a, b) => a.order - b.order)
+                .map(step => ({
+                  title: step.title[locale as 'ar' | 'en'],
+                  description: step.description[locale as 'ar' | 'en'],
+                  icon: step.icon,
+                }))}
               variant="horizontal"
             />
           </Container>
@@ -328,7 +271,7 @@ export default function ServiceDetailPage({
 
       {/* Pricing Section */}
       {pricingPlans.length > 0 && (
-        <section className="py-16">
+        <section className="bg-gray-50 py-16 dark:bg-gray-900">
           <Container>
             <h2 className="mb-4 text-center text-3xl font-bold text-gray-900 dark:text-white">
               {isRTL ? 'باقات الأسعار' : 'Pricing Plans'}
@@ -337,18 +280,20 @@ export default function ServiceDetailPage({
               {isRTL ? 'اختر الباقة المناسبة لاحتياجاتك' : 'Choose the plan that fits your needs'}
             </p>
             <div className="grid gap-8 md:grid-cols-3">
-              {pricingPlans.map((plan, index) => (
-                <PricingCard
-                  key={index}
-                  name={plan.name[locale as 'ar' | 'en']}
-                  description={plan.description?.[locale as 'ar' | 'en']}
-                  price={plan.price}
-                  features={plan.features.map(f => f[locale as 'ar' | 'en'])}
-                  isPopular={plan.isPopular}
-                  ctaLink="/contact"
-                  variant="default"
-                />
-              ))}
+              {pricingPlans
+                .sort((a, b) => a.order - b.order)
+                .map((plan, index) => (
+                  <PricingCard
+                    key={index}
+                    name={plan.name[locale as 'ar' | 'en']}
+                    description={plan.description?.[locale as 'ar' | 'en']}
+                    price={plan.price}
+                    features={plan.features.map(f => f[locale as 'ar' | 'en'])}
+                    isPopular={plan.isPopular}
+                    ctaLink="/contact"
+                    variant="default"
+                  />
+                ))}
             </div>
           </Container>
         </section>
@@ -356,17 +301,19 @@ export default function ServiceDetailPage({
 
       {/* FAQ Section */}
       {faqs.length > 0 && (
-        <section className="bg-gray-50 py-16 dark:bg-gray-900">
+        <section className="py-16">
           <Container>
             <h2 className="mb-12 text-center text-3xl font-bold text-gray-900 dark:text-white">
               {isRTL ? 'الأسئلة الشائعة' : 'Frequently Asked Questions'}
             </h2>
             <div className="mx-auto max-w-3xl">
               <FAQAccordion
-                items={faqs.map(faq => ({
-                  question: faq.question[locale as 'ar' | 'en'],
-                  answer: faq.answer[locale as 'ar' | 'en'],
-                }))}
+                items={faqs
+                  .sort((a, b) => a.order - b.order)
+                  .map(faq => ({
+                    question: faq.question[locale as 'ar' | 'en'],
+                    answer: faq.answer[locale as 'ar' | 'en'],
+                  }))}
                 variant="separated"
               />
             </div>
@@ -375,25 +322,27 @@ export default function ServiceDetailPage({
       )}
 
       {/* Related Services */}
-      <section className="py-16">
-        <Container>
-          <h2 className="mb-8 text-center text-3xl font-bold text-gray-900 dark:text-white">
-            {isRTL ? 'خدمات أخرى' : 'Other Services'}
-          </h2>
-          <div className="grid gap-8 md:grid-cols-3">
-            {relatedServices.map(serviceSlug => (
-              <ServiceCard
-                key={serviceSlug}
-                title={t(`${serviceSlug.replace(/-/g, '')}.title`)}
-                description={t(`${serviceSlug.replace(/-/g, '')}.description`)}
-                slug={serviceSlug}
-                icon={servicesData[serviceSlug].icon}
-                variant="compact"
-              />
-            ))}
-          </div>
-        </Container>
-      </section>
+      {relatedServices.length > 0 && (
+        <section className="bg-gray-50 py-16 dark:bg-gray-900">
+          <Container>
+            <h2 className="mb-8 text-center text-3xl font-bold text-gray-900 dark:text-white">
+              {isRTL ? 'خدمات أخرى' : 'Other Services'}
+            </h2>
+            <div className="grid gap-8 md:grid-cols-3">
+              {relatedServices.map(relatedService => (
+                <ServiceCard
+                  key={relatedService._id}
+                  title={relatedService.title[locale as 'ar' | 'en']}
+                  description={relatedService.shortDescription[locale as 'ar' | 'en']}
+                  slug={relatedService.slug}
+                  icon={relatedService.icon || 'code'}
+                  variant="compact"
+                />
+              ))}
+            </div>
+          </Container>
+        </section>
+      )}
 
       {/* CTA Section */}
       <section className="bg-primary-600 py-16 text-white">
@@ -417,6 +366,29 @@ export default function ServiceDetailPage({
           </div>
         </Container>
       </section>
+    </>
+  );
+}
+
+// Loading Component
+function ServiceLoading() {
+  return (
+    <div className="flex min-h-screen items-center justify-center">
+      <Spinner size="lg" />
+    </div>
+  );
+}
+
+export default function ServiceDetailPage({
+  params: { locale, slug },
+}: {
+  params: { locale: string; slug: string };
+}) {
+  return (
+    <main className="min-h-screen">
+      <Suspense fallback={<ServiceLoading />}>
+        <ServiceContent slug={slug} locale={locale} />
+      </Suspense>
     </main>
   );
 }

@@ -69,11 +69,12 @@ describe('Header', () => {
 
   it('renders navigation links on desktop', () => {
     render(<Header />);
-    expect(screen.getByText('Home')).toBeInTheDocument();
-    expect(screen.getByText('About')).toBeInTheDocument();
-    expect(screen.getByText('Services')).toBeInTheDocument();
-    expect(screen.getByText('Projects')).toBeInTheDocument();
-    expect(screen.getByText('Blog')).toBeInTheDocument();
+    // Header renders both desktop and mobile navigation, so use getAllByText
+    expect(screen.getAllByText('Home').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('About').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Services').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Projects').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Blog').length).toBeGreaterThan(0);
   });
 
   it('renders theme toggle', () => {

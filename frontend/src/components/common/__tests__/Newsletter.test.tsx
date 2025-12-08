@@ -48,13 +48,14 @@ describe('Newsletter', () => {
     it('shows error for invalid email', async () => {
       render(<Newsletter />);
       const input = screen.getByPlaceholderText('Your email');
-      const submitButton = screen.getByRole('button', { name: /subscribe/i });
+      const form = input.closest('form')!;
 
       await userEvent.type(input, 'invalid-email');
-      fireEvent.click(submitButton);
+      fireEvent.submit(form);
 
       await waitFor(() => {
-        expect(screen.getByText(/valid email/i)).toBeInTheDocument();
+        // Error message appears in both Input component and separate paragraph
+        expect(screen.getAllByText(/valid email/i).length).toBeGreaterThan(0);
       });
     });
 

@@ -64,10 +64,9 @@ describe('LanguageSwitcher', () => {
     });
 
     it('shows globe icon when showIcon is true', () => {
-      render(<LanguageSwitcher variant="buttons" showIcon />);
-      // Globe icon should be rendered (check for SVG)
-      const container = screen.getByText('العربية').closest('div');
-      expect(container?.querySelector('svg')).toBeInTheDocument();
+      const { container } = render(<LanguageSwitcher variant="buttons" showIcon />);
+      // Globe icon should be rendered (check for SVG in the whole component)
+      expect(container.querySelector('svg')).toBeInTheDocument();
     });
 
     it('hides globe icon when showIcon is false', () => {

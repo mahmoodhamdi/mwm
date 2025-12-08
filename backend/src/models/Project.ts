@@ -153,7 +153,6 @@ const projectSchema = new Schema<IProject, IProjectModel>(
       unique: true,
       trim: true,
       lowercase: true,
-      index: true,
     },
     shortDescription: {
       ar: {

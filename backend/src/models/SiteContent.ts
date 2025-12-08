@@ -143,9 +143,8 @@ const siteContentSchema = new Schema<ISiteContent>(
   }
 );
 
-// Indexes
+// Indexes (key index is created by unique: true on the field)
 siteContentSchema.index({ section: 1, order: 1 });
-siteContentSchema.index({ key: 1 }, { unique: true });
 siteContentSchema.index({ isActive: 1 });
 
 /**

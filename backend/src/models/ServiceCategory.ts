@@ -124,8 +124,7 @@ const serviceCategorySchema = new Schema<IServiceCategory>(
   }
 );
 
-// Indexes
-serviceCategorySchema.index({ slug: 1 }, { unique: true });
+// Indexes (slug index is created by unique: true on the field)
 serviceCategorySchema.index({ isActive: 1, order: 1 });
 serviceCategorySchema.index({ 'name.ar': 'text', 'name.en': 'text' });
 

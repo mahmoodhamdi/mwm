@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocale } from 'next-intl';
 import {
   Plus,
@@ -9,195 +9,120 @@ import {
   Trash2,
   Eye,
   User,
-  Tag,
   Clock,
   FileText,
   Image,
   X,
   Save,
+  Loader2,
+  RefreshCw,
 } from 'lucide-react';
-
-// Types
-type PostStatus = 'draft' | 'published' | 'scheduled' | 'archived';
-
-interface Category {
-  id: string;
-  nameAr: string;
-  nameEn: string;
-  slug: string;
-  postsCount: number;
-}
-
-interface Tag {
-  id: string;
-  nameAr: string;
-  nameEn: string;
-  slug: string;
-}
-
-interface Author {
-  id: string;
-  name: string;
-  email: string;
-  avatar: string;
-}
-
-interface BlogPost {
-  id: string;
-  title: { ar: string; en: string };
-  slug: string;
-  excerpt: { ar: string; en: string };
-  content: { ar: string; en: string };
-  featuredImage: string;
-  category: Category;
-  tags: Tag[];
-  author: Author;
-  status: PostStatus;
-  publishedAt: string | null;
-  scheduledAt: string | null;
-  readingTime: number;
-  views: number;
-  seo: {
-    title: { ar: string; en: string };
-    description: { ar: string; en: string };
-    keywords: { ar: string; en: string };
-  };
-  createdAt: string;
-  updatedAt: string;
-}
+import {
+  getPosts,
+  getCategories,
+  createPost,
+  updatePost,
+  deletePost,
+  createCategory,
+  updateCategory,
+  deleteCategory,
+  bulkUpdatePostsStatus,
+  type BlogPost,
+  type BlogCategory,
+  type PostStatus,
+  type CreatePostData,
+  type UpdatePostData,
+  type CreateCategoryData,
+  type UpdateCategoryData,
+} from '@/services/admin/blog.service';
 
 export default function BlogPage() {
   const locale = useLocale();
   const isRTL = locale === 'ar';
 
   // State
-  const [activeTab, setActiveTab] = useState<'posts' | 'categories' | 'tags'>('posts');
+  const [activeTab, setActiveTab] = useState<'posts' | 'categories'>('posts');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<PostStatus | 'all'>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [showPostModal, setShowPostModal] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
-  const [showTagModal, setShowTagModal] = useState(false);
   const [selectedPosts, setSelectedPosts] = useState<string[]>([]);
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [editingTag, setEditingTag] = useState<Tag | null>(null);
+  const [editingCategory, setEditingCategory] = useState<BlogCategory | null>(null);
 
-  // Sample data
-  const categories: Category[] = [
-    { id: '1', nameAr: 'التقنية', nameEn: 'Technology', slug: 'technology', postsCount: 15 },
-    { id: '2', nameAr: 'التصميم', nameEn: 'Design', slug: 'design', postsCount: 8 },
-    { id: '3', nameAr: 'التسويق', nameEn: 'Marketing', slug: 'marketing', postsCount: 12 },
-    { id: '4', nameAr: 'الأعمال', nameEn: 'Business', slug: 'business', postsCount: 6 },
-  ];
+  // Data states
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [categories, setCategories] = useState<BlogCategory[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const tags: Tag[] = [
-    { id: '1', nameAr: 'ويب', nameEn: 'Web', slug: 'web' },
-    { id: '2', nameAr: 'موبايل', nameEn: 'Mobile', slug: 'mobile' },
-    { id: '3', nameAr: 'AI', nameEn: 'AI', slug: 'ai' },
-    { id: '4', nameAr: 'سيو', nameEn: 'SEO', slug: 'seo' },
-    { id: '5', nameAr: 'UX', nameEn: 'UX', slug: 'ux' },
-  ];
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalPosts, setTotalPosts] = useState(0);
+  const postsPerPage = 10;
 
-  const authors: Author[] = [
-    { id: '1', name: 'Ahmed Hassan', email: 'ahmed@company.com', avatar: '/avatars/ahmed.jpg' },
-    { id: '2', name: 'Sarah Ali', email: 'sarah@company.com', avatar: '/avatars/sarah.jpg' },
-  ];
+  // Post form state
+  const [postForm, setPostForm] = useState<{
+    titleAr: string;
+    titleEn: string;
+    slug: string;
+    excerptAr: string;
+    excerptEn: string;
+    contentAr: string;
+    contentEn: string;
+    featuredImage: string;
+    category: string;
+    status: PostStatus;
+    scheduledAt: string;
+    isFeatured: boolean;
+    readingTime: number;
+    seoTitleAr: string;
+    seoTitleEn: string;
+    seoDescriptionAr: string;
+    seoDescriptionEn: string;
+  }>({
+    titleAr: '',
+    titleEn: '',
+    slug: '',
+    excerptAr: '',
+    excerptEn: '',
+    contentAr: '',
+    contentEn: '',
+    featuredImage: '',
+    category: '',
+    status: 'draft',
+    scheduledAt: '',
+    isFeatured: false,
+    readingTime: 5,
+    seoTitleAr: '',
+    seoTitleEn: '',
+    seoDescriptionAr: '',
+    seoDescriptionEn: '',
+  });
 
-  const [posts] = useState<BlogPost[]>([
-    {
-      id: '1',
-      title: { ar: 'مستقبل تطوير الويب في 2024', en: 'Future of Web Development in 2024' },
-      slug: 'future-of-web-development-2024',
-      excerpt: { ar: 'نظرة على أهم التقنيات...', en: 'A look at the key technologies...' },
-      content: { ar: 'محتوى المقال...', en: 'Article content...' },
-      featuredImage: '/images/blog/web-dev.jpg',
-      category: categories[0],
-      tags: [tags[0], tags[2]],
-      author: authors[0],
-      status: 'published',
-      publishedAt: '2024-01-20',
-      scheduledAt: null,
-      readingTime: 8,
-      views: 1250,
-      seo: {
-        title: { ar: 'مستقبل تطوير الويب', en: 'Future of Web Development' },
-        description: { ar: 'وصف سيو', en: 'SEO description' },
-        keywords: { ar: 'ويب، تطوير', en: 'web, development' },
-      },
-      createdAt: '2024-01-18',
-      updatedAt: '2024-01-20',
-    },
-    {
-      id: '2',
-      title: { ar: 'أفضل ممارسات تصميم UI/UX', en: 'Best UI/UX Design Practices' },
-      slug: 'best-ui-ux-design-practices',
-      excerpt: { ar: 'دليل شامل لتصميم...', en: 'Comprehensive guide to design...' },
-      content: { ar: 'محتوى المقال...', en: 'Article content...' },
-      featuredImage: '/images/blog/ui-ux.jpg',
-      category: categories[1],
-      tags: [tags[4]],
-      author: authors[1],
-      status: 'draft',
-      publishedAt: null,
-      scheduledAt: null,
-      readingTime: 12,
-      views: 0,
-      seo: {
-        title: { ar: 'تصميم UI/UX', en: 'UI/UX Design' },
-        description: { ar: 'وصف سيو', en: 'SEO description' },
-        keywords: { ar: 'تصميم، UX', en: 'design, UX' },
-      },
-      createdAt: '2024-01-22',
-      updatedAt: '2024-01-22',
-    },
-    {
-      id: '3',
-      title: { ar: 'استراتيجيات التسويق الرقمي', en: 'Digital Marketing Strategies' },
-      slug: 'digital-marketing-strategies',
-      excerpt: { ar: 'كيف تبني استراتيجية...', en: 'How to build a strategy...' },
-      content: { ar: 'محتوى المقال...', en: 'Article content...' },
-      featuredImage: '/images/blog/marketing.jpg',
-      category: categories[2],
-      tags: [tags[3]],
-      author: authors[0],
-      status: 'scheduled',
-      publishedAt: null,
-      scheduledAt: '2024-01-30',
-      readingTime: 6,
-      views: 0,
-      seo: {
-        title: { ar: 'التسويق الرقمي', en: 'Digital Marketing' },
-        description: { ar: 'وصف سيو', en: 'SEO description' },
-        keywords: { ar: 'تسويق، رقمي', en: 'marketing, digital' },
-      },
-      createdAt: '2024-01-21',
-      updatedAt: '2024-01-21',
-    },
-    {
-      id: '4',
-      title: { ar: 'الذكاء الاصطناعي في الأعمال', en: 'AI in Business' },
-      slug: 'ai-in-business',
-      excerpt: { ar: 'كيف يغير AI طريقة...', en: 'How AI is changing the way...' },
-      content: { ar: 'محتوى المقال...', en: 'Article content...' },
-      featuredImage: '/images/blog/ai-business.jpg',
-      category: categories[3],
-      tags: [tags[2]],
-      author: authors[1],
-      status: 'archived',
-      publishedAt: '2023-12-15',
-      scheduledAt: null,
-      readingTime: 10,
-      views: 3420,
-      seo: {
-        title: { ar: 'AI في الأعمال', en: 'AI in Business' },
-        description: { ar: 'وصف سيو', en: 'SEO description' },
-        keywords: { ar: 'ذكاء، اصطناعي', en: 'AI, artificial intelligence' },
-      },
-      createdAt: '2023-12-10',
-      updatedAt: '2023-12-15',
-    },
-  ]);
+  // Category form state
+  const [categoryForm, setCategoryForm] = useState<{
+    nameAr: string;
+    nameEn: string;
+    slug: string;
+    descriptionAr: string;
+    descriptionEn: string;
+    image: string;
+    order: number;
+    isActive: boolean;
+  }>({
+    nameAr: '',
+    nameEn: '',
+    slug: '',
+    descriptionAr: '',
+    descriptionEn: '',
+    image: '',
+    order: 0,
+    isActive: true,
+  });
 
   // Status config
   const statusConfig: Record<PostStatus, { labelAr: string; labelEn: string; color: string }> = {
@@ -207,25 +132,270 @@ export default function BlogPage() {
     archived: { labelAr: 'مؤرشف', labelEn: 'Archived', color: 'bg-yellow-100 text-yellow-800' },
   };
 
-  // Filter posts
-  const filteredPosts = posts.filter(post => {
-    const matchesSearch =
-      post.title.ar.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.title.en.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || post.status === statusFilter;
-    const matchesCategory = categoryFilter === 'all' || post.category.id === categoryFilter;
-    return matchesSearch && matchesStatus && matchesCategory;
-  });
+  // Fetch posts
+  const fetchPosts = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await getPosts({
+        page: currentPage,
+        limit: postsPerPage,
+        status: statusFilter !== 'all' ? statusFilter : undefined,
+        category: categoryFilter !== 'all' ? categoryFilter : undefined,
+        search: searchQuery || undefined,
+      });
 
-  // Stats
-  const stats = {
-    total: posts.length,
-    published: posts.filter(p => p.status === 'published').length,
-    draft: posts.filter(p => p.status === 'draft').length,
-    scheduled: posts.filter(p => p.status === 'scheduled').length,
-    totalViews: posts.reduce((sum, p) => sum + p.views, 0),
+      if (response.success && response.data) {
+        setPosts(response.data.posts);
+        setTotalPages(response.data.pagination.pages);
+        setTotalPosts(response.data.total);
+      }
+    } catch {
+      setError(isRTL ? 'حدث خطأ أثناء تحميل المقالات' : 'Error loading posts');
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage, statusFilter, categoryFilter, searchQuery, isRTL]);
+
+  // Fetch categories
+  const fetchCategories = useCallback(async () => {
+    try {
+      const response = await getCategories({ limit: 100 });
+      if (response.success && response.data) {
+        setCategories(response.data.categories);
+      }
+    } catch {
+      console.error('Error fetching categories');
+    }
+  }, []);
+
+  // Initial load
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
+
+  useEffect(() => {
+    fetchPosts();
+  }, [fetchPosts]);
+
+  // Reset page on filter change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter, categoryFilter, searchQuery]);
+
+  // Generate slug from title
+  const generateSlug = (title: string): string => {
+    return title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim();
   };
 
+  // Handle post form submit
+  const handleSavePost = async () => {
+    setActionLoading(true);
+    try {
+      const postData: CreatePostData | UpdatePostData = {
+        title: { ar: postForm.titleAr, en: postForm.titleEn },
+        slug: postForm.slug || generateSlug(postForm.titleEn),
+        excerpt: { ar: postForm.excerptAr, en: postForm.excerptEn },
+        content: { ar: postForm.contentAr, en: postForm.contentEn },
+        featuredImage: postForm.featuredImage || undefined,
+        category: postForm.category,
+        status: postForm.status,
+        scheduledAt: postForm.scheduledAt || undefined,
+        isFeatured: postForm.isFeatured,
+        readingTime: postForm.readingTime,
+        seo: {
+          metaTitle: { ar: postForm.seoTitleAr, en: postForm.seoTitleEn },
+          metaDescription: { ar: postForm.seoDescriptionAr, en: postForm.seoDescriptionEn },
+        },
+      };
+
+      if (editingPost) {
+        await updatePost(editingPost._id, postData);
+      } else {
+        await createPost(postData as CreatePostData);
+      }
+
+      setShowPostModal(false);
+      setEditingPost(null);
+      resetPostForm();
+      fetchPosts();
+    } catch {
+      setError(isRTL ? 'حدث خطأ أثناء حفظ المقال' : 'Error saving post');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Handle post delete
+  const handleDeletePost = async (id: string) => {
+    if (
+      !confirm(
+        isRTL ? 'هل أنت متأكد من حذف هذا المقال؟' : 'Are you sure you want to delete this post?'
+      )
+    ) {
+      return;
+    }
+
+    setActionLoading(true);
+    try {
+      await deletePost(id);
+      fetchPosts();
+    } catch {
+      setError(isRTL ? 'حدث خطأ أثناء حذف المقال' : 'Error deleting post');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Handle bulk status update
+  const handleBulkStatusUpdate = async (status: PostStatus) => {
+    if (selectedPosts.length === 0) return;
+
+    setActionLoading(true);
+    try {
+      await bulkUpdatePostsStatus({ ids: selectedPosts, status });
+      setSelectedPosts([]);
+      fetchPosts();
+    } catch {
+      setError(isRTL ? 'حدث خطأ أثناء تحديث المقالات' : 'Error updating posts');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Handle category form submit
+  const handleSaveCategory = async () => {
+    setActionLoading(true);
+    try {
+      const categoryData: CreateCategoryData | UpdateCategoryData = {
+        name: { ar: categoryForm.nameAr, en: categoryForm.nameEn },
+        slug: categoryForm.slug || generateSlug(categoryForm.nameEn),
+        description: { ar: categoryForm.descriptionAr, en: categoryForm.descriptionEn },
+        image: categoryForm.image || undefined,
+        order: categoryForm.order,
+        isActive: categoryForm.isActive,
+      };
+
+      if (editingCategory) {
+        await updateCategory(editingCategory._id, categoryData);
+      } else {
+        await createCategory(categoryData as CreateCategoryData);
+      }
+
+      setShowCategoryModal(false);
+      setEditingCategory(null);
+      resetCategoryForm();
+      fetchCategories();
+    } catch {
+      setError(isRTL ? 'حدث خطأ أثناء حفظ الفئة' : 'Error saving category');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Handle category delete
+  const handleDeleteCategory = async (id: string) => {
+    if (
+      !confirm(
+        isRTL ? 'هل أنت متأكد من حذف هذه الفئة؟' : 'Are you sure you want to delete this category?'
+      )
+    ) {
+      return;
+    }
+
+    setActionLoading(true);
+    try {
+      await deleteCategory(id);
+      fetchCategories();
+    } catch {
+      setError(isRTL ? 'لا يمكن حذف فئة تحتوي على مقالات' : 'Cannot delete category with posts');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Reset forms
+  const resetPostForm = () => {
+    setPostForm({
+      titleAr: '',
+      titleEn: '',
+      slug: '',
+      excerptAr: '',
+      excerptEn: '',
+      contentAr: '',
+      contentEn: '',
+      featuredImage: '',
+      category: categories[0]?._id || '',
+      status: 'draft',
+      scheduledAt: '',
+      isFeatured: false,
+      readingTime: 5,
+      seoTitleAr: '',
+      seoTitleEn: '',
+      seoDescriptionAr: '',
+      seoDescriptionEn: '',
+    });
+  };
+
+  const resetCategoryForm = () => {
+    setCategoryForm({
+      nameAr: '',
+      nameEn: '',
+      slug: '',
+      descriptionAr: '',
+      descriptionEn: '',
+      image: '',
+      order: 0,
+      isActive: true,
+    });
+  };
+
+  // Edit handlers
+  const handleEditPost = (post: BlogPost) => {
+    setEditingPost(post);
+    setPostForm({
+      titleAr: post.title.ar,
+      titleEn: post.title.en,
+      slug: post.slug,
+      excerptAr: post.excerpt.ar,
+      excerptEn: post.excerpt.en,
+      contentAr: post.content.ar,
+      contentEn: post.content.en,
+      featuredImage: post.featuredImage || '',
+      category: typeof post.category === 'string' ? post.category : post.category._id,
+      status: post.status,
+      scheduledAt: post.scheduledAt || '',
+      isFeatured: post.isFeatured,
+      readingTime: post.readingTime,
+      seoTitleAr: post.seo?.metaTitle?.ar || '',
+      seoTitleEn: post.seo?.metaTitle?.en || '',
+      seoDescriptionAr: post.seo?.metaDescription?.ar || '',
+      seoDescriptionEn: post.seo?.metaDescription?.en || '',
+    });
+    setShowPostModal(true);
+  };
+
+  const handleEditCategory = (category: BlogCategory) => {
+    setEditingCategory(category);
+    setCategoryForm({
+      nameAr: category.name.ar,
+      nameEn: category.name.en,
+      slug: category.slug,
+      descriptionAr: category.description?.ar || '',
+      descriptionEn: category.description?.en || '',
+      image: category.image || '',
+      order: category.order,
+      isActive: category.isActive,
+    });
+    setShowCategoryModal(true);
+  };
+
+  // Selection handlers
   const togglePostSelection = (postId: string) => {
     setSelectedPosts(prev =>
       prev.includes(postId) ? prev.filter(id => id !== postId) : [...prev, postId]
@@ -233,28 +403,38 @@ export default function BlogPage() {
   };
 
   const selectAllPosts = () => {
-    if (selectedPosts.length === filteredPosts.length) {
+    if (selectedPosts.length === posts.length) {
       setSelectedPosts([]);
     } else {
-      setSelectedPosts(filteredPosts.map(p => p.id));
+      setSelectedPosts(posts.map(p => p._id));
     }
   };
 
-  const handleEditPost = (post: BlogPost) => {
-    setEditingPost(post);
-    setShowPostModal(true);
+  // Get category name helper
+  const getCategoryName = (category: BlogCategory | string): string => {
+    if (typeof category === 'string') {
+      const cat = categories.find(c => c._id === category);
+      return cat ? (isRTL ? cat.name.ar : cat.name.en) : '';
+    }
+    return isRTL ? category.name.ar : category.name.en;
   };
 
-  const handleEditCategory = (category: Category) => {
-    setEditingCategory(category);
-    setShowCategoryModal(true);
+  // Get author name helper
+  const getAuthorName = (author: BlogPost['author']): string => {
+    if (typeof author === 'string') return '';
+    return author.name || '';
   };
 
-  const handleEditTag = (tag: Tag) => {
-    setEditingTag(tag);
-    setShowTagModal(true);
+  // Stats
+  const stats = {
+    total: totalPosts,
+    published: posts.filter(p => p.status === 'published').length,
+    draft: posts.filter(p => p.status === 'draft').length,
+    scheduled: posts.filter(p => p.status === 'scheduled').length,
+    totalViews: posts.reduce((sum, p) => sum + p.views, 0),
   };
 
+  // Render posts tab
   const renderPostsTab = () => (
     <div className="space-y-6">
       {/* Stats Cards */}
@@ -312,20 +492,28 @@ export default function BlogPage() {
         >
           <option value="all">{isRTL ? 'كل التصنيفات' : 'All Categories'}</option>
           {categories.map(cat => (
-            <option key={cat.id} value={cat.id}>
-              {isRTL ? cat.nameAr : cat.nameEn}
+            <option key={cat._id} value={cat._id}>
+              {isRTL ? cat.name.ar : cat.name.en}
             </option>
           ))}
         </select>
         <button
           onClick={() => {
             setEditingPost(null);
+            resetPostForm();
             setShowPostModal(true);
           }}
           className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
         >
           <Plus className="size-5" />
           {isRTL ? 'مقال جديد' : 'New Post'}
+        </button>
+        <button
+          onClick={() => fetchPosts()}
+          className="rounded-lg border p-2 hover:bg-gray-50"
+          title={isRTL ? 'تحديث' : 'Refresh'}
+        >
+          <RefreshCw className={`size-5 ${loading ? 'animate-spin' : ''}`} />
         </button>
       </div>
 
@@ -337,161 +525,213 @@ export default function BlogPage() {
               ? `تم اختيار ${selectedPosts.length} مقال`
               : `${selectedPosts.length} posts selected`}
           </span>
-          <button className="rounded bg-green-600 px-3 py-1 text-sm text-white hover:bg-green-700">
+          <button
+            onClick={() => handleBulkStatusUpdate('published')}
+            disabled={actionLoading}
+            className="rounded bg-green-600 px-3 py-1 text-sm text-white hover:bg-green-700 disabled:opacity-50"
+          >
             {isRTL ? 'نشر' : 'Publish'}
           </button>
-          <button className="rounded bg-yellow-600 px-3 py-1 text-sm text-white hover:bg-yellow-700">
+          <button
+            onClick={() => handleBulkStatusUpdate('archived')}
+            disabled={actionLoading}
+            className="rounded bg-yellow-600 px-3 py-1 text-sm text-white hover:bg-yellow-700 disabled:opacity-50"
+          >
             {isRTL ? 'أرشفة' : 'Archive'}
           </button>
-          <button className="rounded bg-red-600 px-3 py-1 text-sm text-white hover:bg-red-700">
-            {isRTL ? 'حذف' : 'Delete'}
+          <button
+            onClick={() => setSelectedPosts([])}
+            className="rounded bg-gray-600 px-3 py-1 text-sm text-white hover:bg-gray-700"
+          >
+            {isRTL ? 'إلغاء التحديد' : 'Clear'}
           </button>
         </div>
       )}
 
-      {/* Posts Table */}
-      <div className="overflow-hidden rounded-lg border bg-white">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="w-12 px-4 py-3">
-                <input
-                  type="checkbox"
-                  checked={
-                    selectedPosts.length === filteredPosts.length && filteredPosts.length > 0
-                  }
-                  onChange={selectAllPosts}
-                  className="rounded"
-                />
-              </th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
-                {isRTL ? 'المقال' : 'Post'}
-              </th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
-                {isRTL ? 'التصنيف' : 'Category'}
-              </th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
-                {isRTL ? 'الكاتب' : 'Author'}
-              </th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
-                {isRTL ? 'الحالة' : 'Status'}
-              </th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
-                {isRTL ? 'المشاهدات' : 'Views'}
-              </th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
-                {isRTL ? 'التاريخ' : 'Date'}
-              </th>
-              <th className="w-24 px-4 py-3"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {filteredPosts.map(post => (
-              <tr key={post.id} className="hover:bg-gray-50">
-                <td className="px-4 py-3">
-                  <input
-                    type="checkbox"
-                    checked={selectedPosts.includes(post.id)}
-                    onChange={() => togglePostSelection(post.id)}
-                    className="rounded"
-                  />
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    <div className="size-16 overflow-hidden rounded-lg bg-gray-100">
-                      {post.featuredImage ? (
-                        <div className="flex size-full items-center justify-center bg-gray-200">
-                          <Image className="size-6 text-gray-400" />
+      {/* Error message */}
+      {error && (
+        <div className="rounded-lg bg-red-50 p-4 text-red-600">
+          {error}
+          <button onClick={() => setError(null)} className="float-right">
+            <X className="size-4" />
+          </button>
+        </div>
+      )}
+
+      {/* Loading state */}
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="size-8 animate-spin text-blue-600" />
+        </div>
+      ) : (
+        <>
+          {/* Posts Table */}
+          <div className="overflow-hidden rounded-lg border bg-white">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="w-12 px-4 py-3">
+                    <input
+                      type="checkbox"
+                      checked={selectedPosts.length === posts.length && posts.length > 0}
+                      onChange={selectAllPosts}
+                      className="rounded"
+                    />
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
+                    {isRTL ? 'المقال' : 'Post'}
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
+                    {isRTL ? 'التصنيف' : 'Category'}
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
+                    {isRTL ? 'الكاتب' : 'Author'}
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
+                    {isRTL ? 'الحالة' : 'Status'}
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
+                    {isRTL ? 'المشاهدات' : 'Views'}
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
+                    {isRTL ? 'التاريخ' : 'Date'}
+                  </th>
+                  <th className="w-24 px-4 py-3"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {posts.map(post => (
+                  <tr key={post._id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3">
+                      <input
+                        type="checkbox"
+                        checked={selectedPosts.includes(post._id)}
+                        onChange={() => togglePostSelection(post._id)}
+                        className="rounded"
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="size-16 overflow-hidden rounded-lg bg-gray-100">
+                          {post.featuredImage ? (
+                            <div className="flex size-full items-center justify-center bg-gray-200">
+                              <Image className="size-6 text-gray-400" />
+                            </div>
+                          ) : (
+                            <div className="flex size-full items-center justify-center">
+                              <FileText className="size-6 text-gray-400" />
+                            </div>
+                          )}
                         </div>
-                      ) : (
-                        <div className="flex size-full items-center justify-center">
-                          <FileText className="size-6 text-gray-400" />
+                        <div>
+                          <p className="font-medium">{isRTL ? post.title.ar : post.title.en}</p>
+                          <p className="line-clamp-1 text-sm text-gray-500">
+                            {isRTL ? post.excerpt.ar : post.excerpt.en}
+                          </p>
+                          <div className="mt-1 flex items-center gap-2">
+                            <Clock className="size-3 text-gray-400" />
+                            <span className="text-xs text-gray-400">
+                              {post.readingTime} {isRTL ? 'دقيقة' : 'min read'}
+                            </span>
+                          </div>
                         </div>
-                      )}
-                    </div>
-                    <div>
-                      <p className="font-medium">{isRTL ? post.title.ar : post.title.en}</p>
-                      <p className="line-clamp-1 text-sm text-gray-500">
-                        {isRTL ? post.excerpt.ar : post.excerpt.en}
-                      </p>
-                      <div className="mt-1 flex items-center gap-2">
-                        <Clock className="size-3 text-gray-400" />
-                        <span className="text-xs text-gray-400">
-                          {post.readingTime} {isRTL ? 'دقيقة' : 'min read'}
-                        </span>
                       </div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-4 py-3">
-                  <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-sm">
-                    {isRTL ? post.category.nameAr : post.category.nameEn}
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <div className="flex size-8 items-center justify-center rounded-full bg-gray-200">
-                      <User className="size-4 text-gray-500" />
-                    </div>
-                    <span className="text-sm">{post.author.name}</span>
-                  </div>
-                </td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-sm ${statusConfig[post.status].color}`}
-                  >
-                    {isRTL ? statusConfig[post.status].labelAr : statusConfig[post.status].labelEn}
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  <span className="flex items-center gap-1 text-sm text-gray-500">
-                    <Eye className="size-4" />
-                    {post.views.toLocaleString()}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-sm text-gray-500">
-                  {post.status === 'scheduled'
-                    ? post.scheduledAt
-                    : post.status === 'published'
-                      ? post.publishedAt
-                      : post.updatedAt}
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleEditPost(post)}
-                      className="rounded p-1 hover:bg-gray-100"
-                      title={isRTL ? 'تعديل' : 'Edit'}
-                    >
-                      <Edit className="size-4 text-gray-500" />
-                    </button>
-                    <button
-                      className="rounded p-1 hover:bg-gray-100"
-                      title={isRTL ? 'معاينة' : 'Preview'}
-                    >
-                      <Eye className="size-4 text-gray-500" />
-                    </button>
-                    <button
-                      className="rounded p-1 hover:bg-gray-100"
-                      title={isRTL ? 'حذف' : 'Delete'}
-                    >
-                      <Trash2 className="size-4 text-red-500" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {filteredPosts.length === 0 && (
-          <div className="p-8 text-center text-gray-500">
-            {isRTL ? 'لا توجد مقالات' : 'No posts found'}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-sm">
+                        {getCategoryName(post.category)}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <div className="flex size-8 items-center justify-center rounded-full bg-gray-200">
+                          <User className="size-4 text-gray-500" />
+                        </div>
+                        <span className="text-sm">{getAuthorName(post.author)}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-sm ${statusConfig[post.status].color}`}
+                      >
+                        {isRTL
+                          ? statusConfig[post.status].labelAr
+                          : statusConfig[post.status].labelEn}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="flex items-center gap-1 text-sm text-gray-500">
+                        <Eye className="size-4" />
+                        {post.views.toLocaleString()}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-500">
+                      {post.status === 'scheduled'
+                        ? post.scheduledAt
+                        : post.status === 'published'
+                          ? post.publishedAt
+                          : post.updatedAt}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleEditPost(post)}
+                          className="rounded p-1 hover:bg-gray-100"
+                          title={isRTL ? 'تعديل' : 'Edit'}
+                        >
+                          <Edit className="size-4 text-gray-500" />
+                        </button>
+                        <button
+                          onClick={() => handleDeletePost(post._id)}
+                          className="rounded p-1 hover:bg-gray-100"
+                          title={isRTL ? 'حذف' : 'Delete'}
+                          disabled={actionLoading}
+                        >
+                          <Trash2 className="size-4 text-red-500" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {posts.length === 0 && (
+              <div className="p-8 text-center text-gray-500">
+                {isRTL ? 'لا توجد مقالات' : 'No posts found'}
+              </div>
+            )}
           </div>
-        )}
-      </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2">
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="rounded-lg border px-4 py-2 hover:bg-gray-50 disabled:opacity-50"
+              >
+                {isRTL ? 'السابق' : 'Previous'}
+              </button>
+              <span className="text-sm text-gray-500">
+                {isRTL
+                  ? `صفحة ${currentPage} من ${totalPages}`
+                  : `Page ${currentPage} of ${totalPages}`}
+              </span>
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="rounded-lg border px-4 py-2 hover:bg-gray-50 disabled:opacity-50"
+              >
+                {isRTL ? 'التالي' : 'Next'}
+              </button>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 
+  // Render categories tab
   const renderCategoriesTab = () => (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -499,6 +739,7 @@ export default function BlogPage() {
         <button
           onClick={() => {
             setEditingCategory(null);
+            resetCategoryForm();
             setShowCategoryModal(true);
           }}
           className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
@@ -510,10 +751,10 @@ export default function BlogPage() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {categories.map(category => (
-          <div key={category.id} className="rounded-lg border bg-white p-4">
+          <div key={category._id} className="rounded-lg border bg-white p-4">
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="font-medium">{isRTL ? category.nameAr : category.nameEn}</h4>
+                <h4 className="font-medium">{isRTL ? category.name.ar : category.name.en}</h4>
                 <p className="text-sm text-gray-500">/{category.slug}</p>
               </div>
               <div className="flex items-center gap-2">
@@ -523,7 +764,11 @@ export default function BlogPage() {
                 >
                   <Edit className="size-4 text-gray-500" />
                 </button>
-                <button className="rounded p-1 hover:bg-gray-100">
+                <button
+                  onClick={() => handleDeleteCategory(category._id)}
+                  className="rounded p-1 hover:bg-gray-100"
+                  disabled={actionLoading}
+                >
                   <Trash2 className="size-4 text-red-500" />
                 </button>
               </div>
@@ -531,8 +776,13 @@ export default function BlogPage() {
             <div className="mt-3 flex items-center gap-2 text-sm text-gray-500">
               <FileText className="size-4" />
               <span>
-                {category.postsCount} {isRTL ? 'مقال' : 'posts'}
+                {category.postCount || 0} {isRTL ? 'مقال' : 'posts'}
               </span>
+              {!category.isActive && (
+                <span className="rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
+                  {isRTL ? 'غير نشط' : 'Inactive'}
+                </span>
+              )}
             </div>
           </div>
         ))}
@@ -540,45 +790,7 @@ export default function BlogPage() {
     </div>
   );
 
-  const renderTagsTab = () => (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">{isRTL ? 'الوسوم' : 'Tags'}</h3>
-        <button
-          onClick={() => {
-            setEditingTag(null);
-            setShowTagModal(true);
-          }}
-          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-        >
-          <Plus className="size-5" />
-          {isRTL ? 'وسم جديد' : 'New Tag'}
-        </button>
-      </div>
-
-      <div className="flex flex-wrap gap-3">
-        {tags.map(tag => (
-          <div
-            key={tag.id}
-            className="flex items-center gap-2 rounded-full border bg-white px-4 py-2"
-          >
-            <Tag className="size-4 text-gray-400" />
-            <span>{isRTL ? tag.nameAr : tag.nameEn}</span>
-            <button
-              onClick={() => handleEditTag(tag)}
-              className="rounded-full p-1 hover:bg-gray-100"
-            >
-              <Edit className="size-3 text-gray-400" />
-            </button>
-            <button className="rounded-full p-1 hover:bg-gray-100">
-              <X className="size-3 text-red-400" />
-            </button>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
+  // Post Modal
   const renderPostModal = () => (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-lg bg-white">
@@ -606,7 +818,8 @@ export default function BlogPage() {
               </label>
               <input
                 type="text"
-                defaultValue={editingPost?.title.ar}
+                value={postForm.titleAr}
+                onChange={e => setPostForm({ ...postForm, titleAr: e.target.value })}
                 className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
                 dir="rtl"
               />
@@ -617,7 +830,8 @@ export default function BlogPage() {
               </label>
               <input
                 type="text"
-                defaultValue={editingPost?.title.en}
+                value={postForm.titleEn}
+                onChange={e => setPostForm({ ...postForm, titleEn: e.target.value })}
                 className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -628,7 +842,9 @@ export default function BlogPage() {
             <label className="mb-1 block text-sm font-medium">{isRTL ? 'الرابط' : 'Slug'}</label>
             <input
               type="text"
-              defaultValue={editingPost?.slug}
+              value={postForm.slug}
+              onChange={e => setPostForm({ ...postForm, slug: e.target.value })}
+              placeholder={postForm.titleEn ? generateSlug(postForm.titleEn) : ''}
               className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -640,7 +856,8 @@ export default function BlogPage() {
                 {isRTL ? 'المقتطف (عربي)' : 'Excerpt (Arabic)'}
               </label>
               <textarea
-                defaultValue={editingPost?.excerpt.ar}
+                value={postForm.excerptAr}
+                onChange={e => setPostForm({ ...postForm, excerptAr: e.target.value })}
                 className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
                 rows={3}
                 dir="rtl"
@@ -651,7 +868,8 @@ export default function BlogPage() {
                 {isRTL ? 'المقتطف (إنجليزي)' : 'Excerpt (English)'}
               </label>
               <textarea
-                defaultValue={editingPost?.excerpt.en}
+                value={postForm.excerptEn}
+                onChange={e => setPostForm({ ...postForm, excerptEn: e.target.value })}
                 className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
                 rows={3}
               />
@@ -665,7 +883,8 @@ export default function BlogPage() {
                 {isRTL ? 'المحتوى (عربي)' : 'Content (Arabic)'}
               </label>
               <textarea
-                defaultValue={editingPost?.content.ar}
+                value={postForm.contentAr}
+                onChange={e => setPostForm({ ...postForm, contentAr: e.target.value })}
                 className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
                 rows={10}
                 dir="rtl"
@@ -676,68 +895,40 @@ export default function BlogPage() {
                 {isRTL ? 'المحتوى (إنجليزي)' : 'Content (English)'}
               </label>
               <textarea
-                defaultValue={editingPost?.content.en}
+                value={postForm.contentEn}
+                onChange={e => setPostForm({ ...postForm, contentEn: e.target.value })}
                 className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
                 rows={10}
               />
             </div>
           </div>
 
-          {/* Category and Tags */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Category and Status */}
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="mb-1 block text-sm font-medium">
                 {isRTL ? 'التصنيف' : 'Category'}
               </label>
               <select
-                defaultValue={editingPost?.category.id}
+                value={postForm.category}
+                onChange={e => setPostForm({ ...postForm, category: e.target.value })}
                 className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
               >
+                <option value="">{isRTL ? 'اختر التصنيف' : 'Select Category'}</option>
                 {categories.map(cat => (
-                  <option key={cat.id} value={cat.id}>
-                    {isRTL ? cat.nameAr : cat.nameEn}
+                  <option key={cat._id} value={cat._id}>
+                    {isRTL ? cat.name.ar : cat.name.en}
                   </option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">{isRTL ? 'الوسوم' : 'Tags'}</label>
-              <div className="flex flex-wrap gap-2 rounded-lg border p-2">
-                {tags.map(tag => (
-                  <label key={tag.id} className="flex items-center gap-1">
-                    <input
-                      type="checkbox"
-                      defaultChecked={editingPost?.tags.some(t => t.id === tag.id)}
-                      className="rounded"
-                    />
-                    <span className="text-sm">{isRTL ? tag.nameAr : tag.nameEn}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Featured Image */}
-          <div>
-            <label className="mb-1 block text-sm font-medium">
-              {isRTL ? 'الصورة الرئيسية' : 'Featured Image'}
-            </label>
-            <div className="rounded-lg border-2 border-dashed p-4 text-center">
-              <Image className="mx-auto mb-2 size-8 text-gray-400" />
-              <p className="text-sm text-gray-500">
-                {isRTL ? 'اسحب أو اختر صورة' : 'Drag or select image'}
-              </p>
-            </div>
-          </div>
-
-          {/* Status and Scheduling */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
               <label className="mb-1 block text-sm font-medium">
                 {isRTL ? 'الحالة' : 'Status'}
               </label>
               <select
-                defaultValue={editingPost?.status || 'draft'}
+                value={postForm.status}
+                onChange={e => setPostForm({ ...postForm, status: e.target.value as PostStatus })}
                 className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
               >
                 {Object.entries(statusConfig).map(([key, config]) => (
@@ -749,14 +940,61 @@ export default function BlogPage() {
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium">
+                {isRTL ? 'وقت القراءة (دقائق)' : 'Reading Time (min)'}
+              </label>
+              <input
+                type="number"
+                value={postForm.readingTime}
+                onChange={e =>
+                  setPostForm({ ...postForm, readingTime: parseInt(e.target.value) || 5 })
+                }
+                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                min={1}
+              />
+            </div>
+          </div>
+
+          {/* Featured Image */}
+          <div>
+            <label className="mb-1 block text-sm font-medium">
+              {isRTL ? 'رابط الصورة الرئيسية' : 'Featured Image URL'}
+            </label>
+            <input
+              type="text"
+              value={postForm.featuredImage}
+              onChange={e => setPostForm({ ...postForm, featuredImage: e.target.value })}
+              className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              placeholder="https://..."
+            />
+          </div>
+
+          {/* Scheduled Date */}
+          {postForm.status === 'scheduled' && (
+            <div>
+              <label className="mb-1 block text-sm font-medium">
                 {isRTL ? 'تاريخ النشر المجدول' : 'Scheduled Date'}
               </label>
               <input
                 type="datetime-local"
-                defaultValue={editingPost?.scheduledAt || ''}
+                value={postForm.scheduledAt}
+                onChange={e => setPostForm({ ...postForm, scheduledAt: e.target.value })}
                 className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
               />
             </div>
+          )}
+
+          {/* Featured checkbox */}
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="isFeatured"
+              checked={postForm.isFeatured}
+              onChange={e => setPostForm({ ...postForm, isFeatured: e.target.checked })}
+              className="rounded"
+            />
+            <label htmlFor="isFeatured" className="text-sm font-medium">
+              {isRTL ? 'مقال مميز' : 'Featured Post'}
+            </label>
           </div>
 
           {/* SEO Section */}
@@ -770,7 +1008,8 @@ export default function BlogPage() {
                   </label>
                   <input
                     type="text"
-                    defaultValue={editingPost?.seo.title.ar}
+                    value={postForm.seoTitleAr}
+                    onChange={e => setPostForm({ ...postForm, seoTitleAr: e.target.value })}
                     className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
                     dir="rtl"
                   />
@@ -781,7 +1020,8 @@ export default function BlogPage() {
                   </label>
                   <input
                     type="text"
-                    defaultValue={editingPost?.seo.title.en}
+                    value={postForm.seoTitleEn}
+                    onChange={e => setPostForm({ ...postForm, seoTitleEn: e.target.value })}
                     className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -792,7 +1032,8 @@ export default function BlogPage() {
                     {isRTL ? 'وصف SEO (عربي)' : 'SEO Description (Arabic)'}
                   </label>
                   <textarea
-                    defaultValue={editingPost?.seo.description.ar}
+                    value={postForm.seoDescriptionAr}
+                    onChange={e => setPostForm({ ...postForm, seoDescriptionAr: e.target.value })}
                     className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
                     rows={2}
                     dir="rtl"
@@ -803,7 +1044,8 @@ export default function BlogPage() {
                     {isRTL ? 'وصف SEO (إنجليزي)' : 'SEO Description (English)'}
                   </label>
                   <textarea
-                    defaultValue={editingPost?.seo.description.en}
+                    value={postForm.seoDescriptionEn}
+                    onChange={e => setPostForm({ ...postForm, seoDescriptionEn: e.target.value })}
                     className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
                     rows={2}
                   />
@@ -820,8 +1062,16 @@ export default function BlogPage() {
           >
             {isRTL ? 'إلغاء' : 'Cancel'}
           </button>
-          <button className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">
-            <Save className="size-5" />
+          <button
+            onClick={handleSavePost}
+            disabled={actionLoading || !postForm.titleAr || !postForm.titleEn || !postForm.category}
+            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+          >
+            {actionLoading ? (
+              <Loader2 className="size-5 animate-spin" />
+            ) : (
+              <Save className="size-5" />
+            )}
             {isRTL ? 'حفظ' : 'Save'}
           </button>
         </div>
@@ -829,6 +1079,7 @@ export default function BlogPage() {
     </div>
   );
 
+  // Category Modal
   const renderCategoryModal = () => (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="w-full max-w-md rounded-lg bg-white">
@@ -856,7 +1107,8 @@ export default function BlogPage() {
             </label>
             <input
               type="text"
-              defaultValue={editingCategory?.nameAr}
+              value={categoryForm.nameAr}
+              onChange={e => setCategoryForm({ ...categoryForm, nameAr: e.target.value })}
               className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
               dir="rtl"
             />
@@ -867,7 +1119,8 @@ export default function BlogPage() {
             </label>
             <input
               type="text"
-              defaultValue={editingCategory?.nameEn}
+              value={categoryForm.nameEn}
+              onChange={e => setCategoryForm({ ...categoryForm, nameEn: e.target.value })}
               className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -875,9 +1128,35 @@ export default function BlogPage() {
             <label className="mb-1 block text-sm font-medium">{isRTL ? 'الرابط' : 'Slug'}</label>
             <input
               type="text"
-              defaultValue={editingCategory?.slug}
+              value={categoryForm.slug}
+              onChange={e => setCategoryForm({ ...categoryForm, slug: e.target.value })}
+              placeholder={categoryForm.nameEn ? generateSlug(categoryForm.nameEn) : ''}
               className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
             />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium">{isRTL ? 'الترتيب' : 'Order'}</label>
+            <input
+              type="number"
+              value={categoryForm.order}
+              onChange={e =>
+                setCategoryForm({ ...categoryForm, order: parseInt(e.target.value) || 0 })
+              }
+              className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              min={0}
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="isActive"
+              checked={categoryForm.isActive}
+              onChange={e => setCategoryForm({ ...categoryForm, isActive: e.target.checked })}
+              className="rounded"
+            />
+            <label htmlFor="isActive" className="text-sm font-medium">
+              {isRTL ? 'نشط' : 'Active'}
+            </label>
           </div>
         </div>
         <div className="flex justify-end gap-3 border-t px-6 py-4">
@@ -887,64 +1166,16 @@ export default function BlogPage() {
           >
             {isRTL ? 'إلغاء' : 'Cancel'}
           </button>
-          <button className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">
-            {isRTL ? 'حفظ' : 'Save'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderTagModal = () => (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-md rounded-lg bg-white">
-        <div className="flex items-center justify-between border-b px-6 py-4">
-          <h2 className="text-xl font-bold">
-            {editingTag ? (isRTL ? 'تعديل الوسم' : 'Edit Tag') : isRTL ? 'وسم جديد' : 'New Tag'}
-          </h2>
-          <button onClick={() => setShowTagModal(false)} className="rounded p-1 hover:bg-gray-100">
-            <X className="size-6" />
-          </button>
-        </div>
-        <div className="space-y-4 p-6">
-          <div>
-            <label className="mb-1 block text-sm font-medium">
-              {isRTL ? 'الاسم (عربي)' : 'Name (Arabic)'}
-            </label>
-            <input
-              type="text"
-              defaultValue={editingTag?.nameAr}
-              className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
-              dir="rtl"
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium">
-              {isRTL ? 'الاسم (إنجليزي)' : 'Name (English)'}
-            </label>
-            <input
-              type="text"
-              defaultValue={editingTag?.nameEn}
-              className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium">{isRTL ? 'الرابط' : 'Slug'}</label>
-            <input
-              type="text"
-              defaultValue={editingTag?.slug}
-              className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-        </div>
-        <div className="flex justify-end gap-3 border-t px-6 py-4">
           <button
-            onClick={() => setShowTagModal(false)}
-            className="rounded-lg border px-4 py-2 hover:bg-gray-50"
+            onClick={handleSaveCategory}
+            disabled={actionLoading || !categoryForm.nameAr || !categoryForm.nameEn}
+            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
           >
-            {isRTL ? 'إلغاء' : 'Cancel'}
-          </button>
-          <button className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">
+            {actionLoading ? (
+              <Loader2 className="size-5 animate-spin" />
+            ) : (
+              <Save className="size-5" />
+            )}
             {isRTL ? 'حفظ' : 'Save'}
           </button>
         </div>
@@ -972,11 +1203,10 @@ export default function BlogPage() {
           {[
             { id: 'posts', labelAr: 'المقالات', labelEn: 'Posts' },
             { id: 'categories', labelAr: 'التصنيفات', labelEn: 'Categories' },
-            { id: 'tags', labelAr: 'الوسوم', labelEn: 'Tags' },
           ].map(tab => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as 'posts' | 'categories' | 'tags')}
+              onClick={() => setActiveTab(tab.id as 'posts' | 'categories')}
               className={`border-b-2 px-4 py-3 text-sm font-medium ${
                 activeTab === tab.id
                   ? 'border-blue-600 text-blue-600'
@@ -993,13 +1223,11 @@ export default function BlogPage() {
       <div className="p-6">
         {activeTab === 'posts' && renderPostsTab()}
         {activeTab === 'categories' && renderCategoriesTab()}
-        {activeTab === 'tags' && renderTagsTab()}
       </div>
 
       {/* Modals */}
       {showPostModal && renderPostModal()}
       {showCategoryModal && renderCategoryModal()}
-      {showTagModal && renderTagModal()}
     </div>
   );
 }

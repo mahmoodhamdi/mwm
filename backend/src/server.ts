@@ -4,7 +4,7 @@
  */
 
 import { createApp } from './app';
-import { env, logger, connectDatabase, connectRedis } from './config';
+import { env, logger, connectDatabase, connectRedis, initializeFirebase } from './config';
 
 /**
  * Start the server
@@ -16,6 +16,10 @@ async function startServer(): Promise<void> {
     logger.info('🔌 Connecting to databases...');
     await connectDatabase();
     await connectRedis();
+
+    // Initialize Firebase for push notifications
+    logger.info('🔔 Initializing Firebase...');
+    initializeFirebase();
 
     // Create Express app
     const app = createApp();

@@ -128,8 +128,7 @@ const subscriberSchema = new Schema<ISubscriber>(
   }
 );
 
-// Indexes
-subscriberSchema.index({ email: 1 }, { unique: true });
+// Indexes (email index is auto-created by unique: true on the field)
 subscriberSchema.index({ status: 1 });
 subscriberSchema.index({ source: 1 });
 subscriberSchema.index({ tags: 1 });

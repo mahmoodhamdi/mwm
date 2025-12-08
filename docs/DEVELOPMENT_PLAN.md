@@ -13,7 +13,7 @@ This document outlines the comprehensive development plan for the MWM corporate 
 - [x] Project structure (monorepo with npm workspaces)
 - [x] Backend API server with full CRUD operations
 - [x] Frontend Next.js 14 App Router with all public pages
-- [x] MongoDB connection with Mongoose (17 models)
+- [x] MongoDB connection with Mongoose (18 models)
 - [x] Redis caching
 - [x] i18n setup (Arabic/English) with RTL support
 - [x] Dark mode support
@@ -27,9 +27,11 @@ This document outlines the comprehensive development plan for the MWM corporate 
 
 ### Pending Items
 
-- [x] Connect Blog frontend to backend API
-- [x] Connect Careers frontend to backend API
-- [x] Newsletter campaigns
+- [x] Connect Blog frontend to backend API (public pages)
+- [x] Connect Careers frontend to backend API (public pages)
+- [x] Newsletter campaigns (backend + admin UI)
+- [x] Connect Admin Blog page to backend API
+- [x] Connect Admin Careers page to backend API
 - [ ] E2E tests with Playwright
 - [ ] Production deployment (SSL, domain, CDN)
 
@@ -50,7 +52,7 @@ This document outlines the comprehensive development plan for the MWM corporate 
 
 ## Phase 2: Core Features
 
-### 2.1 Backend API - 12 Route Modules
+### 2.1 Backend API - 13 Route Modules
 
 | Module       | Status   | Models                   |
 | ------------ | -------- | ------------------------ |
@@ -66,6 +68,7 @@ This document outlines the comprehensive development plan for the MWM corporate 
 | Health       | Complete | -                        |
 | Blog         | Complete | BlogPost, BlogCategory   |
 | Careers      | Complete | Job, JobApplication      |
+| Newsletter   | Complete | Newsletter, Subscriber   |
 
 ### 2.2 Public Pages - Frontend
 
@@ -174,9 +177,11 @@ This document outlines the comprehensive development plan for the MWM corporate 
 2. ~~**Careers System Backend**: Create Job and Application models with CRUD API~~ ✅
 3. ~~**Connect Blog Frontend**: Wire blog pages to backend API~~ ✅
 4. ~~**Connect Careers Frontend**: Wire careers pages to backend API~~ ✅
-5. **Newsletter Campaigns**: Add email campaign functionality
-6. **E2E Tests**: Implement Playwright tests for critical flows
-7. **Production Deployment**: SSL, domain, monitoring
+5. ~~**Newsletter Campaigns**: Add email campaign functionality~~ ✅
+6. ~~**Connect Admin Blog Page**: Wire admin blog to backend API for CRUD operations~~ ✅
+7. ~~**Connect Admin Careers Page**: Wire admin careers to backend API for CRUD operations~~ ✅
+8. **E2E Tests**: Implement Playwright tests for critical flows
+9. **Production Deployment**: SSL, domain, monitoring
 
 ---
 
@@ -189,8 +194,8 @@ mwm/
 │       ├── config/          # Configuration (env, db, redis, swagger)
 │       ├── controllers/     # Route handlers
 │       ├── middlewares/     # Express middlewares
-│       ├── models/          # Mongoose schemas (17 models)
-│       ├── routes/          # API routes (12 modules)
+│       ├── models/          # Mongoose schemas (18 models)
+│       ├── routes/          # API routes (13 modules)
 │       ├── services/        # Business logic
 │       ├── validations/     # Joi schemas
 │       └── utils/           # Utilities

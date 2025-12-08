@@ -93,3 +93,6 @@ export {
   type RecipientType,
   type ICampaignMetrics,
 } from './Newsletter';
+export { Notification, type INotification } from './Notification';
+export { DeviceToken, type IDeviceToken } from './DeviceToken';
+export { ActivityLog, type IActivityLog } from './ActivityLog';

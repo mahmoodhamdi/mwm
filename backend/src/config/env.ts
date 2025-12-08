@@ -47,6 +47,14 @@ const envSchema = Joi.object({
 
   // Sentry
   SENTRY_DSN: Joi.string().allow('').optional(),
+
+  // Firebase
+  FIREBASE_PROJECT_ID: Joi.string().allow('').optional(),
+  FIREBASE_PRIVATE_KEY_ID: Joi.string().allow('').optional(),
+  FIREBASE_PRIVATE_KEY: Joi.string().allow('').optional(),
+  FIREBASE_CLIENT_EMAIL: Joi.string().allow('').optional(),
+  FIREBASE_CLIENT_ID: Joi.string().allow('').optional(),
+  FIREBASE_CERT_URL: Joi.string().allow('').optional(),
 })
   .unknown()
   .required();
@@ -108,6 +116,16 @@ export const env = {
 
   // Sentry
   sentryDsn: envVars.SENTRY_DSN as string | undefined,
+
+  // Firebase
+  firebase: {
+    projectId: envVars.FIREBASE_PROJECT_ID as string | undefined,
+    privateKeyId: envVars.FIREBASE_PRIVATE_KEY_ID as string | undefined,
+    privateKey: envVars.FIREBASE_PRIVATE_KEY as string | undefined,
+    clientEmail: envVars.FIREBASE_CLIENT_EMAIL as string | undefined,
+    clientId: envVars.FIREBASE_CLIENT_ID as string | undefined,
+    certUrl: envVars.FIREBASE_CERT_URL as string | undefined,
+  },
 } as const;
 
 export type Env = typeof env;

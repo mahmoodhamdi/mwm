@@ -9,6 +9,9 @@ import { asyncHandler } from '../middlewares';
 import { redis } from '../config/redis';
 import { ApiError } from '../utils/ApiError';
 import { sendSuccess } from '../utils/response';
+import { verifyRecaptcha } from '../services/recaptcha.service';
+import { notifyNewContact } from '../services/notification.service';
+import emailService from '../services/email.service';
 
 // Cache TTL: 5 minutes for messages (shorter because they change frequently)
 const CACHE_TTL = 60 * 5;
@@ -41,11 +44,18 @@ export const submitContact = asyncHandler(async (req: Request, res: Response) =>
   const locale = req.headers['accept-language']?.startsWith('ar') ? 'ar' : 'en';
   const referrer = req.headers.referer || req.headers.referrer || '';
 
-  // TODO: Verify reCAPTCHA token if provided
-  // const recaptchaScore = await verifyRecaptcha(recaptchaToken);
+  // Verify reCAPTCHA token if provided
+  let recaptchaScore: number | undefined;
+  if (recaptchaToken) {
+    const recaptchaResult = await verifyRecaptcha(recaptchaToken);
+    if (!recaptchaResult.success || recaptchaResult.score < 0.5) {
+      throw new ApiError(400, 'RECAPTCHA_FAILED', 'reCAPTCHA verification failed');
+    }
+    recaptchaScore = recaptchaResult.score;
+  }
 
   // Create contact message
-  await Contact.create({
+  const contact = await Contact.create({
     name,
     email,
     phone,
@@ -62,7 +72,7 @@ export const submitContact = asyncHandler(async (req: Request, res: Response) =>
     referrer,
     source: 'website',
     recaptchaToken,
-    // recaptchaScore,
+    recaptchaScore,
   });
 
   // Invalidate cache
@@ -71,8 +81,8 @@ export const submitContact = asyncHandler(async (req: Request, res: Response) =>
     await redis.del(...cacheKeys);
   }
 
-  // TODO: Send email notification to admin
-  // await sendContactNotification(contact);
+  // Send push notification to admins
+  await notifyNewContact(contact._id.toString(), name, subject);
 
   res.status(201);
   sendSuccess(res, {
@@ -189,7 +199,7 @@ export const updateMessage = asyncHandler(async (req: Request, res: Response) =>
  */
 export const replyToMessage = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const { message: replyMessage } = req.body;
+  const { message: replyMessage, sendEmail = true } = req.body;
   const userId = (req as Request & { user: { _id: string } }).user._id;
 
   const contact = await Contact.findById(id);
@@ -210,10 +220,16 @@ export const replyToMessage = asyncHandler(async (req: Request, res: Response) =
 
   await contact.save();
 
-  // TODO: Send email to contact if sendEmail is true
-  // if (sendEmail) {
-  //   await sendReplyEmail(contact.email, replyMessage);
-  // }
+  // Send email to contact if sendEmail is true
+  if (sendEmail) {
+    await emailService.sendContactReply(
+      contact.email,
+      contact.name,
+      contact.subject,
+      replyMessage,
+      contact.locale || 'ar'
+    );
+  }
 
   // Invalidate cache
   const cacheKeys = await redis.keys('contact:*');

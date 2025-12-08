@@ -74,10 +74,15 @@ export default function BlogListingPage() {
         ar: 'نظرة شاملة على أهم التقنيات والاتجاهات التي ستشكل مستقبل تطوير الويب في العام القادم...',
         en: 'A comprehensive look at the key technologies and trends that will shape the future of web development...',
       },
-      featuredImage: '/images/blog/web-dev.jpg',
+      featuredImage:
+        'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=500&fit=crop',
       category: categories[0],
       tags: [popularTags[0], popularTags[2]],
-      author: { id: '1', name: 'Ahmed Hassan', avatar: '/avatars/ahmed.jpg' },
+      author: {
+        id: '1',
+        name: 'Ahmed Hassan',
+        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
+      },
       publishedAt: '2024-01-20',
       readingTime: 8,
     },
@@ -89,10 +94,15 @@ export default function BlogListingPage() {
         ar: 'دليل شامل لأفضل الممارسات في تصميم واجهات المستخدم وتجربة المستخدم...',
         en: 'A comprehensive guide to best practices in user interface and user experience design...',
       },
-      featuredImage: '/images/blog/ui-ux.jpg',
+      featuredImage:
+        'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&h=500&fit=crop',
       category: categories[1],
       tags: [popularTags[4]],
-      author: { id: '2', name: 'Sarah Ali', avatar: '/avatars/sarah.jpg' },
+      author: {
+        id: '2',
+        name: 'Sarah Ali',
+        avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&h=100&fit=crop',
+      },
       publishedAt: '2024-01-18',
       readingTime: 12,
     },
@@ -107,10 +117,15 @@ export default function BlogListingPage() {
         ar: 'كيف تبني استراتيجية تسويق رقمي ناجحة لعملك في العصر الحديث...',
         en: 'How to build a successful digital marketing strategy for your business in the modern era...',
       },
-      featuredImage: '/images/blog/marketing.jpg',
+      featuredImage:
+        'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=500&fit=crop',
       category: categories[2],
       tags: [popularTags[3]],
-      author: { id: '1', name: 'Ahmed Hassan', avatar: '/avatars/ahmed.jpg' },
+      author: {
+        id: '1',
+        name: 'Ahmed Hassan',
+        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
+      },
       publishedAt: '2024-01-15',
       readingTime: 6,
     },
@@ -122,10 +137,15 @@ export default function BlogListingPage() {
         ar: 'كيف يغير الذكاء الاصطناعي طريقة عمل الشركات وما هي الفرص المتاحة...',
         en: 'How AI is changing the way businesses operate and what opportunities are available...',
       },
-      featuredImage: '/images/blog/ai-business.jpg',
+      featuredImage:
+        'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=500&fit=crop',
       category: categories[3],
       tags: [popularTags[2]],
-      author: { id: '2', name: 'Sarah Ali', avatar: '/avatars/sarah.jpg' },
+      author: {
+        id: '2',
+        name: 'Sarah Ali',
+        avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&h=100&fit=crop',
+      },
       publishedAt: '2024-01-12',
       readingTime: 10,
     },
@@ -137,10 +157,15 @@ export default function BlogListingPage() {
         ar: 'دليل شامل لتطوير تطبيقات الهاتف المحمول باستخدام أحدث التقنيات...',
         en: 'A comprehensive guide to mobile app development using the latest technologies...',
       },
-      featuredImage: '/images/blog/mobile.jpg',
+      featuredImage:
+        'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800&h=500&fit=crop',
       category: categories[0],
       tags: [popularTags[1]],
-      author: { id: '1', name: 'Ahmed Hassan', avatar: '/avatars/ahmed.jpg' },
+      author: {
+        id: '1',
+        name: 'Ahmed Hassan',
+        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
+      },
       publishedAt: '2024-01-10',
       readingTime: 9,
     },
@@ -152,10 +177,15 @@ export default function BlogListingPage() {
         ar: 'كل ما تحتاج معرفته عن تحسين محركات البحث لموقعك الإلكتروني...',
         en: 'Everything you need to know about search engine optimization for your website...',
       },
-      featuredImage: '/images/blog/seo.jpg',
+      featuredImage:
+        'https://images.unsplash.com/photo-1432888622747-4eb9a8efeb07?w=800&h=500&fit=crop',
       category: categories[2],
       tags: [popularTags[3], popularTags[0]],
-      author: { id: '2', name: 'Sarah Ali', avatar: '/avatars/sarah.jpg' },
+      author: {
+        id: '2',
+        name: 'Sarah Ali',
+        avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&h=100&fit=crop',
+      },
       publishedAt: '2024-01-08',
       readingTime: 7,
     },
@@ -233,7 +263,13 @@ export default function BlogListingPage() {
                 </h2>
                 <Link href={`/${locale}/blog/${featuredPost.slug}`}>
                   <div className="group overflow-hidden rounded-2xl bg-white shadow-lg transition-shadow hover:shadow-xl">
-                    <div className="aspect-video bg-gradient-to-br from-blue-100 to-blue-200"></div>
+                    <div className="aspect-video overflow-hidden">
+                      <img
+                        src={featuredPost.featuredImage}
+                        alt={isRTL ? featuredPost.title.ar : featuredPost.title.en}
+                        className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    </div>
                     <div className="p-6">
                       <div className="mb-3 flex items-center gap-4">
                         <span className="rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-800">
@@ -252,9 +288,11 @@ export default function BlogListingPage() {
                       </p>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="flex size-10 items-center justify-center rounded-full bg-gray-200">
-                            <User className="size-5 text-gray-500" />
-                          </div>
+                          <img
+                            src={featuredPost.author.avatar}
+                            alt={featuredPost.author.name}
+                            className="size-10 rounded-full object-cover"
+                          />
                           <div>
                             <p className="font-medium text-gray-900">{featuredPost.author.name}</p>
                             <p className="flex items-center gap-1 text-sm text-gray-500">
@@ -287,7 +325,13 @@ export default function BlogListingPage() {
                 {paginatedPosts.map(post => (
                   <Link key={post.id} href={`/${locale}/blog/${post.slug}`}>
                     <article className="group h-full overflow-hidden rounded-xl bg-white shadow-md transition-shadow hover:shadow-lg">
-                      <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200"></div>
+                      <div className="aspect-video overflow-hidden">
+                        <img
+                          src={post.featuredImage}
+                          alt={isRTL ? post.title.ar : post.title.en}
+                          className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                      </div>
                       <div className="p-5">
                         <div className="mb-3 flex items-center gap-3">
                           <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-700">
@@ -305,9 +349,11 @@ export default function BlogListingPage() {
                         </p>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <div className="flex size-8 items-center justify-center rounded-full bg-gray-200">
-                              <User className="size-4 text-gray-500" />
-                            </div>
+                            <img
+                              src={post.author.avatar}
+                              alt={post.author.name}
+                              className="size-8 rounded-full object-cover"
+                            />
                             <span className="text-sm text-gray-700">{post.author.name}</span>
                           </div>
                           <span className="flex items-center gap-1 text-xs text-gray-500">

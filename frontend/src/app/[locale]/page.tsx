@@ -13,7 +13,15 @@ export default function HomePage() {
     <main className="min-h-screen">
       {/* Hero Section */}
       <section className="from-primary-600 to-primary-900 relative bg-gradient-to-br text-white">
-        <div className="container mx-auto px-4 py-24 md:py-32">
+        {/* Background Image Overlay */}
+        <div className="absolute inset-0 opacity-10">
+          <img
+            src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&h=1080&fit=crop"
+            alt=""
+            className="size-full object-cover"
+          />
+        </div>
+        <div className="container relative mx-auto px-4 py-24 md:py-32">
           <div className="mx-auto max-w-4xl text-center">
             <h1 className="mb-6 text-4xl font-bold md:text-6xl">{t('home.heroTitle')}</h1>
             <p className="text-primary-100 mb-4 text-xl md:text-2xl">{t('home.title')}</p>

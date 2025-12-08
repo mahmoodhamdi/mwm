@@ -5,7 +5,7 @@
  * صفحة بناء القوائم
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocale } from 'next-intl';
 import {
   Save,
@@ -22,7 +22,17 @@ import {
   LayoutGrid,
   Smartphone,
   Monitor,
+  RefreshCw,
+  Loader2,
 } from 'lucide-react';
+import {
+  menusService,
+  Menu as ApiMenu,
+  MenuItem as ApiMenuItem,
+  CreateMenuData,
+  CreateMenuItemData,
+} from '@/services/admin';
+import { ApiError } from '@/lib/api';
 
 // Menu item type
 interface MenuItem {
@@ -47,165 +57,6 @@ interface Menu {
   isActive: boolean;
 }
 
-// Mock menu data
-const mockMenus: Menu[] = [
-  {
-    id: '1',
-    name: 'Main Navigation',
-    nameAr: 'القائمة الرئيسية',
-    location: 'header',
-    isActive: true,
-    items: [
-      {
-        id: '1-1',
-        label: { ar: 'الرئيسية', en: 'Home' },
-        url: '/',
-        type: 'internal',
-        target: '_self',
-        order: 1,
-        isActive: true,
-      },
-      {
-        id: '1-2',
-        label: { ar: 'من نحن', en: 'About' },
-        url: '/about',
-        type: 'internal',
-        target: '_self',
-        order: 2,
-        isActive: true,
-      },
-      {
-        id: '1-3',
-        label: { ar: 'خدماتنا', en: 'Services' },
-        url: '/services',
-        type: 'internal',
-        target: '_self',
-        order: 3,
-        isActive: true,
-        children: [
-          {
-            id: '1-3-1',
-            label: { ar: 'تطوير الويب', en: 'Web Development' },
-            url: '/services/web',
-            type: 'internal',
-            target: '_self',
-            order: 1,
-            isActive: true,
-          },
-          {
-            id: '1-3-2',
-            label: { ar: 'تطبيقات الموبايل', en: 'Mobile Apps' },
-            url: '/services/mobile',
-            type: 'internal',
-            target: '_self',
-            order: 2,
-            isActive: true,
-          },
-        ],
-      },
-      {
-        id: '1-4',
-        label: { ar: 'أعمالنا', en: 'Portfolio' },
-        url: '/portfolio',
-        type: 'internal',
-        target: '_self',
-        order: 4,
-        isActive: true,
-      },
-      {
-        id: '1-5',
-        label: { ar: 'فريقنا', en: 'Team' },
-        url: '/team',
-        type: 'internal',
-        target: '_self',
-        order: 5,
-        isActive: true,
-      },
-      {
-        id: '1-6',
-        label: { ar: 'تواصل معنا', en: 'Contact' },
-        url: '/contact',
-        type: 'internal',
-        target: '_self',
-        order: 6,
-        isActive: true,
-      },
-    ],
-  },
-  {
-    id: '2',
-    name: 'Footer Links',
-    nameAr: 'روابط التذييل',
-    location: 'footer',
-    isActive: true,
-    items: [
-      {
-        id: '2-1',
-        label: { ar: 'سياسة الخصوصية', en: 'Privacy Policy' },
-        url: '/privacy',
-        type: 'internal',
-        target: '_self',
-        order: 1,
-        isActive: true,
-      },
-      {
-        id: '2-2',
-        label: { ar: 'الشروط والأحكام', en: 'Terms & Conditions' },
-        url: '/terms',
-        type: 'internal',
-        target: '_self',
-        order: 2,
-        isActive: true,
-      },
-      {
-        id: '2-3',
-        label: { ar: 'تويتر', en: 'Twitter' },
-        url: 'https://twitter.com/mwm',
-        type: 'external',
-        target: '_blank',
-        order: 3,
-        isActive: true,
-      },
-    ],
-  },
-  {
-    id: '3',
-    name: 'Mobile Menu',
-    nameAr: 'قائمة الموبايل',
-    location: 'mobile',
-    isActive: true,
-    items: [
-      {
-        id: '3-1',
-        label: { ar: 'الرئيسية', en: 'Home' },
-        url: '/',
-        type: 'internal',
-        target: '_self',
-        order: 1,
-        isActive: true,
-      },
-      {
-        id: '3-2',
-        label: { ar: 'خدماتنا', en: 'Services' },
-        url: '/services',
-        type: 'internal',
-        target: '_self',
-        order: 2,
-        isActive: true,
-      },
-      {
-        id: '3-3',
-        label: { ar: 'تواصل معنا', en: 'Contact' },
-        url: '/contact',
-        type: 'internal',
-        target: '_self',
-        order: 3,
-        isActive: true,
-      },
-    ],
-  },
-];
-
 // Location icons
 const locationIcons = {
   header: Monitor,
@@ -214,12 +65,40 @@ const locationIcons = {
   mobile: Smartphone,
 };
 
+// Helper: Convert API menu to local format
+const mapApiMenuToLocal = (apiMenu: ApiMenu): Menu => ({
+  id: apiMenu._id,
+  name: apiMenu.name,
+  nameAr: apiMenu.nameAr,
+  location: apiMenu.location,
+  isActive: apiMenu.isActive,
+  items: apiMenu.items.map(mapApiItemToLocal),
+});
+
+// Helper: Convert API menu item to local format
+const mapApiItemToLocal = (apiItem: ApiMenuItem): MenuItem => ({
+  id: apiItem._id || String(Date.now()),
+  label: apiItem.label,
+  url: apiItem.url,
+  type: apiItem.type === 'custom' ? 'internal' : apiItem.type,
+  target: apiItem.target,
+  icon: apiItem.icon,
+  order: apiItem.order,
+  isActive: apiItem.isActive,
+  children: apiItem.children?.map(mapApiItemToLocal),
+});
+
 export default function MenusPage() {
   const locale = useLocale();
   const isArabic = locale === 'ar';
 
-  const [menus, setMenus] = useState<Menu[]>(mockMenus);
-  const [selectedMenu, setSelectedMenu] = useState<string | null>(mockMenus[0]?.id || null);
+  // Loading and error states
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const [menus, setMenus] = useState<Menu[]>([]);
+  const [selectedMenu, setSelectedMenu] = useState<string | null>(null);
   const [_editingItem, _setEditingItem] = useState<string | null>(null);
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [showAddItem, setShowAddItem] = useState(false);
@@ -244,6 +123,32 @@ export default function MenusPage() {
     parentId: null as string | null,
   });
 
+  // Fetch menus from API
+  const fetchMenus = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const apiMenus = await menusService.getAllMenus();
+      const localMenus = apiMenus.map(mapApiMenuToLocal);
+      setMenus(localMenus);
+      if (localMenus.length > 0 && !selectedMenu) {
+        setSelectedMenu(localMenus[0].id);
+      }
+    } catch (err) {
+      const apiError = err as ApiError;
+      setError(apiError.message || 'Failed to load menus');
+      console.error('Error fetching menus:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [selectedMenu]);
+
+  // Load menus on mount
+  useEffect(() => {
+    fetchMenus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Get current menu
   const currentMenu = menus.find(m => m.id === selectedMenu);
 
@@ -259,77 +164,81 @@ export default function MenusPage() {
   };
 
   // Add new menu
-  const addMenu = () => {
+  const addMenu = async () => {
     if (!newMenu.name || !newMenu.nameAr) return;
 
-    const menu: Menu = {
-      id: Date.now().toString(),
-      name: newMenu.name,
-      nameAr: newMenu.nameAr,
-      location: newMenu.location,
-      isActive: true,
-      items: [],
-    };
+    try {
+      setIsSaving(true);
+      setError(null);
 
-    setMenus(prev => [...prev, menu]);
-    setSelectedMenu(menu.id);
-    setNewMenu({ name: '', nameAr: '', location: 'header' });
-    setShowAddMenu(false);
-    setHasChanges(true);
+      const createData: CreateMenuData = {
+        name: newMenu.name,
+        nameAr: newMenu.nameAr,
+        slug: newMenu.name.toLowerCase().replace(/\s+/g, '-'),
+        location: newMenu.location,
+        items: [],
+        isActive: true,
+      };
+
+      const created = await menusService.createMenu(createData);
+      const localMenu = mapApiMenuToLocal(created);
+
+      setMenus(prev => [...prev, localMenu]);
+      setSelectedMenu(localMenu.id);
+      setNewMenu({ name: '', nameAr: '', location: 'header' });
+      setShowAddMenu(false);
+    } catch (err) {
+      const apiError = err as ApiError;
+      setError(apiError.message || 'Failed to create menu');
+      console.error('Error creating menu:', err);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // Add new item
-  const addItem = () => {
+  const addItem = async () => {
     if (!newItem.labelAr || !newItem.labelEn || !newItem.url || !currentMenu) return;
 
-    const item: MenuItem = {
-      id: Date.now().toString(),
-      label: { ar: newItem.labelAr, en: newItem.labelEn },
-      url: newItem.url,
-      type: newItem.type,
-      target: newItem.target,
-      order: currentMenu.items.length + 1,
-      isActive: true,
-    };
+    try {
+      setIsSaving(true);
+      setError(null);
 
-    setMenus(prev =>
-      prev.map(menu => {
-        if (menu.id !== selectedMenu) return menu;
+      const itemData: CreateMenuItemData = {
+        label: { ar: newItem.labelAr, en: newItem.labelEn },
+        url: newItem.url,
+        type: newItem.type,
+        target: newItem.target,
+        order: currentMenu.items.length + 1,
+        isActive: true,
+        parentId: newItem.parentId || undefined,
+      };
 
-        if (newItem.parentId) {
-          // Add as child
-          return {
-            ...menu,
-            items: menu.items.map(menuItem => {
-              if (menuItem.id === newItem.parentId) {
-                return {
-                  ...menuItem,
-                  children: [...(menuItem.children || []), item],
-                };
-              }
-              return menuItem;
-            }),
-          };
-        }
+      const updatedMenu = await menusService.addMenuItem(currentMenu.id, itemData);
+      const localMenu = mapApiMenuToLocal(updatedMenu);
 
-        return { ...menu, items: [...menu.items, item] };
-      })
-    );
+      setMenus(prev => prev.map(menu => (menu.id === localMenu.id ? localMenu : menu)));
 
-    setNewItem({
-      labelAr: '',
-      labelEn: '',
-      url: '',
-      type: 'internal',
-      target: '_self',
-      parentId: null,
-    });
-    setShowAddItem(false);
-    setHasChanges(true);
+      setNewItem({
+        labelAr: '',
+        labelEn: '',
+        url: '',
+        type: 'internal',
+        target: '_self',
+        parentId: null,
+      });
+      setShowAddItem(false);
+    } catch (err) {
+      const apiError = err as ApiError;
+      setError(apiError.message || 'Failed to add item');
+      console.error('Error adding item:', err);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // Delete item
-  const deleteItem = (itemId: string, parentId?: string) => {
+  const deleteItem = async (itemId: string, _parentId?: string) => {
     if (
       !confirm(
         isArabic ? 'هل أنت متأكد من حذف هذا العنصر؟' : 'Are you sure you want to delete this item?'
@@ -338,63 +247,66 @@ export default function MenusPage() {
       return;
     }
 
-    setMenus(prev =>
-      prev.map(menu => {
-        if (menu.id !== selectedMenu) return menu;
+    if (!selectedMenu) return;
 
-        if (parentId) {
-          return {
-            ...menu,
-            items: menu.items.map(item => {
-              if (item.id === parentId) {
-                return {
-                  ...item,
-                  children: item.children?.filter(child => child.id !== itemId),
-                };
-              }
-              return item;
-            }),
-          };
-        }
+    try {
+      setIsSaving(true);
+      setError(null);
 
-        return { ...menu, items: menu.items.filter(item => item.id !== itemId) };
-      })
-    );
-    setHasChanges(true);
+      const updatedMenu = await menusService.removeMenuItem(selectedMenu, itemId);
+      const localMenu = mapApiMenuToLocal(updatedMenu);
+
+      setMenus(prev => prev.map(menu => (menu.id === localMenu.id ? localMenu : menu)));
+    } catch (err) {
+      const apiError = err as ApiError;
+      setError(apiError.message || 'Failed to delete item');
+      console.error('Error deleting item:', err);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // Toggle item active
-  const toggleItemActive = (itemId: string, parentId?: string) => {
+  const toggleItemActive = async (itemId: string, _parentId?: string) => {
+    if (!selectedMenu) return;
+
+    // Find current item status
+    const currentItem = currentMenu?.items.find(i => i.id === itemId);
+    const newActiveState = !currentItem?.isActive;
+
+    // Optimistically update UI
     setMenus(prev =>
       prev.map(menu => {
         if (menu.id !== selectedMenu) return menu;
-
-        if (parentId) {
-          return {
-            ...menu,
-            items: menu.items.map(item => {
-              if (item.id === parentId) {
-                return {
-                  ...item,
-                  children: item.children?.map(child =>
-                    child.id === itemId ? { ...child, isActive: !child.isActive } : child
-                  ),
-                };
-              }
-              return item;
-            }),
-          };
-        }
-
         return {
           ...menu,
           items: menu.items.map(item =>
-            item.id === itemId ? { ...item, isActive: !item.isActive } : item
+            item.id === itemId ? { ...item, isActive: newActiveState } : item
           ),
         };
       })
     );
     setHasChanges(true);
+
+    try {
+      await menusService.updateMenuItem(selectedMenu, itemId, { isActive: newActiveState });
+    } catch (err) {
+      // Revert on error
+      setMenus(prev =>
+        prev.map(menu => {
+          if (menu.id !== selectedMenu) return menu;
+          return {
+            ...menu,
+            items: menu.items.map(item =>
+              item.id === itemId ? { ...item, isActive: !newActiveState } : item
+            ),
+          };
+        })
+      );
+      const apiError = err as ApiError;
+      setError(apiError.message || 'Failed to update item');
+      console.error('Error updating item:', err);
+    }
   };
 
   // Move item up
@@ -429,10 +341,20 @@ export default function MenusPage() {
     setHasChanges(true);
   };
 
-  // Save changes
-  const saveChanges = () => {
-    console.log('Saving menus:', menus);
-    setHasChanges(false);
+  // Save changes - refresh from server
+  const saveChanges = async () => {
+    try {
+      setIsSaving(true);
+      setError(null);
+      await fetchMenus();
+      setHasChanges(false);
+    } catch (err) {
+      const apiError = err as ApiError;
+      setError(apiError.message || 'Failed to save changes');
+      console.error('Error saving changes:', err);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // Render menu item
@@ -513,6 +435,20 @@ export default function MenusPage() {
     );
   };
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="text-primary mx-auto size-8 animate-spin" />
+          <p className="text-muted-foreground mt-2">
+            {isArabic ? 'جاري تحميل القوائم...' : 'Loading menus...'}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -526,6 +462,14 @@ export default function MenusPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={fetchMenus}
+            disabled={isLoading}
+            className="hover:bg-muted inline-flex items-center justify-center gap-2 rounded-lg border px-4 py-2 transition-colors disabled:opacity-50"
+            title={isArabic ? 'تحديث' : 'Refresh'}
+          >
+            <RefreshCw className={`size-4 ${isLoading ? 'animate-spin' : ''}`} />
+          </button>
           <button
             onClick={() => setShowAddMenu(true)}
             className="hover:bg-muted inline-flex items-center justify-center gap-2 rounded-lg border px-4 py-2 transition-colors"
@@ -544,14 +488,27 @@ export default function MenusPage() {
           </button>
           <button
             onClick={saveChanges}
-            disabled={!hasChanges}
+            disabled={!hasChanges || isSaving}
             className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <Save className="size-4" />
+            {isSaving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
             <span>{isArabic ? 'حفظ' : 'Save'}</span>
           </button>
         </div>
       </div>
+
+      {/* Error message */}
+      {error && (
+        <div className="flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/10 p-3">
+          <span className="text-sm text-red-600 dark:text-red-400">{error}</span>
+          <button
+            onClick={() => setError(null)}
+            className="text-red-600 hover:text-red-700 dark:text-red-400"
+          >
+            &times;
+          </button>
+        </div>
+      )}
 
       {/* Changes indicator */}
       {hasChanges && (

@@ -5,8 +5,10 @@
  * صفحة تحرير الترجمات
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocale } from 'next-intl';
+import { translationsService, TranslationItem as ApiTranslationItem } from '@/services/admin';
+import { ApiError } from '@/lib/api';
 import {
   Save,
   Search,
@@ -19,6 +21,7 @@ import {
   ChevronRight,
   AlertCircle,
   Check,
+  RefreshCw,
 } from 'lucide-react';
 
 // Translation item type
@@ -192,6 +195,9 @@ export default function TranslationsPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // New translation form state
   const [newTranslation, setNewTranslation] = useState({
@@ -248,30 +254,74 @@ export default function TranslationsPage() {
     setHasChanges(true);
   };
 
+  // Fetch translations from API
+  const fetchTranslations = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const response = await translationsService.getAllTranslations({ limit: 200 });
+      if (response.data) {
+        const apiTranslations = response.data.map((item: ApiTranslationItem) => ({
+          id: item._id,
+          key: item.key,
+          namespace: item.namespace,
+          translations: item.translations,
+          isSystem: item.isSystem,
+          description: item.description,
+        }));
+        setTranslations(apiTranslations);
+      }
+    } catch (err) {
+      const apiError = err as ApiError;
+      setError(apiError.message || 'Failed to load translations');
+      console.error('Error fetching translations:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Fetch translations on mount
+  useEffect(() => {
+    fetchTranslations();
+  }, [fetchTranslations]);
+
   // Add new translation
-  const addTranslation = () => {
+  const addTranslation = async () => {
     if (!newTranslation.key || !newTranslation.ar || !newTranslation.en) return;
 
-    const newItem: TranslationItem = {
-      id: Date.now().toString(),
-      key: newTranslation.key,
-      namespace: newTranslation.namespace,
-      translations: {
-        ar: newTranslation.ar,
-        en: newTranslation.en,
-      },
-      isSystem: false,
-      description: newTranslation.description,
-    };
+    try {
+      setError(null);
+      const result = await translationsService.createTranslation({
+        key: newTranslation.key,
+        namespace: newTranslation.namespace,
+        translations: {
+          ar: newTranslation.ar,
+          en: newTranslation.en,
+        },
+        description: newTranslation.description,
+        isSystem: false,
+      });
 
-    setTranslations(prev => [...prev, newItem]);
-    setNewTranslation({ key: '', namespace: 'common', ar: '', en: '', description: '' });
-    setShowAddModal(false);
-    setHasChanges(true);
+      const newItem: TranslationItem = {
+        id: result._id,
+        key: result.key,
+        namespace: result.namespace,
+        translations: result.translations,
+        isSystem: result.isSystem,
+        description: result.description,
+      };
+
+      setTranslations(prev => [...prev, newItem]);
+      setNewTranslation({ key: '', namespace: 'common', ar: '', en: '', description: '' });
+      setShowAddModal(false);
+    } catch (err) {
+      const apiError = err as ApiError;
+      setError(apiError.message || 'Failed to add translation');
+    }
   };
 
   // Delete translation
-  const deleteTranslation = (id: string) => {
+  const deleteTranslation = async (id: string) => {
     const item = translations.find(t => t.id === id);
     if (item?.isSystem) return;
 
@@ -282,15 +332,39 @@ export default function TranslationsPage() {
           : 'Are you sure you want to delete this translation?'
       )
     ) {
-      setTranslations(prev => prev.filter(t => t.id !== id));
-      setHasChanges(true);
+      try {
+        setError(null);
+        await translationsService.deleteTranslation(id);
+        setTranslations(prev => prev.filter(t => t.id !== id));
+      } catch (err) {
+        const apiError = err as ApiError;
+        setError(apiError.message || 'Failed to delete translation');
+      }
     }
   };
 
-  // Save changes
-  const saveChanges = () => {
-    console.log('Saving translations:', translations);
-    setHasChanges(false);
+  // Save changes (bulk update)
+  const saveChanges = async () => {
+    try {
+      setIsSaving(true);
+      setError(null);
+
+      const translationsToSave = translations.map(t => ({
+        key: t.key,
+        namespace: t.namespace,
+        translations: t.translations,
+        description: t.description,
+        isSystem: t.isSystem,
+      }));
+
+      await translationsService.bulkUpsertTranslations(translationsToSave);
+      setHasChanges(false);
+    } catch (err) {
+      const apiError = err as ApiError;
+      setError(apiError.message || 'Failed to save translations');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // Export translations
@@ -324,6 +398,18 @@ export default function TranslationsPage() {
     return translations.filter(t => !t.translations.ar || !t.translations.en).length;
   };
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="flex min-h-96 items-center justify-center">
+        <div className="text-center">
+          <RefreshCw className="mx-auto size-8 animate-spin text-blue-600" />
+          <p className="mt-4 text-gray-600">{isArabic ? 'جاري التحميل...' : 'Loading...'}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -355,14 +441,22 @@ export default function TranslationsPage() {
           </button>
           <button
             onClick={saveChanges}
-            disabled={!hasChanges}
+            disabled={!hasChanges || isSaving}
             className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <Save className="size-4" />
+            {isSaving ? <RefreshCw className="size-4 animate-spin" /> : <Save className="size-4" />}
             <span>{isArabic ? 'حفظ' : 'Save'}</span>
           </button>
         </div>
       </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
+          <AlertCircle className="size-5" />
+          {error}
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">

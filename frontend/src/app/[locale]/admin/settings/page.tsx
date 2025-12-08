@@ -1,9 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocale } from 'next-intl';
+import { settingsService, Settings as SettingsData } from '@/services/admin';
+import { ApiError } from '@/lib/api';
 import {
-  Settings,
+  Settings as SettingsIcon,
   Globe,
   Palette,
   Search,
@@ -99,7 +101,9 @@ export default function SettingsPage() {
   // State
   const [activeTab, setActiveTab] = useState<TabType>('general');
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // General Settings
   const [siteName, setSiteName] = useState({ ar: 'موقع الشركة', en: 'Company Website' });
@@ -269,7 +273,12 @@ export default function SettingsPage() {
 
   // Tabs
   const tabs: { id: TabType; labelAr: string; labelEn: string; icon: React.ReactNode }[] = [
-    { id: 'general', labelAr: 'عام', labelEn: 'General', icon: <Settings className="size-5" /> },
+    {
+      id: 'general',
+      labelAr: 'عام',
+      labelEn: 'General',
+      icon: <SettingsIcon className="size-5" />,
+    },
     { id: 'seo', labelAr: 'محركات البحث', labelEn: 'SEO', icon: <Search className="size-5" /> },
     { id: 'theme', labelAr: 'المظهر', labelEn: 'Theme', icon: <Palette className="size-5" /> },
     { id: 'features', labelAr: 'الميزات', labelEn: 'Features', icon: <Globe className="size-5" /> },
@@ -282,13 +291,132 @@ export default function SettingsPage() {
     { id: 'security', labelAr: 'الأمان', labelEn: 'Security', icon: <Shield className="size-5" /> },
   ];
 
+  // Fetch settings from API
+  const fetchSettings = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const data = await settingsService.getSettings();
+
+      // Update all state from API data
+      if (data.general) {
+        setSiteName(data.general.siteName || { ar: '', en: '' });
+        setSiteTagline(data.general.siteTagline || { ar: '', en: '' });
+        setDefaultLanguage(data.general.defaultLanguage || 'ar');
+        setTimezone(data.general.timezone || 'Asia/Riyadh');
+        setDateFormat(data.general.dateFormat || 'DD/MM/YYYY');
+      }
+      if (data.contact) {
+        setSiteEmail(data.contact.email || '');
+        setSitePhone(data.contact.phone || '');
+        setSiteAddress(data.contact.address || { ar: '', en: '' });
+      }
+      if (data.social) {
+        setSocialMedia({
+          facebook: data.social.facebook || '',
+          twitter: data.social.twitter || '',
+          linkedin: data.social.linkedin || '',
+          instagram: data.social.instagram || '',
+          youtube: data.social.youtube || '',
+        });
+      }
+      if (data.seo) {
+        setSeoSettings({
+          titleTemplate: data.seo.titleTemplate || { ar: '', en: '' },
+          defaultTitle: data.seo.defaultTitle || { ar: '', en: '' },
+          defaultDescription: data.seo.defaultDescription || { ar: '', en: '' },
+          defaultKeywords: data.seo.defaultKeywords || { ar: '', en: '' },
+          ogImage: data.seo.ogImage || '',
+          twitterCard: data.seo.twitterCard || 'summary_large_image',
+          robotsTxt: data.seo.robotsTxt || '',
+          sitemapEnabled: data.seo.sitemapEnabled ?? true,
+          analyticsId: data.seo.analyticsId || '',
+        });
+      }
+      if (data.theme) {
+        setThemeSettings({
+          mode: data.theme.mode || 'system',
+          primaryColor: data.theme.primaryColor || '#3B82F6',
+          secondaryColor: data.theme.secondaryColor || '#10B981',
+          accentColor: data.theme.accentColor || '#F59E0B',
+          fontFamily: data.theme.fontFamily || { ar: 'Noto Sans Arabic', en: 'Inter' },
+          borderRadius: data.theme.borderRadius || 'md',
+          logoLight: data.theme.logoLight || '',
+          logoDark: data.theme.logoDark || '',
+          favicon: '',
+        });
+      }
+      if (data.features) {
+        setFeatures(prev =>
+          prev.map(f => ({
+            ...f,
+            enabled: data.features?.[f.id as keyof typeof data.features] ?? f.enabled,
+          }))
+        );
+      }
+    } catch (err) {
+      const apiError = err as ApiError;
+      setError(apiError.message || 'Failed to load settings');
+      console.error('Error fetching settings:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Fetch settings on mount
+  useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
+
   const handleSave = async () => {
     setIsSaving(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsSaving(false);
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
+    setError(null);
+    try {
+      const settingsData: Partial<SettingsData> = {
+        general: {
+          siteName,
+          siteTagline,
+          logo: '',
+          favicon: themeSettings.favicon,
+          defaultLanguage,
+          timezone,
+          dateFormat,
+          maintenanceMode: securitySettings.maintenanceMode,
+          maintenanceMessage: { ar: '', en: '' },
+        },
+        contact: {
+          email: siteEmail,
+          phone: sitePhone,
+          address: siteAddress,
+          workingHours: { ar: '', en: '' },
+        },
+        social: socialMedia,
+        seo: seoSettings,
+        theme: {
+          mode: themeSettings.mode,
+          primaryColor: themeSettings.primaryColor,
+          secondaryColor: themeSettings.secondaryColor,
+          accentColor: themeSettings.accentColor,
+          fontFamily: themeSettings.fontFamily,
+          borderRadius: themeSettings.borderRadius,
+          logoLight: themeSettings.logoLight,
+          logoDark: themeSettings.logoDark,
+        },
+        features: features.reduce(
+          (acc, f) => ({ ...acc, [f.id]: f.enabled }),
+          {}
+        ) as SettingsData['features'],
+      };
+
+      await settingsService.updateSettings(settingsData);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
+    } catch (err) {
+      const apiError = err as ApiError;
+      setError(apiError.message || 'Failed to save settings');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const toggleFeature = (id: string) => {
@@ -1342,6 +1470,20 @@ export default function SettingsPage() {
     </div>
   );
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div
+        className={`flex min-h-screen items-center justify-center bg-gray-50 ${isRTL ? 'rtl' : 'ltr'}`}
+      >
+        <div className="text-center">
+          <RefreshCw className="mx-auto size-8 animate-spin text-blue-600" />
+          <p className="mt-4 text-gray-600">{isRTL ? 'جاري التحميل...' : 'Loading...'}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`min-h-screen bg-gray-50 ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Header */}
@@ -1369,6 +1511,14 @@ export default function SettingsPage() {
         <div className="mx-6 mt-4 flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 p-4 text-green-800">
           <CheckCircle className="size-5" />
           {isRTL ? 'تم حفظ الإعدادات بنجاح' : 'Settings saved successfully'}
+        </div>
+      )}
+
+      {/* Error Message */}
+      {error && (
+        <div className="mx-6 mt-4 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
+          <Shield className="size-5" />
+          {error}
         </div>
       )}
 

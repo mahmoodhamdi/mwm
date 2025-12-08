@@ -1,0 +1,37 @@
+version: "3.8"
+
+# Development Docker Compose - Minimal services only
+# Usage: docker-compose -f docker-compose.dev.yml up -d
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7
+    container_name: mwm-mongodb-dev
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_dev_data:/data/db
+    networks:
+      - mwm-dev-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: mwm-redis-dev
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_dev_data:/data
+    networks:
+      - mwm-dev-network
+
+networks:
+  mwm-dev-network:
+    driver: bridge
+
+volumes:
+  mongodb_dev_data:
+  redis_dev_data:

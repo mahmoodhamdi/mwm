@@ -14,7 +14,13 @@ let isConnected = false;
 
 beforeAll(async () => {
   try {
-    mongoServer = await MongoMemoryServer.create();
+    // Ensure no existing connection
+    if (mongoose.connection.readyState !== 0) {
+      await mongoose.disconnect();
+    }
+    mongoServer = await MongoMemoryServer.create({
+      instance: { ip: '127.0.0.1' },
+    });
     const uri = mongoServer.getUri();
     await mongoose.connect(uri);
     isConnected = true;
@@ -28,7 +34,7 @@ beforeAll(async () => {
     console.warn('MongoMemoryServer could not start. Tests will be skipped.');
     isConnected = false;
   }
-});
+}, 120000);
 
 afterAll(async () => {
   if (isConnected) {

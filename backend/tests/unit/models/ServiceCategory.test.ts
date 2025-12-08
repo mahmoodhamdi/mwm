@@ -21,7 +21,9 @@ describe('ServiceCategory Model', () => {
 
   beforeAll(async () => {
     try {
-      mongoServer = await MongoMemoryServer.create();
+      mongoServer = await MongoMemoryServer.create({
+        instance: { ip: '127.0.0.1' },
+      });
       const mongoUri = mongoServer.getUri();
       await mongoose.connect(mongoUri);
     } catch {

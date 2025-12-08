@@ -18,7 +18,9 @@ describe('Settings Model', () => {
 
   beforeAll(async () => {
     try {
-      mongoServer = await MongoMemoryServer.create();
+      mongoServer = await MongoMemoryServer.create({
+        instance: { ip: '127.0.0.1' },
+      });
       const mongoUri = mongoServer.getUri();
       await mongoose.connect(mongoUri);
     } catch {
@@ -46,50 +48,33 @@ describe('Settings Model', () => {
       if (mongoose.connection.readyState !== 1) return;
 
       const settingsData = {
-        key: 'site_settings',
         general: {
           siteName: { ar: 'موقع اختبار', en: 'Test Site' },
-          siteDescription: { ar: 'وصف الموقع', en: 'Site Description' },
-          logo: 'https://example.com/logo.png',
-          favicon: 'https://example.com/favicon.ico',
-          timezone: 'Asia/Riyadh',
-          defaultLanguage: 'ar',
+          siteTagline: { ar: 'وصف الموقع', en: 'Site Description' },
+          logo: { light: '/images/logo-light.svg', dark: '/images/logo-dark.svg' },
+          favicon: '/favicon.ico',
+          defaultLanguage: 'ar' as const,
         },
       };
 
       const settings = await Settings.create(settingsData);
 
       expect(settings._id).toBeDefined();
-      expect(settings.key).toBe(settingsData.key);
       expect(settings.general?.siteName?.ar).toBe('موقع اختبار');
       expect(settings.general?.siteName?.en).toBe('Test Site');
-    });
-
-    it('should enforce unique key constraint', async () => {
-      if (mongoose.connection.readyState !== 1) return;
-
-      const settingsData = {
-        key: 'site_settings',
-        general: {
-          siteName: { ar: 'موقع', en: 'Site' },
-        },
-      };
-
-      await Settings.create(settingsData);
-      await expect(Settings.create(settingsData)).rejects.toThrow();
     });
 
     it('should create settings with contact info', async () => {
       if (mongoose.connection.readyState !== 1) return;
 
       const settingsData = {
-        key: 'site_settings',
         contact: {
           email: 'info@example.com',
           phone: '+966500000000',
           whatsapp: '+966500000000',
           address: { ar: 'الرياض', en: 'Riyadh' },
           workingHours: { ar: '9 ص - 5 م', en: '9 AM - 5 PM' },
+          location: { lat: 24.7136, lng: 46.6753 },
         },
       };
 
@@ -104,7 +89,6 @@ describe('Settings Model', () => {
       if (mongoose.connection.readyState !== 1) return;
 
       const settingsData = {
-        key: 'site_settings',
         social: {
           facebook: 'https://facebook.com/example',
           twitter: 'https://twitter.com/example',
@@ -123,40 +107,37 @@ describe('Settings Model', () => {
       if (mongoose.connection.readyState !== 1) return;
 
       const settingsData = {
-        key: 'site_settings',
         seo: {
-          metaTitle: { ar: 'عنوان الميتا', en: 'Meta Title' },
-          metaDescription: { ar: 'وصف الميتا', en: 'Meta Description' },
-          keywords: ['keyword1', 'keyword2'],
-          ogImage: 'https://example.com/og-image.png',
+          defaultTitle: { ar: 'عنوان الميتا', en: 'Meta Title' },
+          defaultDescription: { ar: 'وصف الميتا', en: 'Meta Description' },
+          defaultKeywords: { ar: ['كلمة1', 'كلمة2'], en: ['keyword1', 'keyword2'] },
+          ogImage: '/images/og-image.jpg',
         },
       };
 
       const settings = await Settings.create(settingsData);
 
-      expect(settings.seo?.metaTitle?.ar).toBe('عنوان الميتا');
-      expect(settings.seo?.keywords).toContain('keyword1');
+      expect(settings.seo?.defaultTitle?.ar).toBe('عنوان الميتا');
+      expect(settings.seo?.defaultKeywords?.en).toContain('keyword1');
     });
 
     it('should create settings with feature flags', async () => {
       if (mongoose.connection.readyState !== 1) return;
 
       const settingsData = {
-        key: 'site_settings',
         features: {
-          enableBlog: true,
-          enableContactForm: true,
-          enableNewsletter: false,
-          enableComments: true,
-          maintenanceMode: false,
+          blog: true,
+          contactForm: true,
+          newsletter: false,
+          testimonials: true,
+          darkMode: true,
         },
       };
 
       const settings = await Settings.create(settingsData);
 
-      expect(settings.features?.enableBlog).toBe(true);
-      expect(settings.features?.enableNewsletter).toBe(false);
-      expect(settings.features?.maintenanceMode).toBe(false);
+      expect(settings.features?.blog).toBe(true);
+      expect(settings.features?.newsletter).toBe(false);
     });
   });
 
@@ -166,7 +147,6 @@ describe('Settings Model', () => {
 
       // Create settings first
       await Settings.create({
-        key: 'site_settings',
         general: {
           siteName: { ar: 'موقع', en: 'Site' },
         },
@@ -175,7 +155,7 @@ describe('Settings Model', () => {
       const settings = await Settings.getSettings();
 
       expect(settings).toBeDefined();
-      expect(settings?.key).toBe('site_settings');
+      expect(settings?.general?.siteName?.ar).toBe('موقع');
     });
 
     it('should create default settings if none exist', async () => {
@@ -184,22 +164,33 @@ describe('Settings Model', () => {
       const settings = await Settings.getSettings();
 
       expect(settings).toBeDefined();
-      expect(settings?.key).toBe('site_settings');
+      // Should have default values
+      expect(settings?.general?.siteName?.ar).toBe('MWM');
+      expect(settings?.general?.siteName?.en).toBe('MWM');
     });
 
     it('should update settings with updateSettings()', async () => {
       if (mongoose.connection.readyState !== 1) return;
 
       await Settings.create({
-        key: 'site_settings',
         general: {
           siteName: { ar: 'موقع قديم', en: 'Old Site' },
+          siteTagline: { ar: 'شعار', en: 'Tagline' },
+          logo: { light: '/logo-light.svg', dark: '/logo-dark.svg' },
+          favicon: '/favicon.ico',
+          defaultLanguage: 'ar' as const,
+          maintenanceMode: false,
         },
       });
 
       const updatedSettings = await Settings.updateSettings({
         general: {
           siteName: { ar: 'موقع جديد', en: 'New Site' },
+          siteTagline: { ar: 'شعار', en: 'Tagline' },
+          logo: { light: '/logo-light.svg', dark: '/logo-dark.svg' },
+          favicon: '/favicon.ico',
+          defaultLanguage: 'ar' as const,
+          maintenanceMode: false,
         },
       });
 
@@ -213,7 +204,6 @@ describe('Settings Model', () => {
       if (mongoose.connection.readyState !== 1) return;
 
       const settings = await Settings.create({
-        key: 'site_settings',
         general: {
           siteName: { ar: 'موقع', en: 'Site' },
         },
@@ -227,9 +217,13 @@ describe('Settings Model', () => {
       if (mongoose.connection.readyState !== 1) return;
 
       const settings = await Settings.create({
-        key: 'site_settings',
         general: {
           siteName: { ar: 'موقع', en: 'Site' },
+          siteTagline: { ar: 'شعار', en: 'Tagline' },
+          logo: { light: '/logo-light.svg', dark: '/logo-dark.svg' },
+          favicon: '/favicon.ico',
+          defaultLanguage: 'ar' as const,
+          maintenanceMode: false,
         },
       });
 
@@ -239,12 +233,48 @@ describe('Settings Model', () => {
       await new Promise(resolve => setTimeout(resolve, 100));
 
       settings.general = {
-        ...settings.general,
         siteName: { ar: 'موقع محدث', en: 'Updated Site' },
+        siteTagline: { ar: 'شعار', en: 'Tagline' },
+        logo: { light: '/logo-light.svg', dark: '/logo-dark.svg' },
+        favicon: '/favicon.ico',
+        defaultLanguage: 'ar' as const,
+        maintenanceMode: false,
       };
       await settings.save();
 
       expect(settings.updatedAt.getTime()).toBeGreaterThan(originalUpdatedAt.getTime());
+    });
+  });
+
+  describe('Default Values', () => {
+    it('should have default feature values', async () => {
+      if (mongoose.connection.readyState !== 1) return;
+
+      const settings = await Settings.create({});
+
+      expect(settings.features?.blog).toBe(true);
+      expect(settings.features?.darkMode).toBe(true);
+      expect(settings.features?.multiLanguage).toBe(true);
+    });
+
+    it('should have default theme values', async () => {
+      if (mongoose.connection.readyState !== 1) return;
+
+      const settings = await Settings.create({});
+
+      expect(settings.theme?.primaryColor).toBe('#3B82F6');
+      expect(settings.theme?.borderRadius).toBe('md');
+      expect(settings.theme?.buttonStyle).toBe('solid');
+    });
+
+    it('should have default homepage settings', async () => {
+      if (mongoose.connection.readyState !== 1) return;
+
+      const settings = await Settings.create({});
+
+      expect(settings.homepage?.heroEnabled).toBe(true);
+      expect(settings.homepage?.servicesEnabled).toBe(true);
+      expect(settings.homepage?.sectionsOrder).toContain('hero');
     });
   });
 });

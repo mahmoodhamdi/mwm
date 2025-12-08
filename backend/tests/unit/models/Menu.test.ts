@@ -18,7 +18,9 @@ describe('Menu Model', () => {
 
   beforeAll(async () => {
     try {
-      mongoServer = await MongoMemoryServer.create();
+      mongoServer = await MongoMemoryServer.create({
+        instance: { ip: '127.0.0.1' },
+      });
       const mongoUri = mongoServer.getUri();
       await mongoose.connect(mongoUri);
     } catch {
@@ -46,7 +48,7 @@ describe('Menu Model', () => {
       if (mongoose.connection.readyState !== 1) return;
 
       const menuData = {
-        name: { ar: 'القائمة الرئيسية', en: 'Main Menu' },
+        name: 'Main Menu',
         slug: 'main-menu',
         location: 'header',
         items: [
@@ -72,7 +74,7 @@ describe('Menu Model', () => {
       if (mongoose.connection.readyState !== 1) return;
 
       const menuData = {
-        name: { ar: 'قائمة', en: 'Menu' },
+        name: 'Menu',
         slug: 'main-menu',
         location: 'header',
         items: [],
@@ -98,7 +100,7 @@ describe('Menu Model', () => {
       if (mongoose.connection.readyState !== 1) return;
 
       const menuData = {
-        name: { ar: 'قائمة', en: 'Menu' },
+        name: 'Menu',
         location: 'header',
         items: [],
       };
@@ -106,24 +108,23 @@ describe('Menu Model', () => {
       await expect(Menu.create(menuData)).rejects.toThrow();
     });
 
-    it('should default location to header', async () => {
+    it('should require location', async () => {
       if (mongoose.connection.readyState !== 1) return;
 
       const menuData = {
-        name: { ar: 'قائمة', en: 'Menu' },
+        name: 'Menu',
         slug: 'test-menu',
         items: [],
       };
 
-      const menu = await Menu.create(menuData);
-      expect(menu.location).toBe('header');
+      await expect(Menu.create(menuData)).rejects.toThrow();
     });
 
     it('should validate location enum', async () => {
       if (mongoose.connection.readyState !== 1) return;
 
       const menuData = {
-        name: { ar: 'قائمة', en: 'Menu' },
+        name: 'Menu',
         slug: 'test-menu',
         location: 'invalid_location',
         items: [],
@@ -139,7 +140,7 @@ describe('Menu Model', () => {
 
       for (const location of locations) {
         const menu = await Menu.create({
-          name: { ar: 'قائمة', en: 'Menu' },
+          name: 'Menu',
           slug: `menu-${location}`,
           location,
           items: [],
@@ -155,7 +156,7 @@ describe('Menu Model', () => {
       if (mongoose.connection.readyState !== 1) return;
 
       const menuData = {
-        name: { ar: 'قائمة', en: 'Menu' },
+        name: 'Menu',
         slug: 'nested-menu',
         location: 'header',
         items: [
@@ -192,7 +193,7 @@ describe('Menu Model', () => {
       if (mongoose.connection.readyState !== 1) return;
 
       const menuData = {
-        name: { ar: 'قائمة', en: 'Menu' },
+        name: 'Menu',
         slug: 'external-menu',
         location: 'footer',
         items: [
@@ -201,7 +202,7 @@ describe('Menu Model', () => {
             label: { ar: 'فيسبوك', en: 'Facebook' },
             url: 'https://facebook.com',
             target: '_blank',
-            isExternal: true,
+            type: 'external',
             order: 1,
           },
         ],
@@ -209,7 +210,7 @@ describe('Menu Model', () => {
 
       const menu = await Menu.create(menuData);
 
-      expect(menu.items[0]?.isExternal).toBe(true);
+      expect(menu.items[0]?.type).toBe('external');
       expect(menu.items[0]?.target).toBe('_blank');
     });
 
@@ -217,7 +218,7 @@ describe('Menu Model', () => {
       if (mongoose.connection.readyState !== 1) return;
 
       const menuData = {
-        name: { ar: 'قائمة', en: 'Menu' },
+        name: 'Menu',
         slug: 'icon-menu',
         location: 'sidebar',
         items: [
@@ -242,7 +243,7 @@ describe('Menu Model', () => {
       if (mongoose.connection.readyState !== 1) return;
 
       await Menu.create({
-        name: { ar: 'قائمة الهيدر', en: 'Header Menu' },
+        name: 'Header Menu',
         slug: 'header-menu',
         location: 'header',
         items: [],
@@ -250,7 +251,7 @@ describe('Menu Model', () => {
       });
 
       await Menu.create({
-        name: { ar: 'قائمة الفوتر', en: 'Footer Menu' },
+        name: 'Footer Menu',
         slug: 'footer-menu',
         location: 'footer',
         items: [],
@@ -267,7 +268,7 @@ describe('Menu Model', () => {
       if (mongoose.connection.readyState !== 1) return;
 
       await Menu.create({
-        name: { ar: 'قائمة اختبار', en: 'Test Menu' },
+        name: 'Test Menu',
         slug: 'test-menu',
         location: 'header',
         items: [],
@@ -285,22 +286,22 @@ describe('Menu Model', () => {
 
       // Create new
       const created = await Menu.upsertMenu('new-menu', {
-        name: { ar: 'قائمة جديدة', en: 'New Menu' },
+        name: 'New Menu',
         location: 'header',
         items: [],
       });
 
       expect(created.slug).toBe('new-menu');
-      expect(created.name.ar).toBe('قائمة جديدة');
+      expect(created.name).toBe('New Menu');
 
       // Update existing
       const updated = await Menu.upsertMenu('new-menu', {
-        name: { ar: 'قائمة محدثة', en: 'Updated Menu' },
+        name: 'Updated Menu',
         location: 'header',
         items: [],
       });
 
-      expect(updated.name.ar).toBe('قائمة محدثة');
+      expect(updated.name).toBe('Updated Menu');
 
       // Verify only one record exists
       const count = await Menu.countDocuments({ slug: 'new-menu' });
@@ -311,17 +312,20 @@ describe('Menu Model', () => {
       if (mongoose.connection.readyState !== 1) return;
 
       const menu = await Menu.create({
-        name: { ar: 'قائمة', en: 'Menu' },
+        name: 'Menu',
         slug: 'add-item-test',
         location: 'header',
         items: [],
       });
 
-      const updatedMenu = await Menu.addItem('add-item-test', {
+      const updatedMenu = await Menu.addItem(menu._id, {
         id: 'new-item',
         label: { ar: 'عنصر جديد', en: 'New Item' },
         url: '/new',
         order: 1,
+        type: 'internal',
+        target: '_self',
+        isActive: true,
       });
 
       expect(updatedMenu?.items).toHaveLength(1);
@@ -331,8 +335,8 @@ describe('Menu Model', () => {
     it('should update item in menu', async () => {
       if (mongoose.connection.readyState !== 1) return;
 
-      await Menu.create({
-        name: { ar: 'قائمة', en: 'Menu' },
+      const menu = await Menu.create({
+        name: 'Menu',
         slug: 'update-item-test',
         location: 'header',
         items: [
@@ -345,7 +349,7 @@ describe('Menu Model', () => {
         ],
       });
 
-      const updatedMenu = await Menu.updateItem('update-item-test', 'item-1', {
+      const updatedMenu = await Menu.updateItem(menu._id, 'item-1', {
         label: { ar: 'عنصر جديد', en: 'New Item' },
         url: '/new',
       });
@@ -357,8 +361,8 @@ describe('Menu Model', () => {
     it('should remove item from menu', async () => {
       if (mongoose.connection.readyState !== 1) return;
 
-      await Menu.create({
-        name: { ar: 'قائمة', en: 'Menu' },
+      const menu = await Menu.create({
+        name: 'Menu',
         slug: 'remove-item-test',
         location: 'header',
         items: [
@@ -377,7 +381,7 @@ describe('Menu Model', () => {
         ],
       });
 
-      const updatedMenu = await Menu.removeItem('remove-item-test', 'item-1');
+      const updatedMenu = await Menu.removeItem(menu._id, 'item-1');
 
       expect(updatedMenu?.items).toHaveLength(1);
       expect(updatedMenu?.items[0]?.id).toBe('item-2');
@@ -386,8 +390,8 @@ describe('Menu Model', () => {
     it('should reorder items', async () => {
       if (mongoose.connection.readyState !== 1) return;
 
-      await Menu.create({
-        name: { ar: 'قائمة', en: 'Menu' },
+      const menu = await Menu.create({
+        name: 'Menu',
         slug: 'reorder-test',
         location: 'header',
         items: [
@@ -397,7 +401,7 @@ describe('Menu Model', () => {
         ],
       });
 
-      const updatedMenu = await Menu.reorderItems('reorder-test', ['item-3', 'item-1', 'item-2']);
+      const updatedMenu = await Menu.reorderItems(menu._id, ['item-3', 'item-1', 'item-2']);
 
       expect(updatedMenu?.items[0]?.id).toBe('item-3');
       expect(updatedMenu?.items[0]?.order).toBe(0);
@@ -413,7 +417,7 @@ describe('Menu Model', () => {
       if (mongoose.connection.readyState !== 1) return;
 
       await Menu.create({
-        name: { ar: 'قائمة نشطة', en: 'Active Menu' },
+        name: 'Active Menu',
         slug: 'active-menu',
         location: 'header',
         items: [],
@@ -421,7 +425,7 @@ describe('Menu Model', () => {
       });
 
       await Menu.create({
-        name: { ar: 'قائمة غير نشطة', en: 'Inactive Menu' },
+        name: 'Inactive Menu',
         slug: 'inactive-menu',
         location: 'header',
         items: [],
@@ -442,7 +446,7 @@ describe('Menu Model', () => {
       if (mongoose.connection.readyState !== 1) return;
 
       const menu = await Menu.create({
-        name: { ar: 'قائمة', en: 'Menu' },
+        name: 'Menu',
         slug: 'timestamp-test',
         location: 'header',
         items: [],

@@ -4,6 +4,7 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "baseUrl": "./src",
+    "isolatedModules": true,
     "paths": {
       "@/*": ["./*"],
       "@config/*": ["./config/*"],

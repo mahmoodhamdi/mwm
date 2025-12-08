@@ -206,8 +206,7 @@ describe('Notifications Page', () => {
       render(<NotificationsPage />);
 
       // Initial unread count
-      const unreadBadge = screen.getByText(/unread/);
-      const initialCount = parseInt(unreadBadge.textContent?.match(/\d+/)?.[0] || '0');
+      screen.getByText(/unread/);
 
       // Find and click a "Mark as read" button (they appear on hover)
       const markAsReadButtons = screen.getAllByText('Mark as read');

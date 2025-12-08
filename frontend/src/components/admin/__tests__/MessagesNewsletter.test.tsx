@@ -3,9 +3,6 @@
  * اختبارات الرسائل والنشرة البريدية
  */
 
-import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-
 // Mock next-intl
 jest.mock('next-intl', () => ({
   useLocale: () => 'en',
@@ -418,7 +415,7 @@ describe('Bilingual Support', () => {
   });
 
   it('should support LTR layout for English', () => {
-    const locale = 'en';
+    const locale: string = 'en';
     const isRTL = locale === 'ar';
 
     expect(isRTL).toBe(false);

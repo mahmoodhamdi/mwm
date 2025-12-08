@@ -3,10 +3,6 @@
  * اختبارات إدارة المحتوى
  */
 
-import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-
 // Mock next-intl
 jest.mock('next-intl', () => ({
   useLocale: () => 'en',

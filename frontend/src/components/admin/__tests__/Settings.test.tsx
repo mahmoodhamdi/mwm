@@ -3,8 +3,6 @@
  * اختبارات الإعدادات
  */
 
-import React from 'react';
-
 // Mock next-intl
 jest.mock('next-intl', () => ({
   useLocale: () => 'en',
@@ -514,7 +512,7 @@ describe('Bilingual Support', () => {
   });
 
   it('should determine LTR layout for English', () => {
-    const locale = 'en';
+    const locale: string = 'en';
     const isRTL = locale === 'ar';
 
     expect(isRTL).toBe(false);

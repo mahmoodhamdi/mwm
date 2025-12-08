@@ -118,8 +118,8 @@ describe('Footer', () => {
 
   it('renders contact information', () => {
     render(<Footer />);
-    expect(screen.getByText('info@mwm.com')).toBeInTheDocument();
-    expect(screen.getByText('+966 50 000 0000')).toBeInTheDocument();
+    expect(screen.getByText('mwm.softwars.solutions@gmail.com')).toBeInTheDocument();
+    expect(screen.getByText('+20 101 979 3768')).toBeInTheDocument();
   });
 
   it('applies custom className', () => {

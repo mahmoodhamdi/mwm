@@ -21,7 +21,7 @@ describe('useLocalStorage', () => {
     it('should return stored value when localStorage has data', () => {
       window.localStorage.setItem('test-key', JSON.stringify('stored-value'));
 
-      const { result } = renderHook(() => useLocalStorage('test-key', 'initial'));
+      renderHook(() => useLocalStorage('test-key', 'initial'));
 
       // After mount effect runs, it should read from localStorage
       expect(window.localStorage.getItem).toHaveBeenCalledWith('test-key');

@@ -22,7 +22,7 @@ jest.mock('next/navigation', () => ({
 
 // Mock useClickOutside
 jest.mock('@/hooks', () => ({
-  useClickOutside: (handler: () => void) => {
+  useClickOutside: (_handler: () => void) => {
     const ref = { current: null };
     return ref;
   },

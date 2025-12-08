@@ -27,6 +27,11 @@ cd frontend && npm run test:watch # Watch mode for frontend
 cd backend && npx jest src/path/to/file.test.ts
 cd frontend && npx jest src/path/to/file.test.tsx
 
+# E2E tests (Playwright)
+cd frontend && npm run test:e2e              # Run all E2E tests
+cd frontend && npx playwright test --ui      # Interactive UI mode
+cd frontend && npx playwright test file.spec.ts  # Run specific test
+
 # Type checking
 cd backend && npx tsc --noEmit
 cd frontend && npx tsc --noEmit
@@ -64,8 +69,8 @@ npm run docker:down            # Stop Docker services
 
 - `app.ts` - Express app setup with middleware chain (security, CORS, rate limiting)
 - `server.ts` - Server entry point with database connection
-- `controllers/` - Route handlers (auth, content, menu, service, project, team, contact)
-- `models/` - Mongoose schemas (User, Service, Project, TeamMember, Contact, etc.)
+- `controllers/` - Route handlers (auth, content, menu, service, project, team, contact, blog, careers, newsletter)
+- `models/` - Mongoose schemas (19 models: User, Service, ServiceCategory, Project, ProjectCategory, TeamMember, Department, BlogPost, BlogCategory, Job, JobApplication, Newsletter, Subscriber, Contact, SiteContent, Menu, Translation, Settings)
 - `routes/` - API route definitions (versioned at `/api/v1/`)
 - `middlewares/` - Auth, validation, error handling, asyncHandler
 - `validations/` - Joi validation schemas (one per domain)
@@ -77,11 +82,12 @@ npm run docker:down            # Stop Docker services
 - `app/[locale]/` - Next.js App Router pages with locale prefix
 - `app/[locale]/admin/` - Admin dashboard pages (content, services, projects, team, etc.)
 - `components/` - UI components organized by domain (admin, services, projects, team, contact)
+- `services/` - API service layer (organized by `admin/` and `public/` subdirectories)
 - `messages/` - i18n translation files (`ar.json`, `en.json`)
 - `i18n/` - next-intl configuration
 - `providers/` - React context providers (Theme, etc.)
-- `hooks/` - Custom React hooks
-- `lib/` - Utility functions and API client
+- `hooks/` - Custom React hooks (useDebounce, useLocalStorage, useMediaQuery, etc.)
+- `lib/` - Utility functions and API client (`api.ts` with axios interceptors)
 
 ### Shared Package (packages/shared/src/)
 
@@ -119,6 +125,9 @@ Current endpoints:
 - `/api/v1/menus` - Navigation menus
 - `/api/v1/translations` - Translation management
 - `/api/v1/settings` - Site settings
+- `/api/v1/blog` - Blog posts and categories
+- `/api/v1/careers` - Job listings and applications
+- `/api/v1/newsletter` - Newsletter subscribers and campaigns
 
 ### i18n in Frontend
 
@@ -132,8 +141,22 @@ Current endpoints:
 - Backend: Jest with `mongodb-memory-server` for integration tests (Redis is mocked in tests/setup.ts)
 - Frontend: Jest with React Testing Library (jsdom environment)
 - Test files colocated in `__tests__/` directories or as `*.test.{ts,tsx}`
-- E2E: Playwright (`npm run test:e2e` in frontend)
+- E2E: Playwright (`npm run test:e2e` in frontend) - tests in `frontend/e2e/` directory
 - Backend coverage threshold: 80% | Frontend coverage threshold: 70%
+
+### Frontend Services Pattern
+
+Frontend API services are organized by access level:
+
+- `services/public/` - Public-facing API calls (services, projects, team, blog, careers, contact)
+- `services/admin/` - Admin dashboard API calls (content, menus, settings, translations, newsletter)
+- `services/index.ts` - Unified re-exports with types
+
+Each service module exports:
+
+- Type definitions for request/response data
+- Individual API functions (e.g., `getServices`, `createService`)
+- A service object grouping all functions (e.g., `servicesService`)
 
 ### Path Aliases
 

@@ -32,83 +32,89 @@ export async function generateMetadata({
 const teamMembers = [
   {
     id: '1',
+    slug: 'ahmed-mohamed',
     name: { ar: 'أحمد محمد', en: 'Ahmed Mohamed' },
     position: { ar: 'المؤسس والرئيس التنفيذي', en: 'Founder & CEO' },
-    bio: {
+    shortBio: {
       ar: 'خبرة أكثر من 10 سنوات في مجال تطوير البرمجيات وإدارة المشاريع التقنية',
       en: 'Over 10 years of experience in software development and technical project management',
     },
-    image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop',
-    social: {
+    avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop',
+    socialLinks: {
       linkedin: 'https://linkedin.com',
       twitter: 'https://twitter.com',
     },
   },
   {
     id: '2',
+    slug: 'sara-ahmed',
     name: { ar: 'سارة أحمد', en: 'Sara Ahmed' },
     position: { ar: 'مدير التقنية', en: 'CTO' },
-    bio: {
+    shortBio: {
       ar: 'متخصصة في هندسة البرمجيات والذكاء الاصطناعي',
       en: 'Specialized in software engineering and artificial intelligence',
     },
-    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop',
-    social: {
+    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop',
+    socialLinks: {
       linkedin: 'https://linkedin.com',
     },
   },
   {
     id: '3',
+    slug: 'mohamed-ali',
     name: { ar: 'محمد علي', en: 'Mohamed Ali' },
     position: { ar: 'مطور واجهات أمامية', en: 'Senior Frontend Developer' },
-    bio: {
+    shortBio: {
       ar: 'متخصص في React و Next.js مع خبرة 5 سنوات',
       en: 'Specialized in React and Next.js with 5 years of experience',
     },
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop',
-    social: {
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop',
+    socialLinks: {
       linkedin: 'https://linkedin.com',
       github: 'https://github.com',
     },
   },
   {
     id: '4',
+    slug: 'nora-hassan',
     name: { ar: 'نورا حسن', en: 'Nora Hassan' },
     position: { ar: 'مصممة UI/UX', en: 'UI/UX Designer' },
-    bio: {
+    shortBio: {
       ar: 'شغوفة بتصميم تجارب مستخدم استثنائية ومبتكرة',
       en: 'Passionate about designing exceptional and innovative user experiences',
     },
-    image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&h=400&fit=crop',
-    social: {
+    avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&h=400&fit=crop',
+    socialLinks: {
       linkedin: 'https://linkedin.com',
-      dribbble: 'https://dribbble.com',
+      website: 'https://dribbble.com',
     },
   },
   {
     id: '5',
+    slug: 'khaled-ibrahim',
     name: { ar: 'خالد إبراهيم', en: 'Khaled Ibrahim' },
     position: { ar: 'مطور خوادم', en: 'Backend Developer' },
-    bio: {
+    shortBio: {
       ar: 'متخصص في Node.js و Python مع خبرة في قواعد البيانات',
       en: 'Specialized in Node.js and Python with database expertise',
     },
-    image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop',
-    social: {
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop',
+    socialLinks: {
       linkedin: 'https://linkedin.com',
       github: 'https://github.com',
     },
   },
   {
     id: '6',
+    slug: 'mariam-abdullah',
     name: { ar: 'مريم عبدالله', en: 'Mariam Abdullah' },
     position: { ar: 'مطورة تطبيقات موبايل', en: 'Mobile Developer' },
-    bio: {
+    shortBio: {
       ar: 'متخصصة في React Native و Flutter',
       en: 'Specialized in React Native and Flutter',
     },
-    image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop',
-    social: {
+    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop',
+    socialLinks: {
       linkedin: 'https://linkedin.com',
     },
   },
@@ -141,11 +147,12 @@ export default function TeamPage({ params: { locale } }: { params: { locale: str
             {teamMembers.map(member => (
               <TeamCard
                 key={member.id}
+                slug={member.slug}
                 name={member.name[locale as 'ar' | 'en']}
                 position={member.position[locale as 'ar' | 'en']}
-                bio={member.bio[locale as 'ar' | 'en']}
-                image={member.image}
-                social={member.social}
+                shortBio={member.shortBio[locale as 'ar' | 'en']}
+                avatar={member.avatar}
+                socialLinks={member.socialLinks}
               />
             ))}
           </div>

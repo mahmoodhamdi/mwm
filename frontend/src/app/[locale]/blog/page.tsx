@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useLocale } from 'next-intl';
 import Link from 'next/link';
-import { Search, Calendar, User, Clock, Tag, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Search, Calendar, Clock, Tag, ArrowRight, ArrowLeft } from 'lucide-react';
 
 // Types
 interface Category {

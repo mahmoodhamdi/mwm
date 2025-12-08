@@ -96,12 +96,12 @@ export default async function LocaleLayout({
           description="A company specialized in software development and integrated digital solutions"
           url={process.env.NEXT_PUBLIC_SITE_URL || 'https://mwm.com'}
           logo={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://mwm.com'}/logo.png`}
-          email="info@mwm.com"
-          phone="+966500000000"
+          email="mwm.softwars.solutions@gmail.com"
+          phone="+201019793768"
           address={{
-            street: '123 Business Street',
-            city: 'Tech City',
-            country: 'SA',
+            street: 'Cairo',
+            city: 'Cairo',
+            country: 'EG',
           }}
           socialProfiles={[
             'https://facebook.com/mwm',

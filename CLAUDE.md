@@ -27,6 +27,10 @@ cd frontend && npm run test:watch # Watch mode for frontend
 cd backend && npx jest src/path/to/file.test.ts
 cd frontend && npx jest src/path/to/file.test.tsx
 
+# Type checking
+cd backend && npx tsc --noEmit
+cd frontend && npx tsc --noEmit
+
 # Linting
 npm run lint                   # Lint all workspaces
 npm run lint:fix               # Auto-fix lint issues
@@ -36,7 +40,8 @@ npm run build                  # Build all packages
 npm run build:backend          # Build backend only
 npm run build:frontend         # Build frontend only
 
-# IMPORTANT: Shared package must be rebuilt when types change
+# CRITICAL: Shared package must be rebuilt when types change
+# Failing to rebuild causes "module not found" or type mismatch errors
 cd packages/shared && npm run build
 
 # Seeding

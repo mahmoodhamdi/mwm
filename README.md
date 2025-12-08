@@ -9,94 +9,132 @@ mwm/
 ├── backend/          # Express.js API server
 ├── frontend/         # Next.js 14 application
 ├── packages/
-│   └── shared/       # Shared types and utilities
+│   └── shared/       # Shared types and utilities (@mwm/shared)
 └── docs/             # Documentation
 ```
 
 ## Features
 
-- **Bilingual Support**: Full Arabic (RTL) and English support
-- **Admin Dashboard**: Complete CMS for managing content
-- **Services Management**: Showcase company services with categories
-- **Portfolio/Projects**: Display completed projects and case studies
-- **Team Management**: Manage team member profiles
-- **Contact Form**: Receive and manage customer inquiries
-- **Newsletter**: Email subscription management
-- **Analytics**: Track visitor metrics and engagement
-- **SEO Optimized**: Schema.org markup, sitemap, meta tags
+### Public Website
+
+- **Bilingual Support**: Full Arabic (RTL) and English with dynamic switching
+- **Services Showcase**: Service listings with categories and detailed pages
+- **Portfolio/Projects**: Project gallery with technologies and case studies
+- **Team Profiles**: Team member pages with departments
+- **Contact Form**: Customer inquiry submission
+- **Blog & Careers**: Pages ready (backend pending)
+
+### Admin Dashboard
+
+- **Content Management**: Edit all site content in Arabic/English
+- **Services/Projects/Team CRUD**: Full management capabilities
+- **Messages Inbox**: View and manage contact submissions
+- **Newsletter**: Subscriber management
+- **Menu Builder**: Dynamic navigation management
+- **Settings**: Site configuration, SEO, social links
+- **User Management**: Roles and permissions system
 
 ## Tech Stack
 
 ### Frontend
 
 - Next.js 14 (App Router)
-- TypeScript
-- Tailwind CSS
-- Framer Motion
+- TypeScript 5
+- Tailwind CSS 3 with RTL support
 - next-intl (i18n)
+- TanStack Query + Zustand
+- react-hook-form + Zod
 
 ### Backend
 
-- Express.js
-- TypeScript
-- MongoDB with Mongoose
+- Express.js 4
+- TypeScript 5
+- MongoDB 7 + Mongoose 8
+- Redis 7 (caching)
 - JWT Authentication
-- Redis (caching)
 
 ### Infrastructure
 
-- Docker
-- PM2
-- Nginx
+- Docker & Docker Compose
+- PM2 process management
 
-## Getting Started
+## Quick Start
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 20+
 - MongoDB 6+
 - Redis 7+
-- npm or yarn
+- npm 10+
 
 ### Installation
 
-1. Clone the repository:
-
 ```bash
+# Clone and install
 git clone https://github.com/your-org/mwm.git
 cd mwm
-```
-
-2. Install dependencies:
-
-```bash
 npm install
-```
 
-3. Set up environment variables:
-
-```bash
-# Backend
+# Setup environment
 cp backend/.env.example backend/.env
-
-# Frontend
 cp frontend/.env.example frontend/.env.local
-```
 
-4. Start development servers:
-
-```bash
-# Start all services
+# Start development
 npm run dev
-
-# Or individually
-cd backend && npm run dev
-cd frontend && npm run dev
 ```
 
-### Environment Variables
+## Available Scripts
 
-#### Backend (.env)
+| Command                | Description                   |
+| ---------------------- | ----------------------------- |
+| `npm run dev`          | Start all development servers |
+| `npm run dev:backend`  | Start backend only            |
+| `npm run dev:frontend` | Start frontend only           |
+| `npm run build`        | Build all packages            |
+| `npm test`             | Run all tests                 |
+| `npm run lint`         | Lint all packages             |
+| `npm run docker:dev`   | Start with Docker Compose     |
+
+## API Documentation
+
+- **Swagger UI**: http://localhost:5000/api/docs
+- **OpenAPI JSON**: http://localhost:5000/api/docs.json
+
+## Documentation
+
+| Document                                          | Description                    |
+| ------------------------------------------------- | ------------------------------ |
+| [DEVELOPMENT_PLAN.md](./docs/DEVELOPMENT_PLAN.md) | Development roadmap and status |
+| [PROJECT_ROUTES.md](./docs/PROJECT_ROUTES.md)     | Frontend pages and API routes  |
+| [ADMIN_GUIDE.md](./docs/ADMIN_GUIDE.md)           | Admin panel user guide         |
+| [DEPLOYMENT.md](./docs/DEPLOYMENT.md)             | Production deployment guide    |
+
+## Project Status
+
+### Completed
+
+- Foundation & Setup (monorepo, TypeScript, Docker)
+- Backend API (10 route modules, 13 models)
+- Frontend (13 public pages, 16 admin pages)
+- Authentication (JWT with refresh tokens)
+- i18n (Arabic/English with RTL)
+- Testing (unit & integration)
+- SEO (meta tags, sitemap, robots.txt)
+
+### In Progress
+
+- Blog System (backend API)
+- Careers System (backend API)
+
+### Planned
+
+- Newsletter campaigns
+- E2E tests (Playwright)
+- Production deployment
+
+## Environment Variables
+
+### Backend (.env)
 
 ```env
 NODE_ENV=development
@@ -104,93 +142,16 @@ PORT=5000
 MONGODB_URI=mongodb://localhost:27017/mwm
 JWT_SECRET=your-jwt-secret
 JWT_REFRESH_SECRET=your-refresh-secret
-CORS_ORIGIN=http://localhost:3000
 REDIS_URL=redis://localhost:6379
-SMTP_HOST=smtp.mailtrap.io
-SMTP_PORT=2525
-SMTP_USER=your-smtp-user
-SMTP_PASS=your-smtp-pass
-CLOUDINARY_CLOUD_NAME=your-cloud-name
-CLOUDINARY_API_KEY=your-api-key
-CLOUDINARY_API_SECRET=your-api-secret
 ```
 
-#### Frontend (.env.local)
+### Frontend (.env.local)
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
-## API Documentation
-
-After starting the backend server, access the API documentation at:
-
-- Swagger UI: `http://localhost:5000/api/docs`
-- OpenAPI JSON: `http://localhost:5000/api/docs.json`
-
-## Scripts
-
-### Root
-
-- `npm run dev` - Start all development servers
-- `npm run build` - Build all packages
-- `npm run test` - Run all tests
-- `npm run lint` - Lint all packages
-
-### Backend
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run test` - Run tests
-- `npm run test:coverage` - Run tests with coverage
-
-### Frontend
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run test` - Run tests
-
-## Testing
-
-```bash
-# Run all tests
-npm test
-
-# Backend tests only
-cd backend && npm test
-
-# Frontend tests only
-cd frontend && npm test
-
-# With coverage
-npm run test:coverage
-```
-
-## Deployment
-
-See [DEPLOYMENT.md](./docs/DEPLOYMENT.md) for detailed deployment instructions.
-
-## Admin Guide
-
-See [ADMIN_GUIDE.md](./docs/ADMIN_GUIDE.md) for admin panel usage guide.
-
-## Project Status
-
-### Completed Phases
-
-- **Phase 1**: Project Setup & Core Infrastructure
-- **Phase 2**: Authentication & Authorization
-- **Phase 3**: Public Pages (Home, About, Services, Portfolio, Contact)
-- **Phase 4**: Admin Dashboard (Content Management, Analytics)
-- **Phase 5**: Performance, SEO, Security, Documentation
-
 ## License
 
 Private - All rights reserved
-
-## Contact
-
-- Website: https://mwm.com
-- Email: support@mwm.com

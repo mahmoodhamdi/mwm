@@ -12,3 +12,4 @@ export { serviceController } from './service.controller';
 export { projectController } from './project.controller';
 export { teamController } from './team.controller';
 export { contactController } from './contact.controller';
+export { blogController } from './blog.controller';

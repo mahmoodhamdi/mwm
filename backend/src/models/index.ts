@@ -62,3 +62,5 @@ export {
   type ContactStatus,
   type ContactPriority,
 } from './Contact';
+export { BlogCategory, type IBlogCategory, type IBlogCategoryModel } from './BlogCategory';
+export { BlogPost, type IBlogPost, type IBlogPostModel, type BlogPostStatus } from './BlogPost';

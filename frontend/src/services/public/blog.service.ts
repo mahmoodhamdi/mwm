@@ -91,7 +91,7 @@ const BLOG_ENDPOINT = '/blog';
 export async function getBlogPosts(
   filters: BlogPostsFilters = {}
 ): Promise<ApiResponse<BlogPostsResponse>> {
-  const response = await apiClient.get<BlogPostsResponse>(`${BLOG_ENDPOINT}/posts`, filters);
+  const response = await apiClient.get<BlogPostsResponse>(`${BLOG_ENDPOINT}/posts`, { ...filters });
   return response;
 }
 

@@ -110,6 +110,7 @@ export type {
   JobsPagination,
   JobsResponse,
   JobApplication,
+  Department as CareersDepartment,
 } from './careers.service';
 export {
   getJobs,
@@ -117,5 +118,5 @@ export {
   getFeaturedJobs,
   submitApplication,
   careersService,
+  getDepartments as getCareersDepartments,
 } from './careers.service';
-export { getDepartments } from './careers.service';

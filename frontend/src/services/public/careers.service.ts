@@ -102,7 +102,7 @@ const CAREERS_ENDPOINT = '/careers';
  * جلب الوظائف مع الفلاتر
  */
 export async function getJobs(filters: JobsFilters = {}): Promise<ApiResponse<JobsResponse>> {
-  const response = await apiClient.get<JobsResponse>(`${CAREERS_ENDPOINT}/jobs`, filters);
+  const response = await apiClient.get<JobsResponse>(`${CAREERS_ENDPOINT}/jobs`, { ...filters });
   return response;
 }
 

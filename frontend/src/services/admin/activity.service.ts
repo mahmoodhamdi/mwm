@@ -3,7 +3,7 @@
  * خدمة سجل النشاط
  */
 
-import api from '@/lib/api';
+import { api, extractData } from '@/lib/api';
 
 // Types
 export interface ActivityLogEntry {
@@ -59,7 +59,7 @@ export interface GetLogsParams {
 // Service functions
 export async function getLogs(params?: GetLogsParams): Promise<ActivityLogsResponse> {
   const response = await api.get('/activity', { params });
-  return response.data.data;
+  return extractData<ActivityLogsResponse>(response);
 }
 
 export async function getLogsByUser(
@@ -67,7 +67,7 @@ export async function getLogsByUser(
   params?: { page?: number; limit?: number; action?: string; resource?: string }
 ): Promise<{ logs: ActivityLogEntry[]; total: number }> {
   const response = await api.get(`/activity/user/${userId}`, { params });
-  return response.data.data;
+  return extractData<{ logs: ActivityLogEntry[]; total: number }>(response);
 }
 
 export async function getLogsByResource(
@@ -75,12 +75,12 @@ export async function getLogsByResource(
   params?: { resourceId?: string; page?: number; limit?: number }
 ): Promise<{ logs: ActivityLogEntry[]; total: number }> {
   const response = await api.get(`/activity/resource/${resource}`, { params });
-  return response.data.data;
+  return extractData<{ logs: ActivityLogEntry[]; total: number }>(response);
 }
 
 export async function getRecentLogs(limit?: number): Promise<{ logs: ActivityLogEntry[] }> {
   const response = await api.get('/activity/recent', { params: { limit } });
-  return response.data.data;
+  return extractData<{ logs: ActivityLogEntry[] }>(response);
 }
 
 export async function getStatistics(params?: {
@@ -88,7 +88,7 @@ export async function getStatistics(params?: {
   endDate?: string;
 }): Promise<ActivityStatistics> {
   const response = await api.get('/activity/stats', { params });
-  return response.data.data;
+  return extractData<ActivityStatistics>(response);
 }
 
 export async function getMyActivity(params?: {
@@ -98,12 +98,12 @@ export async function getMyActivity(params?: {
   resource?: string;
 }): Promise<{ logs: ActivityLogEntry[]; total: number }> {
   const response = await api.get('/activity/me', { params });
-  return response.data.data;
+  return extractData<{ logs: ActivityLogEntry[]; total: number }>(response);
 }
 
 export async function deleteOldLogs(daysOld?: number): Promise<{ deleted: number }> {
   const response = await api.delete('/activity/old', { data: { daysOld } });
-  return response.data.data;
+  return extractData<{ deleted: number }>(response);
 }
 
 // Service object

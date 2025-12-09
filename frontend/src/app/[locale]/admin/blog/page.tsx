@@ -17,6 +17,18 @@ import {
   Loader2,
   RefreshCw,
 } from 'lucide-react';
+import dynamic from 'next/dynamic';
+
+// Dynamic import for MarkdownEditor to avoid SSR issues
+const MarkdownEditor = dynamic(
+  () => import('@/components/ui/MarkdownEditor').then(mod => mod.MarkdownEditor),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-[300px] animate-pulse rounded-lg border bg-gray-100 dark:bg-gray-800" />
+    ),
+  }
+);
 import {
   getPosts,
   getCategories,
@@ -877,30 +889,29 @@ export default function BlogPage() {
           </div>
 
           {/* Content */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="mb-1 block text-sm font-medium">
-                {isRTL ? 'المحتوى (عربي)' : 'Content (Arabic)'}
-              </label>
-              <textarea
-                value={postForm.contentAr}
-                onChange={e => setPostForm({ ...postForm, contentAr: e.target.value })}
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                rows={10}
-                dir="rtl"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium">
-                {isRTL ? 'المحتوى (إنجليزي)' : 'Content (English)'}
-              </label>
-              <textarea
-                value={postForm.contentEn}
-                onChange={e => setPostForm({ ...postForm, contentEn: e.target.value })}
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                rows={10}
-              />
-            </div>
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <MarkdownEditor
+              value={postForm.contentAr}
+              onChange={(value: string) => setPostForm({ ...postForm, contentAr: value })}
+              label={isRTL ? 'المحتوى (عربي)' : 'Content (Arabic)'}
+              placeholder={isRTL ? 'اكتب المحتوى هنا...' : 'Write Arabic content here...'}
+              language="ar"
+              dir="rtl"
+              minHeight={350}
+              maxHeight={500}
+            />
+            <MarkdownEditor
+              value={postForm.contentEn}
+              onChange={(value: string) => setPostForm({ ...postForm, contentEn: value })}
+              label={isRTL ? 'المحتوى (إنجليزي)' : 'Content (English)'}
+              placeholder={
+                isRTL ? 'اكتب المحتوى بالإنجليزية هنا...' : 'Write English content here...'
+              }
+              language="en"
+              dir="ltr"
+              minHeight={350}
+              maxHeight={500}
+            />
           </div>
 
           {/* Category and Status */}

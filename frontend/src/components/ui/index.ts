@@ -26,3 +26,6 @@ export type { SpinnerProps, LoadingProps } from './Spinner';
 
 export { Container } from './Container';
 export type { ContainerProps } from './Container';
+
+export { MarkdownEditor } from './MarkdownEditor';
+export type { MarkdownEditorProps } from './MarkdownEditor';

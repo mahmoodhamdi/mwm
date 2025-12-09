@@ -25,6 +25,18 @@ import {
   Search,
   AlertCircle,
 } from 'lucide-react';
+import dynamic from 'next/dynamic';
+
+// Dynamic import for MarkdownEditor to avoid SSR issues
+const MarkdownEditor = dynamic(
+  () => import('@/components/ui/MarkdownEditor').then(mod => mod.MarkdownEditor),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-[200px] animate-pulse rounded-lg border bg-gray-100 dark:bg-gray-800" />
+    ),
+  }
+);
 
 // Content item type
 interface ContentItem {
@@ -498,12 +510,24 @@ export default function ContentPage() {
                                 </span>
                                 {isArabic ? 'العربية' : 'Arabic'}
                               </label>
-                              {item.type === 'html' || isEditing ? (
+                              {item.type === 'html' ? (
+                                <MarkdownEditor
+                                  value={item.content.ar}
+                                  onChange={(value: string) => updateContent(item.id, 'ar', value)}
+                                  language="ar"
+                                  dir="rtl"
+                                  minHeight={200}
+                                  maxHeight={350}
+                                  placeholder={
+                                    isArabic ? 'اكتب المحتوى هنا...' : 'Write content here...'
+                                  }
+                                />
+                              ) : isEditing ? (
                                 <textarea
                                   value={item.content.ar}
                                   onChange={e => updateContent(item.id, 'ar', e.target.value)}
                                   dir="rtl"
-                                  rows={item.type === 'html' ? 4 : 2}
+                                  rows={2}
                                   className="bg-background focus:ring-primary w-full resize-none rounded-lg border p-2 text-sm focus:outline-none focus:ring-2"
                                 />
                               ) : (
@@ -524,12 +548,26 @@ export default function ContentPage() {
                                 </span>
                                 {isArabic ? 'الإنجليزية' : 'English'}
                               </label>
-                              {item.type === 'html' || isEditing ? (
+                              {item.type === 'html' ? (
+                                <MarkdownEditor
+                                  value={item.content.en}
+                                  onChange={(value: string) => updateContent(item.id, 'en', value)}
+                                  language="en"
+                                  dir="ltr"
+                                  minHeight={200}
+                                  maxHeight={350}
+                                  placeholder={
+                                    isArabic
+                                      ? 'اكتب المحتوى بالإنجليزية هنا...'
+                                      : 'Write content here...'
+                                  }
+                                />
+                              ) : isEditing ? (
                                 <textarea
                                   value={item.content.en}
                                   onChange={e => updateContent(item.id, 'en', e.target.value)}
                                   dir="ltr"
-                                  rows={item.type === 'html' ? 4 : 2}
+                                  rows={2}
                                   className="bg-background focus:ring-primary w-full resize-none rounded-lg border p-2 text-sm focus:outline-none focus:ring-2"
                                 />
                               ) : (

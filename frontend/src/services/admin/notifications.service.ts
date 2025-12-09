@@ -3,7 +3,7 @@
  * خدمة إدارة الإشعارات
  */
 
-import api from '@/lib/api';
+import { api, extractData } from '@/lib/api';
 
 // Types
 export interface Notification {
@@ -67,22 +67,23 @@ export async function getNotifications(params?: {
   unreadOnly?: boolean;
 }): Promise<NotificationsResponse> {
   const response = await api.get('/notifications', { params });
-  return response.data.data;
+  return extractData<NotificationsResponse>(response);
 }
 
 export async function getUnreadCount(): Promise<{ count: number }> {
   const response = await api.get('/notifications/unread-count');
-  return response.data.data;
+  return extractData<{ count: number }>(response);
 }
 
 export async function markAsRead(notificationId: string): Promise<Notification> {
   const response = await api.put(`/notifications/${notificationId}/read`);
-  return response.data.data.notification;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (response.data as any).data.notification as Notification;
 }
 
 export async function markAllAsRead(): Promise<{ count: number }> {
   const response = await api.put('/notifications/read-all');
-  return response.data.data;
+  return extractData<{ count: number }>(response);
 }
 
 export async function deleteNotification(notificationId: string): Promise<void> {
@@ -91,7 +92,7 @@ export async function deleteNotification(notificationId: string): Promise<void> 
 
 export async function deleteReadNotifications(): Promise<{ count: number }> {
   const response = await api.delete('/notifications/read');
-  return response.data.data;
+  return extractData<{ count: number }>(response);
 }
 
 export async function registerDeviceToken(
@@ -108,7 +109,8 @@ export async function registerDeviceToken(
     token,
     ...deviceInfo,
   });
-  return response.data.data.deviceToken;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (response.data as any).data.deviceToken as DeviceToken;
 }
 
 export async function removeDeviceToken(token: string): Promise<void> {
@@ -117,7 +119,7 @@ export async function removeDeviceToken(token: string): Promise<void> {
 
 export async function getDeviceTokens(): Promise<{ tokens: DeviceToken[] }> {
   const response = await api.get('/notifications/device-tokens');
-  return response.data.data;
+  return extractData<{ tokens: DeviceToken[] }>(response);
 }
 
 export async function subscribeToTopic(topic: string, token: string): Promise<void> {

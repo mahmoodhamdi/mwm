@@ -55,9 +55,10 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
     refetch,
   } = useQuery<NotificationsResponse>({
     queryKey: ['notifications'],
-    queryFn: async () => {
-      const response = await api.get('/notifications');
-      return response.data.data;
+    queryFn: async (): Promise<NotificationsResponse> => {
+      const response = await api.get<{ data: NotificationsResponse }>('/notifications');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return (response.data as any).data as NotificationsResponse;
     },
     enabled,
     refetchInterval: 60000, // Refetch every minute
@@ -66,9 +67,10 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
   // Fetch unread count
   const { data: unreadCountData } = useQuery<{ count: number }>({
     queryKey: ['notifications-unread-count'],
-    queryFn: async () => {
-      const response = await api.get('/notifications/unread-count');
-      return response.data.data;
+    queryFn: async (): Promise<{ count: number }> => {
+      const response = await api.get<{ data: { count: number } }>('/notifications/unread-count');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return (response.data as any).data as { count: number };
     },
     enabled,
     refetchInterval: 30000, // Refetch every 30 seconds
@@ -168,7 +170,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
   }, []);
 
   return {
-    notifications: notificationsData?.notifications || [],
+    notifications: (notificationsData?.notifications || []) as Notification[],
     total: notificationsData?.total || 0,
     unreadCount: unreadCountData?.count || notificationsData?.unreadCount || 0,
     isLoading,

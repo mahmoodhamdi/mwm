@@ -3,7 +3,7 @@
  * خدمة لوحة التحكم
  */
 
-import api from '@/lib/api';
+import { api, extractData } from '@/lib/api';
 
 // Types
 export interface DashboardStats {
@@ -99,22 +99,22 @@ export interface QuickStatsResponse {
 // Service functions
 export async function getStats(): Promise<DashboardStats> {
   const response = await api.get('/dashboard/stats');
-  return response.data.data;
+  return extractData<DashboardStats>(response);
 }
 
 export async function getRecentActivity(limit?: number): Promise<RecentActivityResponse> {
   const response = await api.get('/dashboard/activity', { params: { limit } });
-  return response.data.data;
+  return extractData<RecentActivityResponse>(response);
 }
 
 export async function getChartsData(period?: number): Promise<ChartsDataResponse> {
   const response = await api.get('/dashboard/charts', { params: { period } });
-  return response.data.data;
+  return extractData<ChartsDataResponse>(response);
 }
 
 export async function getQuickStats(): Promise<QuickStatsResponse> {
   const response = await api.get('/dashboard/quick-stats');
-  return response.data.data;
+  return extractData<QuickStatsResponse>(response);
 }
 
 // Service object

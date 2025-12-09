@@ -3,7 +3,7 @@
  * ملفات اختبار Playwright
  */
 
-import { test as base, expect } from '@playwright/test';
+import { test as base, expect, Page } from '@playwright/test';
 
 // Extend base test with custom fixtures
 export const test = base.extend({
@@ -68,12 +68,12 @@ export const selectors = {
 // Helper functions
 export const helpers = {
   // Wait for page to be fully loaded
-  async waitForPageLoad(page: ReturnType<typeof base.extend>['page'] extends Promise<infer P> ? P : never) {
+  async waitForPageLoad(page: Page) {
     await page.waitForLoadState('networkidle');
   },
 
   // Check if element is visible
-  async isVisible(page: ReturnType<typeof base.extend>['page'] extends Promise<infer P> ? P : never, selector: string) {
+  async isVisible(page: Page, selector: string) {
     const element = page.locator(selector).first();
     return await element.isVisible();
   },

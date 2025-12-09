@@ -115,7 +115,14 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/a
 // Export configured client
 export const api = createApiClient(API_BASE_URL);
 
-// Helper methods
+/**
+ * Helper to extract nested data from API response
+ * This handles the common pattern where API returns { success: boolean, data: T }
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const extractData = <T>(response: any): T => response.data.data as T;
+
+// Helper methods with proper typing
 export const apiClient = {
   get: <T>(url: string, params?: Record<string, unknown>) =>
     api.get<ApiResponse<T>>(url, { params }).then(res => res.data),

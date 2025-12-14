@@ -282,3 +282,31 @@ export {
 } from './notifications.service';
 
 export { notificationsService } from './notifications.service';
+
+// Users service
+export type {
+  User,
+  UserRole,
+  UserStatus,
+  UsersFilters,
+  UsersResponse,
+  UserStats,
+  CreateUserData,
+  UpdateUserData,
+  BulkActionData as UserBulkActionData,
+} from './users.service';
+
+export {
+  getAllUsers,
+  getUserById,
+  getUserStats,
+  createUser,
+  updateUser,
+  deleteUser,
+  resetUserPassword,
+  toggleUserStatus,
+  unlockUser,
+  bulkAction as userBulkAction,
+} from './users.service';
+
+export { usersAdminService } from './users.service';

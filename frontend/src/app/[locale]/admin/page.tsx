@@ -5,80 +5,135 @@
 
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocale } from 'next-intl';
-import { FolderKanban, MessageSquare, Users, Mail, TrendingUp } from 'lucide-react';
+import { FolderKanban, MessageSquare, Users, Mail, TrendingUp, Briefcase } from 'lucide-react';
 import { StatsCard, DashboardCharts, RecentActivity } from '@/components/admin';
 import type { ActivityItem } from '@/components/admin';
-
-// Mock data - replace with actual API calls
-const mockStats = {
-  totalProjects: 24,
-  newMessages: 12,
-  todayVisitors: 1250,
-  newsletterSubscribers: 380,
-  trends: {
-    projects: 8,
-    messages: 15,
-    visitors: 12,
-    subscribers: 5,
-  },
-};
-
-const mockActivityItems: ActivityItem[] = [
-  {
-    id: '1',
-    type: 'message',
-    titleAr: 'أحمد محمد',
-    titleEn: 'Ahmed Mohammed',
-    descriptionAr: 'استفسار عن تطوير تطبيق موبايل',
-    descriptionEn: 'Inquiry about mobile app development',
-    timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 mins ago
-    href: '/admin/messages/1',
-  },
-  {
-    id: '2',
-    type: 'subscriber',
-    titleAr: 'user@example.com',
-    titleEn: 'user@example.com',
-    descriptionAr: 'اشترك في النشرة البريدية',
-    descriptionEn: 'Subscribed to newsletter',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60), // 1 hour ago
-  },
-  {
-    id: '3',
-    type: 'project_update',
-    titleAr: 'تحديث مشروع التجارة الإلكترونية',
-    titleEn: 'E-commerce project updated',
-    descriptionAr: 'تم تحديث معلومات المشروع',
-    descriptionEn: 'Project information updated',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-    href: '/admin/projects/1',
-  },
-  {
-    id: '4',
-    type: 'message',
-    titleAr: 'سارة عبدالله',
-    titleEn: 'Sara Abdullah',
-    descriptionAr: 'طلب عرض سعر لتصميم UI/UX',
-    descriptionEn: 'Quote request for UI/UX design',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5), // 5 hours ago
-    href: '/admin/messages/2',
-  },
-  {
-    id: '5',
-    type: 'user_login',
-    titleAr: 'تسجيل دخول المدير',
-    titleEn: 'Admin logged in',
-    descriptionAr: 'تم تسجيل الدخول من جهاز جديد',
-    descriptionEn: 'Logged in from a new device',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
-  },
-];
+import {
+  dashboardService,
+  type DashboardStats,
+  type RecentActivityResponse,
+} from '@/services/admin/dashboard.service';
 
 export default function AdminDashboard() {
   const locale = useLocale();
   const isRTL = locale === 'ar';
+
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [activity, setActivity] = useState<RecentActivityResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadDashboardData() {
+      try {
+        setLoading(true);
+        setError(null);
+        const [statsData, activityData] = await Promise.all([
+          dashboardService.getStats(),
+          dashboardService.getRecentActivity(10),
+        ]);
+        setStats(statsData);
+        setActivity(activityData);
+      } catch (err) {
+        console.error('Failed to load dashboard data:', err);
+        setError(isRTL ? 'فشل في تحميل بيانات لوحة التحكم' : 'Failed to load dashboard data');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadDashboardData();
+  }, [isRTL]);
+
+  // Transform API data to ActivityItem format
+  const activityItems: ActivityItem[] = React.useMemo(() => {
+    if (!activity) return [];
+
+    const items: ActivityItem[] = [];
+
+    // Add recent contacts
+    activity.recentContacts?.forEach(contact => {
+      items.push({
+        id: contact._id,
+        type: 'message',
+        titleAr: contact.name,
+        titleEn: contact.name,
+        descriptionAr: contact.subject,
+        descriptionEn: contact.subject,
+        timestamp: new Date(contact.createdAt),
+        href: `/${locale}/admin/messages/${contact._id}`,
+      });
+    });
+
+    // Add recent subscribers
+    activity.recentSubscribers?.forEach(subscriber => {
+      items.push({
+        id: subscriber._id,
+        type: 'subscriber',
+        titleAr: subscriber.email,
+        titleEn: subscriber.email,
+        descriptionAr: 'اشترك في النشرة البريدية',
+        descriptionEn: 'Subscribed to newsletter',
+        timestamp: new Date(subscriber.subscribedAt),
+      });
+    });
+
+    // Add recent applications
+    activity.recentApplications?.forEach(application => {
+      items.push({
+        id: application._id,
+        type: 'project_update',
+        titleAr: `${application.firstName} ${application.lastName}`,
+        titleEn: `${application.firstName} ${application.lastName}`,
+        descriptionAr: application.job?.title?.ar || 'طلب توظيف جديد',
+        descriptionEn: application.job?.title?.en || 'New job application',
+        timestamp: new Date(application.createdAt),
+        href: `/${locale}/admin/careers`,
+      });
+    });
+
+    // Add activity logs
+    activity.recentActivity?.forEach(log => {
+      items.push({
+        id: log._id,
+        type: log.action === 'login' ? 'user_login' : 'project_update',
+        titleAr: log.resourceTitle || log.resource,
+        titleEn: log.resourceTitle || log.resource,
+        descriptionAr: `${log.action} - ${log.resource}`,
+        descriptionEn: `${log.action} - ${log.resource}`,
+        timestamp: new Date(log.createdAt),
+      });
+    });
+
+    // Sort by timestamp (newest first) and take top 10
+    return items.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()).slice(0, 10);
+  }, [activity, locale]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="border-primary size-8 animate-spin rounded-full border-4 border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="text-center">
+          <p className="text-destructive mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-primary text-primary-foreground rounded-lg px-4 py-2"
+          >
+            {isRTL ? 'إعادة المحاولة' : 'Retry'}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -95,10 +150,10 @@ export default function AdminDashboard() {
         <StatsCard
           titleAr="إجمالي المشاريع"
           titleEn="Total Projects"
-          value={mockStats.totalProjects}
+          value={stats?.projects.total || 0}
           icon={<FolderKanban className="size-6" />}
           trend={{
-            value: mockStats.trends.projects,
+            value: stats?.projects.published || 0,
             isPositive: true,
           }}
           variant="primary"
@@ -106,21 +161,21 @@ export default function AdminDashboard() {
         <StatsCard
           titleAr="الرسائل الجديدة"
           titleEn="New Messages"
-          value={mockStats.newMessages}
+          value={stats?.contacts.unread || 0}
           icon={<MessageSquare className="size-6" />}
           trend={{
-            value: mockStats.trends.messages,
+            value: stats?.contacts.total || 0,
             isPositive: true,
           }}
           variant="warning"
         />
         <StatsCard
-          titleAr="زوار اليوم"
-          titleEn="Today's Visitors"
-          value={mockStats.todayVisitors}
-          icon={<TrendingUp className="size-6" />}
+          titleAr="الخدمات النشطة"
+          titleEn="Active Services"
+          value={stats?.services.active || 0}
+          icon={<Briefcase className="size-6" />}
           trend={{
-            value: mockStats.trends.visitors,
+            value: stats?.services.total || 0,
             isPositive: true,
           }}
           variant="success"
@@ -128,12 +183,44 @@ export default function AdminDashboard() {
         <StatsCard
           titleAr="مشتركي النشرة"
           titleEn="Newsletter Subscribers"
-          value={mockStats.newsletterSubscribers}
+          value={stats?.subscribers.active || 0}
           icon={<Mail className="size-6" />}
           trend={{
-            value: mockStats.trends.subscribers,
+            value: stats?.subscribers.total || 0,
             isPositive: true,
           }}
+          variant="default"
+        />
+      </div>
+
+      {/* Secondary Stats Row */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatsCard
+          titleAr="أعضاء الفريق"
+          titleEn="Team Members"
+          value={stats?.team.active || 0}
+          icon={<Users className="size-6" />}
+          variant="default"
+        />
+        <StatsCard
+          titleAr="المقالات المنشورة"
+          titleEn="Published Posts"
+          value={stats?.posts.published || 0}
+          icon={<TrendingUp className="size-6" />}
+          variant="default"
+        />
+        <StatsCard
+          titleAr="الوظائف المتاحة"
+          titleEn="Open Jobs"
+          value={stats?.jobs.open || 0}
+          icon={<Briefcase className="size-6" />}
+          variant="default"
+        />
+        <StatsCard
+          titleAr="طلبات التوظيف"
+          titleEn="Pending Applications"
+          value={stats?.applications.pending || 0}
+          icon={<Users className="size-6" />}
           variant="default"
         />
       </div>
@@ -145,7 +232,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Recent Activity - Takes 2 columns */}
         <div className="lg:col-span-2">
-          <RecentActivity items={mockActivityItems} viewAllHref={`/${locale}/admin/activity`} />
+          <RecentActivity items={activityItems} viewAllHref={`/${locale}/admin/activity`} />
         </div>
 
         {/* Quick Actions */}

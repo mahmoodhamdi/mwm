@@ -9,6 +9,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useLocale } from 'next-intl';
 import { contentService, ContentItem as ApiContentItem, ContentType } from '@/services/admin';
 import { ApiError } from '@/lib/api';
+import { createSanitizedHtml } from '@/lib/sanitize';
 import {
   Save,
   Eye,
@@ -623,7 +624,7 @@ export default function ContentPage() {
                     {content.map(item => (
                       <div key={item.id}>
                         <span className="text-muted-foreground text-xs">{item.key}:</span>
-                        <div dangerouslySetInnerHTML={{ __html: item.content.ar }} />
+                        <div dangerouslySetInnerHTML={createSanitizedHtml(item.content.ar)} />
                       </div>
                     ))}
                   </div>
@@ -636,7 +637,7 @@ export default function ContentPage() {
                     {content.map(item => (
                       <div key={item.id}>
                         <span className="text-muted-foreground text-xs">{item.key}:</span>
-                        <div dangerouslySetInnerHTML={{ __html: item.content.en }} />
+                        <div dangerouslySetInnerHTML={createSanitizedHtml(item.content.en)} />
                       </div>
                     ))}
                   </div>

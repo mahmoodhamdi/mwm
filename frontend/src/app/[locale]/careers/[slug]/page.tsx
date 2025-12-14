@@ -171,7 +171,7 @@ export default function JobDetailPage() {
         lastName: formData.lastName,
         email: formData.email,
         phone: formData.phone,
-        resume: formData.resume || 'https://placeholder.resume.url',
+        resume: formData.resume,
         coverLetter: formData.coverLetter,
         linkedIn: formData.linkedin,
         portfolio: formData.portfolio,

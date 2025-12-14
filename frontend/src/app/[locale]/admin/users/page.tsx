@@ -48,6 +48,7 @@ export default function UsersPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
@@ -116,7 +117,7 @@ export default function UsersPage() {
 
       if (roleFilter !== 'all') params.role = roleFilter as UserRole;
       if (statusFilter !== 'all') params.status = statusFilter as UserStatus;
-      if (searchQuery) params.search = searchQuery;
+      if (debouncedSearch) params.search = debouncedSearch;
 
       const response: UsersResponse = await usersAdminService.getAllUsers(params);
       setUsers(response.users);
@@ -127,7 +128,7 @@ export default function UsersPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, roleFilter, statusFilter, searchQuery, isRTL]);
+  }, [page, roleFilter, statusFilter, debouncedSearch, isRTL]);
 
   // Fetch stats
   const fetchStats = useCallback(async () => {
@@ -144,11 +145,11 @@ export default function UsersPage() {
     fetchStats();
   }, [fetchUsers, fetchStats]);
 
-  // Debounced search
+  // Debounced search - updates debouncedSearch after 300ms delay
   useEffect(() => {
     const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
       setPage(1);
-      fetchUsers();
     }, 300);
     return () => clearTimeout(timer);
   }, [searchQuery]);

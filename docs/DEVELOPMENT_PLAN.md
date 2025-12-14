@@ -90,24 +90,24 @@ This document outlines the comprehensive development plan for the MWM corporate 
 
 ### 2.3 Admin Dashboard - 16 Pages
 
-| Page          | Route                         | Status   |
-| ------------- | ----------------------------- | -------- |
-| Dashboard     | /[locale]/admin               | Complete |
-| Services      | /[locale]/admin/services      | Complete |
-| Projects      | /[locale]/admin/projects      | Complete |
-| Team          | /[locale]/admin/team          | Complete |
-| Blog          | /[locale]/admin/blog          | UI Only  |
-| Careers       | /[locale]/admin/careers       | UI Only  |
-| Messages      | /[locale]/admin/messages      | Complete |
-| Newsletter    | /[locale]/admin/newsletter    | Complete |
-| Analytics     | /[locale]/admin/analytics     | UI Only  |
-| Notifications | /[locale]/admin/notifications | UI Only  |
-| Users         | /[locale]/admin/users         | Complete |
-| Activity      | /[locale]/admin/activity      | UI Only  |
-| Content       | /[locale]/admin/content       | Complete |
-| Translations  | /[locale]/admin/translations  | Complete |
-| Menus         | /[locale]/admin/menus         | Complete |
-| Settings      | /[locale]/admin/settings      | Complete |
+| Page          | Route                         | Status        |
+| ------------- | ----------------------------- | ------------- |
+| Dashboard     | /[locale]/admin               | API Connected |
+| Services      | /[locale]/admin/services      | API Connected |
+| Projects      | /[locale]/admin/projects      | API Connected |
+| Team          | /[locale]/admin/team          | UI Only       |
+| Blog          | /[locale]/admin/blog          | API Connected |
+| Careers       | /[locale]/admin/careers       | API Connected |
+| Messages      | /[locale]/admin/messages      | UI Only       |
+| Newsletter    | /[locale]/admin/newsletter    | API Connected |
+| Analytics     | /[locale]/admin/analytics     | UI Only       |
+| Notifications | /[locale]/admin/notifications | UI Only       |
+| Users         | /[locale]/admin/users         | UI Only       |
+| Activity      | /[locale]/admin/activity      | UI Only       |
+| Content       | /[locale]/admin/content       | UI Only       |
+| Translations  | /[locale]/admin/translations  | API Connected |
+| Menus         | /[locale]/admin/menus         | API Connected |
+| Settings      | /[locale]/admin/settings      | API Connected |
 
 ---
 
@@ -239,4 +239,15 @@ npm run docker:down            # Stop databases
 
 ---
 
-_Last Updated: 2025-12-08_
+## Recent Updates (2025-12-14)
+
+- Connected Admin Dashboard to real API endpoints (stats, activity)
+- Connected Admin Services page to real CRUD API
+- Connected Admin Projects page to real CRUD API
+- Created admin service files for Services, Projects, Team, Contact
+- Created comprehensive business plan document (see `docs/COMPREHENSIVE_BUSINESS_PLAN.md`)
+- Remaining admin pages (Team, Messages, Content, Analytics, Users, Activity) still need API connection
+
+---
+
+_Last Updated: 2025-12-14_

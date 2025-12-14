@@ -18,6 +18,7 @@ export interface TokenPayload {
   userId: string;
   email: string;
   role: string;
+  iat?: number; // Token issued at timestamp
 }
 
 /**
@@ -138,6 +139,7 @@ class AuthService {
         userId: decoded.userId,
         email: decoded.email,
         role: decoded.role,
+        iat: decoded.iat,
       };
     } catch (error) {
       if (error instanceof jwt.TokenExpiredError) {

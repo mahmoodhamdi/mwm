@@ -22,6 +22,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { getBlogPostBySlug, getRelatedPosts, type BlogPost } from '@/services/public';
+import { createSanitizedHtml } from '@/lib/sanitize';
 
 export default function BlogPostPage() {
   const locale = useLocale() as 'ar' | 'en';
@@ -300,7 +301,7 @@ export default function BlogPostPage() {
             {/* Article Content */}
             <div
               className="prose prose-lg prose-headings:font-bold prose-h2:mt-8 prose-h2:text-2xl prose-p:text-gray-700 prose-a:text-blue-600 prose-ul:my-4 prose-li:text-gray-700 max-w-none"
-              dangerouslySetInnerHTML={{ __html: content }}
+              dangerouslySetInnerHTML={createSanitizedHtml(content)}
             />
 
             {/* Tags */}

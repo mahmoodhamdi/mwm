@@ -19,6 +19,7 @@ import {
   ArrowLeftIcon,
 } from '@heroicons/react/24/outline';
 import { Suspense } from 'react';
+import { createSanitizedHtml } from '@/lib/sanitize';
 
 // Types
 interface BilingualText {
@@ -281,7 +282,7 @@ async function ProjectContent({ slug, locale }: { slug: string; locale: string }
             <div className="mx-auto max-w-4xl">
               <div
                 className="prose prose-lg dark:prose-invert max-w-none text-gray-700 dark:text-gray-300"
-                dangerouslySetInnerHTML={{ __html: description }}
+                dangerouslySetInnerHTML={createSanitizedHtml(description)}
               />
             </div>
           </Container>

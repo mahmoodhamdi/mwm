@@ -115,7 +115,9 @@ export async function getJobBySlug(slug: string, locale?: 'ar' | 'en'): Promise<
     const params = locale ? { locale } : {};
     const response = await apiClient.get<{ job: Job }>(`${CAREERS_ENDPOINT}/jobs/${slug}`, params);
     return response.data?.job || null;
-  } catch {
+  } catch (error) {
+    // Log error for debugging - 404s are expected for invalid slugs
+    console.error(`[CareersService] Failed to fetch job with slug "${slug}":`, error);
     return null;
   }
 }

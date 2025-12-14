@@ -17,6 +17,12 @@ jest.mock('next-intl', () => ({
     };
     return translations[key] || key;
   },
+  useLocale: () => 'en',
+}));
+
+// Mock the newsletter service
+jest.mock('@/services/public/contact.service', () => ({
+  subscribeNewsletter: jest.fn().mockResolvedValue({ success: true }),
 }));
 
 describe('Newsletter', () => {

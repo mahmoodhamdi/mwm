@@ -121,7 +121,8 @@ export const authenticate = asyncHandler(
     }
 
     // Check if password was changed after token was issued
-    const tokenIssuedAt = Math.floor(Date.now() / 1000) - 60; // approximate
+    // Use actual iat from token, fallback to current time if missing
+    const tokenIssuedAt = decoded.iat ?? Math.floor(Date.now() / 1000);
     if (user.changedPasswordAfter(tokenIssuedAt)) {
       throw Errors.TOKEN_EXPIRED();
     }

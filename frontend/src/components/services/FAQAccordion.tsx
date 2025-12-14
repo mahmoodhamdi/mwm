@@ -9,6 +9,7 @@ import { useState, forwardRef, HTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createSanitizedHtml } from '@/lib/sanitize';
 
 export interface FAQItem {
   /** Question text */
@@ -83,7 +84,7 @@ const FAQAccordion = forwardRef<HTMLDivElement, FAQAccordionProps>(
                   >
                     <div
                       className="mt-3 text-gray-600 dark:text-gray-300"
-                      dangerouslySetInnerHTML={{ __html: item.answer }}
+                      dangerouslySetInnerHTML={createSanitizedHtml(item.answer)}
                     />
                   </motion.div>
                 )}
@@ -141,7 +142,7 @@ const FAQAccordion = forwardRef<HTMLDivElement, FAQAccordionProps>(
                   >
                     <div
                       className="border-primary-200 dark:border-primary-800 border-t px-4 pb-4 pt-3 text-gray-600 dark:text-gray-300"
-                      dangerouslySetInnerHTML={{ __html: item.answer }}
+                      dangerouslySetInnerHTML={createSanitizedHtml(item.answer)}
                     />
                   </motion.div>
                 )}
@@ -196,7 +197,7 @@ const FAQAccordion = forwardRef<HTMLDivElement, FAQAccordionProps>(
                   >
                     <div
                       className="border-t border-gray-100 px-5 pb-5 pt-4 text-gray-600 dark:border-gray-700 dark:text-gray-300"
-                      dangerouslySetInnerHTML={{ __html: item.answer }}
+                      dangerouslySetInnerHTML={createSanitizedHtml(item.answer)}
                     />
                   </motion.div>
                 )}
@@ -235,7 +236,7 @@ const FAQAccordion = forwardRef<HTMLDivElement, FAQAccordionProps>(
                   >
                     <div
                       className="mt-2 text-sm text-gray-500 dark:text-gray-400"
-                      dangerouslySetInnerHTML={{ __html: item.answer }}
+                      dangerouslySetInnerHTML={createSanitizedHtml(item.answer)}
                     />
                   </motion.div>
                 )}

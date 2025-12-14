@@ -12,6 +12,7 @@ import { ServiceJsonLd, FAQJsonLd, BreadcrumbJsonLd } from '@/components/seo';
 import { Container, Spinner } from '@/components/ui';
 import { CheckCircleIcon, ArrowRightIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { Suspense } from 'react';
+import { createSanitizedHtml } from '@/lib/sanitize';
 
 // Types
 interface BilingualText {
@@ -212,7 +213,7 @@ async function ServiceContent({ slug, locale }: { slug: string; locale: string }
             <div className="mx-auto max-w-4xl">
               <div
                 className="prose prose-lg dark:prose-invert max-w-none text-gray-700 dark:text-gray-300"
-                dangerouslySetInnerHTML={{ __html: description }}
+                dangerouslySetInnerHTML={createSanitizedHtml(description)}
               />
             </div>
           </Container>

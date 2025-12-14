@@ -180,6 +180,12 @@ Frontend uses:
 - Client state: Zustand
 - Forms: react-hook-form with Zod validation
 
+### Push Notifications
+
+- Backend: Firebase Admin SDK (`firebase-admin`) for sending FCM notifications
+- Frontend: Firebase Web SDK for receiving push notifications in browser
+- Service worker handles background notification delivery
+
 ## Environment Setup
 
 Backend requires `.env` file (copy from `.env.example`):
@@ -189,11 +195,15 @@ Backend requires `.env` file (copy from `.env.example`):
 - Redis URL (`REDIS_URL`)
 - SMTP config for emails
 - Cloudinary for image uploads
+- Firebase Admin SDK (`FIREBASE_PROJECT_ID`, `FIREBASE_PRIVATE_KEY`, `FIREBASE_CLIENT_EMAIL`)
+- reCAPTCHA (`RECAPTCHA_SECRET_KEY`)
 
 Frontend requires `.env.local`:
 
 - `NEXT_PUBLIC_API_URL` - Backend API URL (default: `http://localhost:5000/api/v1`)
 - `NEXT_PUBLIC_SITE_URL` - Frontend URL (default: `http://localhost:3000`)
+- Firebase Web SDK (`NEXT_PUBLIC_FIREBASE_*` keys for push notifications)
+- reCAPTCHA (`NEXT_PUBLIC_RECAPTCHA_SITE_KEY`)
 
 ## Commit Conventions
 

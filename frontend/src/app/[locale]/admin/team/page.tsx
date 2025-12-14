@@ -8,6 +8,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocale } from 'next-intl';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Plus,
   Trash2,
@@ -165,17 +166,20 @@ export default function TeamPage() {
       accessor: 'avatar',
       width: '80px',
       render: value => (
-        <div className="size-12 overflow-hidden rounded-full">
+        <div className="relative size-12 overflow-hidden rounded-full">
           {value ? (
-            <img
+            <Image
               src={value as string}
               alt=""
-              className="size-full object-cover"
+              fill
+              sizes="48px"
+              className="object-cover"
               onError={e => {
                 (e.target as HTMLImageElement).style.display = 'none';
                 (e.target as HTMLImageElement).parentElement!.innerHTML =
                   '<div class="from-primary/20 to-primary/5 flex size-full items-center justify-center bg-gradient-to-br"><svg class="text-muted-foreground size-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>';
               }}
+              unoptimized
             />
           ) : (
             <div className="from-primary/20 to-primary/5 flex size-full items-center justify-center bg-gradient-to-br">

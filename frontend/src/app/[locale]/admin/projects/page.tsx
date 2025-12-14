@@ -8,6 +8,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocale } from 'next-intl';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Plus,
   Eye,
@@ -157,15 +158,18 @@ export default function ProjectsPage() {
       accessor: 'thumbnail',
       width: '80px',
       render: value => (
-        <div className="bg-muted flex size-12 items-center justify-center overflow-hidden rounded-lg">
+        <div className="bg-muted relative flex size-12 items-center justify-center overflow-hidden rounded-lg">
           {value ? (
-            <img
+            <Image
               src={value as string}
               alt=""
-              className="size-full object-cover"
+              fill
+              sizes="48px"
+              className="object-cover"
               onError={e => {
                 (e.target as HTMLImageElement).style.display = 'none';
               }}
+              unoptimized
             />
           ) : (
             <ImageIcon className="text-muted-foreground size-5" />

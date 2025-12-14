@@ -5,7 +5,7 @@
  * صفحة إدارة المشاريع
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocale } from 'next-intl';
 import Link from 'next/link';
 import {
@@ -17,105 +17,136 @@ import {
   Archive,
   ExternalLink,
   Image as ImageIcon,
+  RefreshCw,
 } from 'lucide-react';
 import { DataTable, tableActions } from '@/components/admin';
 import type { Column, DataTableAction } from '@/components/admin';
-
-// Project type definition
-interface Project {
-  id: string;
-  titleAr: string;
-  titleEn: string;
-  categoryAr: string;
-  categoryEn: string;
-  clientAr: string;
-  clientEn: string;
-  status: 'draft' | 'published' | 'archived';
-  featured: boolean;
-  thumbnail: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-// Mock data for projects
-const mockProjects: Project[] = [
-  {
-    id: '1',
-    titleAr: 'تطبيق التجارة الإلكترونية',
-    titleEn: 'E-commerce Application',
-    categoryAr: 'تطوير تطبيقات',
-    categoryEn: 'App Development',
-    clientAr: 'شركة التقنية المتقدمة',
-    clientEn: 'Advanced Tech Co.',
-    status: 'published',
-    featured: true,
-    thumbnail: '/images/projects/ecommerce.jpg',
-    createdAt: new Date('2024-01-15'),
-    updatedAt: new Date('2024-02-20'),
-  },
-  {
-    id: '2',
-    titleAr: 'موقع الشركة',
-    titleEn: 'Corporate Website',
-    categoryAr: 'تطوير الويب',
-    categoryEn: 'Web Development',
-    clientAr: 'مجموعة الأعمال',
-    clientEn: 'Business Group',
-    status: 'published',
-    featured: false,
-    thumbnail: '/images/projects/corporate.jpg',
-    createdAt: new Date('2024-02-01'),
-    updatedAt: new Date('2024-02-15'),
-  },
-  {
-    id: '3',
-    titleAr: 'تصميم هوية بصرية',
-    titleEn: 'Brand Identity Design',
-    categoryAr: 'تصميم UI/UX',
-    categoryEn: 'UI/UX Design',
-    clientAr: 'ستارت أب',
-    clientEn: 'Startup Inc.',
-    status: 'draft',
-    featured: false,
-    thumbnail: '/images/projects/branding.jpg',
-    createdAt: new Date('2024-03-01'),
-    updatedAt: new Date('2024-03-05'),
-  },
-  {
-    id: '4',
-    titleAr: 'لوحة تحكم إدارية',
-    titleEn: 'Admin Dashboard',
-    categoryAr: 'تطوير الويب',
-    categoryEn: 'Web Development',
-    clientAr: 'شركة الحلول',
-    clientEn: 'Solutions Co.',
-    status: 'archived',
-    featured: false,
-    thumbnail: '/images/projects/dashboard.jpg',
-    createdAt: new Date('2023-11-10'),
-    updatedAt: new Date('2024-01-20'),
-  },
-  {
-    id: '5',
-    titleAr: 'تطبيق توصيل الطعام',
-    titleEn: 'Food Delivery App',
-    categoryAr: 'تطوير تطبيقات',
-    categoryEn: 'App Development',
-    clientAr: 'مطاعم الذواقة',
-    clientEn: 'Gourmet Restaurants',
-    status: 'published',
-    featured: true,
-    thumbnail: '/images/projects/food-delivery.jpg',
-    createdAt: new Date('2024-01-25'),
-    updatedAt: new Date('2024-03-01'),
-  },
-];
+import {
+  projectsAdminService,
+  type Project,
+  type ProjectsResponse,
+} from '@/services/admin/projects.service';
 
 export default function ProjectsPage() {
   const locale = useLocale();
   const isArabic = locale === 'ar';
 
-  const [projects, setProjects] = useState<Project[]>(mockProjects);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [featuredFilter, setFeaturedFilter] = useState<boolean | null>(null);
+
+  // Fetch projects
+  const fetchProjects = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const params: Parameters<typeof projectsAdminService.getAllProjects>[0] = {
+        page,
+        limit: 10,
+        sort: '-updatedAt',
+      };
+
+      if (statusFilter === 'published') params.isPublished = true;
+      if (statusFilter === 'draft') params.isPublished = false;
+      if (featuredFilter !== null) params.isFeatured = featuredFilter;
+
+      const response: ProjectsResponse = await projectsAdminService.getAllProjects(params);
+      setProjects(response.projects);
+      setTotalPages(response.pages);
+      setTotal(response.total);
+    } catch (err) {
+      console.error('Failed to fetch projects:', err);
+      setError(isArabic ? 'فشل في تحميل المشاريع' : 'Failed to load projects');
+    } finally {
+      setLoading(false);
+    }
+  }, [page, statusFilter, featuredFilter, isArabic]);
+
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
+
+  // Toggle featured status
+  const toggleFeatured = async (project: Project) => {
+    try {
+      await projectsAdminService.toggleFeaturedStatus(project._id);
+      fetchProjects();
+    } catch (err) {
+      console.error('Failed to toggle featured:', err);
+      alert(isArabic ? 'فشل في تغيير حالة المميز' : 'Failed to toggle featured status');
+    }
+  };
+
+  // Toggle publish status
+  const togglePublish = async (project: Project) => {
+    try {
+      await projectsAdminService.togglePublishStatus(project._id);
+      fetchProjects();
+    } catch (err) {
+      console.error('Failed to toggle publish:', err);
+      alert(isArabic ? 'فشل في تغيير حالة النشر' : 'Failed to toggle publish status');
+    }
+  };
+
+  // Delete project
+  const deleteProject = async (project: Project) => {
+    if (
+      !confirm(
+        isArabic
+          ? 'هل أنت متأكد من حذف هذا المشروع؟'
+          : 'Are you sure you want to delete this project?'
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await projectsAdminService.deleteProject(project._id);
+      fetchProjects();
+    } catch (err) {
+      console.error('Failed to delete project:', err);
+      alert(isArabic ? 'فشل في حذف المشروع' : 'Failed to delete project');
+    }
+  };
+
+  // Bulk delete
+  const bulkDelete = async (selectedIds: string[]) => {
+    if (
+      !confirm(
+        isArabic
+          ? `هل أنت متأكد من حذف ${selectedIds.length} مشروع؟`
+          : `Are you sure you want to delete ${selectedIds.length} projects?`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await Promise.all(selectedIds.map(id => projectsAdminService.deleteProject(id)));
+      fetchProjects();
+    } catch (err) {
+      console.error('Failed to bulk delete:', err);
+      alert(isArabic ? 'فشل في حذف المشاريع' : 'Failed to delete projects');
+    }
+  };
+
+  // Bulk publish
+  const bulkPublish = async (selectedIds: string[], publish: boolean) => {
+    try {
+      await Promise.all(
+        selectedIds.map(id => projectsAdminService.updateProject(id, { isPublished: publish }))
+      );
+      fetchProjects();
+    } catch (err) {
+      console.error('Failed to bulk update:', err);
+      alert(isArabic ? 'فشل في تحديث المشاريع' : 'Failed to update projects');
+    }
+  };
 
   // Table columns
   const columns: Column<Project>[] = [
@@ -128,9 +159,14 @@ export default function ProjectsPage() {
       render: value => (
         <div className="bg-muted flex size-12 items-center justify-center overflow-hidden rounded-lg">
           {value ? (
-            <div className="from-primary/20 to-primary/5 flex size-full items-center justify-center bg-gradient-to-br">
-              <ImageIcon className="text-muted-foreground size-5" />
-            </div>
+            <img
+              src={value as string}
+              alt=""
+              className="size-full object-cover"
+              onError={e => {
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
           ) : (
             <ImageIcon className="text-muted-foreground size-5" />
           )}
@@ -141,14 +177,12 @@ export default function ProjectsPage() {
       id: 'title',
       headerAr: 'العنوان',
       headerEn: 'Title',
-      accessor: row => (isArabic ? row.titleAr : row.titleEn),
+      accessor: row => (isArabic ? row.title.ar : row.title.en),
       sortable: true,
       render: (value, row) => (
         <div>
           <div className="font-medium">{value as string}</div>
-          <div className="text-muted-foreground text-sm">
-            {isArabic ? row.clientAr : row.clientEn}
-          </div>
+          <div className="text-muted-foreground text-sm">{row.client?.name || '-'}</div>
         </div>
       ),
     },
@@ -156,32 +190,32 @@ export default function ProjectsPage() {
       id: 'category',
       headerAr: 'التصنيف',
       headerEn: 'Category',
-      accessor: row => (isArabic ? row.categoryAr : row.categoryEn),
+      accessor: row => {
+        const cat = row.category as { name?: { ar: string; en: string } } | string;
+        if (typeof cat === 'object' && cat?.name) {
+          return isArabic ? cat.name.ar : cat.name.en;
+        }
+        return '-';
+      },
       sortable: true,
     },
     {
       id: 'status',
       headerAr: 'الحالة',
       headerEn: 'Status',
-      accessor: 'status',
+      accessor: 'isPublished',
       sortable: true,
       render: value => {
-        const statusStyles = {
-          draft: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400',
-          published: 'bg-green-500/10 text-green-600 dark:text-green-400',
-          archived: 'bg-gray-500/10 text-gray-600 dark:text-gray-400',
-        };
-        const statusLabels = {
-          draft: { ar: 'مسودة', en: 'Draft' },
-          published: { ar: 'منشور', en: 'Published' },
-          archived: { ar: 'مؤرشف', en: 'Archived' },
-        };
-        const status = value as keyof typeof statusStyles;
+        const isPublished = value as boolean;
         return (
           <span
-            className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${statusStyles[status]}`}
+            className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
+              isPublished
+                ? 'bg-green-500/10 text-green-600 dark:text-green-400'
+                : 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400'
+            }`}
           >
-            {isArabic ? statusLabels[status].ar : statusLabels[status].en}
+            {isPublished ? (isArabic ? 'منشور' : 'Published') : isArabic ? 'مسودة' : 'Draft'}
           </span>
         );
       },
@@ -190,7 +224,7 @@ export default function ProjectsPage() {
       id: 'featured',
       headerAr: 'مميز',
       headerEn: 'Featured',
-      accessor: 'featured',
+      accessor: 'isFeatured',
       align: 'center',
       render: value =>
         value ? (
@@ -200,13 +234,26 @@ export default function ProjectsPage() {
         ),
     },
     {
+      id: 'views',
+      headerAr: 'المشاهدات',
+      headerEn: 'Views',
+      accessor: 'views',
+      sortable: true,
+      align: 'center',
+      render: value => (
+        <span className="bg-muted inline-flex min-w-8 items-center justify-center rounded-full px-2 py-1 text-sm font-medium">
+          {value as number}
+        </span>
+      ),
+    },
+    {
       id: 'updatedAt',
       headerAr: 'آخر تحديث',
       headerEn: 'Last Updated',
       accessor: 'updatedAt',
       sortable: true,
       render: value => {
-        const date = value as Date;
+        const date = new Date(value as string);
         return (
           <span className="text-muted-foreground text-sm">
             {date.toLocaleDateString(isArabic ? 'ar-SA' : 'en-US', {
@@ -223,34 +270,24 @@ export default function ProjectsPage() {
   // Row actions
   const actions: DataTableAction<Project>[] = [
     tableActions.view(project => {
-      console.log('View project:', project.id);
-      // Navigate to project view
+      window.open(`/${locale}/projects/${project.slug}`, '_blank');
     }),
     tableActions.edit(project => {
-      console.log('Edit project:', project.id);
-      // Navigate to project edit
+      window.location.href = `/${locale}/admin/projects/${project._id}/edit`;
     }),
     {
       id: 'toggle-featured',
       labelAr: 'تبديل المميز',
       labelEn: 'Toggle Featured',
       icon: <Star className="size-4" />,
-      onClick: project => {
-        setProjects(prev =>
-          prev.map(p => (p.id === project.id ? { ...p, featured: !p.featured } : p))
-        );
-      },
+      onClick: toggleFeatured,
     },
     {
-      id: 'archive',
-      labelAr: 'أرشفة',
-      labelEn: 'Archive',
-      icon: <Archive className="size-4" />,
-      onClick: project => {
-        setProjects(prev =>
-          prev.map(p => (p.id === project.id ? { ...p, status: 'archived' as const } : p))
-        );
-      },
+      id: 'toggle-publish',
+      labelAr: 'تبديل النشر',
+      labelEn: 'Toggle Publish',
+      icon: <Eye className="size-4" />,
+      onClick: togglePublish,
     },
     {
       id: 'preview',
@@ -258,20 +295,10 @@ export default function ProjectsPage() {
       labelEn: 'Preview',
       icon: <ExternalLink className="size-4" />,
       onClick: project => {
-        window.open(`/projects/${project.id}`, '_blank');
+        window.open(`/${locale}/projects/${project.slug}`, '_blank');
       },
     },
-    tableActions.delete(project => {
-      if (
-        confirm(
-          isArabic
-            ? 'هل أنت متأكد من حذف هذا المشروع؟'
-            : 'Are you sure you want to delete this project?'
-        )
-      ) {
-        setProjects(prev => prev.filter(p => p.id !== project.id));
-      }
-    }),
+    tableActions.delete(deleteProject),
   ];
 
   // Bulk actions
@@ -282,41 +309,52 @@ export default function ProjectsPage() {
       labelEn: 'Delete Selected',
       icon: <Trash2 className="size-4" />,
       variant: 'destructive' as const,
-      onClick: (selectedIds: string[]) => {
-        if (
-          confirm(
-            isArabic
-              ? `هل أنت متأكد من حذف ${selectedIds.length} مشروع؟`
-              : `Are you sure you want to delete ${selectedIds.length} projects?`
-          )
-        ) {
-          setProjects(prev => prev.filter(p => !selectedIds.includes(p.id)));
-        }
-      },
-    },
-    {
-      id: 'archive',
-      labelAr: 'أرشفة المحدد',
-      labelEn: 'Archive Selected',
-      icon: <Archive className="size-4" />,
-      onClick: (selectedIds: string[]) => {
-        setProjects(prev =>
-          prev.map(p => (selectedIds.includes(p.id) ? { ...p, status: 'archived' as const } : p))
-        );
-      },
+      onClick: bulkDelete,
     },
     {
       id: 'publish',
       labelAr: 'نشر المحدد',
       labelEn: 'Publish Selected',
       icon: <Eye className="size-4" />,
-      onClick: (selectedIds: string[]) => {
-        setProjects(prev =>
-          prev.map(p => (selectedIds.includes(p.id) ? { ...p, status: 'published' as const } : p))
-        );
-      },
+      onClick: (selectedIds: string[]) => bulkPublish(selectedIds, true),
+    },
+    {
+      id: 'unpublish',
+      labelAr: 'إلغاء نشر المحدد',
+      labelEn: 'Unpublish Selected',
+      icon: <Archive className="size-4" />,
+      onClick: (selectedIds: string[]) => bulkPublish(selectedIds, false),
     },
   ];
+
+  const publishedCount = projects.filter(p => p.isPublished).length;
+  const draftCount = projects.filter(p => !p.isPublished).length;
+  const featuredCount = projects.filter(p => p.isFeatured).length;
+
+  if (loading && projects.length === 0) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="border-primary size-8 animate-spin rounded-full border-4 border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (error && projects.length === 0) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="text-center">
+          <p className="text-destructive mb-4">{error}</p>
+          <button
+            onClick={fetchProjects}
+            className="bg-primary text-primary-foreground inline-flex items-center gap-2 rounded-lg px-4 py-2"
+          >
+            <RefreshCw className="size-4" />
+            {isArabic ? 'إعادة المحاولة' : 'Retry'}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -332,33 +370,78 @@ export default function ProjectsPage() {
               : 'Manage and organize portfolio projects'}
           </p>
         </div>
-        <Link
-          href="/admin/projects/new"
-          className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 transition-colors"
-        >
-          <Plus className="size-5" />
-          <span>{isArabic ? 'مشروع جديد' : 'New Project'}</span>
-        </Link>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={fetchProjects}
+            className="border-input hover:bg-accent inline-flex items-center gap-2 rounded-lg border px-3 py-2"
+            disabled={loading}
+          >
+            <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} />
+          </button>
+          <Link
+            href={`/${locale}/admin/projects/new`}
+            className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 transition-colors"
+          >
+            <Plus className="size-5" />
+            <span>{isArabic ? 'مشروع جديد' : 'New Project'}</span>
+          </Link>
+        </div>
       </div>
 
       {/* Filters */}
       <div className="flex flex-wrap gap-2">
-        <button className="bg-primary text-primary-foreground rounded-lg px-3 py-1.5 text-sm font-medium">
-          {isArabic ? 'الكل' : 'All'} ({projects.length})
+        <button
+          onClick={() => {
+            setStatusFilter(null);
+            setFeaturedFilter(null);
+          }}
+          className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
+            statusFilter === null && featuredFilter === null
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-muted hover:bg-muted/80'
+          }`}
+        >
+          {isArabic ? 'الكل' : 'All'} ({total})
         </button>
-        <button className="bg-muted hover:bg-muted/80 rounded-lg px-3 py-1.5 text-sm font-medium">
-          {isArabic ? 'منشور' : 'Published'} (
-          {projects.filter(p => p.status === 'published').length})
+        <button
+          onClick={() => {
+            setStatusFilter('published');
+            setFeaturedFilter(null);
+          }}
+          className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
+            statusFilter === 'published'
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-muted hover:bg-muted/80'
+          }`}
+        >
+          {isArabic ? 'منشور' : 'Published'} ({publishedCount})
         </button>
-        <button className="bg-muted hover:bg-muted/80 rounded-lg px-3 py-1.5 text-sm font-medium">
-          {isArabic ? 'مسودة' : 'Draft'} ({projects.filter(p => p.status === 'draft').length})
+        <button
+          onClick={() => {
+            setStatusFilter('draft');
+            setFeaturedFilter(null);
+          }}
+          className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
+            statusFilter === 'draft'
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-muted hover:bg-muted/80'
+          }`}
+        >
+          {isArabic ? 'مسودة' : 'Draft'} ({draftCount})
         </button>
-        <button className="bg-muted hover:bg-muted/80 rounded-lg px-3 py-1.5 text-sm font-medium">
-          {isArabic ? 'مؤرشف' : 'Archived'} ({projects.filter(p => p.status === 'archived').length})
-        </button>
-        <button className="bg-muted hover:bg-muted/80 rounded-lg px-3 py-1.5 text-sm font-medium">
+        <button
+          onClick={() => {
+            setStatusFilter(null);
+            setFeaturedFilter(true);
+          }}
+          className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
+            featuredFilter === true
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-muted hover:bg-muted/80'
+          }`}
+        >
           <Star className="mr-1 inline-block size-4" />
-          {isArabic ? 'مميز' : 'Featured'} ({projects.filter(p => p.featured).length})
+          {isArabic ? 'مميز' : 'Featured'} ({featuredCount})
         </button>
       </div>
 
@@ -366,7 +449,7 @@ export default function ProjectsPage() {
       <DataTable
         data={projects}
         columns={columns}
-        keyField="id"
+        keyField="_id"
         actions={actions}
         searchable
         selectable
@@ -378,6 +461,11 @@ export default function ProjectsPage() {
         emptyStateAr="لا توجد مشاريع"
         emptyStateEn="No projects found"
       />
+
+      {/* Pagination Info */}
+      <div className="text-muted-foreground text-center text-sm">
+        {isArabic ? `صفحة ${page} من ${totalPages}` : `Page ${page} of ${totalPages}`}
+      </div>
     </div>
   );
 }

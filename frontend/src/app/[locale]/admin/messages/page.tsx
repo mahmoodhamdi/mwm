@@ -5,7 +5,7 @@
  * صفحة صندوق الرسائل
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocale } from 'next-intl';
 import {
   Mail,
@@ -27,107 +27,11 @@ import {
   CheckCircle,
   Send,
 } from 'lucide-react';
-
-// Message type
-interface Message {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  company?: string;
-  subject: string;
-  message: string;
-  service?: string;
-  budget?: string;
-  status: 'new' | 'read' | 'replied' | 'archived';
-  isStarred: boolean;
-  priority: 'low' | 'normal' | 'high';
-  createdAt: Date;
-  replies?: Array<{
-    id: string;
-    message: string;
-    sentAt: Date;
-  }>;
-}
-
-// Mock messages data
-const mockMessages: Message[] = [
-  {
-    id: '1',
-    name: 'أحمد محمد',
-    email: 'ahmed@example.com',
-    phone: '+966501234567',
-    company: 'شركة التقنية',
-    subject: 'استفسار عن تطوير تطبيق',
-    message: 'نحتاج تطوير تطبيق موبايل لشركتنا. هل يمكنكم تقديم عرض سعر؟',
-    service: 'mobile',
-    budget: '10000-25000',
-    status: 'new',
-    isStarred: true,
-    priority: 'high',
-    createdAt: new Date('2024-03-10T10:30:00'),
-  },
-  {
-    id: '2',
-    name: 'Sarah Johnson',
-    email: 'sarah@company.com',
-    company: 'Tech Solutions',
-    subject: 'Website Redesign Project',
-    message: 'We are looking to redesign our corporate website. Can you provide a quote?',
-    service: 'web',
-    budget: '5000-10000',
-    status: 'read',
-    isStarred: false,
-    priority: 'normal',
-    createdAt: new Date('2024-03-09T14:20:00'),
-  },
-  {
-    id: '3',
-    name: 'محمد علي',
-    email: 'mohamed@gmail.com',
-    phone: '+966559876543',
-    subject: 'سؤال عن الأسعار',
-    message: 'ما هي أسعار خدمة تصميم الهوية البصرية؟',
-    service: 'design',
-    status: 'replied',
-    isStarred: false,
-    priority: 'low',
-    createdAt: new Date('2024-03-08T09:15:00'),
-    replies: [
-      {
-        id: 'r1',
-        message: 'شكراً لتواصلك. أسعارنا تبدأ من 5000 ريال.',
-        sentAt: new Date('2024-03-08T11:00:00'),
-      },
-    ],
-  },
-  {
-    id: '4',
-    name: 'John Smith',
-    email: 'john@business.org',
-    company: 'Business Corp',
-    subject: 'Partnership Inquiry',
-    message: 'We would like to discuss a potential partnership opportunity.',
-    status: 'archived',
-    isStarred: false,
-    priority: 'normal',
-    createdAt: new Date('2024-03-05T16:45:00'),
-  },
-  {
-    id: '5',
-    name: 'فاطمة أحمد',
-    email: 'fatima@email.com',
-    phone: '+966512345678',
-    subject: 'طلب عرض سعر',
-    message: 'أحتاج عرض سعر لتطوير موقع إلكتروني لمتجري الإلكتروني مع ربط بوابة دفع.',
-    service: 'web',
-    budget: '25000+',
-    status: 'new',
-    isStarred: true,
-    priority: 'high',
-    createdAt: new Date('2024-03-11T08:00:00'),
-  },
-];
+import {
+  contactAdminService,
+  type ContactMessage,
+  type ContactStatus,
+} from '@/services/admin/contact.service';
 
 // Status configuration
 const statusConfig = {
@@ -135,6 +39,7 @@ const statusConfig = {
   read: { labelAr: 'مقروء', labelEn: 'Read', color: 'bg-gray-500' },
   replied: { labelAr: 'تم الرد', labelEn: 'Replied', color: 'bg-green-500' },
   archived: { labelAr: 'مؤرشف', labelEn: 'Archived', color: 'bg-yellow-500' },
+  spam: { labelAr: 'بريد مزعج', labelEn: 'Spam', color: 'bg-red-500' },
 };
 
 // Priority configuration
@@ -142,54 +47,69 @@ const priorityConfig = {
   low: { labelAr: 'منخفض', labelEn: 'Low', color: 'text-gray-500' },
   normal: { labelAr: 'عادي', labelEn: 'Normal', color: 'text-blue-500' },
   high: { labelAr: 'عالي', labelEn: 'High', color: 'text-red-500' },
+  urgent: { labelAr: 'عاجل', labelEn: 'Urgent', color: 'text-red-600 font-bold' },
 };
 
 export default function MessagesPage() {
   const locale = useLocale();
   const isArabic = locale === 'ar';
 
-  const [messages, setMessages] = useState<Message[]>(mockMessages);
-  const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
+  const [messages, setMessages] = useState<ContactMessage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [showReplyModal, setShowReplyModal] = useState(false);
   const [replyText, setReplyText] = useState('');
+  const [stats, setStats] = useState({ total: 0, new: 0, starred: 0, archived: 0 });
 
-  // Filter messages
-  const filteredMessages = messages.filter(msg => {
-    // Status filter
-    if (filterStatus !== 'all') {
-      if (filterStatus === 'starred' && !msg.isStarred) return false;
-      if (filterStatus !== 'starred' && msg.status !== filterStatus) return false;
+  // Fetch messages
+  const fetchMessages = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const params: { status?: ContactStatus; isStarred?: boolean; search?: string } = {};
+
+      if (filterStatus && filterStatus !== 'all' && filterStatus !== 'starred') {
+        params.status = filterStatus as ContactStatus;
+      }
+      if (filterStatus === 'starred') {
+        params.isStarred = true;
+      }
+      if (searchQuery) {
+        params.search = searchQuery;
+      }
+
+      const [messagesResponse, statsResponse] = await Promise.all([
+        contactAdminService.getAllMessages(params),
+        contactAdminService.getStats(),
+      ]);
+
+      setMessages(messagesResponse.messages || []);
+      setStats({
+        total: statsResponse.total || 0,
+        new: statsResponse.unread || 0,
+        starred: statsResponse.starred || 0,
+        archived: statsResponse.byStatus?.archived || 0,
+      });
+    } catch (err) {
+      console.error('Failed to fetch messages:', err);
+      setError(isArabic ? 'فشل في تحميل الرسائل' : 'Failed to load messages');
+    } finally {
+      setLoading(false);
     }
+  }, [filterStatus, searchQuery, isArabic]);
 
-    // Search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      return (
-        msg.name.toLowerCase().includes(query) ||
-        msg.email.toLowerCase().includes(query) ||
-        msg.subject.toLowerCase().includes(query) ||
-        msg.message.toLowerCase().includes(query)
-      );
-    }
-
-    return true;
-  });
+  useEffect(() => {
+    fetchMessages();
+  }, [fetchMessages]);
 
   // Sort by date (newest first)
-  const sortedMessages = [...filteredMessages].sort(
-    (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+  const sortedMessages = [...messages].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
-
-  // Stats
-  const stats = {
-    total: messages.length,
-    new: messages.filter(m => m.status === 'new').length,
-    starred: messages.filter(m => m.isStarred).length,
-    archived: messages.filter(m => m.status === 'archived').length,
-  };
 
   // Toggle message selection
   const toggleSelect = (id: string) => {
@@ -207,61 +127,85 @@ export default function MessagesPage() {
     if (selectedIds.size === sortedMessages.length) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(sortedMessages.map(m => m.id)));
+      setSelectedIds(new Set(sortedMessages.map(m => m._id)));
     }
   };
 
   // Toggle star
-  const toggleStar = (id: string) => {
-    setMessages(prev => prev.map(m => (m.id === id ? { ...m, isStarred: !m.isStarred } : m)));
+  const toggleStar = async (id: string) => {
+    try {
+      await contactAdminService.toggleStar(id);
+      fetchMessages();
+    } catch (err) {
+      console.error('Failed to toggle star:', err);
+    }
   };
 
-  // Mark as read
-  const markAsRead = (id: string) => {
-    setMessages(prev =>
-      prev.map(m => (m.id === id && m.status === 'new' ? { ...m, status: 'read' } : m))
-    );
+  // Mark as read when selecting
+  const handleSelectMessage = async (msg: ContactMessage) => {
+    setSelectedMessage(msg);
+    if (msg.status === 'new') {
+      try {
+        await contactAdminService.updateMessage(msg._id, { status: 'read' });
+        fetchMessages();
+      } catch (err) {
+        console.error('Failed to mark as read:', err);
+      }
+    }
   };
 
   // Archive messages
-  const archiveSelected = () => {
-    setMessages(prev => prev.map(m => (selectedIds.has(m.id) ? { ...m, status: 'archived' } : m)));
-    setSelectedIds(new Set());
+  const archiveSelected = async () => {
+    try {
+      await contactAdminService.bulkAction({
+        ids: Array.from(selectedIds),
+        action: 'archive',
+      });
+      setSelectedIds(new Set());
+      fetchMessages();
+    } catch (err) {
+      console.error('Failed to archive:', err);
+      alert(isArabic ? 'فشل في الأرشفة' : 'Failed to archive');
+    }
   };
 
   // Delete messages
-  const deleteSelected = () => {
+  const deleteSelected = async () => {
     if (!confirm(isArabic ? 'هل أنت متأكد من الحذف؟' : 'Are you sure you want to delete?')) {
       return;
     }
-    setMessages(prev => prev.filter(m => !selectedIds.has(m.id)));
-    setSelectedIds(new Set());
-    if (selectedMessage && selectedIds.has(selectedMessage.id)) {
-      setSelectedMessage(null);
+    try {
+      await contactAdminService.bulkAction({
+        ids: Array.from(selectedIds),
+        action: 'delete',
+      });
+      setSelectedIds(new Set());
+      if (selectedMessage && selectedIds.has(selectedMessage._id)) {
+        setSelectedMessage(null);
+      }
+      fetchMessages();
+    } catch (err) {
+      console.error('Failed to delete:', err);
+      alert(isArabic ? 'فشل في الحذف' : 'Failed to delete');
     }
   };
 
   // Send reply
-  const sendReply = () => {
+  const sendReply = async () => {
     if (!selectedMessage || !replyText.trim()) return;
 
-    setMessages(prev =>
-      prev.map(m =>
-        m.id === selectedMessage.id
-          ? {
-              ...m,
-              status: 'replied',
-              replies: [
-                ...(m.replies || []),
-                { id: Date.now().toString(), message: replyText, sentAt: new Date() },
-              ],
-            }
-          : m
-      )
-    );
-
-    setReplyText('');
-    setShowReplyModal(false);
+    try {
+      await contactAdminService.replyToMessage(selectedMessage._id, {
+        message: replyText,
+        sendEmail: true,
+      });
+      setReplyText('');
+      setShowReplyModal(false);
+      fetchMessages();
+    } catch (err) {
+      console.error('Failed to send reply:', err);
+      alert(isArabic ? 'فشل في إرسال الرد' : 'Failed to send reply');
+    }
   };
 
   // Export to CSV
@@ -275,7 +219,7 @@ export default function MessagesPage() {
       m.subject,
       m.message.replace(/,/g, ';'),
       m.status,
-      m.createdAt.toISOString(),
+      new Date(m.createdAt).toISOString(),
     ]);
 
     const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
@@ -288,7 +232,8 @@ export default function MessagesPage() {
   };
 
   // Format date
-  const formatDate = (date: Date) => {
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const hours = diff / (1000 * 60 * 60);
@@ -306,6 +251,31 @@ export default function MessagesPage() {
     });
   };
 
+  if (loading && messages.length === 0) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="border-primary size-8 animate-spin rounded-full border-4 border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (error && messages.length === 0) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="text-center">
+          <p className="text-destructive mb-4">{error}</p>
+          <button
+            onClick={fetchMessages}
+            className="bg-primary text-primary-foreground inline-flex items-center gap-2 rounded-lg px-4 py-2"
+          >
+            <RefreshCw className="size-4" />
+            {isArabic ? 'إعادة المحاولة' : 'Retry'}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -320,10 +290,11 @@ export default function MessagesPage() {
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setMessages(mockMessages)}
+            onClick={fetchMessages}
             className="hover:bg-muted inline-flex items-center justify-center gap-2 rounded-lg border px-4 py-2 transition-colors"
+            disabled={loading}
           >
-            <RefreshCw className="size-4" />
+            <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} />
             <span>{isArabic ? 'تحديث' : 'Refresh'}</span>
           </button>
           <button
@@ -468,23 +439,20 @@ export default function MessagesPage() {
           ) : (
             sortedMessages.map(msg => (
               <div
-                key={msg.id}
-                onClick={() => {
-                  setSelectedMessage(msg);
-                  markAsRead(msg.id);
-                }}
+                key={msg._id}
+                onClick={() => handleSelectMessage(msg)}
                 className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors ${
-                  selectedMessage?.id === msg.id
+                  selectedMessage?._id === msg._id
                     ? 'border-primary bg-primary/5'
                     : 'hover:bg-muted/50'
                 } ${msg.status === 'new' ? 'bg-blue-50 dark:bg-blue-950/20' : ''}`}
               >
                 <input
                   type="checkbox"
-                  checked={selectedIds.has(msg.id)}
+                  checked={selectedIds.has(msg._id)}
                   onChange={e => {
                     e.stopPropagation();
-                    toggleSelect(msg.id);
+                    toggleSelect(msg._id);
                   }}
                   onClick={e => e.stopPropagation()}
                   className="mt-1 size-4 rounded border-gray-300"
@@ -500,7 +468,7 @@ export default function MessagesPage() {
                       <button
                         onClick={e => {
                           e.stopPropagation();
-                          toggleStar(msg.id);
+                          toggleStar(msg._id);
                         }}
                         className="p-0.5"
                       >
@@ -520,7 +488,9 @@ export default function MessagesPage() {
                   <div className="text-muted-foreground mt-1 flex items-center gap-2 text-xs">
                     <Clock className="size-3" />
                     <span>{formatDate(msg.createdAt)}</span>
-                    <span className={`size-2 rounded-full ${statusConfig[msg.status].color}`} />
+                    <span
+                      className={`size-2 rounded-full ${statusConfig[msg.status as keyof typeof statusConfig]?.color || 'bg-gray-500'}`}
+                    />
                   </div>
                 </div>
               </div>
@@ -539,16 +509,22 @@ export default function MessagesPage() {
                     <h2 className="text-lg font-medium">{selectedMessage.subject}</h2>
                     <div className="mt-2 flex flex-wrap items-center gap-2">
                       <span
-                        className={`rounded-full px-2 py-0.5 text-xs text-white ${statusConfig[selectedMessage.status].color}`}
+                        className={`rounded-full px-2 py-0.5 text-xs text-white ${statusConfig[selectedMessage.status as keyof typeof statusConfig]?.color || 'bg-gray-500'}`}
                       >
                         {isArabic
-                          ? statusConfig[selectedMessage.status].labelAr
-                          : statusConfig[selectedMessage.status].labelEn}
+                          ? statusConfig[selectedMessage.status as keyof typeof statusConfig]
+                              ?.labelAr
+                          : statusConfig[selectedMessage.status as keyof typeof statusConfig]
+                              ?.labelEn}
                       </span>
-                      <span className={`text-sm ${priorityConfig[selectedMessage.priority].color}`}>
+                      <span
+                        className={`text-sm ${priorityConfig[selectedMessage.priority as keyof typeof priorityConfig]?.color || 'text-gray-500'}`}
+                      >
                         {isArabic
-                          ? priorityConfig[selectedMessage.priority].labelAr
-                          : priorityConfig[selectedMessage.priority].labelEn}
+                          ? priorityConfig[selectedMessage.priority as keyof typeof priorityConfig]
+                              ?.labelAr
+                          : priorityConfig[selectedMessage.priority as keyof typeof priorityConfig]
+                              ?.labelEn}
                       </span>
                     </div>
                   </div>
@@ -561,7 +537,7 @@ export default function MessagesPage() {
                       <span>{isArabic ? 'رد' : 'Reply'}</span>
                     </button>
                     <button
-                      onClick={() => toggleStar(selectedMessage.id)}
+                      onClick={() => toggleStar(selectedMessage._id)}
                       className="hover:bg-muted rounded-lg border p-2 transition-colors"
                     >
                       {selectedMessage.isStarred ? (
@@ -608,20 +584,6 @@ export default function MessagesPage() {
                     </div>
                   )}
                 </div>
-                {(selectedMessage.service || selectedMessage.budget) && (
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {selectedMessage.service && (
-                      <span className="bg-muted rounded-full px-2 py-1 text-xs">
-                        {isArabic ? 'الخدمة:' : 'Service:'} {selectedMessage.service}
-                      </span>
-                    )}
-                    {selectedMessage.budget && (
-                      <span className="bg-muted rounded-full px-2 py-1 text-xs">
-                        {isArabic ? 'الميزانية:' : 'Budget:'} ${selectedMessage.budget}
-                      </span>
-                    )}
-                  </div>
-                )}
               </div>
 
               {/* Message Content */}
@@ -631,7 +593,7 @@ export default function MessagesPage() {
                 </p>
                 <div className="text-muted-foreground mt-4 text-xs">
                   <Clock className="me-1 inline size-3" />
-                  {selectedMessage.createdAt.toLocaleString(isArabic ? 'ar-SA' : 'en-US')}
+                  {new Date(selectedMessage.createdAt).toLocaleString(isArabic ? 'ar-SA' : 'en-US')}
                 </div>
               </div>
 
@@ -640,14 +602,16 @@ export default function MessagesPage() {
                 <div className="border-t p-4">
                   <h3 className="mb-4 font-medium">{isArabic ? 'الردود' : 'Replies'}</h3>
                   <div className="space-y-4">
-                    {selectedMessage.replies.map(reply => (
-                      <div key={reply.id} className="bg-muted/50 rounded-lg p-3">
+                    {selectedMessage.replies.map((reply, index) => (
+                      <div key={index} className="bg-muted/50 rounded-lg p-3">
                         <p className="text-sm">{reply.message}</p>
                         <div className="text-muted-foreground mt-2 flex items-center gap-1 text-xs">
                           <CheckCircle className="size-3 text-green-500" />
                           <span>{isArabic ? 'تم الإرسال' : 'Sent'}</span>
                           <span>•</span>
-                          <span>{reply.sentAt.toLocaleString(isArabic ? 'ar-SA' : 'en-US')}</span>
+                          <span>
+                            {new Date(reply.sentAt).toLocaleString(isArabic ? 'ar-SA' : 'en-US')}
+                          </span>
                         </div>
                       </div>
                     ))}

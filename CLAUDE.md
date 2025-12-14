@@ -77,6 +77,7 @@ npm run docker:down            # Stop Docker services
 - `validations/` - Joi validation schemas (one per domain)
 - `services/` - Business logic (auth, email)
 - `config/` - Environment, database, Redis, logging, swagger
+- `utils/` - Utilities: `ApiError` (custom error class), `response` (standardized responses), `pagination` (query helpers), `security` (sanitization)
 
 ### Frontend Architecture (frontend/src/)
 
@@ -104,6 +105,8 @@ Exports types used across both packages. Import via `@mwm/shared`:
 - `BaseEntity`, `PublishableEntity` - Common entity interfaces
 
 Sub-exports available: `@mwm/shared/types`, `@mwm/shared/constants`, `@mwm/shared/utils`
+
+Build: Uses `tsup` for dual ESM/CJS output. Always rebuild after type changes: `cd packages/shared && npm run build`
 
 ## Key Patterns
 

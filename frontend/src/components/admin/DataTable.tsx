@@ -284,6 +284,7 @@ export function DataTable<T extends object>({
                 }}
                 placeholder={isRTL ? searchPlaceholderAr : searchPlaceholderEn}
                 className="placeholder:text-muted-foreground w-full border-none bg-transparent text-sm outline-none"
+                aria-label={isRTL ? 'بحث في الجدول' : 'Search table'}
               />
             </div>
           )}
@@ -416,6 +417,9 @@ export function DataTable<T extends object>({
                               setOpenActionMenu(openActionMenu === rowId ? null : rowId)
                             }
                             className="hover:bg-accent rounded-lg p-2 transition-colors"
+                            aria-label={isRTL ? 'خيارات المزيد' : 'More options'}
+                            aria-expanded={openActionMenu === rowId}
+                            aria-haspopup="menu"
                           >
                             <MoreHorizontal className="size-4" />
                           </button>
@@ -427,6 +431,8 @@ export function DataTable<T extends object>({
                               />
                               <div
                                 className={`bg-card border-border absolute ${isRTL ? 'left-0' : 'right-0'} top-full z-50 mt-1 min-w-[150px] rounded-lg border py-1 shadow-lg`}
+                                role="menu"
+                                aria-orientation="vertical"
                               >
                                 {actions
                                   .filter(action => !action.hidden?.(row))
@@ -442,6 +448,7 @@ export function DataTable<T extends object>({
                                           ? 'text-destructive hover:bg-destructive/10'
                                           : 'hover:bg-accent'
                                       }`}
+                                      role="menuitem"
                                     >
                                       {action.icon}
                                       <span>{isRTL ? action.labelAr : action.labelEn}</span>
@@ -485,11 +492,15 @@ export function DataTable<T extends object>({
             </span>
           </div>
 
-          <div className="flex items-center gap-1">
+          <nav
+            className="flex items-center gap-1"
+            aria-label={isRTL ? 'تصفح الصفحات' : 'Pagination'}
+          >
             <button
               onClick={() => setCurrentPage(1)}
               disabled={currentPage === 1}
               className="hover:bg-accent rounded-lg p-2 transition-colors disabled:opacity-50"
+              aria-label={isRTL ? 'الانتقال للصفحة الأولى' : 'Go to first page'}
             >
               <ChevronLeft className={`size-4 ${isRTL ? '' : 'rotate-180'}`} />
               <ChevronLeft className={`-ml-2 size-4 ${isRTL ? '' : 'rotate-180'}`} />
@@ -498,11 +509,12 @@ export function DataTable<T extends object>({
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
               className="hover:bg-accent rounded-lg p-2 transition-colors disabled:opacity-50"
+              aria-label={isRTL ? 'الصفحة السابقة' : 'Previous page'}
             >
               <ChevronLeft className={`size-4 ${isRTL ? '' : 'rotate-180'}`} />
             </button>
 
-            <span className="text-muted-foreground px-4 text-sm">
+            <span className="text-muted-foreground px-4 text-sm" aria-current="page">
               {isRTL
                 ? `صفحة ${currentPage} من ${totalPages}`
                 : `Page ${currentPage} of ${totalPages}`}
@@ -512,6 +524,7 @@ export function DataTable<T extends object>({
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
               className="hover:bg-accent rounded-lg p-2 transition-colors disabled:opacity-50"
+              aria-label={isRTL ? 'الصفحة التالية' : 'Next page'}
             >
               <ChevronRight className={`size-4 ${isRTL ? '' : 'rotate-180'}`} />
             </button>
@@ -519,11 +532,12 @@ export function DataTable<T extends object>({
               onClick={() => setCurrentPage(totalPages)}
               disabled={currentPage === totalPages}
               className="hover:bg-accent rounded-lg p-2 transition-colors disabled:opacity-50"
+              aria-label={isRTL ? 'الانتقال للصفحة الأخيرة' : 'Go to last page'}
             >
               <ChevronRight className={`size-4 ${isRTL ? '' : 'rotate-180'}`} />
               <ChevronRight className={`-ml-2 size-4 ${isRTL ? '' : 'rotate-180'}`} />
             </button>
-          </div>
+          </nav>
         </div>
       )}
     </div>

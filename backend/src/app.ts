@@ -34,6 +34,7 @@ import newsletterRouter from './routes/newsletter.routes';
 import notificationRouter from './routes/notification.routes';
 import dashboardRouter from './routes/dashboard.routes';
 import activityRouter from './routes/activity.routes';
+import usersRouter from './routes/users.routes';
 
 /**
  * Create Express application
@@ -117,6 +118,7 @@ export function createApp(): Express {
   app.use('/api/v1/notifications', notificationRouter);
   app.use('/api/v1/dashboard', dashboardRouter);
   app.use('/api/v1/activity', activityRouter);
+  app.use('/api/v1/users', usersRouter);
 
   // Swagger documentation
   app.use(

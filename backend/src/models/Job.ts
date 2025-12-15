@@ -4,10 +4,13 @@
  */
 
 import mongoose, { Document, Schema } from 'mongoose';
-import { LocalizedString } from '@mwm/shared';
+import { LocalizedString, JobType, ExperienceLevel, JobStatus } from '@mwm/shared';
 
 // Type alias for backward compatibility
 type IBilingual = LocalizedString;
+
+// Re-export types for backward compatibility
+export type { JobType, ExperienceLevel, JobStatus };
 
 /**
  * Salary range interface
@@ -20,24 +23,6 @@ interface ISalaryRange {
   period: 'hourly' | 'monthly' | 'yearly';
   isPublic: boolean;
 }
-
-/**
- * Job type
- * نوع الوظيفة
- */
-export type JobType = 'full-time' | 'part-time' | 'contract' | 'internship' | 'remote';
-
-/**
- * Experience level
- * مستوى الخبرة
- */
-export type ExperienceLevel = 'entry' | 'mid' | 'senior' | 'lead' | 'executive';
-
-/**
- * Job status
- * حالة الوظيفة
- */
-export type JobStatus = 'draft' | 'open' | 'closed' | 'filled';
 
 /**
  * Job interface

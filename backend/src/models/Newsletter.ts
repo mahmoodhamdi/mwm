@@ -4,26 +4,16 @@
  */
 
 import mongoose, { Schema, Document, Model } from 'mongoose';
-import { LocalizedString } from '@mwm/shared';
+import { LocalizedString, CampaignStatus, RecipientType, CampaignMetrics } from '@mwm/shared';
 
 // Type alias for backward compatibility
 type IBilingual = LocalizedString;
 
-// Campaign Status
-export type CampaignStatus = 'draft' | 'scheduled' | 'sending' | 'sent' | 'cancelled';
+// Re-export types for backward compatibility
+export type { CampaignStatus, RecipientType };
 
-// Recipient Type
-export type RecipientType = 'all' | 'tags' | 'specific';
-
-// Campaign Metrics
-export interface ICampaignMetrics {
-  recipientCount: number;
-  sentCount: number;
-  openCount: number;
-  clickCount: number;
-  bounceCount: number;
-  unsubscribeCount: number;
-}
+// Alias for backward compatibility (ICampaignMetrics -> CampaignMetrics)
+export type ICampaignMetrics = CampaignMetrics;
 
 // Interface
 export interface INewsletter extends Document {

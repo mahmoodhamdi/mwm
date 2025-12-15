@@ -94,6 +94,37 @@ export type BlogPostStatus = 'draft' | 'published' | 'scheduled' | 'archived';
 export type ContactStatus = 'new' | 'read' | 'replied' | 'archived' | 'spam';
 export type ContactPriority = 'low' | 'normal' | 'high' | 'urgent';
 
+// Careers types | أنواع الوظائف
+export type JobType = 'full-time' | 'part-time' | 'contract' | 'internship' | 'remote';
+export type ExperienceLevel = 'entry' | 'mid' | 'senior' | 'lead' | 'executive';
+export type JobStatus = 'draft' | 'open' | 'closed' | 'filled';
+export type ApplicationStatus =
+  | 'pending'
+  | 'reviewing'
+  | 'shortlisted'
+  | 'interviewed'
+  | 'offered'
+  | 'hired'
+  | 'rejected'
+  | 'withdrawn';
+
+// Newsletter types | أنواع النشرة البريدية
+export type CampaignStatus = 'draft' | 'scheduled' | 'sending' | 'sent' | 'cancelled';
+export type RecipientType = 'all' | 'tags' | 'specific';
+
+export interface CampaignMetrics {
+  recipientCount: number;
+  sentCount: number;
+  openCount: number;
+  clickCount: number;
+  bounceCount: number;
+  unsubscribeCount: number;
+}
+
+// Subscriber types | أنواع المشتركين
+export type SubscriberStatus = 'active' | 'unsubscribed' | 'bounced' | 'pending';
+export type SubscriberSource = 'website' | 'import' | 'manual' | 'api';
+
 // Common entity interface | واجهة الكيان المشترك
 export interface BaseEntity {
   _id: string;

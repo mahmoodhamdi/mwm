@@ -4,20 +4,10 @@
  */
 
 import mongoose, { Document, Schema } from 'mongoose';
+import { ApplicationStatus } from '@mwm/shared';
 
-/**
- * Application status type
- * نوع حالة الطلب
- */
-export type ApplicationStatus =
-  | 'pending'
-  | 'reviewing'
-  | 'shortlisted'
-  | 'interviewed'
-  | 'offered'
-  | 'hired'
-  | 'rejected'
-  | 'withdrawn';
+// Re-export type for backward compatibility
+export type { ApplicationStatus };
 
 /**
  * Job Application interface

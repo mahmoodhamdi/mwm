@@ -22,7 +22,9 @@ test.describe('Contact Page', () => {
 
     test('should have required form fields', async ({ page }) => {
       // Name field
-      const nameField = page.locator('input[name="name"], input[placeholder*="الاسم"], input[placeholder*="name"]').first();
+      const nameField = page
+        .locator('input[name="name"], input[placeholder*="الاسم"], input[placeholder*="name"]')
+        .first();
       await expect(nameField).toBeVisible();
 
       // Email field
@@ -108,7 +110,9 @@ test.describe('Contact Page', () => {
 
     test('should display contact information', async ({ page }) => {
       // Look for contact details section
-      const contactInfo = page.locator('address, [class*="contact-info"], [data-testid="contact-info"]');
+      const contactInfo = page.locator(
+        'address, [class*="contact-info"], [data-testid="contact-info"]'
+      );
       // Contact info layout varies
     });
 
@@ -134,7 +138,9 @@ test.describe('Contact Page', () => {
       await page.goto('/ar/contact');
 
       // Look for map container
-      const mapContainer = page.locator('[data-testid="map"], .map-container, iframe[src*="google"], iframe[src*="maps"]');
+      const mapContainer = page.locator(
+        '[data-testid="map"], .map-container, iframe[src*="google"], iframe[src*="maps"]'
+      );
       // Map may or may not be implemented
     });
   });
@@ -157,7 +163,9 @@ test.describe('Contact Page', () => {
     test('should have social media links', async ({ page }) => {
       await page.goto('/ar/contact');
 
-      const socialLinks = page.locator('a[href*="twitter"], a[href*="facebook"], a[href*="linkedin"], a[href*="instagram"]');
+      const socialLinks = page.locator(
+        'a[href*="twitter"], a[href*="facebook"], a[href*="linkedin"], a[href*="instagram"]'
+      );
       // Social links may be on contact page
     });
   });
@@ -173,17 +181,23 @@ test.describe('Newsletter Subscription', () => {
     });
 
     test('should display newsletter subscription form', async ({ page }) => {
-      const newsletterForm = page.locator('form').filter({ has: page.locator('input[type="email"]') });
+      const newsletterForm = page
+        .locator('form')
+        .filter({ has: page.locator('input[type="email"]') });
       // Newsletter form may be in footer or separate section
     });
 
     test('should have email input for newsletter', async ({ page }) => {
-      const emailInput = page.locator('input[type="email"], input[placeholder*="email"], input[placeholder*="بريد"]').last();
+      const emailInput = page
+        .locator('input[type="email"], input[placeholder*="email"], input[placeholder*="بريد"]')
+        .last();
       // Newsletter email input
     });
 
     test('should validate email before subscription', async ({ page }) => {
-      const newsletterEmail = page.locator('footer input[type="email"], input[placeholder*="newsletter"]').first();
+      const newsletterEmail = page
+        .locator('footer input[type="email"], input[placeholder*="newsletter"]')
+        .first();
       if (await newsletterEmail.isVisible()) {
         await newsletterEmail.fill('invalid-email');
 

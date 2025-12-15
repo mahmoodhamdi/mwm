@@ -30,15 +30,15 @@ describe('JobApplication Model', () => {
       await mongoose.connect(mongoUri);
 
       // Create a test department
-      testDepartment = await Department.create({
+      testDepartment = (await Department.create({
         name: { ar: 'قسم التقنية', en: 'Technology Department' },
         slug: 'tech-dept-app',
         description: { ar: 'وصف القسم', en: 'Department description' },
         isActive: true,
-      }) as mongoose.Document & { _id: mongoose.Types.ObjectId };
+      })) as mongoose.Document & { _id: mongoose.Types.ObjectId };
 
       // Create a test job
-      testJob = await Job.create({
+      testJob = (await Job.create({
         title: { ar: 'مطور برمجيات', en: 'Software Developer' },
         slug: 'software-developer-app',
         description: { ar: 'وصف الوظيفة', en: 'Job description' },
@@ -47,7 +47,7 @@ describe('JobApplication Model', () => {
         type: 'full-time',
         experienceLevel: 'mid',
         status: 'open',
-      }) as mongoose.Document & { _id: mongoose.Types.ObjectId };
+      })) as mongoose.Document & { _id: mongoose.Types.ObjectId };
     } catch {
       console.warn('MongoMemoryServer could not start');
     }

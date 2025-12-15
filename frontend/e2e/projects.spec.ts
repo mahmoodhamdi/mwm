@@ -24,7 +24,9 @@ test.describe('Projects Page', () => {
       await page.waitForLoadState('networkidle');
 
       // Look for project cards
-      const projectCards = page.locator('[data-testid="project-card"], article, .project-card, [class*="project"]');
+      const projectCards = page.locator(
+        '[data-testid="project-card"], article, .project-card, [class*="project"]'
+      );
       // Projects may be loading from API
     });
 
@@ -104,7 +106,9 @@ test.describe('Projects Page', () => {
         await page.waitForLoadState('networkidle');
 
         // Look for technologies section
-        const technologies = page.locator('[data-testid="technologies"], .technologies, [class*="tech"]');
+        const technologies = page.locator(
+          '[data-testid="technologies"], .technologies, [class*="tech"]'
+        );
         // Technologies section may vary
       }
     });
@@ -115,7 +119,9 @@ test.describe('Projects Page', () => {
       await page.goto('/ar/projects');
       await page.waitForLoadState('networkidle');
 
-      const categoryFilter = page.locator('[data-testid="category-filter"], .category-filter, button[class*="category"]');
+      const categoryFilter = page.locator(
+        '[data-testid="category-filter"], .category-filter, button[class*="category"]'
+      );
       // Category filter may or may not exist
     });
 
@@ -123,7 +129,10 @@ test.describe('Projects Page', () => {
       await page.goto('/ar/projects');
       await page.waitForLoadState('networkidle');
 
-      const categoryButton = page.locator('button').filter({ hasText: /ويب|Web|موبايل|Mobile/i }).first();
+      const categoryButton = page
+        .locator('button')
+        .filter({ hasText: /ويب|Web|موبايل|Mobile/i })
+        .first();
       if (await categoryButton.isVisible()) {
         await categoryButton.click();
         await page.waitForTimeout(500);

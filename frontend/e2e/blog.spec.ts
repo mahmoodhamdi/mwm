@@ -24,7 +24,9 @@ test.describe('Blog Page', () => {
       await page.waitForLoadState('networkidle');
 
       // Look for blog post cards
-      const blogPosts = page.locator('[data-testid="blog-post"], article, .blog-card, [class*="post"]');
+      const blogPosts = page.locator(
+        '[data-testid="blog-post"], article, .blog-card, [class*="post"]'
+      );
 
       // Should have posts or empty state
       const count = await blogPosts.count();
@@ -121,7 +123,9 @@ test.describe('Blog Page', () => {
       await page.goto('/ar/blog');
       await page.waitForLoadState('networkidle');
 
-      const categoryFilter = page.locator('[data-testid="category-filter"], .category-filter, nav [class*="category"]');
+      const categoryFilter = page.locator(
+        '[data-testid="category-filter"], .category-filter, nav [class*="category"]'
+      );
       // Category filter may or may not exist
     });
 
@@ -129,7 +133,10 @@ test.describe('Blog Page', () => {
       await page.goto('/ar/blog');
       await page.waitForLoadState('networkidle');
 
-      const categoryButton = page.locator('button, a').filter({ hasText: /تصنيف|Category/i }).first();
+      const categoryButton = page
+        .locator('button, a')
+        .filter({ hasText: /تصنيف|Category/i })
+        .first();
       if (await categoryButton.isVisible()) {
         await categoryButton.click();
         await page.waitForTimeout(500);
@@ -141,7 +148,9 @@ test.describe('Blog Page', () => {
     test('should have search functionality', async ({ page }) => {
       await page.goto('/ar/blog');
 
-      const searchInput = page.locator('input[type="search"], input[placeholder*="بحث"], input[placeholder*="search"]');
+      const searchInput = page.locator(
+        'input[type="search"], input[placeholder*="بحث"], input[placeholder*="search"]'
+      );
       // Search may or may not be implemented
     });
   });
@@ -151,7 +160,9 @@ test.describe('Blog Page', () => {
       await page.goto('/ar/blog');
       await page.waitForLoadState('networkidle');
 
-      const pagination = page.locator('nav[aria-label*="pagination"], .pagination, [data-testid="pagination"]');
+      const pagination = page.locator(
+        'nav[aria-label*="pagination"], .pagination, [data-testid="pagination"]'
+      );
       // Pagination appears when there are many posts
     });
   });

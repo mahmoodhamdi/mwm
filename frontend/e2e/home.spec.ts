@@ -47,7 +47,9 @@ test.describe('Home Page', () => {
       await page.waitForTimeout(500);
 
       // Check for services heading or section
-      const servicesSection = page.locator('section').filter({ hasText: /خدماتنا|الخدمات|Services/i });
+      const servicesSection = page
+        .locator('section')
+        .filter({ hasText: /خدماتنا|الخدمات|Services/i });
       // Services section may or may not be on homepage depending on design
     });
 
@@ -91,7 +93,9 @@ test.describe('Home Page', () => {
       await page.goto('/ar');
 
       // Find language toggle/link
-      const englishLink = page.locator('a[href*="/en"], button:has-text("EN"), button:has-text("English")').first();
+      const englishLink = page
+        .locator('a[href*="/en"], button:has-text("EN"), button:has-text("English")')
+        .first();
       if (await englishLink.isVisible()) {
         await englishLink.click();
         await expect(page).toHaveURL(/\/en/);
@@ -102,7 +106,9 @@ test.describe('Home Page', () => {
       await page.goto('/en');
 
       // Find language toggle/link
-      const arabicLink = page.locator('a[href*="/ar"], button:has-text("عربي"), button:has-text("AR")').first();
+      const arabicLink = page
+        .locator('a[href*="/ar"], button:has-text("عربي"), button:has-text("AR")')
+        .first();
       if (await arabicLink.isVisible()) {
         await arabicLink.click();
         await expect(page).toHaveURL(/\/ar/);
@@ -119,7 +125,9 @@ test.describe('Home Page', () => {
       await expect(page).toHaveTitle(/MWM|ممم/);
 
       // Mobile menu button might be visible
-      const mobileMenuButton = page.locator('button[aria-label*="menu"], button[aria-label*="القائمة"], [data-testid="mobile-menu"]');
+      const mobileMenuButton = page.locator(
+        'button[aria-label*="menu"], button[aria-label*="القائمة"], [data-testid="mobile-menu"]'
+      );
       // Mobile menu implementation may vary
     });
 

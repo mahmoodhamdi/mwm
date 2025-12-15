@@ -96,7 +96,7 @@ NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=G-XBL3PT6EFX
 
 # Firebase Cloud Messaging VAPID Key
 # Get from: Firebase Console > Project Settings > Cloud Messaging > Web Push certificates
-NEXT_PUBLIC_FIREBASE_VAPID_KEY=
+NEXT_PUBLIC_FIREBASE_VAPID_KEY=BGeoB0-7GTlBjbH7OtgxxdPrA0vb550RzBXvIjhMa4V4FkkU0OUaBujw4w6tDUJwZpcRIPKM44mHxoByPnj1Mxo
 
 # ============ OPTIONAL ============
 

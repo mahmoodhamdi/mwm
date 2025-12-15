@@ -90,7 +90,7 @@ export default function AdminLoginPage() {
     setIsGoogleLoading(true);
 
     try {
-      const response = await authService.loginWithGoogle();
+      await authService.loginWithGoogle();
       toast.success(t('success'));
       // Manually set user in auth context by checking auth
       window.location.href = `/${locale}/admin`;

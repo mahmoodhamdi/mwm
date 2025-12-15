@@ -6,6 +6,17 @@
 // Export BilingualText from public types (common type used everywhere)
 export type { BilingualText, PaginationMeta } from './public/types';
 
+// Auth service
+export {
+  type User,
+  type LoginCredentials,
+  type RegisterData,
+  type AuthTokens,
+  type LoginResponse,
+  tokenUtils,
+  authService,
+} from './auth.service';
+
 // Re-export admin services (excluding BilingualText to avoid conflict)
 export {
   // Settings

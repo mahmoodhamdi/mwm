@@ -87,10 +87,10 @@ const createApiClient = (baseURL: string): AxiosInstance => {
             }
           }
         } catch {
-          // Refresh failed, clear tokens and redirect to login
+          // Refresh failed, clear tokens
+          // AuthProvider will handle redirect to login
           localStorage.removeItem('accessToken');
           localStorage.removeItem('refreshToken');
-          window.location.href = '/login';
         }
       }
 

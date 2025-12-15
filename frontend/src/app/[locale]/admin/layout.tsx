@@ -4,6 +4,8 @@
  */
 
 import { AdminLayout } from '@/components/admin';
+import { AuthProvider } from '@/providers/AuthProvider';
+import { AdminAuthGuard } from '@/components/admin/AdminAuthGuard';
 
 export const metadata = {
   title: 'Admin Dashboard | MWM',
@@ -15,5 +17,11 @@ export const metadata = {
 };
 
 export default function AdminRootLayout({ children }: { children: React.ReactNode }) {
-  return <AdminLayout>{children}</AdminLayout>;
+  return (
+    <AuthProvider>
+      <AdminAuthGuard>
+        <AdminLayout>{children}</AdminLayout>
+      </AdminAuthGuard>
+    </AuthProvider>
+  );
 }

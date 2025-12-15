@@ -4,12 +4,10 @@
  */
 
 import mongoose, { Schema, Document, Model } from 'mongoose';
+import { ContactStatus, ContactPriority } from '@mwm/shared';
 
-// Contact Status
-export type ContactStatus = 'new' | 'read' | 'replied' | 'archived' | 'spam';
-
-// Contact Priority
-export type ContactPriority = 'low' | 'normal' | 'high' | 'urgent';
+// Re-export for backward compatibility with existing imports
+export type { ContactStatus, ContactPriority } from '@mwm/shared';
 
 // Interface
 export interface IContact extends Document {

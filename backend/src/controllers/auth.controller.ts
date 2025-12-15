@@ -10,6 +10,7 @@ import { ApiError, Errors } from '../utils/ApiError';
 import { sendSuccess, sendCreated } from '../utils/response';
 import { asyncHandler } from '../middlewares';
 import { logger } from '../config';
+import { verifyIdToken } from '../config/firebase';
 
 /**
  * Register a new user
@@ -370,6 +371,103 @@ export const changePassword = asyncHandler(async (req: Request, res: Response) =
   });
 });
 
+/**
+ * Google Sign-in with Firebase
+ * تسجيل الدخول بجوجل عبر Firebase
+ * POST /api/v1/auth/google
+ */
+export const googleAuth = asyncHandler(async (req: Request, res: Response) => {
+  const { idToken } = req.body;
+
+  if (!idToken || typeof idToken !== 'string') {
+    throw new ApiError(400, 'MISSING_TOKEN', 'Firebase ID token is required | توكن Firebase مطلوب');
+  }
+
+  // Verify Firebase ID token
+  const decodedToken = await verifyIdToken(idToken);
+
+  if (!decodedToken) {
+    throw new ApiError(
+      401,
+      'INVALID_TOKEN',
+      'Invalid or expired Firebase ID token | توكن Firebase غير صالح أو منتهي الصلاحية'
+    );
+  }
+
+  const { email, name, picture, uid: firebaseUid } = decodedToken;
+
+  if (!email) {
+    throw new ApiError(
+      400,
+      'EMAIL_REQUIRED',
+      'Google account must have an email | حساب جوجل يجب أن يحتوي على بريد إلكتروني'
+    );
+  }
+
+  // Check if user exists
+  let user = await User.findOne({ email });
+
+  if (user) {
+    // User exists - check if account is active
+    if (!user.isActive) {
+      throw new ApiError(
+        403,
+        'ACCOUNT_DISABLED',
+        'Account is disabled. Please contact support | الحساب معطل. يرجى التواصل مع الدعم'
+      );
+    }
+
+    // Update avatar if not set
+    if (!user.avatar && picture) {
+      user.avatar = picture;
+      await user.save();
+    }
+
+    // Auto-verify email for Google users
+    if (!user.isEmailVerified) {
+      user.isEmailVerified = true;
+      await user.save();
+    }
+  } else {
+    // Create new user
+    user = await User.create({
+      name: name || email.split('@')[0],
+      email,
+      password: firebaseUid + '_' + Date.now(), // Random password for Firebase users
+      avatar: picture,
+      isEmailVerified: true, // Google emails are verified
+    });
+
+    // Send welcome email (non-blocking)
+    const emailSent = await emailService.sendWelcomeEmail(user.email, user.name);
+    if (!emailSent) {
+      logger.warn(`Failed to send welcome email to ${user.email} after Google sign-in`);
+    }
+  }
+
+  // Reset login attempts
+  await user.resetLoginAttempts();
+
+  // Generate tokens
+  const tokens = await authService.generateTokenPair(user, req.headers['user-agent'], req.ip);
+
+  sendSuccess(
+    res,
+    {
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        avatar: user.avatar,
+        isEmailVerified: user.isEmailVerified,
+      },
+      ...tokens,
+    },
+    { message: 'Google sign-in successful | تم تسجيل الدخول بجوجل بنجاح' }
+  );
+});
+
 export const authController = {
   register,
   login,
@@ -382,6 +480,7 @@ export const authController = {
   getMe,
   updateProfile,
   changePassword,
+  googleAuth,
 };
 
 export default authController;

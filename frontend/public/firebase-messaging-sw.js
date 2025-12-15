@@ -8,13 +8,14 @@ importScripts('https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js'
 importScripts('https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-compat.js');
 
 // Firebase configuration
+// NOTE: Update these values from your Firebase console project settings
 firebase.initializeApp({
-  apiKey: 'YOUR_API_KEY',
-  authDomain: 'auth-pro-33cb9.firebaseapp.com',
-  projectId: 'auth-pro-33cb9',
-  storageBucket: 'auth-pro-33cb9.appspot.com',
-  messagingSenderId: 'YOUR_SENDER_ID',
-  appId: 'YOUR_APP_ID',
+  apiKey: 'YOUR_FIREBASE_API_KEY',
+  authDomain: 'mwmintegratedsoftwaresolutions.firebaseapp.com',
+  projectId: 'mwmintegratedsoftwaresolutions',
+  storageBucket: 'mwmintegratedsoftwaresolutions.firebasestorage.app',
+  messagingSenderId: 'YOUR_FIREBASE_MESSAGING_SENDER_ID',
+  appId: 'YOUR_FIREBASE_APP_ID',
 });
 
 // Get messaging instance

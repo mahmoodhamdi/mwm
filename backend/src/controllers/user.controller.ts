@@ -9,6 +9,8 @@ import { User, UserRoles, IUser } from '../models/User';
 import { asyncHandler } from '../middlewares';
 import { ApiError, parsePagination } from '../utils';
 import { validatePasswordStrength, escapeRegex } from '../utils/security';
+import { emailService } from '../services/email.service';
+import { logger } from '../config';
 
 /**
  * Get all users with pagination and filtering
@@ -151,7 +153,21 @@ export const createUser = asyncHandler(async (req: Request, res: Response) => {
     isActive: true,
   });
 
-  // TODO: Send invite email if sendInvite is true
+  // Send invite email if sendInvite is true
+  if (sendInvite) {
+    try {
+      const verificationToken = user.generateEmailVerificationToken();
+      await user.save();
+
+      const emailSent = await emailService.sendVerificationEmail(email, name, verificationToken);
+      if (!emailSent) {
+        logger.warn(`Failed to send invite email to ${email}`);
+      }
+    } catch (error) {
+      logger.error('Error sending invite email:', error);
+      // Don't fail the request if email fails - user was created successfully
+    }
+  }
 
   res.status(201).json({
     success: true,

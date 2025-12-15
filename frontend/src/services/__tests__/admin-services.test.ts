@@ -3,22 +3,46 @@
  * اختبارات خدمات الإدارة
  */
 
-import { api } from '@/lib/api';
+// Define mock functions
+const mockGet = jest.fn();
+const mockPost = jest.fn();
+const mockPut = jest.fn();
+const mockDelete = jest.fn();
 
-// Mock the API
+// Mock the API before imports
 jest.mock('@/lib/api', () => ({
   api: {
+    get: mockGet,
+    post: mockPost,
+    put: mockPut,
+    delete: mockDelete,
+  },
+  apiClient: {
     get: jest.fn(),
     post: jest.fn(),
     put: jest.fn(),
     delete: jest.fn(),
   },
-  extractData: jest.fn(
-    (response: { data?: { data?: unknown } }) => response.data?.data || response.data
-  ),
+  extractData: <T>(response: { data?: { data?: T } }): T => response?.data?.data as T,
 }));
 
-const mockApi = api as jest.Mocked<typeof api>;
+// Import services after mocking
+import {
+  getStats,
+  getRecentActivity,
+  getChartsData,
+  getQuickStats,
+} from '../admin/dashboard.service';
+
+import {
+  getLogs,
+  getLogsByUser,
+  getLogsByResource,
+  getRecentLogs,
+  getStatistics,
+  getMyActivity,
+  deleteOldLogs,
+} from '../admin/activity.service';
 
 describe('Admin Services', () => {
   beforeEach(() => {
@@ -26,13 +50,6 @@ describe('Admin Services', () => {
   });
 
   describe('Dashboard Service', () => {
-    let dashboardService: typeof import('../admin/dashboard.service');
-
-    beforeEach(async () => {
-      jest.resetModules();
-      dashboardService = await import('../admin/dashboard.service');
-    });
-
     describe('getStats', () => {
       it('should fetch dashboard stats', async () => {
         const mockStats = {
@@ -45,12 +62,12 @@ describe('Admin Services', () => {
           subscribers: { total: 500, active: 480 },
           team: { total: 10, active: 10 },
         };
-        mockApi.get.mockResolvedValue({ data: { data: mockStats } });
+        mockGet.mockResolvedValue({ data: { data: mockStats } });
 
-        const result = await dashboardService.getStats();
+        const result = await getStats();
 
-        expect(mockApi.get).toHaveBeenCalledWith('/dashboard/stats');
-        expect(result).toBeDefined();
+        expect(mockGet).toHaveBeenCalledWith('/dashboard/stats');
+        expect(result).toEqual(mockStats);
       });
     });
 
@@ -63,21 +80,29 @@ describe('Admin Services', () => {
           recentSubscribers: [],
           recentActivity: [],
         };
-        mockApi.get.mockResolvedValue({ data: { data: mockActivity } });
+        mockGet.mockResolvedValue({ data: { data: mockActivity } });
 
-        await dashboardService.getRecentActivity();
+        const result = await getRecentActivity();
 
-        expect(mockApi.get).toHaveBeenCalledWith('/dashboard/activity', {
+        expect(mockGet).toHaveBeenCalledWith('/dashboard/activity', {
           params: { limit: undefined },
         });
+        expect(result).toEqual(mockActivity);
       });
 
       it('should fetch recent activity with custom limit', async () => {
-        mockApi.get.mockResolvedValue({ data: { data: {} } });
+        const mockActivity = {
+          recentContacts: [],
+          recentPosts: [],
+          recentApplications: [],
+          recentSubscribers: [],
+          recentActivity: [],
+        };
+        mockGet.mockResolvedValue({ data: { data: mockActivity } });
 
-        await dashboardService.getRecentActivity(10);
+        await getRecentActivity(10);
 
-        expect(mockApi.get).toHaveBeenCalledWith('/dashboard/activity', { params: { limit: 10 } });
+        expect(mockGet).toHaveBeenCalledWith('/dashboard/activity', { params: { limit: 10 } });
       });
     });
 
@@ -96,21 +121,26 @@ describe('Admin Services', () => {
             jobsByType: {},
           },
         };
-        mockApi.get.mockResolvedValue({ data: { data: mockData } });
+        mockGet.mockResolvedValue({ data: { data: mockData } });
 
-        await dashboardService.getChartsData();
+        const result = await getChartsData();
 
-        expect(mockApi.get).toHaveBeenCalledWith('/dashboard/charts', {
+        expect(mockGet).toHaveBeenCalledWith('/dashboard/charts', {
           params: { period: undefined },
         });
+        expect(result).toEqual(mockData);
       });
 
       it('should fetch charts data with custom period', async () => {
-        mockApi.get.mockResolvedValue({ data: { data: {} } });
+        const mockData = {
+          timeSeries: { contacts: [], subscribers: [], applications: [], posts: [] },
+          distributions: { contactsByStatus: {}, applicationsByStatus: {}, jobsByType: {} },
+        };
+        mockGet.mockResolvedValue({ data: { data: mockData } });
 
-        await dashboardService.getChartsData(30);
+        await getChartsData(30);
 
-        expect(mockApi.get).toHaveBeenCalledWith('/dashboard/charts', { params: { period: 30 } });
+        expect(mockGet).toHaveBeenCalledWith('/dashboard/charts', { params: { period: 30 } });
       });
     });
 
@@ -121,41 +151,36 @@ describe('Admin Services', () => {
           pendingApplications: 10,
           unreadNotifications: 3,
         };
-        mockApi.get.mockResolvedValue({ data: { data: mockStats } });
+        mockGet.mockResolvedValue({ data: { data: mockStats } });
 
-        const result = await dashboardService.getQuickStats();
+        const result = await getQuickStats();
 
-        expect(mockApi.get).toHaveBeenCalledWith('/dashboard/quick-stats');
-        expect(result).toBeDefined();
+        expect(mockGet).toHaveBeenCalledWith('/dashboard/quick-stats');
+        expect(result).toEqual(mockStats);
       });
     });
   });
 
   describe('Activity Service', () => {
-    let activityService: typeof import('../admin/activity.service');
-
-    beforeEach(async () => {
-      jest.resetModules();
-      activityService = await import('../admin/activity.service');
-    });
-
     describe('getLogs', () => {
       it('should fetch activity logs with default params', async () => {
         const mockResponse = {
           logs: [],
           pagination: { page: 1, limit: 10, total: 0, totalPages: 0 },
         };
-        mockApi.get.mockResolvedValue({ data: { data: mockResponse } });
+        mockGet.mockResolvedValue({ data: { data: mockResponse } });
 
-        await activityService.getLogs();
+        const result = await getLogs();
 
-        expect(mockApi.get).toHaveBeenCalledWith('/activity', { params: undefined });
+        expect(mockGet).toHaveBeenCalledWith('/activity', { params: undefined });
+        expect(result).toEqual(mockResponse);
       });
 
       it('should fetch activity logs with custom params', async () => {
-        mockApi.get.mockResolvedValue({ data: { data: { logs: [], pagination: {} } } });
+        const mockResponse = { logs: [], pagination: {} };
+        mockGet.mockResolvedValue({ data: { data: mockResponse } });
 
-        await activityService.getLogs({
+        await getLogs({
           page: 2,
           limit: 20,
           action: 'create',
@@ -163,7 +188,7 @@ describe('Admin Services', () => {
           userId: 'user123',
         });
 
-        expect(mockApi.get).toHaveBeenCalledWith('/activity', {
+        expect(mockGet).toHaveBeenCalledWith('/activity', {
           params: {
             page: 2,
             limit: 20,
@@ -177,19 +202,22 @@ describe('Admin Services', () => {
 
     describe('getLogsByUser', () => {
       it('should fetch logs by user', async () => {
-        mockApi.get.mockResolvedValue({ data: { data: { logs: [], total: 0 } } });
+        const mockResponse = { logs: [], total: 0 };
+        mockGet.mockResolvedValue({ data: { data: mockResponse } });
 
-        await activityService.getLogsByUser('user123');
+        const result = await getLogsByUser('user123');
 
-        expect(mockApi.get).toHaveBeenCalledWith('/activity/user/user123', { params: undefined });
+        expect(mockGet).toHaveBeenCalledWith('/activity/user/user123', { params: undefined });
+        expect(result).toEqual(mockResponse);
       });
 
       it('should fetch logs by user with filters', async () => {
-        mockApi.get.mockResolvedValue({ data: { data: { logs: [], total: 0 } } });
+        const mockResponse = { logs: [], total: 0 };
+        mockGet.mockResolvedValue({ data: { data: mockResponse } });
 
-        await activityService.getLogsByUser('user123', { page: 1, limit: 10, action: 'create' });
+        await getLogsByUser('user123', { page: 1, limit: 10, action: 'create' });
 
-        expect(mockApi.get).toHaveBeenCalledWith('/activity/user/user123', {
+        expect(mockGet).toHaveBeenCalledWith('/activity/user/user123', {
           params: { page: 1, limit: 10, action: 'create' },
         });
       });
@@ -197,19 +225,22 @@ describe('Admin Services', () => {
 
     describe('getLogsByResource', () => {
       it('should fetch logs by resource', async () => {
-        mockApi.get.mockResolvedValue({ data: { data: { logs: [], total: 0 } } });
+        const mockResponse = { logs: [], total: 0 };
+        mockGet.mockResolvedValue({ data: { data: mockResponse } });
 
-        await activityService.getLogsByResource('posts');
+        const result = await getLogsByResource('posts');
 
-        expect(mockApi.get).toHaveBeenCalledWith('/activity/resource/posts', { params: undefined });
+        expect(mockGet).toHaveBeenCalledWith('/activity/resource/posts', { params: undefined });
+        expect(result).toEqual(mockResponse);
       });
 
       it('should fetch logs by resource with params', async () => {
-        mockApi.get.mockResolvedValue({ data: { data: { logs: [], total: 0 } } });
+        const mockResponse = { logs: [], total: 0 };
+        mockGet.mockResolvedValue({ data: { data: mockResponse } });
 
-        await activityService.getLogsByResource('posts', { resourceId: 'post123', page: 1 });
+        await getLogsByResource('posts', { resourceId: 'post123', page: 1 });
 
-        expect(mockApi.get).toHaveBeenCalledWith('/activity/resource/posts', {
+        expect(mockGet).toHaveBeenCalledWith('/activity/resource/posts', {
           params: { resourceId: 'post123', page: 1 },
         });
       });
@@ -217,21 +248,22 @@ describe('Admin Services', () => {
 
     describe('getRecentLogs', () => {
       it('should fetch recent logs', async () => {
-        mockApi.get.mockResolvedValue({ data: { data: { logs: [] } } });
+        const mockResponse = { logs: [] };
+        mockGet.mockResolvedValue({ data: { data: mockResponse } });
 
-        await activityService.getRecentLogs();
+        const result = await getRecentLogs();
 
-        expect(mockApi.get).toHaveBeenCalledWith('/activity/recent', {
-          params: { limit: undefined },
-        });
+        expect(mockGet).toHaveBeenCalledWith('/activity/recent', { params: { limit: undefined } });
+        expect(result).toEqual(mockResponse);
       });
 
       it('should fetch recent logs with limit', async () => {
-        mockApi.get.mockResolvedValue({ data: { data: { logs: [] } } });
+        const mockResponse = { logs: [] };
+        mockGet.mockResolvedValue({ data: { data: mockResponse } });
 
-        await activityService.getRecentLogs(5);
+        await getRecentLogs(5);
 
-        expect(mockApi.get).toHaveBeenCalledWith('/activity/recent', { params: { limit: 5 } });
+        expect(mockGet).toHaveBeenCalledWith('/activity/recent', { params: { limit: 5 } });
       });
     });
 
@@ -242,22 +274,24 @@ describe('Admin Services', () => {
           byResource: { posts: 8, projects: 7 },
           byUser: { user1: 10, user2: 5 },
         };
-        mockApi.get.mockResolvedValue({ data: { data: mockStats } });
+        mockGet.mockResolvedValue({ data: { data: mockStats } });
 
-        await activityService.getStatistics();
+        const result = await getStatistics();
 
-        expect(mockApi.get).toHaveBeenCalledWith('/activity/stats', { params: undefined });
+        expect(mockGet).toHaveBeenCalledWith('/activity/stats', { params: undefined });
+        expect(result).toEqual(mockStats);
       });
 
       it('should fetch statistics with date range', async () => {
-        mockApi.get.mockResolvedValue({ data: { data: {} } });
+        const mockStats = { byAction: {}, byResource: {}, byUser: {} };
+        mockGet.mockResolvedValue({ data: { data: mockStats } });
 
-        await activityService.getStatistics({
+        await getStatistics({
           startDate: '2024-01-01',
           endDate: '2024-12-31',
         });
 
-        expect(mockApi.get).toHaveBeenCalledWith('/activity/stats', {
+        expect(mockGet).toHaveBeenCalledWith('/activity/stats', {
           params: { startDate: '2024-01-01', endDate: '2024-12-31' },
         });
       });
@@ -265,19 +299,22 @@ describe('Admin Services', () => {
 
     describe('getMyActivity', () => {
       it('should fetch current user activity', async () => {
-        mockApi.get.mockResolvedValue({ data: { data: { logs: [], total: 0 } } });
+        const mockResponse = { logs: [], total: 0 };
+        mockGet.mockResolvedValue({ data: { data: mockResponse } });
 
-        await activityService.getMyActivity();
+        const result = await getMyActivity();
 
-        expect(mockApi.get).toHaveBeenCalledWith('/activity/me', { params: undefined });
+        expect(mockGet).toHaveBeenCalledWith('/activity/me', { params: undefined });
+        expect(result).toEqual(mockResponse);
       });
 
       it('should fetch current user activity with filters', async () => {
-        mockApi.get.mockResolvedValue({ data: { data: { logs: [], total: 0 } } });
+        const mockResponse = { logs: [], total: 0 };
+        mockGet.mockResolvedValue({ data: { data: mockResponse } });
 
-        await activityService.getMyActivity({ page: 1, limit: 10, action: 'update' });
+        await getMyActivity({ page: 1, limit: 10, action: 'update' });
 
-        expect(mockApi.get).toHaveBeenCalledWith('/activity/me', {
+        expect(mockGet).toHaveBeenCalledWith('/activity/me', {
           params: { page: 1, limit: 10, action: 'update' },
         });
       });
@@ -285,21 +322,25 @@ describe('Admin Services', () => {
 
     describe('deleteOldLogs', () => {
       it('should delete old logs with default days', async () => {
-        mockApi.delete.mockResolvedValue({ data: { data: { deleted: 100 } } });
+        const mockResponse = { deleted: 100 };
+        mockDelete.mockResolvedValue({ data: { data: mockResponse } });
 
-        await activityService.deleteOldLogs();
+        const result = await deleteOldLogs();
 
-        expect(mockApi.delete).toHaveBeenCalledWith('/activity/old', {
+        expect(mockDelete).toHaveBeenCalledWith('/activity/old', {
           data: { daysOld: undefined },
         });
+        expect(result).toEqual(mockResponse);
       });
 
       it('should delete old logs with custom days', async () => {
-        mockApi.delete.mockResolvedValue({ data: { data: { deleted: 50 } } });
+        const mockResponse = { deleted: 50 };
+        mockDelete.mockResolvedValue({ data: { data: mockResponse } });
 
-        await activityService.deleteOldLogs(90);
+        const result = await deleteOldLogs(90);
 
-        expect(mockApi.delete).toHaveBeenCalledWith('/activity/old', { data: { daysOld: 90 } });
+        expect(mockDelete).toHaveBeenCalledWith('/activity/old', { data: { daysOld: 90 } });
+        expect(result).toEqual(mockResponse);
       });
     });
   });

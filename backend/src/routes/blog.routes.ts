@@ -6,6 +6,7 @@
 import { Router } from 'express';
 import { blogController } from '../controllers';
 import { authenticate, authorize } from '../middlewares/auth';
+import { validate, idParamsSchema } from '../middlewares/validate';
 
 const router = Router();
 
@@ -66,6 +67,7 @@ router.put(
   '/admin/categories/:id',
   authenticate,
   authorize('blog:update'),
+  validate({ params: idParamsSchema }),
   blogController.updateCategory
 );
 
@@ -74,6 +76,7 @@ router.delete(
   '/admin/categories/:id',
   authenticate,
   authorize('blog:delete'),
+  validate({ params: idParamsSchema }),
   blogController.deleteCategory
 );
 
@@ -86,7 +89,13 @@ router.delete(
 router.get('/admin/posts', authenticate, authorize('blog:read'), blogController.getAllPosts);
 
 // GET /api/v1/blog/admin/posts/:id - Get post by ID (Admin)
-router.get('/admin/posts/:id', authenticate, authorize('blog:read'), blogController.getPostById);
+router.get(
+  '/admin/posts/:id',
+  authenticate,
+  authorize('blog:read'),
+  validate({ params: idParamsSchema }),
+  blogController.getPostById
+);
 
 // POST /api/v1/blog/admin/posts - Create post
 router.post('/admin/posts', authenticate, authorize('blog:create'), blogController.createPost);
@@ -100,13 +109,20 @@ router.put(
 );
 
 // PUT /api/v1/blog/admin/posts/:id - Update post
-router.put('/admin/posts/:id', authenticate, authorize('blog:update'), blogController.updatePost);
+router.put(
+  '/admin/posts/:id',
+  authenticate,
+  authorize('blog:update'),
+  validate({ params: idParamsSchema }),
+  blogController.updatePost
+);
 
 // DELETE /api/v1/blog/admin/posts/:id - Delete post
 router.delete(
   '/admin/posts/:id',
   authenticate,
   authorize('blog:delete'),
+  validate({ params: idParamsSchema }),
   blogController.deletePost
 );
 

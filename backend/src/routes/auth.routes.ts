@@ -17,11 +17,15 @@ const router = Router();
  * محددات معدل خاصة بالمصادقة
  */
 
+// Skip rate limiting in test environment
+const isTestEnv = process.env.NODE_ENV === 'test';
+
 // Strict rate limit for login attempts (5 attempts per 15 minutes)
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 5,
   skipSuccessfulRequests: true, // Only count failed attempts
+  skip: () => isTestEnv, // Skip in test environment
   message: {
     success: false,
     error: {
@@ -38,6 +42,7 @@ const loginLimiter = rateLimit({
 const passwordResetLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 3,
+  skip: () => isTestEnv, // Skip in test environment
   message: {
     success: false,
     error: {
@@ -54,6 +59,7 @@ const passwordResetLimiter = rateLimit({
 const registerLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 10,
+  skip: () => isTestEnv, // Skip in test environment
   message: {
     success: false,
     error: {
@@ -70,6 +76,7 @@ const registerLimiter = rateLimit({
 const verificationLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 5,
+  skip: () => isTestEnv, // Skip in test environment
   message: {
     success: false,
     error: {

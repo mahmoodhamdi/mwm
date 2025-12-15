@@ -10,6 +10,7 @@ import { teamValidation } from '../validations';
 import { asyncHandler } from '../middlewares/asyncHandler';
 import { Errors } from '../utils/ApiError';
 import { successResponse, paginatedResponse } from '../utils/response';
+import { parsePagination } from '../utils/pagination';
 import { redis } from '../config';
 import { escapeRegex } from '../utils/security';
 
@@ -74,7 +75,15 @@ export const getDepartmentBySlug = asyncHandler(async (req: Request, res: Respon
  * جلب جميع الأقسام (للمسؤول)
  */
 export const getAllDepartments = asyncHandler(async (req: Request, res: Response) => {
-  const { page = 1, limit = 20, isActive, search } = req.query;
+  const { isActive, search } = req.query;
+
+  // Use validated pagination utility
+  const { page, limit, skip } = parsePagination({
+    page: req.query.page,
+    limit: req.query.limit,
+    defaultLimit: 20,
+    maxLimit: 100,
+  });
 
   const filter: Record<string, unknown> = {};
 
@@ -90,17 +99,13 @@ export const getAllDepartments = asyncHandler(async (req: Request, res: Response
     ];
   }
 
-  const skip = (Number(page) - 1) * Number(limit);
   const total = await Department.countDocuments(filter);
-  const departments = await Department.find(filter)
-    .sort({ order: 1 })
-    .skip(skip)
-    .limit(Number(limit));
+  const departments = await Department.find(filter).sort({ order: 1 }).skip(skip).limit(limit);
 
   return paginatedResponse(res, {
     data: departments,
-    page: Number(page),
-    limit: Number(limit),
+    page,
+    limit,
     total,
   });
 });
@@ -228,7 +233,15 @@ export const deleteDepartment = asyncHandler(async (req: Request, res: Response)
  * جلب أعضاء الفريق (عام)
  */
 export const getTeamMembers = asyncHandler(async (req: Request, res: Response) => {
-  const { page = 1, limit = 12, department } = req.query;
+  const { department } = req.query;
+
+  // Use validated pagination utility
+  const { page, limit, skip } = parsePagination({
+    page: req.query.page,
+    limit: req.query.limit,
+    defaultLimit: 12,
+    maxLimit: 100,
+  });
 
   const cacheKey = `${TEAM_CACHE_PREFIX}:list:${page}:${limit}:${department || 'all'}`;
 
@@ -253,21 +266,20 @@ export const getTeamMembers = asyncHandler(async (req: Request, res: Response) =
     }
   }
 
-  const skip = (Number(page) - 1) * Number(limit);
   const total = await TeamMember.countDocuments(filter);
   const members = await TeamMember.find(filter)
     .sort({ order: 1 })
     .skip(skip)
-    .limit(Number(limit))
+    .limit(limit)
     .populate('department', 'name slug');
 
   const result = {
     members,
     pagination: {
-      page: Number(page),
-      limit: Number(limit),
+      page,
+      limit,
       total,
-      pages: Math.ceil(total / Number(limit)),
+      pages: Math.ceil(total / limit),
     },
   };
 
@@ -343,8 +355,6 @@ export const getLeaders = asyncHandler(async (_req: Request, res: Response) => {
  */
 export const getAllMembers = asyncHandler(async (req: Request, res: Response) => {
   const {
-    page = 1,
-    limit = 12,
     department,
     featured,
     leaders,
@@ -353,6 +363,14 @@ export const getAllMembers = asyncHandler(async (req: Request, res: Response) =>
     sortBy = 'order',
     sortOrder = 'asc',
   } = req.query;
+
+  // Use validated pagination utility
+  const { page, limit, skip } = parsePagination({
+    page: req.query.page,
+    limit: req.query.limit,
+    defaultLimit: 12,
+    maxLimit: 100,
+  });
 
   const filter: Record<string, unknown> = {};
 
@@ -391,7 +409,6 @@ export const getAllMembers = asyncHandler(async (req: Request, res: Response) =>
     ];
   }
 
-  const skip = (Number(page) - 1) * Number(limit);
   const total = await TeamMember.countDocuments(filter);
 
   const sortOptions: Record<string, 1 | -1> = {
@@ -401,14 +418,14 @@ export const getAllMembers = asyncHandler(async (req: Request, res: Response) =>
   const members = await TeamMember.find(filter)
     .sort(sortOptions)
     .skip(skip)
-    .limit(Number(limit))
+    .limit(limit)
     .populate('department', 'name slug')
     .populate('createdBy', 'name email');
 
   return paginatedResponse(res, {
     data: members,
-    page: Number(page),
-    limit: Number(limit),
+    page,
+    limit,
     total,
   });
 });

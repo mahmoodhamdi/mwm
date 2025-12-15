@@ -9,6 +9,7 @@ import { contentValidation } from '../validations';
 import { asyncHandler } from '../middlewares/asyncHandler';
 import { Errors } from '../utils/ApiError';
 import { successResponse, paginatedResponse } from '../utils/response';
+import { parsePagination } from '../utils/pagination';
 import { redis } from '../config';
 import { escapeRegex } from '../utils/security';
 
@@ -76,7 +77,15 @@ export const getContentBySection = asyncHandler(async (req: Request, res: Respon
  * جلب كل المحتوى (للمسؤول)
  */
 export const getAllContent = asyncHandler(async (req: Request, res: Response) => {
-  const { page = 1, limit = 20, section, type, isActive, search } = req.query;
+  const { section, type, isActive, search } = req.query;
+
+  // Use validated pagination utility
+  const { page, limit, skip } = parsePagination({
+    page: req.query.page,
+    limit: req.query.limit,
+    defaultLimit: 20,
+    maxLimit: 100,
+  });
 
   const filter: Record<string, unknown> = {};
 
@@ -101,19 +110,18 @@ export const getAllContent = asyncHandler(async (req: Request, res: Response) =>
     ];
   }
 
-  const skip = (Number(page) - 1) * Number(limit);
   const total = await SiteContent.countDocuments(filter);
   const contents = await SiteContent.find(filter)
     .sort({ section: 1, order: 1 })
     .skip(skip)
-    .limit(Number(limit))
+    .limit(limit)
     .populate('createdBy', 'name email')
     .populate('updatedBy', 'name email');
 
   return paginatedResponse(res, {
     data: contents,
-    page: Number(page),
-    limit: Number(limit),
+    page,
+    limit,
     total,
   });
 });

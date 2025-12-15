@@ -11,6 +11,7 @@ import { asyncHandler } from '../middlewares/asyncHandler';
 import { Errors } from '../utils/ApiError';
 import { successResponse, paginatedResponse } from '../utils/response';
 import { redis } from '../config';
+import { escapeRegex } from '../utils/security';
 
 const JOB_CACHE_PREFIX = 'careers-job';
 const CACHE_TTL = 1800; // 30 minutes
@@ -232,11 +233,12 @@ export const getAllJobs = asyncHandler(async (req: Request, res: Response) => {
   }
 
   if (search) {
+    const escapedSearch = escapeRegex(search as string);
     filter.$or = [
-      { 'title.ar': { $regex: search, $options: 'i' } },
-      { 'title.en': { $regex: search, $options: 'i' } },
-      { 'description.ar': { $regex: search, $options: 'i' } },
-      { 'description.en': { $regex: search, $options: 'i' } },
+      { 'title.ar': { $regex: escapedSearch, $options: 'i' } },
+      { 'title.en': { $regex: escapedSearch, $options: 'i' } },
+      { 'description.ar': { $regex: escapedSearch, $options: 'i' } },
+      { 'description.en': { $regex: escapedSearch, $options: 'i' } },
     ];
   }
 

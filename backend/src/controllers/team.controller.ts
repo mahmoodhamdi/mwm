@@ -11,6 +11,7 @@ import { asyncHandler } from '../middlewares/asyncHandler';
 import { Errors } from '../utils/ApiError';
 import { successResponse, paginatedResponse } from '../utils/response';
 import { redis } from '../config';
+import { escapeRegex } from '../utils/security';
 
 const TEAM_CACHE_PREFIX = 'team';
 const DEPARTMENT_CACHE_PREFIX = 'department';
@@ -82,9 +83,10 @@ export const getAllDepartments = asyncHandler(async (req: Request, res: Response
   }
 
   if (search) {
+    const escapedSearch = escapeRegex(search as string);
     filter.$or = [
-      { 'name.ar': { $regex: search, $options: 'i' } },
-      { 'name.en': { $regex: search, $options: 'i' } },
+      { 'name.ar': { $regex: escapedSearch, $options: 'i' } },
+      { 'name.en': { $regex: escapedSearch, $options: 'i' } },
     ];
   }
 
@@ -380,11 +382,12 @@ export const getAllMembers = asyncHandler(async (req: Request, res: Response) =>
   }
 
   if (search) {
+    const escapedSearch = escapeRegex(search as string);
     filter.$or = [
-      { 'name.ar': { $regex: search, $options: 'i' } },
-      { 'name.en': { $regex: search, $options: 'i' } },
-      { 'position.ar': { $regex: search, $options: 'i' } },
-      { 'position.en': { $regex: search, $options: 'i' } },
+      { 'name.ar': { $regex: escapedSearch, $options: 'i' } },
+      { 'name.en': { $regex: escapedSearch, $options: 'i' } },
+      { 'position.ar': { $regex: escapedSearch, $options: 'i' } },
+      { 'position.en': { $regex: escapedSearch, $options: 'i' } },
     ];
   }
 

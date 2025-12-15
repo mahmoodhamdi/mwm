@@ -7,7 +7,7 @@ import { Request, Response } from 'express';
 import { User, UserRoles, IUser } from '../models/User';
 import { asyncHandler } from '../middlewares';
 import { ApiError } from '../utils';
-import { validatePasswordStrength } from '../utils/security';
+import { validatePasswordStrength, escapeRegex } from '../utils/security';
 
 /**
  * Get all users with pagination and filtering
@@ -47,9 +47,10 @@ export const getAllUsers = asyncHandler(async (req: Request, res: Response) => {
   }
 
   if (search) {
+    const escapedSearch = escapeRegex(search as string);
     filter.$or = [
-      { name: { $regex: search, $options: 'i' } },
-      { email: { $regex: search, $options: 'i' } },
+      { name: { $regex: escapedSearch, $options: 'i' } },
+      { email: { $regex: escapedSearch, $options: 'i' } },
     ];
   }
 

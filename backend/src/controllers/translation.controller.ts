@@ -10,6 +10,7 @@ import { asyncHandler } from '../middlewares/asyncHandler';
 import { Errors } from '../utils/ApiError';
 import { successResponse, paginatedResponse } from '../utils/response';
 import { redis } from '../config';
+import { escapeRegex } from '../utils/security';
 
 const TRANSLATION_CACHE_PREFIX = 'translations';
 const TRANSLATION_CACHE_TTL = 3600; // 1 hour
@@ -79,10 +80,11 @@ export const getAllTranslations = asyncHandler(async (req: Request, res: Respons
   }
 
   if (search) {
+    const escapedSearch = escapeRegex(search as string);
     filter.$or = [
-      { key: { $regex: search, $options: 'i' } },
-      { 'translations.ar': { $regex: search, $options: 'i' } },
-      { 'translations.en': { $regex: search, $options: 'i' } },
+      { key: { $regex: escapedSearch, $options: 'i' } },
+      { 'translations.ar': { $regex: escapedSearch, $options: 'i' } },
+      { 'translations.en': { $regex: escapedSearch, $options: 'i' } },
     ];
   }
 

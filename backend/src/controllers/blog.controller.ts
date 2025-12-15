@@ -11,6 +11,7 @@ import { asyncHandler } from '../middlewares/asyncHandler';
 import { Errors } from '../utils/ApiError';
 import { successResponse, paginatedResponse } from '../utils/response';
 import { redis } from '../config';
+import { escapeRegex } from '../utils/security';
 
 const POST_CACHE_PREFIX = 'blog-post';
 const CATEGORY_CACHE_PREFIX = 'blog-category';
@@ -89,9 +90,10 @@ export const getAllCategories = asyncHandler(async (req: Request, res: Response)
   }
 
   if (search) {
+    const escapedSearch = escapeRegex(search as string);
     filter.$or = [
-      { 'name.ar': { $regex: search, $options: 'i' } },
-      { 'name.en': { $regex: search, $options: 'i' } },
+      { 'name.ar': { $regex: escapedSearch, $options: 'i' } },
+      { 'name.en': { $regex: escapedSearch, $options: 'i' } },
     ];
   }
 
@@ -444,11 +446,12 @@ export const getAllPosts = asyncHandler(async (req: Request, res: Response) => {
   }
 
   if (search) {
+    const escapedSearch = escapeRegex(search as string);
     filter.$or = [
-      { 'title.ar': { $regex: search, $options: 'i' } },
-      { 'title.en': { $regex: search, $options: 'i' } },
-      { 'excerpt.ar': { $regex: search, $options: 'i' } },
-      { 'excerpt.en': { $regex: search, $options: 'i' } },
+      { 'title.ar': { $regex: escapedSearch, $options: 'i' } },
+      { 'title.en': { $regex: escapedSearch, $options: 'i' } },
+      { 'excerpt.ar': { $regex: escapedSearch, $options: 'i' } },
+      { 'excerpt.en': { $regex: escapedSearch, $options: 'i' } },
     ];
   }
 

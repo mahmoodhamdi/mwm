@@ -22,12 +22,13 @@ npm run test:backend           # Backend tests only
 npm run test:frontend          # Frontend tests only
 cd backend && npm run test:watch  # Watch mode for backend
 cd frontend && npm run test:watch # Watch mode for frontend
+cd packages/shared && npm test    # Shared package tests
 
 # Run a single test file
 cd backend && npx jest src/path/to/file.test.ts
 cd frontend && npx jest src/path/to/file.test.tsx
 
-# E2E tests (Playwright)
+# E2E tests (Playwright - frontend)
 cd frontend && npm run test:e2e              # Run all E2E tests
 cd frontend && npx playwright test --ui      # Interactive UI mode
 cd frontend && npx playwright test file.spec.ts  # Run specific test
@@ -50,12 +51,14 @@ npm run build:frontend         # Build frontend only
 # Failing to rebuild causes "module not found" or type mismatch errors
 cd packages/shared && npm run build
 
-# Seeding
+# Seeding & Cleanup
 cd backend && npm run seed     # Seed database with initial data
+npm run clean                  # Remove all node_modules (troubleshooting)
 
 # Docker
 npm run docker:dev             # Start dev environment with Docker
 npm run docker:down            # Stop Docker services
+npm run docker:logs            # View Docker container logs
 ```
 
 ## Architecture

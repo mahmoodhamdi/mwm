@@ -7,6 +7,7 @@ import { Router } from 'express';
 import { careersController } from '../controllers';
 import { authenticate, authorize } from '../middlewares/auth';
 import { validate, idParamsSchema, jobIdParamsSchema } from '../middlewares/validate';
+import { careersValidation } from '../validations';
 
 const router = Router();
 
@@ -30,7 +31,11 @@ router.get('/jobs', careersController.getJobs);
 // ============================================
 
 // POST /api/v1/careers/apply - Submit job application
-router.post('/apply', careersController.submitApplication);
+router.post(
+  '/apply',
+  validate({ body: careersValidation.createApplication }),
+  careersController.submitApplication
+);
 
 // ============================================
 // Admin Routes - Jobs
@@ -50,7 +55,13 @@ router.get(
 );
 
 // POST /api/v1/careers/admin/jobs - Create job (Admin)
-router.post('/admin/jobs', authenticate, authorize('careers:create'), careersController.createJob);
+router.post(
+  '/admin/jobs',
+  authenticate,
+  authorize('careers:create'),
+  validate({ body: careersValidation.createJob }),
+  careersController.createJob
+);
 
 // PUT /api/v1/careers/admin/jobs/bulk-status - Bulk update jobs status (Admin)
 router.put(
@@ -65,7 +76,7 @@ router.put(
   '/admin/jobs/:id',
   authenticate,
   authorize('careers:update'),
-  validate({ params: idParamsSchema }),
+  validate({ params: idParamsSchema, body: careersValidation.updateJob }),
   careersController.updateJob
 );
 
@@ -113,7 +124,7 @@ router.put(
   '/admin/applications/:id',
   authenticate,
   authorize('careers:update'),
-  validate({ params: idParamsSchema }),
+  validate({ params: idParamsSchema, body: careersValidation.updateApplication }),
   careersController.updateApplicationStatus
 );
 

@@ -7,6 +7,7 @@ import { Router } from 'express';
 import { projectController } from '../controllers';
 import { authenticate, authorize } from '../middlewares/auth';
 import { validate, idParamsSchema } from '../middlewares/validate';
+import { projectValidation } from '../validations';
 
 const router = Router();
 
@@ -28,6 +29,7 @@ router.post(
   '/admin/categories',
   authenticate,
   authorize('projects:create'),
+  validate({ body: projectValidation.createCategory }),
   projectController.createCategory
 );
 
@@ -36,7 +38,7 @@ router.put(
   '/admin/categories/:id',
   authenticate,
   authorize('projects:update'),
-  validate({ params: idParamsSchema }),
+  validate({ params: idParamsSchema, body: projectValidation.updateCategory }),
   projectController.updateCategory
 );
 
@@ -75,7 +77,13 @@ router.get(
 );
 
 // POST /api/v1/projects/admin - Create project
-router.post('/admin', authenticate, authorize('projects:create'), projectController.createProject);
+router.post(
+  '/admin',
+  authenticate,
+  authorize('projects:create'),
+  validate({ body: projectValidation.create }),
+  projectController.createProject
+);
 
 // PUT /api/v1/projects/admin/:id/publish - Toggle publish status
 router.put(
@@ -100,7 +108,7 @@ router.put(
   '/admin/:id',
   authenticate,
   authorize('projects:update'),
-  validate({ params: idParamsSchema }),
+  validate({ params: idParamsSchema, body: projectValidation.update }),
   projectController.updateProject
 );
 

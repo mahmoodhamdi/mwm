@@ -86,12 +86,13 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 # ============ FIREBASE (Get from Firebase Console > Project Settings > General > Your apps) ============
 
-NEXT_PUBLIC_FIREBASE_API_KEY=
+NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyBB3DLoOOTFNPazc2Dw6cb5gabKgYFVL9k
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=mwmintegratedsoftwaresolutions.firebaseapp.com
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=mwmintegratedsoftwaresolutions
 NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=mwmintegratedsoftwaresolutions.firebasestorage.app
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
-NEXT_PUBLIC_FIREBASE_APP_ID=
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=325449130166
+NEXT_PUBLIC_FIREBASE_APP_ID=1:325449130166:web:5b327be2242ca5bc700617
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=G-XBL3PT6EFX
 
 # Firebase Cloud Messaging VAPID Key
 # Get from: Firebase Console > Project Settings > Cloud Messaging > Web Push certificates

@@ -12,6 +12,7 @@ import { sendSuccess } from '../utils/response';
 import { verifyRecaptcha } from '../services/recaptcha.service';
 import { notifyNewContact } from '../services/notification.service';
 import emailService from '../services/email.service';
+import { sanitizeString, detectXssPayload } from '../utils/security';
 
 // Cache TTL: 5 minutes for messages (shorter because they change frequently)
 const CACHE_TTL = 60 * 5;
@@ -38,6 +39,23 @@ export const submitContact = asyncHandler(async (req: Request, res: Response) =>
     recaptchaToken,
   } = req.body;
 
+  // Detect potential XSS payloads in user input
+  const userInputs = [name, subject, message, company, website].filter(Boolean);
+  for (const input of userInputs) {
+    if (detectXssPayload(input)) {
+      throw new ApiError(400, 'INVALID_INPUT', 'Invalid characters detected in input');
+    }
+  }
+
+  // Sanitize user input to prevent XSS
+  const sanitizedName = sanitizeString(name || '');
+  const sanitizedSubject = sanitizeString(subject || '');
+  const sanitizedMessage = sanitizeString(message || '');
+  const sanitizedCompany = company ? sanitizeString(company) : undefined;
+  const sanitizedWebsite = website ? sanitizeString(website) : undefined;
+  const sanitizedService = service ? sanitizeString(service) : undefined;
+  const sanitizedBudget = budget ? sanitizeString(budget) : undefined;
+
   // Get request metadata
   const ip = req.ip || req.connection.remoteAddress || '';
   const userAgent = req.headers['user-agent'] || '';
@@ -54,17 +72,17 @@ export const submitContact = asyncHandler(async (req: Request, res: Response) =>
     recaptchaScore = recaptchaResult.score;
   }
 
-  // Create contact message
+  // Create contact message with sanitized data
   const contact = await Contact.create({
-    name,
-    email,
-    phone,
-    company,
-    website,
-    subject,
-    message,
-    service,
-    budget,
+    name: sanitizedName,
+    email, // Email is validated by schema, no sanitization needed
+    phone, // Phone is validated by schema
+    company: sanitizedCompany,
+    website: sanitizedWebsite,
+    subject: sanitizedSubject,
+    message: sanitizedMessage,
+    service: sanitizedService,
+    budget: sanitizedBudget,
     preferredContact,
     ip,
     userAgent,
@@ -82,12 +100,19 @@ export const submitContact = asyncHandler(async (req: Request, res: Response) =>
   }
 
   // Send push notification to admins
-  await notifyNewContact(contact._id.toString(), name, subject);
+  await notifyNewContact(contact._id.toString(), sanitizedName, sanitizedSubject);
 
-  res.status(201);
-  sendSuccess(res, {
-    message: locale === 'ar' ? 'تم إرسال رسالتك بنجاح' : 'Your message has been sent successfully',
-  });
+  sendSuccess(
+    res,
+    {
+      contactId: contact._id,
+    },
+    {
+      message:
+        locale === 'ar' ? 'تم إرسال رسالتك بنجاح' : 'Your message has been sent successfully',
+      statusCode: 201,
+    }
+  );
 });
 
 // ============ ADMIN ============

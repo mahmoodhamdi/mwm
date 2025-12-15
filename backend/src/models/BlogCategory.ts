@@ -4,15 +4,10 @@
  */
 
 import mongoose, { Document, Schema } from 'mongoose';
+import { LocalizedString } from '@mwm/shared';
 
-/**
- * Bilingual content interface
- * واجهة المحتوى ثنائي اللغة
- */
-interface IBilingual {
-  ar: string;
-  en: string;
-}
+// Type alias for backward compatibility
+type IBilingual = LocalizedString;
 
 /**
  * Blog Category interface

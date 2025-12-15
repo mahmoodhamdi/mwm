@@ -70,8 +70,8 @@ const config: Config = {
         'spin-slow': 'spin 3s linear infinite',
         'pulse-slow': 'pulse 3s ease-in-out infinite',
         'bounce-slow': 'bounce 2s infinite',
-        'float': 'float 6s ease-in-out infinite',
-        'typewriter': 'typewriter 2s steps(40) forwards',
+        float: 'float 6s ease-in-out infinite',
+        typewriter: 'typewriter 2s steps(40) forwards',
       },
       keyframes: {
         fadeIn: {
@@ -121,7 +121,7 @@ const config: Config = {
         '5xl': '2.5rem',
       },
       boxShadow: {
-        'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
+        soft: '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
         'soft-lg': '0 10px 40px -10px rgba(0, 0, 0, 0.1)',
       },
       transitionDuration: {
@@ -136,9 +136,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [
-    require('tailwindcss-rtl'),
-  ],
+  plugins: [require('tailwindcss-rtl')],
 };
 
 export default config;

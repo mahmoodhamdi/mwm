@@ -90,7 +90,9 @@ test.describe('Navigation', () => {
       const footer = page.locator('footer');
 
       // Look for social media links
-      const socialLinks = footer.locator('a[href*="twitter"], a[href*="facebook"], a[href*="linkedin"], a[href*="instagram"]');
+      const socialLinks = footer.locator(
+        'a[href*="twitter"], a[href*="facebook"], a[href*="linkedin"], a[href*="instagram"]'
+      );
       // Social links may or may not exist
     });
   });
@@ -113,7 +115,9 @@ test.describe('Navigation', () => {
       await page.goto('/ar/services');
 
       // Look for breadcrumb navigation
-      const breadcrumbs = page.locator('nav[aria-label*="breadcrumb"], [data-testid="breadcrumbs"], .breadcrumb');
+      const breadcrumbs = page.locator(
+        'nav[aria-label*="breadcrumb"], [data-testid="breadcrumbs"], .breadcrumb'
+      );
       // Breadcrumbs may or may not be implemented
     });
   });
@@ -126,9 +130,12 @@ test.describe('Navigation', () => {
 
     test('should show mobile menu button on small screens', async ({ page }) => {
       // Look for hamburger menu or mobile menu button
-      const mobileMenuButton = page.locator('button').filter({
-        has: page.locator('svg, [class*="menu"], [class*="hamburger"]')
-      }).first();
+      const mobileMenuButton = page
+        .locator('button')
+        .filter({
+          has: page.locator('svg, [class*="menu"], [class*="hamburger"]'),
+        })
+        .first();
 
       // If mobile menu exists, it should be clickable
       if (await mobileMenuButton.isVisible()) {
@@ -136,7 +143,9 @@ test.describe('Navigation', () => {
         await page.waitForTimeout(300);
 
         // Mobile menu should open
-        const mobileMenu = page.locator('[data-testid="mobile-menu"], nav[class*="mobile"], .mobile-menu');
+        const mobileMenu = page.locator(
+          '[data-testid="mobile-menu"], nav[class*="mobile"], .mobile-menu'
+        );
         // Implementation varies
       }
     });

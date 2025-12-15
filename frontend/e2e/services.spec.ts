@@ -25,7 +25,9 @@ test.describe('Services Page', () => {
       await page.waitForLoadState('networkidle');
 
       // Look for service cards or list items
-      const serviceItems = page.locator('[data-testid="service-card"], .service-card, article, [class*="service"]');
+      const serviceItems = page.locator(
+        '[data-testid="service-card"], .service-card, article, [class*="service"]'
+      );
 
       // Should have at least one service or loading state
       const count = await serviceItems.count();
@@ -35,7 +37,9 @@ test.describe('Services Page', () => {
     test('should display service titles in Arabic', async ({ page }) => {
       await page.waitForLoadState('networkidle');
 
-      const serviceCards = page.locator('[data-testid="service-card"], .service-card, article').first();
+      const serviceCards = page
+        .locator('[data-testid="service-card"], .service-card, article')
+        .first();
       if (await serviceCards.isVisible()) {
         // Should have Arabic text
         const title = serviceCards.locator('h2, h3').first();
@@ -59,7 +63,12 @@ test.describe('Services Page', () => {
         const href = await serviceLinks.nth(i).getAttribute('href');
         // Check if this is actually a detail page link (has slug after /services/)
         // Account for locale prefix like /ar/services/slug or /en/services/slug
-        if (href && /\/(ar|en)\/services\/[\w-]+/.test(href) && href !== '/ar/services' && href !== '/en/services') {
+        if (
+          href &&
+          /\/(ar|en)\/services\/[\w-]+/.test(href) &&
+          href !== '/ar/services' &&
+          href !== '/en/services'
+        ) {
           await serviceLinks.nth(i).click();
           await page.waitForURL(/\/services\/[\w-]+/, { timeout: 5000 }).catch(() => null);
           const currentUrl = page.url();
@@ -103,7 +112,9 @@ test.describe('Services Page', () => {
       await page.waitForLoadState('networkidle');
 
       // Look for category filters
-      const categoryFilters = page.locator('[data-testid="category-filter"], .category-filter, select, [class*="filter"]');
+      const categoryFilters = page.locator(
+        '[data-testid="category-filter"], .category-filter, select, [class*="filter"]'
+      );
       // Filters may or may not be implemented
     });
 
@@ -112,7 +123,10 @@ test.describe('Services Page', () => {
       await page.waitForLoadState('networkidle');
 
       // If category filters exist, test them
-      const categoryButton = page.locator('button, a').filter({ hasText: /تصنيف|Category/i }).first();
+      const categoryButton = page
+        .locator('button, a')
+        .filter({ hasText: /تصنيف|Category/i })
+        .first();
       if (await categoryButton.isVisible()) {
         await categoryButton.click();
         await page.waitForTimeout(500);

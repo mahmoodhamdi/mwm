@@ -42,9 +42,12 @@ test.describe('Careers Page', () => {
       await page.waitForLoadState('networkidle');
 
       // Look for job type badges
-      const jobType = page.locator('[class*="badge"], [class*="type"], span').filter({
-        hasText: /دوام كامل|دوام جزئي|عن بعد|Full-time|Part-time|Remote/i
-      }).first();
+      const jobType = page
+        .locator('[class*="badge"], [class*="type"], span')
+        .filter({
+          hasText: /دوام كامل|دوام جزئي|عن بعد|Full-time|Part-time|Remote/i,
+        })
+        .first();
       // Job type display may vary
     });
 
@@ -113,7 +116,10 @@ test.describe('Careers Page', () => {
         await page.waitForLoadState('networkidle');
 
         // Look for apply button
-        const applyButton = page.locator('button, a').filter({ hasText: /تقدم|Apply|قدم/i }).first();
+        const applyButton = page
+          .locator('button, a')
+          .filter({ hasText: /تقدم|Apply|قدم/i })
+          .first();
         // Apply button should be visible
       }
     });
@@ -130,7 +136,10 @@ test.describe('Careers Page', () => {
         await page.waitForLoadState('networkidle');
 
         // Click apply button if exists
-        const applyButton = page.locator('button, a').filter({ hasText: /تقدم|Apply/i }).first();
+        const applyButton = page
+          .locator('button, a')
+          .filter({ hasText: /تقدم|Apply/i })
+          .first();
         if (await applyButton.isVisible()) {
           await applyButton.click();
           await page.waitForTimeout(500);
@@ -168,14 +177,14 @@ test.describe('Careers Page', () => {
 
     test('should have department filter', async ({ page }) => {
       const departmentFilter = page.locator('select, button').filter({
-        hasText: /القسم|Department/i
+        hasText: /القسم|Department/i,
       });
       // Department filter may or may not exist
     });
 
     test('should have job type filter', async ({ page }) => {
       const typeFilter = page.locator('select, button').filter({
-        hasText: /نوع العمل|Job Type/i
+        hasText: /نوع العمل|Job Type/i,
       });
       // Type filter may or may not exist
     });
@@ -193,7 +202,7 @@ test.describe('Careers Page', () => {
 
       // Look for benefits section
       const benefitsSection = page.locator('section').filter({
-        hasText: /المزايا|Benefits|مميزات/i
+        hasText: /المزايا|Benefits|مميزات/i,
       });
       // Benefits section may or may not exist
     });

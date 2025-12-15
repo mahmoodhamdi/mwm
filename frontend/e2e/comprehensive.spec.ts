@@ -42,7 +42,9 @@ test.describe('Home Page - Comprehensive Tests', () => {
 
     test('should have working navigation links', async ({ page }) => {
       // Test services link
-      const servicesLink = page.locator('nav a[href*="/services"], header a[href*="/services"]').first();
+      const servicesLink = page
+        .locator('nav a[href*="/services"], header a[href*="/services"]')
+        .first();
       if (await servicesLink.isVisible()) {
         await expect(servicesLink).toBeVisible();
       }
@@ -87,7 +89,11 @@ test.describe('Home Page - Comprehensive Tests', () => {
       await page.waitForLoadState('networkidle');
 
       // Find language toggle
-      const langSwitch = page.locator('a[href*="/en"], button:has-text("EN"), button:has-text("English"), [data-testid="lang-switch"]').first();
+      const langSwitch = page
+        .locator(
+          'a[href*="/en"], button:has-text("EN"), button:has-text("English"), [data-testid="lang-switch"]'
+        )
+        .first();
       if (await langSwitch.isVisible()) {
         await langSwitch.click();
         await page.waitForLoadState('networkidle');
@@ -99,7 +105,11 @@ test.describe('Home Page - Comprehensive Tests', () => {
       await page.goto('/en');
       await page.waitForLoadState('networkidle');
 
-      const langSwitch = page.locator('a[href*="/ar"], button:has-text("AR"), button:has-text("عربي"), [data-testid="lang-switch"]').first();
+      const langSwitch = page
+        .locator(
+          'a[href*="/ar"], button:has-text("AR"), button:has-text("عربي"), [data-testid="lang-switch"]'
+        )
+        .first();
       if (await langSwitch.isVisible()) {
         await langSwitch.click();
         await page.waitForLoadState('networkidle');
@@ -259,7 +269,9 @@ test.describe('Blog Page - Comprehensive Tests', () => {
     });
 
     test('should have search functionality', async ({ page }) => {
-      const searchInput = page.locator('input[type="search"], input[placeholder*="بحث"], input[placeholder*="search"]').first();
+      const searchInput = page
+        .locator('input[type="search"], input[placeholder*="بحث"], input[placeholder*="search"]')
+        .first();
       // Search may or may not be visible depending on design
     });
   });
@@ -296,7 +308,9 @@ test.describe('Careers Page - Comprehensive Tests', () => {
     });
 
     test('should display job listings', async ({ page }) => {
-      const jobsContainer = page.locator('[class*="grid"], [class*="jobs"], [class*="careers"], main').first();
+      const jobsContainer = page
+        .locator('[class*="grid"], [class*="jobs"], [class*="careers"], main')
+        .first();
       await expect(jobsContainer).toBeVisible();
     });
   });
@@ -338,7 +352,9 @@ test.describe('Contact Page - Comprehensive Tests', () => {
     });
 
     test('should have name input field', async ({ page }) => {
-      const nameInput = page.locator('input[name="name"], input[placeholder*="اسم"], input[placeholder*="name"]').first();
+      const nameInput = page
+        .locator('input[name="name"], input[placeholder*="اسم"], input[placeholder*="name"]')
+        .first();
       await expect(nameInput).toBeVisible();
     });
 

@@ -160,10 +160,7 @@ test.describe('Admin Navigation', () => {
   });
 
   test('admin routes should be accessible', async ({ page }) => {
-    const routes = [
-      '/ar/admin/login',
-      '/en/admin/login',
-    ];
+    const routes = ['/ar/admin/login', '/en/admin/login'];
 
     for (const route of routes) {
       await page.goto(route);

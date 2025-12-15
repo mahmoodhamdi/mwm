@@ -24,7 +24,9 @@ test.describe('Team Page', () => {
       await page.waitForLoadState('networkidle');
 
       // Look for team member cards
-      const teamCards = page.locator('[data-testid="team-card"], article, .team-card, [class*="team-member"]');
+      const teamCards = page.locator(
+        '[data-testid="team-card"], article, .team-card, [class*="team-member"]'
+      );
       // Team members may be loading from API
     });
 
@@ -110,7 +112,9 @@ test.describe('Team Page', () => {
         await page.waitForLoadState('networkidle');
 
         // Look for social media links
-        const socialLinks = page.locator('a[href*="linkedin"], a[href*="twitter"], a[href*="github"]');
+        const socialLinks = page.locator(
+          'a[href*="linkedin"], a[href*="twitter"], a[href*="github"]'
+        );
         // Social links may or may not exist
       }
     });
@@ -121,7 +125,9 @@ test.describe('Team Page', () => {
       await page.goto('/ar/team');
       await page.waitForLoadState('networkidle');
 
-      const departmentFilter = page.locator('[data-testid="department-filter"], .department-filter, select, button[class*="department"]');
+      const departmentFilter = page.locator(
+        '[data-testid="department-filter"], .department-filter, select, button[class*="department"]'
+      );
       // Department filter may or may not exist
     });
 
@@ -129,7 +135,10 @@ test.describe('Team Page', () => {
       await page.goto('/ar/team');
       await page.waitForLoadState('networkidle');
 
-      const departmentButton = page.locator('button').filter({ hasText: /التطوير|Development|التصميم|Design/i }).first();
+      const departmentButton = page
+        .locator('button')
+        .filter({ hasText: /التطوير|Development|التصميم|Design/i })
+        .first();
       if (await departmentButton.isVisible()) {
         await departmentButton.click();
         await page.waitForTimeout(500);

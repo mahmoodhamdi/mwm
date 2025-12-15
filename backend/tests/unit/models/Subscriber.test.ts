@@ -306,7 +306,10 @@ describe('Subscriber Model', () => {
         const sub1 = await Subscriber.create({ email: 'test1@example.com', status: 'active' });
         const sub2 = await Subscriber.create({ email: 'test2@example.com', status: 'active' });
 
-        await Subscriber.bulkUpdateStatus([sub1._id.toString(), sub2._id.toString()], 'unsubscribed');
+        await Subscriber.bulkUpdateStatus(
+          [sub1._id.toString(), sub2._id.toString()],
+          'unsubscribed'
+        );
 
         const updated1 = await Subscriber.findById(sub1._id);
         const updated2 = await Subscriber.findById(sub2._id);

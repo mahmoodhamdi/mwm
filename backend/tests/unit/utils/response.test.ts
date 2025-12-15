@@ -194,13 +194,7 @@ describe('Response Utilities', () => {
 
     it('should include details when provided', () => {
       const details = { field: 'email', error: 'Invalid format' };
-      sendError(
-        mockResponse as Response,
-        400,
-        'VALIDATION_ERROR',
-        'Validation failed',
-        details
-      );
+      sendError(mockResponse as Response, 400, 'VALIDATION_ERROR', 'Validation failed', details);
 
       expect(jsonMock).toHaveBeenCalledWith({
         success: false,

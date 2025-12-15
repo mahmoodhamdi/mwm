@@ -211,10 +211,7 @@ describe('Auth API', () => {
     it('should fail with disabled account', async () => {
       if (mongoose.connection.readyState !== 1) return;
 
-      await User.findOneAndUpdate(
-        { email: 'test@example.com' },
-        { isActive: false }
-      );
+      await User.findOneAndUpdate({ email: 'test@example.com' }, { isActive: false });
 
       const response = await request(app)
         .post('/api/v1/auth/login')
@@ -234,14 +231,12 @@ describe('Auth API', () => {
       if (mongoose.connection.readyState !== 1) return;
 
       // Register to get tokens
-      const registerResponse = await request(app)
-        .post('/api/v1/auth/register')
-        .send({
-          name: 'Test User',
-          email: 'test@example.com',
-          password: 'Test@1234',
-          confirmPassword: 'Test@1234',
-        });
+      const registerResponse = await request(app).post('/api/v1/auth/register').send({
+        name: 'Test User',
+        email: 'test@example.com',
+        password: 'Test@1234',
+        confirmPassword: 'Test@1234',
+      });
 
       const { refreshToken } = registerResponse.body.data;
 
@@ -272,14 +267,12 @@ describe('Auth API', () => {
       if (mongoose.connection.readyState !== 1) return;
 
       // Register to get token
-      const registerResponse = await request(app)
-        .post('/api/v1/auth/register')
-        .send({
-          name: 'Test User',
-          email: 'test@example.com',
-          password: 'Test@1234',
-          confirmPassword: 'Test@1234',
-        });
+      const registerResponse = await request(app).post('/api/v1/auth/register').send({
+        name: 'Test User',
+        email: 'test@example.com',
+        password: 'Test@1234',
+        confirmPassword: 'Test@1234',
+      });
 
       const { accessToken } = registerResponse.body.data;
 
@@ -295,9 +288,7 @@ describe('Auth API', () => {
     it('should fail without token', async () => {
       if (mongoose.connection.readyState !== 1) return;
 
-      const response = await request(app)
-        .get('/api/v1/auth/me')
-        .expect(401);
+      const response = await request(app).get('/api/v1/auth/me').expect(401);
 
       expect(response.body.success).toBe(false);
     });
@@ -319,14 +310,12 @@ describe('Auth API', () => {
       if (mongoose.connection.readyState !== 1) return;
 
       // Register to get token
-      const registerResponse = await request(app)
-        .post('/api/v1/auth/register')
-        .send({
-          name: 'Test User',
-          email: 'test@example.com',
-          password: 'Test@1234',
-          confirmPassword: 'Test@1234',
-        });
+      const registerResponse = await request(app).post('/api/v1/auth/register').send({
+        name: 'Test User',
+        email: 'test@example.com',
+        password: 'Test@1234',
+        confirmPassword: 'Test@1234',
+      });
 
       const { accessToken } = registerResponse.body.data;
 
@@ -346,14 +335,12 @@ describe('Auth API', () => {
       if (mongoose.connection.readyState !== 1) return;
 
       // Register to get token
-      const registerResponse = await request(app)
-        .post('/api/v1/auth/register')
-        .send({
-          name: 'Test User',
-          email: 'test@example.com',
-          password: 'Test@1234',
-          confirmPassword: 'Test@1234',
-        });
+      const registerResponse = await request(app).post('/api/v1/auth/register').send({
+        name: 'Test User',
+        email: 'test@example.com',
+        password: 'Test@1234',
+        confirmPassword: 'Test@1234',
+      });
 
       const { accessToken } = registerResponse.body.data;
 
@@ -385,14 +372,12 @@ describe('Auth API', () => {
       if (mongoose.connection.readyState !== 1) return;
 
       // Register to get token
-      const registerResponse = await request(app)
-        .post('/api/v1/auth/register')
-        .send({
-          name: 'Test User',
-          email: 'test@example.com',
-          password: 'Test@1234',
-          confirmPassword: 'Test@1234',
-        });
+      const registerResponse = await request(app).post('/api/v1/auth/register').send({
+        name: 'Test User',
+        email: 'test@example.com',
+        password: 'Test@1234',
+        confirmPassword: 'Test@1234',
+      });
 
       const { accessToken } = registerResponse.body.data;
 

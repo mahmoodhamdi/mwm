@@ -232,17 +232,15 @@ describe('ProjectCategory Model', () => {
   describe('Indexing', () => {
     it('should have index on slug field', async () => {
       const indexes = ProjectCategory.schema.indexes();
-      const slugIndex = indexes.find(index =>
-        Object.keys(index[0]).includes('slug')
-      );
+      const slugIndex = indexes.find(index => Object.keys(index[0]).includes('slug'));
       expect(slugIndex).toBeDefined();
     });
 
     it('should have compound index on isActive and order', async () => {
       const indexes = ProjectCategory.schema.indexes();
-      const compoundIndex = indexes.find(index =>
-        Object.keys(index[0]).includes('isActive') &&
-        Object.keys(index[0]).includes('order')
+      const compoundIndex = indexes.find(
+        index =>
+          Object.keys(index[0]).includes('isActive') && Object.keys(index[0]).includes('order')
       );
       expect(compoundIndex).toBeDefined();
     });

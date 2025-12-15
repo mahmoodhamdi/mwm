@@ -21,7 +21,9 @@ test.describe('Contact Form', () => {
     });
 
     test('should have name input', async ({ page }) => {
-      const nameInput = page.locator('input[name="name"], input[placeholder*="اسم"], input[placeholder*="name" i]').first();
+      const nameInput = page
+        .locator('input[name="name"], input[placeholder*="اسم"], input[placeholder*="name" i]')
+        .first();
       await expect(nameInput).toBeVisible();
     });
 
@@ -36,7 +38,11 @@ test.describe('Contact Form', () => {
     });
 
     test('should have subject input', async ({ page }) => {
-      const subjectInput = page.locator('input[name="subject"], input[placeholder*="موضوع"], input[placeholder*="subject" i]').first();
+      const subjectInput = page
+        .locator(
+          'input[name="subject"], input[placeholder*="موضوع"], input[placeholder*="subject" i]'
+        )
+        .first();
       // Subject may be optional or select
     });
 
@@ -84,7 +90,9 @@ test.describe('Contact Form', () => {
     });
 
     test('should validate email format', async ({ page }) => {
-      const nameInput = page.locator('input[name="name"], input[placeholder*="اسم" i], input[placeholder*="name" i]').first();
+      const nameInput = page
+        .locator('input[name="name"], input[placeholder*="اسم" i], input[placeholder*="name" i]')
+        .first();
       const emailInput = page.locator('input[type="email"], input[name="email"]').first();
       const messageInput = page.locator('textarea').first();
 
@@ -104,7 +112,9 @@ test.describe('Contact Form', () => {
     });
 
     test('should validate message is required', async ({ page }) => {
-      const nameInput = page.locator('input[name="name"], input[placeholder*="اسم" i], input[placeholder*="name" i]').first();
+      const nameInput = page
+        .locator('input[name="name"], input[placeholder*="اسم" i], input[placeholder*="name" i]')
+        .first();
       const emailInput = page.locator('input[type="email"], input[name="email"]').first();
       const submitButton = page.locator('button[type="submit"]').first();
 
@@ -122,7 +132,9 @@ test.describe('Contact Form', () => {
     });
 
     test('should accept valid form data', async ({ page }) => {
-      const nameInput = page.locator('input[name="name"], input[placeholder*="اسم" i], input[placeholder*="name" i]').first();
+      const nameInput = page
+        .locator('input[name="name"], input[placeholder*="اسم" i], input[placeholder*="name" i]')
+        .first();
       const emailInput = page.locator('input[type="email"], input[name="email"]').first();
       const messageInput = page.locator('textarea').first();
 
@@ -155,7 +167,9 @@ test.describe('Contact Form', () => {
     });
 
     test('should navigate through form with Tab', async ({ page }) => {
-      const nameInput = page.locator('input[name="name"], input[placeholder*="اسم" i], input[placeholder*="name" i]').first();
+      const nameInput = page
+        .locator('input[name="name"], input[placeholder*="اسم" i], input[placeholder*="name" i]')
+        .first();
 
       if (await nameInput.isVisible()) {
         await nameInput.focus();
@@ -165,7 +179,9 @@ test.describe('Contact Form', () => {
     });
 
     test('should clear input on clear button or escape', async ({ page }) => {
-      const nameInput = page.locator('input[name="name"], input[placeholder*="اسم" i], input[placeholder*="name" i]').first();
+      const nameInput = page
+        .locator('input[name="name"], input[placeholder*="اسم" i], input[placeholder*="name" i]')
+        .first();
 
       if (await nameInput.isVisible()) {
         await nameInput.fill('Test');
@@ -176,13 +192,17 @@ test.describe('Contact Form', () => {
     });
 
     test('should support paste in inputs', async ({ page }) => {
-      const nameInput = page.locator('input[name="name"], input[placeholder*="اسم" i], input[placeholder*="name" i]').first();
+      const nameInput = page
+        .locator('input[name="name"], input[placeholder*="اسم" i], input[placeholder*="name" i]')
+        .first();
 
       if (await nameInput.isVisible()) {
         await nameInput.focus();
         // Simulate paste
         await page.evaluate(() => {
-          const input = document.querySelector('input[name="name"], input[placeholder*="اسم"], input[placeholder*="name" i]') as HTMLInputElement;
+          const input = document.querySelector(
+            'input[name="name"], input[placeholder*="اسم"], input[placeholder*="name" i]'
+          ) as HTMLInputElement;
           if (input) {
             input.value = 'Pasted Text';
             input.dispatchEvent(new Event('input', { bubbles: true }));
@@ -204,7 +224,9 @@ test.describe('Newsletter Subscription Form', () => {
     });
 
     test('should display newsletter form if present', async ({ page }) => {
-      const newsletterForm = page.locator('[class*="newsletter"], form:has(input[type="email"])').first();
+      const newsletterForm = page
+        .locator('[class*="newsletter"], form:has(input[type="email"])')
+        .first();
       // Newsletter form may be in footer or dedicated section
     });
 
@@ -213,7 +235,9 @@ test.describe('Newsletter Subscription Form', () => {
       await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
       await page.waitForTimeout(500);
 
-      const emailInput = page.locator('footer input[type="email"], [class*="newsletter"] input[type="email"]').first();
+      const emailInput = page
+        .locator('footer input[type="email"], [class*="newsletter"] input[type="email"]')
+        .first();
       // Newsletter email may or may not be present
     });
   });
@@ -227,7 +251,9 @@ test.describe('Newsletter Subscription Form', () => {
     });
 
     test('should validate email format for newsletter', async ({ page }) => {
-      const emailInput = page.locator('footer input[type="email"], [class*="newsletter"] input[type="email"]').first();
+      const emailInput = page
+        .locator('footer input[type="email"], [class*="newsletter"] input[type="email"]')
+        .first();
 
       if (await emailInput.isVisible()) {
         await emailInput.fill('invalid-email');
@@ -237,7 +263,9 @@ test.describe('Newsletter Subscription Form', () => {
     });
 
     test('should accept valid email for newsletter', async ({ page }) => {
-      const emailInput = page.locator('footer input[type="email"], [class*="newsletter"] input[type="email"]').first();
+      const emailInput = page
+        .locator('footer input[type="email"], [class*="newsletter"] input[type="email"]')
+        .first();
 
       if (await emailInput.isVisible()) {
         await emailInput.fill('test@example.com');
@@ -255,7 +283,9 @@ test.describe('Search Form', () => {
     await page.goto('/ar/blog');
     await page.waitForLoadState('networkidle');
 
-    const searchInput = page.locator('input[type="search"], input[placeholder*="بحث"], input[placeholder*="search" i]').first();
+    const searchInput = page
+      .locator('input[type="search"], input[placeholder*="بحث"], input[placeholder*="search" i]')
+      .first();
     // Search may or may not be present
   });
 
@@ -263,7 +293,9 @@ test.describe('Search Form', () => {
     await page.goto('/ar/blog');
     await page.waitForLoadState('networkidle');
 
-    const searchInput = page.locator('input[type="search"], input[placeholder*="بحث"], input[placeholder*="search" i]').first();
+    const searchInput = page
+      .locator('input[type="search"], input[placeholder*="بحث"], input[placeholder*="search" i]')
+      .first();
 
     if (await searchInput.isVisible()) {
       await searchInput.fill('test search');
@@ -300,7 +332,11 @@ test.describe('Job Application Form', () => {
     await page.waitForLoadState('networkidle');
 
     // Look for application form or apply button
-    const applyButton = page.locator('button:has-text("تقدم"), button:has-text("Apply"), a:has-text("تقدم"), a:has-text("Apply")').first();
+    const applyButton = page
+      .locator(
+        'button:has-text("تقدم"), button:has-text("Apply"), a:has-text("تقدم"), a:has-text("Apply")'
+      )
+      .first();
 
     if (await applyButton.isVisible()) {
       await applyButton.click();
@@ -335,7 +371,8 @@ test.describe('Form Accessibility', () => {
         const placeholder = await input.getAttribute('placeholder');
 
         // Should have some accessibility attribute
-        const hasAccessibility = id !== null || ariaLabel !== null || ariaLabelledBy !== null || placeholder !== null;
+        const hasAccessibility =
+          id !== null || ariaLabel !== null || ariaLabelledBy !== null || placeholder !== null;
         expect(hasAccessibility).toBe(true);
       }
     }

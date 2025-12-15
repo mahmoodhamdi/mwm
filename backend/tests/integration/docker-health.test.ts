@@ -22,18 +22,14 @@ app.use('/api/v1/health', healthRouter);
 describe('Docker Health Check Endpoints', () => {
   describe('Liveness Probe - GET /api/v1/health/live', () => {
     it('should return 200 OK for liveness check', async () => {
-      const response = await request(app)
-        .get('/api/v1/health/live')
-        .expect(200);
+      const response = await request(app).get('/api/v1/health/live').expect(200);
 
       expect(response.body.success).toBe(true);
       expect(response.body.data.status).toBe('alive');
     });
 
     it('should include timestamp in response', async () => {
-      const response = await request(app)
-        .get('/api/v1/health/live')
-        .expect(200);
+      const response = await request(app).get('/api/v1/health/live').expect(200);
 
       expect(response.body.data.timestamp).toBeDefined();
       expect(new Date(response.body.data.timestamp)).toBeInstanceOf(Date);
@@ -50,8 +46,7 @@ describe('Docker Health Check Endpoints', () => {
 
   describe('Readiness Probe - GET /api/v1/health/ready', () => {
     it('should return readiness status with checks', async () => {
-      const response = await request(app)
-        .get('/api/v1/health/ready');
+      const response = await request(app).get('/api/v1/health/ready');
 
       expect(response.body).toHaveProperty('success');
       expect(response.body.data).toHaveProperty('status');
@@ -59,24 +54,21 @@ describe('Docker Health Check Endpoints', () => {
     });
 
     it('should include database check in readiness', async () => {
-      const response = await request(app)
-        .get('/api/v1/health/ready');
+      const response = await request(app).get('/api/v1/health/ready');
 
       expect(response.body.data.checks).toHaveProperty('database');
       expect(typeof response.body.data.checks.database).toBe('boolean');
     });
 
     it('should include cache check in readiness', async () => {
-      const response = await request(app)
-        .get('/api/v1/health/ready');
+      const response = await request(app).get('/api/v1/health/ready');
 
       expect(response.body.data.checks).toHaveProperty('cache');
       expect(typeof response.body.data.checks.cache).toBe('boolean');
     });
 
     it('should include timestamp in response', async () => {
-      const response = await request(app)
-        .get('/api/v1/health/ready');
+      const response = await request(app).get('/api/v1/health/ready');
 
       expect(response.body.data.timestamp).toBeDefined();
     });
@@ -84,16 +76,14 @@ describe('Docker Health Check Endpoints', () => {
 
   describe('Full Health Check - GET /api/v1/health', () => {
     it('should return comprehensive health status', async () => {
-      const response = await request(app)
-        .get('/api/v1/health');
+      const response = await request(app).get('/api/v1/health');
 
       expect(response.body).toHaveProperty('success');
       expect(response.body).toHaveProperty('data');
     });
 
     it('should include all required health properties', async () => {
-      const response = await request(app)
-        .get('/api/v1/health');
+      const response = await request(app).get('/api/v1/health');
 
       const { data } = response.body;
       expect(data).toHaveProperty('status');
@@ -104,8 +94,7 @@ describe('Docker Health Check Endpoints', () => {
     });
 
     it('should include service health details', async () => {
-      const response = await request(app)
-        .get('/api/v1/health');
+      const response = await request(app).get('/api/v1/health');
 
       const { services } = response.body.data;
       expect(services).toHaveProperty('database');
@@ -117,16 +106,14 @@ describe('Docker Health Check Endpoints', () => {
     });
 
     it('should report uptime as number', async () => {
-      const response = await request(app)
-        .get('/api/v1/health');
+      const response = await request(app).get('/api/v1/health');
 
       expect(typeof response.body.data.uptime).toBe('number');
       expect(response.body.data.uptime).toBeGreaterThanOrEqual(0);
     });
 
     it('should include valid environment', async () => {
-      const response = await request(app)
-        .get('/api/v1/health');
+      const response = await request(app).get('/api/v1/health');
 
       expect(['development', 'production', 'test']).toContain(response.body.data.environment);
     });
@@ -165,17 +152,14 @@ describe('Docker Health Check Endpoints', () => {
     it('liveness should always return 200 for basic process check', async () => {
       // Liveness probes check if the container is running
       // Should always return 200 if the process is alive
-      const response = await request(app)
-        .get('/api/v1/health/live')
-        .expect(200);
+      const response = await request(app).get('/api/v1/health/live').expect(200);
 
       expect(response.body.success).toBe(true);
     });
 
     it('readiness should indicate if container can accept traffic', async () => {
       // Readiness probes check if the container is ready to accept requests
-      const response = await request(app)
-        .get('/api/v1/health/ready');
+      const response = await request(app).get('/api/v1/health/ready');
 
       // Response should indicate ready or not ready status
       expect(response.body.data).toHaveProperty('status');

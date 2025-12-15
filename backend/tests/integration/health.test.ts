@@ -20,9 +20,7 @@ app.use('/api/v1/health', healthRouter);
 describe('Health Endpoints', () => {
   describe('GET /api/v1/health', () => {
     it('should return health status', async () => {
-      const response = await request(app)
-        .get('/api/v1/health')
-        .expect('Content-Type', /json/);
+      const response = await request(app).get('/api/v1/health').expect('Content-Type', /json/);
 
       // Status might be unhealthy in test environment (no real DB connection)
       expect(response.body).toHaveProperty('success');

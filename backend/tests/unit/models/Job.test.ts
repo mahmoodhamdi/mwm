@@ -29,12 +29,12 @@ describe('Job Model', () => {
       await mongoose.connect(mongoUri);
 
       // Create a test department
-      testDepartment = await Department.create({
+      testDepartment = (await Department.create({
         name: { ar: 'قسم التقنية', en: 'Technology Department' },
         slug: 'technology-department',
         description: { ar: 'وصف القسم', en: 'Department description' },
         isActive: true,
-      }) as mongoose.Document & { _id: mongoose.Types.ObjectId };
+      })) as mongoose.Document & { _id: mongoose.Types.ObjectId };
     } catch {
       console.warn('MongoMemoryServer could not start');
     }

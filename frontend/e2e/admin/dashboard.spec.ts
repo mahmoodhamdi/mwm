@@ -10,7 +10,9 @@
 import { test, expect } from '@playwright/test';
 
 // Helper to check if user needs authentication
-const checkAuth = async (page: ReturnType<typeof test['info']>['page'] extends Promise<infer P> ? P : never) => {
+const checkAuth = async (
+  page: ReturnType<(typeof test)['info']>['page'] extends Promise<infer P> ? P : never
+) => {
   const loginForm = page.locator('form input[type="email"]');
   return !(await loginForm.isVisible());
 };
@@ -241,7 +243,9 @@ test.describe('Admin Content Management', () => {
       await page.waitForLoadState('networkidle');
 
       // Should show tabs or sections
-      const tabs = page.locator('[role="tablist"], .tabs, button:has-text("المشتركين"), button:has-text("Subscribers")');
+      const tabs = page.locator(
+        '[role="tablist"], .tabs, button:has-text("المشتركين"), button:has-text("Subscribers")'
+      );
       // Tabs visibility depends on auth
     });
 

@@ -14,7 +14,9 @@ test.describe('Admin Authentication', () => {
     test('should load login page', async ({ page }) => {
       // Should be on login page or redirected
       const loginForm = page.locator('form');
-      const loginButton = page.locator('button[type="submit"], button:has-text("تسجيل"), button:has-text("Login")');
+      const loginButton = page.locator(
+        'button[type="submit"], button:has-text("تسجيل"), button:has-text("Login")'
+      );
 
       // Either form is visible or we're redirected
     });
@@ -101,8 +103,12 @@ test.describe('Admin Authentication', () => {
       await page.goto('/ar/admin/login');
 
       // Check for labels
-      const emailLabel = page.locator('label[for*="email"], label:has-text("البريد"), label:has-text("Email")');
-      const passwordLabel = page.locator('label[for*="password"], label:has-text("كلمة"), label:has-text("Password")');
+      const emailLabel = page.locator(
+        'label[for*="email"], label:has-text("البريد"), label:has-text("Email")'
+      );
+      const passwordLabel = page.locator(
+        'label[for*="password"], label:has-text("كلمة"), label:has-text("Password")'
+      );
       // Labels should be present for accessibility
     });
 

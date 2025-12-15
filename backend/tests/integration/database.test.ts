@@ -175,7 +175,7 @@ describe('Database Connection', () => {
       await TestModel.collection.createIndex({ name: 1 });
 
       const indexes = await TestModel.collection.indexes();
-      const hasNameIndex = indexes.some((idx) => idx.key && 'name' in idx.key);
+      const hasNameIndex = indexes.some(idx => idx.key && 'name' in idx.key);
 
       expect(hasNameIndex).toBe(true);
     });

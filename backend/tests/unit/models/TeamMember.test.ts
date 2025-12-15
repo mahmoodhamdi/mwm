@@ -155,9 +155,7 @@ describe('TeamMember Model', () => {
           bio: { ar: 'سيرة', en: 'Bio' },
           department: testDepartment!._id,
           avatar: '/images/ahmed.jpg',
-          skills: [
-            { name: { ar: 'جافاسكريبت', en: 'JavaScript' }, level: 150 },
-          ],
+          skills: [{ name: { ar: 'جافاسكريبت', en: 'JavaScript' }, level: 150 }],
         })
       ).rejects.toThrow();
     });

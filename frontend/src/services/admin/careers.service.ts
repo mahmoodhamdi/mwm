@@ -4,10 +4,19 @@
  */
 
 import { apiClient, ApiResponse } from '@/lib/api';
-import { LocalizedString } from '@mwm/shared';
+import {
+  LocalizedString,
+  JobType,
+  ExperienceLevel,
+  JobStatus,
+  ApplicationStatus,
+} from '@mwm/shared';
 
 // Type alias for backward compatibility
 export type BilingualText = LocalizedString;
+
+// Re-export types from shared
+export type { JobType, ExperienceLevel, JobStatus, ApplicationStatus };
 
 // Department Types
 export interface Department {
@@ -15,11 +24,6 @@ export interface Department {
   name: BilingualText;
   slug: string;
 }
-
-// Job Types
-export type JobType = 'full-time' | 'part-time' | 'contract' | 'internship' | 'remote';
-export type ExperienceLevel = 'entry' | 'mid' | 'senior' | 'lead' | 'executive';
-export type JobStatus = 'draft' | 'open' | 'closed' | 'filled';
 
 export interface SalaryRange {
   min: number;
@@ -117,17 +121,7 @@ export interface BulkJobUpdateData {
   status: JobStatus;
 }
 
-// Application Types
-export type ApplicationStatus =
-  | 'pending'
-  | 'reviewing'
-  | 'shortlisted'
-  | 'interviewed'
-  | 'offered'
-  | 'hired'
-  | 'rejected'
-  | 'withdrawn';
-
+// Application Types (ApplicationStatus is imported from @mwm/shared)
 export interface JobApplication {
   _id: string;
   job: { _id: string; title: BilingualText; slug: string } | string;

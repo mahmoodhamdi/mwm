@@ -284,14 +284,16 @@ project_id: process.env.FIREBASE_PROJECT_ID || 'auth-pro-33cb9',
 - Defined in **12 backend model files** instead of importing from shared
 - Files: Service.ts, Project.ts, Job.ts, BlogPost.ts, and 8 more
 
-#### 3.5 Missing Domain Types
+#### 3.5 ~~Missing Domain Types~~ ✅ FIXED
 
-Should be added to shared package:
+~~Should be added to shared package:~~
 
-- `JobStatus`, `JobType`, `ExperienceLevel`, `ApplicationStatus`
-- `CampaignStatus`, `RecipientType`, `ICampaignMetrics`
-- `SubscriberStatus`, `SubscriberSource`
-- `ContactPriority`
+- ~~`JobStatus`, `JobType`, `ExperienceLevel`, `ApplicationStatus`~~
+- ~~`CampaignStatus`, `RecipientType`, `ICampaignMetrics`~~
+- ~~`SubscriberStatus`, `SubscriberSource`~~
+- ~~`ContactPriority`~~
+
+**Fix Applied:** Added all domain types to @mwm/shared and updated backend models and frontend services to use them
 
 ### Medium Priority Issues
 
@@ -487,6 +489,7 @@ Tests:       23 failed, 856 passed, 879 total
 - [x] Missing validation schemas - Added Joi body validation to all create/update routes (service, project, team, blog, careers)
 - [x] Incomplete sendInvite TODO - Implemented email invite functionality in user.controller.ts using emailService.sendVerificationEmail
 - [x] Frontend bypasses shared package - Updated all BilingualText definitions to use LocalizedString from @mwm/shared (16 files: services, pages)
+- [x] Missing domain types - Added JobType, ExperienceLevel, JobStatus, ApplicationStatus, CampaignStatus, RecipientType, CampaignMetrics, SubscriberStatus, SubscriberSource to @mwm/shared
 
 ---
 

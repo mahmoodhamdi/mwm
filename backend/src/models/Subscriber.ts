@@ -5,12 +5,10 @@
 
 import mongoose, { Schema, Document, Model } from 'mongoose';
 import crypto from 'crypto';
+import { SubscriberStatus, SubscriberSource } from '@mwm/shared';
 
-// Subscriber Status
-export type SubscriberStatus = 'active' | 'unsubscribed' | 'bounced' | 'pending';
-
-// Subscriber Source
-export type SubscriberSource = 'website' | 'import' | 'manual' | 'api';
+// Re-export types for backward compatibility
+export type { SubscriberStatus, SubscriberSource };
 
 // Interface
 export interface ISubscriber extends Document {

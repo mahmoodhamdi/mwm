@@ -4,14 +4,20 @@
  */
 
 import { apiClient, ApiResponse } from '@/lib/api';
-import { LocalizedString } from '@mwm/shared';
+import {
+  LocalizedString,
+  SubscriberStatus,
+  SubscriberSource,
+  CampaignStatus,
+  RecipientType,
+  CampaignMetrics,
+} from '@mwm/shared';
 
 // Type alias for backward compatibility
 export type BilingualText = LocalizedString;
 
-// Subscriber Types
-export type SubscriberStatus = 'active' | 'unsubscribed' | 'bounced' | 'pending';
-export type SubscriberSource = 'website' | 'import' | 'manual' | 'api';
+// Re-export types from shared
+export type { SubscriberStatus, SubscriberSource, CampaignStatus, RecipientType, CampaignMetrics };
 
 export interface Subscriber {
   _id: string;
@@ -91,19 +97,7 @@ export interface ImportResult {
   errors: string[];
 }
 
-// Campaign Types
-export type CampaignStatus = 'draft' | 'scheduled' | 'sending' | 'sent' | 'cancelled';
-export type RecipientType = 'all' | 'tags' | 'specific';
-
-export interface CampaignMetrics {
-  recipientCount: number;
-  sentCount: number;
-  openCount: number;
-  clickCount: number;
-  bounceCount: number;
-  unsubscribeCount: number;
-}
-
+// Campaign Types (imported from @mwm/shared)
 export interface Campaign {
   _id: string;
   subject: BilingualText;

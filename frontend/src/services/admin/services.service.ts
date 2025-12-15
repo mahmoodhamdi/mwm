@@ -4,12 +4,10 @@
  */
 
 import { api, extractData } from '@/lib/api';
+import { LocalizedString } from '@mwm/shared';
 
-// Types
-export interface BilingualText {
-  ar: string;
-  en: string;
-}
+// Type alias for backward compatibility
+export type BilingualText = LocalizedString;
 
 export interface ServiceFeature {
   title: BilingualText;

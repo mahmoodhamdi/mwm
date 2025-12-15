@@ -9,12 +9,10 @@ import { Link } from '@/i18n/routing';
 import { Container, Spinner } from '@/components/ui';
 import { ProjectCard } from '@/components/projects';
 import { Suspense } from 'react';
+import type { LocalizedString } from '@mwm/shared';
 
-// Types
-interface BilingualText {
-  ar: string;
-  en: string;
-}
+// Type alias for backward compatibility
+type BilingualText = LocalizedString;
 
 interface Project {
   _id: string;

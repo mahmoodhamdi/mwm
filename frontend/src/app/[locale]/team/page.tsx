@@ -9,12 +9,10 @@ import { Link } from '@/i18n/routing';
 import { Container, Spinner } from '@/components/ui';
 import { TeamCard } from '@/components/team';
 import { Suspense } from 'react';
+import type { LocalizedString } from '@mwm/shared';
 
-// Types
-interface BilingualText {
-  ar: string;
-  en: string;
-}
+// Type alias for backward compatibility
+type BilingualText = LocalizedString;
 
 interface SocialLinks {
   linkedin?: string;

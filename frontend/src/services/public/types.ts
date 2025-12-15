@@ -1,18 +1,14 @@
 /**
  * Shared Types for Public Services
  * الأنواع المشتركة للخدمات العامة
+ *
+ * Re-exports common types from @mwm/shared package
  */
 
-export interface BilingualText {
-  ar: string;
-  en: string;
-}
+import { LocalizedString, PaginationMeta as SharedPaginationMeta } from '@mwm/shared';
 
-export interface PaginationMeta {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-  hasNextPage: boolean;
-  hasPrevPage: boolean;
-}
+// Type alias for backward compatibility
+export type BilingualText = LocalizedString;
+
+// Re-export from shared package
+export type { LocalizedString, SharedPaginationMeta as PaginationMeta };

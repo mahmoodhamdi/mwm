@@ -6,6 +6,7 @@
 import { Router } from 'express';
 import { projectController } from '../controllers';
 import { authenticate, authorize } from '../middlewares/auth';
+import { validate, idParamsSchema } from '../middlewares/validate';
 
 const router = Router();
 
@@ -35,6 +36,7 @@ router.put(
   '/admin/categories/:id',
   authenticate,
   authorize('projects:update'),
+  validate({ params: idParamsSchema }),
   projectController.updateCategory
 );
 
@@ -43,6 +45,7 @@ router.delete(
   '/admin/categories/:id',
   authenticate,
   authorize('projects:delete'),
+  validate({ params: idParamsSchema }),
   projectController.deleteCategory
 );
 
@@ -67,6 +70,7 @@ router.get(
   '/admin/:id',
   authenticate,
   authorize('projects:read'),
+  validate({ params: idParamsSchema }),
   projectController.getProjectById
 );
 
@@ -78,6 +82,7 @@ router.put(
   '/admin/:id/publish',
   authenticate,
   authorize('projects:update'),
+  validate({ params: idParamsSchema }),
   projectController.togglePublishStatus
 );
 
@@ -86,6 +91,7 @@ router.put(
   '/admin/:id/featured',
   authenticate,
   authorize('projects:update'),
+  validate({ params: idParamsSchema }),
   projectController.toggleFeaturedStatus
 );
 
@@ -94,6 +100,7 @@ router.put(
   '/admin/:id',
   authenticate,
   authorize('projects:update'),
+  validate({ params: idParamsSchema }),
   projectController.updateProject
 );
 
@@ -102,6 +109,7 @@ router.delete(
   '/admin/:id',
   authenticate,
   authorize('projects:delete'),
+  validate({ params: idParamsSchema }),
   projectController.deleteProject
 );
 

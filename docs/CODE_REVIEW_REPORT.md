@@ -431,16 +431,47 @@ Tests:       23 failed, 856 passed, 879 total
 
 - [ ] Migrate JWT to httpOnly cookies
 - [ ] Add CSRF protection
-- [ ] Fix regex injection in search
-- [ ] Remove hardcoded credentials
+- [x] Fix regex injection in search (escapeRegex utility added)
+- [x] Remove hardcoded credentials (Firebase credentials removed)
 - [ ] Add rate limiting on sensitive endpoints
-- [ ] Implement proper input sanitization
+- [x] Implement proper input sanitization (added escapeRegex, validatePasswordStrength)
 - [ ] Add CSP headers
-- [ ] Configure HSTS properly
-- [ ] Add security event logging
+- [x] Configure HSTS properly (HSTS middleware added)
+- [x] Add security event logging (Request ID tracking, reCAPTCHA logging)
 - [ ] Validate video URL origins
 
 ---
 
+## Appendix C: Fixes Applied (December 2025)
+
+### Critical Fixes
+
+- [x] Route ordering in service.routes.ts - Fixed admin routes placement
+- [x] Password validation in resetUserPassword - Added validatePasswordStrength
+- [x] Firebase hardcoded credentials - Removed all fallback values
+- [x] Auth guard race condition - Fixed loading state handling
+- [x] Promise.all failure handling - Changed to Promise.allSettled
+- [x] Error Boundary for admin pages - Added ErrorBoundary component
+
+### High Priority Fixes
+
+- [x] NoSQL injection in regex queries - Added escapeRegex utility
+- [x] Missing accessible labels - Added aria-current, htmlFor/id associations
+- [x] Status code preservation - Fixed sendSuccess status passing
+
+### Medium Priority Fixes
+
+- [x] HSTS header configuration - Added helmet HSTS middleware
+- [x] Request ID tracking - Added requestId middleware
+- [x] Transaction support in bulk operations - Added mongoose sessions
+- [x] Pagination validation - Added parsePagination utility
+- [x] Frontend accessibility - Added ARIA attributes to ContactForm and Header
+- [x] reCAPTCHA handling - Improved logging with startup warnings
+- [x] Admin dashboard stats safety - Added defensive null checking
+- [x] Image error handling - Created ImageWithFallback component
+
+---
+
 **Report prepared by:** Claude Code Review
-**Next Review:** After implementing critical fixes
+**Last Updated:** December 15, 2025
+**Next Review:** After implementing remaining fixes

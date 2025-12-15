@@ -9,6 +9,7 @@ import { asyncHandler } from '../middlewares';
 import { redis } from '../config/redis';
 import { ApiError } from '../utils/ApiError';
 import { sendSuccess } from '../utils/response';
+import { generateCacheKey } from '../utils/helpers';
 import { verifyRecaptcha } from '../services/recaptcha.service';
 import { notifyNewContact } from '../services/notification.service';
 import emailService from '../services/email.service';
@@ -137,8 +138,8 @@ export const getMessages = asyncHandler(async (req: Request, res: Response): Pro
     sort,
   } = req.query;
 
-  // Check cache
-  const cacheKey = `contact:messages:${JSON.stringify(req.query)}`;
+  // Check cache - use deterministic cache key
+  const cacheKey = generateCacheKey('contact:messages', req.query as Record<string, unknown>);
   const cached = await redis.get(cacheKey);
   if (cached) {
     sendSuccess(res, JSON.parse(cached));

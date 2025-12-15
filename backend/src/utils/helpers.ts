@@ -211,3 +211,36 @@ export function chunk<T>(array: T[], size: number): T[][] {
   }
   return result;
 }
+
+/**
+ * Generate deterministic cache key from query parameters
+ * توليد مفتاح ذاكرة مخبأة ثابت من معاملات الاستعلام
+ *
+ * This ensures consistent key ordering and handles various query value types.
+ * JSON.stringify alone doesn't guarantee consistent ordering of object keys.
+ */
+export function generateCacheKey(prefix: string, query: Record<string, unknown>): string {
+  // Filter out undefined/null values and sort keys for consistency
+  const filteredQuery: Record<string, string> = {};
+
+  Object.keys(query)
+    .filter(key => query[key] !== undefined && query[key] !== null && query[key] !== '')
+    .sort()
+    .forEach(key => {
+      const value = query[key];
+      // Convert all values to strings for consistent hashing
+      filteredQuery[key] = Array.isArray(value) ? value.sort().join(',') : String(value);
+    });
+
+  // Create deterministic string representation
+  const queryString = Object.entries(filteredQuery)
+    .map(([key, value]) => `${key}=${value}`)
+    .join('&');
+
+  // Use hash for very long query strings to keep key length manageable
+  if (queryString.length > 100) {
+    return `${prefix}:${hashSHA256(queryString).slice(0, 16)}`;
+  }
+
+  return `${prefix}:${queryString || 'all'}`;
+}

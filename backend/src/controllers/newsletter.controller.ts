@@ -11,6 +11,7 @@ import { asyncHandler } from '../middlewares';
 import { redis } from '../config/redis';
 import { ApiError } from '../utils/ApiError';
 import { sendSuccess } from '../utils/response';
+import { generateCacheKey } from '../utils/helpers';
 
 // Cache TTL: 5 minutes
 const CACHE_TTL = 60 * 5;
@@ -124,7 +125,7 @@ export const getSubscribers = asyncHandler(async (req: Request, res: Response) =
   const { status, source, tags, search, page, limit, sort } = req.query;
 
   // Check cache
-  const cacheKey = `newsletter:subscribers:${JSON.stringify(req.query)}`;
+  const cacheKey = generateCacheKey('newsletter:subscribers', req.query as Record<string, unknown>);
   const cached = await redis.get(cacheKey);
   if (cached) {
     sendSuccess(res, JSON.parse(cached));
@@ -387,7 +388,7 @@ export const getCampaigns = asyncHandler(async (req: Request, res: Response) => 
   const { status, search, page, limit, sort } = req.query;
 
   // Check cache
-  const cacheKey = `newsletter:campaigns:${JSON.stringify(req.query)}`;
+  const cacheKey = generateCacheKey('newsletter:campaigns', req.query as Record<string, unknown>);
   const cached = await redis.get(cacheKey);
   if (cached) {
     sendSuccess(res, JSON.parse(cached));

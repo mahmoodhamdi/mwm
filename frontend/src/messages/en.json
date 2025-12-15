@@ -220,6 +220,18 @@
     "defaultDescription": "A company specialized in software development and integrated digital solutions"
   },
   "admin": {
+    "login": {
+      "title": "Admin Login",
+      "email": "Email",
+      "emailPlaceholder": "Enter your email",
+      "password": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "submit": "Login",
+      "loading": "Logging in...",
+      "success": "Login successful",
+      "error": "Invalid email or password",
+      "rights": "All rights reserved"
+    },
     "dashboard": {
       "title": "Dashboard",
       "welcome": "Welcome to MWM Admin Dashboard",

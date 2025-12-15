@@ -20,6 +20,7 @@ import {
   Settings,
   ChevronDown,
 } from 'lucide-react';
+import { useAuth } from '@/providers/AuthProvider';
 
 export interface AdminHeaderProps {
   onMenuToggle: () => void;
@@ -29,6 +30,7 @@ export interface AdminHeaderProps {
 export function AdminHeader({ onMenuToggle, unreadMessages = 0 }: AdminHeaderProps) {
   const locale = useLocale();
   const isRTL = locale === 'ar';
+  const { user, logout } = useAuth();
   const [isUserMenuOpen, setIsUserMenuOpen] = React.useState(false);
   const [isDarkMode, setIsDarkMode] = React.useState(false);
 
@@ -117,7 +119,7 @@ export function AdminHeader({ onMenuToggle, unreadMessages = 0 }: AdminHeaderPro
               <User className="size-5" />
             </div>
             <span className="hidden text-sm font-medium md:block">
-              {isRTL ? 'المدير' : 'Admin'}
+              {user?.name || (isRTL ? 'المدير' : 'Admin')}
             </span>
             <ChevronDown
               className={`size-4 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`}
@@ -154,9 +156,9 @@ export function AdminHeader({ onMenuToggle, unreadMessages = 0 }: AdminHeaderPro
                 <hr className="border-border my-1" />
                 <button
                   className="text-destructive hover:bg-accent flex w-full items-center gap-3 px-4 py-2 text-sm transition-colors"
-                  onClick={() => {
+                  onClick={async () => {
                     setIsUserMenuOpen(false);
-                    // Handle logout
+                    await logout();
                   }}
                 >
                   <LogOut className="size-4" />

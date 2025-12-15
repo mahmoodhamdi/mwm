@@ -7,6 +7,8 @@
 export { AdminLayout } from './AdminLayout';
 export type { AdminLayoutProps } from './AdminLayout';
 
+export { AdminAuthGuard } from './AdminAuthGuard';
+
 export { AdminSidebar } from './AdminSidebar';
 export type { AdminSidebarProps, SidebarItem } from './AdminSidebar';
 

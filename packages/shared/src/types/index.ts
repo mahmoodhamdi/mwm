@@ -90,7 +90,9 @@ export interface SeoMeta {
 
 // Status types | أنواع الحالة
 export type PublishStatus = 'draft' | 'published' | 'scheduled';
-export type ContactStatus = 'new' | 'read' | 'replied' | 'archived';
+export type BlogPostStatus = 'draft' | 'published' | 'scheduled' | 'archived';
+export type ContactStatus = 'new' | 'read' | 'replied' | 'archived' | 'spam';
+export type ContactPriority = 'low' | 'normal' | 'high' | 'urgent';
 
 // Common entity interface | واجهة الكيان المشترك
 export interface BaseEntity {

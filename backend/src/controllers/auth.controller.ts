@@ -11,6 +11,7 @@ import { sendSuccess, sendCreated } from '../utils/response';
 import { asyncHandler } from '../middlewares';
 import { logger } from '../config';
 import { verifyIdToken } from '../config/firebase';
+import axios from 'axios';
 
 /**
  * Register a new user
@@ -468,6 +469,166 @@ export const googleAuth = asyncHandler(async (req: Request, res: Response) => {
   );
 });
 
+/**
+ * GitHub Sign-in
+ * تسجيل الدخول بجيت هب
+ * POST /api/v1/auth/github
+ */
+export const githubAuth = asyncHandler(async (req: Request, res: Response) => {
+  const { code } = req.body;
+
+  if (!code || typeof code !== 'string') {
+    throw new ApiError(
+      400,
+      'MISSING_CODE',
+      'GitHub authorization code is required | كود التفويض من GitHub مطلوب'
+    );
+  }
+
+  const clientId = process.env.GITHUB_CLIENT_ID;
+  const clientSecret = process.env.GITHUB_CLIENT_SECRET;
+
+  if (!clientId || !clientSecret) {
+    throw new ApiError(
+      500,
+      'GITHUB_NOT_CONFIGURED',
+      'GitHub OAuth is not configured | تسجيل الدخول بـ GitHub غير مُعَد'
+    );
+  }
+
+  try {
+    // Exchange code for access token
+    const tokenResponse = await axios.post(
+      'https://github.com/login/oauth/access_token',
+      {
+        client_id: clientId,
+        client_secret: clientSecret,
+        code,
+      },
+      {
+        headers: {
+          Accept: 'application/json',
+        },
+      }
+    );
+
+    const { access_token, error, error_description } = tokenResponse.data;
+
+    if (error || !access_token) {
+      logger.error('GitHub OAuth error:', error_description || error);
+      throw new ApiError(
+        401,
+        'GITHUB_AUTH_FAILED',
+        error_description || 'GitHub authentication failed | فشل التحقق من GitHub'
+      );
+    }
+
+    // Get user profile from GitHub
+    const userResponse = await axios.get('https://api.github.com/user', {
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+      },
+    });
+
+    const githubUser = userResponse.data;
+
+    // Get user email (may be private)
+    let email = githubUser.email;
+    if (!email) {
+      const emailsResponse = await axios.get('https://api.github.com/user/emails', {
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+        },
+      });
+      const primaryEmail = emailsResponse.data.find(
+        (e: { primary: boolean; verified: boolean; email: string }) => e.primary && e.verified
+      );
+      email = primaryEmail?.email;
+    }
+
+    if (!email) {
+      throw new ApiError(
+        400,
+        'EMAIL_REQUIRED',
+        'GitHub account must have a verified email | حساب GitHub يجب أن يحتوي على بريد إلكتروني مُوثق'
+      );
+    }
+
+    // Check if user exists
+    let user = await User.findOne({ email });
+
+    if (user) {
+      // User exists - check if account is active
+      if (!user.isActive) {
+        throw new ApiError(
+          403,
+          'ACCOUNT_DISABLED',
+          'Account is disabled. Please contact support | الحساب معطل. يرجى التواصل مع الدعم'
+        );
+      }
+
+      // Update avatar if not set
+      if (!user.avatar && githubUser.avatar_url) {
+        user.avatar = githubUser.avatar_url;
+        await user.save();
+      }
+
+      // Auto-verify email for GitHub users
+      if (!user.isEmailVerified) {
+        user.isEmailVerified = true;
+        await user.save();
+      }
+    } else {
+      // Create new user
+      user = await User.create({
+        name: githubUser.name || githubUser.login,
+        email,
+        password: `github_${githubUser.id}_${Date.now()}`, // Random password for GitHub users
+        avatar: githubUser.avatar_url,
+        isEmailVerified: true, // GitHub emails are verified
+      });
+
+      // Send welcome email (non-blocking)
+      const emailSent = await emailService.sendWelcomeEmail(user.email, user.name);
+      if (!emailSent) {
+        logger.warn(`Failed to send welcome email to ${user.email} after GitHub sign-in`);
+      }
+    }
+
+    // Reset login attempts
+    await user.resetLoginAttempts();
+
+    // Generate tokens
+    const tokens = await authService.generateTokenPair(user, req.headers['user-agent'], req.ip);
+
+    sendSuccess(
+      res,
+      {
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          avatar: user.avatar,
+          isEmailVerified: user.isEmailVerified,
+        },
+        ...tokens,
+      },
+      { message: 'GitHub sign-in successful | تم تسجيل الدخول بـ GitHub بنجاح' }
+    );
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    logger.error('GitHub OAuth error:', error);
+    throw new ApiError(
+      500,
+      'GITHUB_AUTH_ERROR',
+      'Failed to authenticate with GitHub | فشل التحقق من GitHub'
+    );
+  }
+});
+
 export const authController = {
   register,
   login,
@@ -481,6 +642,7 @@ export const authController = {
   updateProfile,
   changePassword,
   googleAuth,
+  githubAuth,
 };
 
 export default authController;

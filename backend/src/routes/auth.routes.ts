@@ -144,6 +144,14 @@ router.post(
   authController.googleAuth
 );
 
+// GitHub Sign-in
+router.post(
+  '/github',
+  loginLimiter,
+  validate({ body: authValidation.githubAuth }),
+  authController.githubAuth
+);
+
 /**
  * Protected routes
  * المسارات المحمية

@@ -151,6 +151,11 @@ export const logout = asyncHandler(async (req: Request, res: Response) => {
 export const refreshToken = asyncHandler(async (req: Request, res: Response) => {
   const { refreshToken: token } = req.body;
 
+  // Validate refresh token is provided
+  if (!token || typeof token !== 'string') {
+    throw new ApiError(400, 'MISSING_TOKEN', 'Refresh token is required | توكن التحديث مطلوب');
+  }
+
   const tokens = await authService.refreshTokens(token, req.headers['user-agent'], req.ip);
 
   sendSuccess(res, tokens, { message: 'Tokens refreshed successfully | تم تحديث التوكنات بنجاح' });

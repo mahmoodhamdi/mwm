@@ -4,6 +4,10 @@
  */
 
 import mongoose, { Document, Schema } from 'mongoose';
+import { BlogPostStatus } from '@mwm/shared';
+
+// Re-export for backward compatibility with existing imports
+export type { BlogPostStatus } from '@mwm/shared';
 
 /**
  * Bilingual content interface
@@ -24,12 +28,6 @@ interface ISEO {
   metaKeywords?: string[];
   ogImage?: string;
 }
-
-/**
- * Blog Post status type
- * نوع حالة المقال
- */
-export type BlogPostStatus = 'draft' | 'published' | 'scheduled' | 'archived';
 
 /**
  * Blog Post interface

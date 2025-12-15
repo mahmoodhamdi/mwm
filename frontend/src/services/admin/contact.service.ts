@@ -4,10 +4,10 @@
  */
 
 import { api, extractData } from '@/lib/api';
+import { ContactStatus, ContactPriority } from '@mwm/shared';
 
-// Types
-export type ContactStatus = 'new' | 'read' | 'replied' | 'archived' | 'spam';
-export type ContactPriority = 'low' | 'normal' | 'high' | 'urgent';
+// Re-export for backward compatibility with existing imports
+export type { ContactStatus, ContactPriority } from '@mwm/shared';
 
 export interface ContactMessage {
   _id: string;

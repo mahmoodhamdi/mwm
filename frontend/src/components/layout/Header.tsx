@@ -159,6 +159,7 @@ export function Header({ transparent = false, className }: HeaderProps) {
                         ? 'text-primary-600 dark:text-primary-400'
                         : 'hover:text-primary-600 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
                     )}
+                    aria-current={isActive(item.href) ? 'page' : undefined}
                   >
                     {t(item.key)}
                   </Link>
@@ -241,6 +242,7 @@ export function Header({ transparent = false, className }: HeaderProps) {
                         : 'text-gray-700 dark:text-gray-300'
                     )}
                     onClick={toggleMenu}
+                    aria-current={isActive(item.href) ? 'page' : undefined}
                   >
                     {t(item.key)}
                   </Link>

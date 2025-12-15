@@ -230,6 +230,9 @@
       "loading": "Logging in...",
       "success": "Login successful",
       "error": "Invalid email or password",
+      "googleError": "Google sign-in failed",
+      "githubError": "GitHub sign-in failed",
+      "orContinueWith": "Or continue with",
       "rights": "All rights reserved"
     },
     "dashboard": {

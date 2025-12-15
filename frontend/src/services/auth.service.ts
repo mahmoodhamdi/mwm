@@ -4,6 +4,8 @@
  */
 
 import { api, ApiResponse } from '@/lib/api';
+import { signInWithGoogle, getIdToken, signOut as firebaseSignOut } from '@/lib/firebase';
+import { initiateGitHubAuth } from '@/lib/github';
 
 // Types
 export interface User {
@@ -155,6 +157,55 @@ export const authService = {
    */
   resetPassword: async (token: string, password: string): Promise<void> => {
     await api.post('/auth/reset-password', { token, password });
+  },
+
+  /**
+   * Login with Google
+   */
+  loginWithGoogle: async (): Promise<LoginResponse> => {
+    // Sign in with Firebase Google Auth
+    const result = await signInWithGoogle();
+    if (!result) {
+      throw new Error('Google sign-in failed');
+    }
+
+    // Get ID token from Firebase
+    const idToken = await getIdToken();
+    if (!idToken) {
+      throw new Error('Failed to get ID token');
+    }
+
+    // Send to backend for verification
+    const response = await api.post<ApiResponse<LoginResponse>>('/auth/google', { idToken });
+    const data = response.data.data as LoginResponse;
+
+    // Store tokens
+    tokenUtils.setTokens(data.tokens);
+
+    // Sign out from Firebase (we use our own JWT auth)
+    await firebaseSignOut();
+
+    return data;
+  },
+
+  /**
+   * Initiate GitHub OAuth flow
+   */
+  initiateGitHubLogin: (): void => {
+    initiateGitHubAuth();
+  },
+
+  /**
+   * Complete GitHub OAuth (called from callback page)
+   */
+  loginWithGitHub: async (code: string): Promise<LoginResponse> => {
+    const response = await api.post<ApiResponse<LoginResponse>>('/auth/github', { code });
+    const data = response.data.data as LoginResponse;
+
+    // Store tokens
+    tokenUtils.setTokens(data.tokens);
+
+    return data;
   },
 };
 

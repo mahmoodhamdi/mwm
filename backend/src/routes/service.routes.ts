@@ -6,6 +6,7 @@
 import { Router } from 'express';
 import { serviceController } from '../controllers';
 import { authenticate, authorize } from '../middlewares/auth';
+import { validate, idParamsSchema } from '../middlewares/validate';
 
 const router = Router();
 
@@ -35,6 +36,7 @@ router.put(
   '/admin/categories/:id',
   authenticate,
   authorize('services:update'),
+  validate({ params: idParamsSchema }),
   serviceController.updateCategory
 );
 
@@ -43,6 +45,7 @@ router.delete(
   '/admin/categories/:id',
   authenticate,
   authorize('services:delete'),
+  validate({ params: idParamsSchema }),
   serviceController.deleteCategory
 );
 
@@ -67,6 +70,7 @@ router.get(
   '/admin/:id',
   authenticate,
   authorize('services:read'),
+  validate({ params: idParamsSchema }),
   serviceController.getServiceById
 );
 
@@ -78,6 +82,7 @@ router.put(
   '/admin/:id',
   authenticate,
   authorize('services:update'),
+  validate({ params: idParamsSchema }),
   serviceController.updateService
 );
 
@@ -86,6 +91,7 @@ router.delete(
   '/admin/:id',
   authenticate,
   authorize('services:delete'),
+  validate({ params: idParamsSchema }),
   serviceController.deleteService
 );
 

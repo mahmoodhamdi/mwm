@@ -438,7 +438,7 @@ Tests:       23 failed, 856 passed, 879 total
 - [ ] Add CSP headers
 - [x] Configure HSTS properly (HSTS middleware added)
 - [x] Add security event logging (Request ID tracking, reCAPTCHA logging)
-- [ ] Validate video URL origins
+- [x] Validate video URL origins (whitelist validation added)
 
 ---
 
@@ -469,6 +469,17 @@ Tests:       23 failed, 856 passed, 879 total
 - [x] reCAPTCHA handling - Improved logging with startup warnings
 - [x] Admin dashboard stats safety - Added defensive null checking
 - [x] Image error handling - Created ImageWithFallback component
+
+### Additional Fixes (December 15, 2025 - Session 2)
+
+- [x] Email validation in ContactForm - Improved regex to reject invalid emails like "test@.com"
+- [x] Blog race condition - Added AbortController for request cancellation
+- [x] Project video URL validation - Added whitelist validation for iframe origins
+- [x] Cache key injection vulnerability - Created generateCacheKey utility with deterministic key generation
+- [x] Email service error handling - Added logging when emails fail to send
+- [x] ContactStatus type mismatch - Consolidated to @mwm/shared package
+- [x] BlogPostStatus type mismatch - Consolidated to @mwm/shared package
+- [x] Missing unique index on slugs - Verified all models already have unique: true
 
 ---
 

@@ -10,6 +10,7 @@ import { blogValidation } from '../validations';
 import { asyncHandler } from '../middlewares/asyncHandler';
 import { Errors } from '../utils/ApiError';
 import { successResponse, paginatedResponse } from '../utils/response';
+import { parsePagination } from '../utils/pagination';
 import { redis } from '../config';
 import { escapeRegex } from '../utils/security';
 
@@ -77,7 +78,15 @@ export const getCategoryBySlug = asyncHandler(async (req: Request, res: Response
  * جلب جميع الفئات (للمسؤول)
  */
 export const getAllCategories = asyncHandler(async (req: Request, res: Response) => {
-  const { page = 1, limit = 20, isActive, search, parent } = req.query;
+  const { isActive, search, parent } = req.query;
+
+  // Use validated pagination utility
+  const { page, limit, skip } = parsePagination({
+    page: req.query.page,
+    limit: req.query.limit,
+    defaultLimit: 20,
+    maxLimit: 100,
+  });
 
   const filter: Record<string, unknown> = {};
 
@@ -97,12 +106,11 @@ export const getAllCategories = asyncHandler(async (req: Request, res: Response)
     ];
   }
 
-  const skip = (Number(page) - 1) * Number(limit);
   const total = await BlogCategory.countDocuments(filter);
   const categories = await BlogCategory.find(filter)
     .sort({ order: 1 })
     .skip(skip)
-    .limit(Number(limit))
+    .limit(limit)
     .populate('postCount')
     .populate('parent', 'name slug')
     .populate('createdBy', 'name email')
@@ -110,8 +118,8 @@ export const getAllCategories = asyncHandler(async (req: Request, res: Response)
 
   return paginatedResponse(res, {
     data: categories,
-    page: Number(page),
-    limit: Number(limit),
+    page,
+    limit,
     total,
   });
 });
@@ -282,7 +290,15 @@ export const deleteCategory = asyncHandler(async (req: Request, res: Response) =
  * جلب المقالات (عام)
  */
 export const getPosts = asyncHandler(async (req: Request, res: Response) => {
-  const { page = 1, limit = 10, category, tag, featured, locale, search } = req.query;
+  const { category, tag, featured, locale, search } = req.query;
+
+  // Use validated pagination utility
+  const { page, limit } = parsePagination({
+    page: req.query.page,
+    limit: req.query.limit,
+    defaultLimit: 10,
+    maxLimit: 100,
+  });
 
   const cacheKey = `${POST_CACHE_PREFIX}:list:${page}:${limit}:${category || 'all'}:${tag || 'all'}:${featured || 'all'}:${locale || 'all'}:${search || 'none'}`;
 
@@ -299,18 +315,18 @@ export const getPosts = asyncHandler(async (req: Request, res: Response) => {
     tag: tag as string,
     locale: locale as 'ar' | 'en',
     featured: featured === 'true' ? true : featured === 'false' ? false : undefined,
-    limit: Number(limit),
-    page: Number(page),
+    limit,
+    page,
     search: search as string,
   });
 
   const result = {
     posts,
     pagination: {
-      page: Number(page),
-      limit: Number(limit),
+      page,
+      limit,
       total,
-      pages: Math.ceil(total / Number(limit)),
+      pages: Math.ceil(total / limit),
     },
   };
 
@@ -416,8 +432,6 @@ export const getTags = asyncHandler(async (req: Request, res: Response) => {
  */
 export const getAllPosts = asyncHandler(async (req: Request, res: Response) => {
   const {
-    page = 1,
-    limit = 10,
     category,
     status,
     featured,
@@ -426,6 +440,14 @@ export const getAllPosts = asyncHandler(async (req: Request, res: Response) => {
     sortBy = 'createdAt',
     sortOrder = 'desc',
   } = req.query;
+
+  // Use validated pagination utility
+  const { page, limit, skip } = parsePagination({
+    page: req.query.page,
+    limit: req.query.limit,
+    defaultLimit: 10,
+    maxLimit: 100,
+  });
 
   const filter: Record<string, unknown> = {};
 
@@ -455,7 +477,6 @@ export const getAllPosts = asyncHandler(async (req: Request, res: Response) => {
     ];
   }
 
-  const skip = (Number(page) - 1) * Number(limit);
   const total = await BlogPost.countDocuments(filter);
 
   const sortOptions: Record<string, 1 | -1> = {
@@ -465,14 +486,14 @@ export const getAllPosts = asyncHandler(async (req: Request, res: Response) => {
   const posts = await BlogPost.find(filter)
     .sort(sortOptions)
     .skip(skip)
-    .limit(Number(limit))
+    .limit(limit)
     .populate('category', 'name slug')
     .populate('author', 'name email avatar');
 
   return paginatedResponse(res, {
     data: posts,
-    page: Number(page),
-    limit: Number(limit),
+    page,
+    limit,
     total,
   });
 });

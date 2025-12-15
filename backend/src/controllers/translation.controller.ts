@@ -9,6 +9,7 @@ import { translationValidation } from '../validations';
 import { asyncHandler } from '../middlewares/asyncHandler';
 import { Errors } from '../utils/ApiError';
 import { successResponse, paginatedResponse } from '../utils/response';
+import { parsePagination } from '../utils/pagination';
 import { redis } from '../config';
 import { escapeRegex } from '../utils/security';
 
@@ -71,7 +72,15 @@ export const getAllByLocale = asyncHandler(async (req: Request, res: Response) =
  * جلب كل الترجمات (للمسؤول)
  */
 export const getAllTranslations = asyncHandler(async (req: Request, res: Response) => {
-  const { page = 1, limit = 50, namespace, search } = req.query;
+  const { namespace, search } = req.query;
+
+  // Use validated pagination utility
+  const { page, limit, skip } = parsePagination({
+    page: req.query.page,
+    limit: req.query.limit,
+    defaultLimit: 50,
+    maxLimit: 200,
+  });
 
   const filter: Record<string, unknown> = {};
 
@@ -88,17 +97,16 @@ export const getAllTranslations = asyncHandler(async (req: Request, res: Respons
     ];
   }
 
-  const skip = (Number(page) - 1) * Number(limit);
   const total = await Translation.countDocuments(filter);
   const translations = await Translation.find(filter)
     .sort({ namespace: 1, key: 1 })
     .skip(skip)
-    .limit(Number(limit));
+    .limit(limit);
 
   return paginatedResponse(res, {
     data: translations,
-    page: Number(page),
-    limit: Number(limit),
+    page,
+    limit,
     total,
   });
 });

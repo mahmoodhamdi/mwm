@@ -10,6 +10,7 @@ import { projectValidation } from '../validations';
 import { asyncHandler } from '../middlewares/asyncHandler';
 import { Errors } from '../utils/ApiError';
 import { successResponse, paginatedResponse } from '../utils/response';
+import { parsePagination } from '../utils/pagination';
 import { redis } from '../config';
 import { escapeRegex } from '../utils/security';
 
@@ -77,7 +78,15 @@ export const getCategoryBySlug = asyncHandler(async (req: Request, res: Response
  * جلب جميع الفئات (للمسؤول)
  */
 export const getAllCategories = asyncHandler(async (req: Request, res: Response) => {
-  const { page = 1, limit = 20, isActive, search } = req.query;
+  const { isActive, search } = req.query;
+
+  // Use validated pagination utility
+  const { page, limit, skip } = parsePagination({
+    page: req.query.page,
+    limit: req.query.limit,
+    defaultLimit: 20,
+    maxLimit: 100,
+  });
 
   const filter: Record<string, unknown> = {};
 
@@ -93,18 +102,17 @@ export const getAllCategories = asyncHandler(async (req: Request, res: Response)
     ];
   }
 
-  const skip = (Number(page) - 1) * Number(limit);
   const total = await ProjectCategory.countDocuments(filter);
   const categories = await ProjectCategory.find(filter)
     .sort({ order: 1 })
     .skip(skip)
-    .limit(Number(limit))
+    .limit(limit)
     .populate('projectsCount');
 
   return paginatedResponse(res, {
     data: categories,
-    page: Number(page),
-    limit: Number(limit),
+    page,
+    limit,
     total,
   });
 });
@@ -232,7 +240,15 @@ export const deleteCategory = asyncHandler(async (req: Request, res: Response) =
  * جلب المشاريع (عام)
  */
 export const getProjects = asyncHandler(async (req: Request, res: Response) => {
-  const { page = 1, limit = 12, category, technology } = req.query;
+  const { category, technology } = req.query;
+
+  // Use validated pagination utility
+  const { page, limit } = parsePagination({
+    page: req.query.page,
+    limit: req.query.limit,
+    defaultLimit: 12,
+    maxLimit: 100,
+  });
 
   const cacheKey = `${PROJECT_CACHE_PREFIX}:list:${page}:${limit}:${category || 'all'}:${technology || 'all'}`;
 
@@ -243,8 +259,8 @@ export const getProjects = asyncHandler(async (req: Request, res: Response) => {
   }
 
   const { projects, total, totalPages } = await Project.getPublishedProjects(
-    Number(page),
-    Number(limit),
+    page,
+    limit,
     category as string,
     technology as string
   );
@@ -252,8 +268,8 @@ export const getProjects = asyncHandler(async (req: Request, res: Response) => {
   const result = {
     projects,
     pagination: {
-      page: Number(page),
-      limit: Number(limit),
+      page,
+      limit,
       total,
       pages: totalPages,
     },
@@ -313,8 +329,6 @@ export const getFeaturedProjects = asyncHandler(async (req: Request, res: Respon
  */
 export const getAllProjects = asyncHandler(async (req: Request, res: Response) => {
   const {
-    page = 1,
-    limit = 12,
     category,
     featured,
     isPublished,
@@ -322,6 +336,14 @@ export const getAllProjects = asyncHandler(async (req: Request, res: Response) =
     sortBy = 'order',
     sortOrder = 'asc',
   } = req.query;
+
+  // Use validated pagination utility
+  const { page, limit, skip } = parsePagination({
+    page: req.query.page,
+    limit: req.query.limit,
+    defaultLimit: 12,
+    maxLimit: 100,
+  });
 
   const filter: Record<string, unknown> = {};
 
@@ -357,7 +379,6 @@ export const getAllProjects = asyncHandler(async (req: Request, res: Response) =
     ];
   }
 
-  const skip = (Number(page) - 1) * Number(limit);
   const total = await Project.countDocuments(filter);
 
   const sortOptions: Record<string, 1 | -1> = {
@@ -367,14 +388,14 @@ export const getAllProjects = asyncHandler(async (req: Request, res: Response) =
   const projects = await Project.find(filter)
     .sort(sortOptions)
     .skip(skip)
-    .limit(Number(limit))
+    .limit(limit)
     .populate('category', 'name slug')
     .populate('createdBy', 'name email');
 
   return paginatedResponse(res, {
     data: projects,
-    page: Number(page),
-    limit: Number(limit),
+    page,
+    limit,
     total,
   });
 });

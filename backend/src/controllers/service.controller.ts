@@ -10,6 +10,7 @@ import { serviceValidation } from '../validations';
 import { asyncHandler } from '../middlewares/asyncHandler';
 import { Errors } from '../utils/ApiError';
 import { successResponse, paginatedResponse } from '../utils/response';
+import { parsePagination } from '../utils/pagination';
 import { redis } from '../config';
 import { escapeRegex } from '../utils/security';
 
@@ -77,7 +78,15 @@ export const getCategoryBySlug = asyncHandler(async (req: Request, res: Response
  * جلب جميع الفئات (للمسؤول)
  */
 export const getAllCategories = asyncHandler(async (req: Request, res: Response) => {
-  const { page = 1, limit = 20, isActive, search } = req.query;
+  const { isActive, search } = req.query;
+
+  // Use validated pagination utility
+  const { page, limit, skip } = parsePagination({
+    page: req.query.page,
+    limit: req.query.limit,
+    defaultLimit: 20,
+    maxLimit: 100,
+  });
 
   const filter: Record<string, unknown> = {};
 
@@ -93,20 +102,19 @@ export const getAllCategories = asyncHandler(async (req: Request, res: Response)
     ];
   }
 
-  const skip = (Number(page) - 1) * Number(limit);
   const total = await ServiceCategory.countDocuments(filter);
   const categories = await ServiceCategory.find(filter)
     .sort({ order: 1 })
     .skip(skip)
-    .limit(Number(limit))
+    .limit(limit)
     .populate('servicesCount')
     .populate('createdBy', 'name email')
     .populate('updatedBy', 'name email');
 
   return paginatedResponse(res, {
     data: categories,
-    page: Number(page),
-    limit: Number(limit),
+    page,
+    limit,
     total,
   });
 });
@@ -241,7 +249,15 @@ export const deleteCategory = asyncHandler(async (req: Request, res: Response) =
  * جلب الخدمات (عام)
  */
 export const getServices = asyncHandler(async (req: Request, res: Response) => {
-  const { page = 1, limit = 10, category, featured, locale } = req.query;
+  const { category, featured, locale } = req.query;
+
+  // Use validated pagination utility
+  const { page, limit } = parsePagination({
+    page: req.query.page,
+    limit: req.query.limit,
+    defaultLimit: 10,
+    maxLimit: 100,
+  });
 
   const cacheKey = `${SERVICE_CACHE_PREFIX}:list:${page}:${limit}:${category || 'all'}:${featured || 'all'}:${locale || 'all'}`;
 
@@ -255,17 +271,17 @@ export const getServices = asyncHandler(async (req: Request, res: Response) => {
     category: category as string,
     locale: locale as 'ar' | 'en',
     featured: featured === 'true' ? true : featured === 'false' ? false : undefined,
-    limit: Number(limit),
-    page: Number(page),
+    limit,
+    page,
   });
 
   const result = {
     services,
     pagination: {
-      page: Number(page),
-      limit: Number(limit),
+      page,
+      limit,
       total,
-      pages: Math.ceil(total / Number(limit)),
+      pages: Math.ceil(total / limit),
     },
   };
 
@@ -324,16 +340,15 @@ export const getFeaturedServices = asyncHandler(async (req: Request, res: Respon
  * جلب جميع الخدمات (للمسؤول)
  */
 export const getAllServices = asyncHandler(async (req: Request, res: Response) => {
-  const {
-    page = 1,
-    limit = 10,
-    category,
-    featured,
-    isActive,
-    search,
-    sortBy = 'order',
-    sortOrder = 'asc',
-  } = req.query;
+  const { category, featured, isActive, search, sortBy = 'order', sortOrder = 'asc' } = req.query;
+
+  // Use validated pagination utility
+  const { page, limit, skip } = parsePagination({
+    page: req.query.page,
+    limit: req.query.limit,
+    defaultLimit: 10,
+    maxLimit: 100,
+  });
 
   const filter: Record<string, unknown> = {};
 
@@ -359,7 +374,6 @@ export const getAllServices = asyncHandler(async (req: Request, res: Response) =
     ];
   }
 
-  const skip = (Number(page) - 1) * Number(limit);
   const total = await Service.countDocuments(filter);
 
   const sortOptions: Record<string, 1 | -1> = {
@@ -369,15 +383,15 @@ export const getAllServices = asyncHandler(async (req: Request, res: Response) =
   const services = await Service.find(filter)
     .sort(sortOptions)
     .skip(skip)
-    .limit(Number(limit))
+    .limit(limit)
     .populate('category', 'name slug')
     .populate('createdBy', 'name email')
     .populate('updatedBy', 'name email');
 
   return paginatedResponse(res, {
     data: services,
-    page: Number(page),
-    limit: Number(limit),
+    page,
+    limit,
     total,
   });
 });

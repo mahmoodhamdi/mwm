@@ -10,6 +10,7 @@ import { careersValidation } from '../validations';
 import { asyncHandler } from '../middlewares/asyncHandler';
 import { Errors } from '../utils/ApiError';
 import { successResponse, paginatedResponse } from '../utils/response';
+import { parsePagination } from '../utils/pagination';
 import { redis } from '../config';
 import { escapeRegex } from '../utils/security';
 
@@ -25,16 +26,15 @@ const CACHE_TTL = 1800; // 30 minutes
  * جلب الوظائف المفتوحة (عام)
  */
 export const getJobs = asyncHandler(async (req: Request, res: Response) => {
-  const {
-    page = 1,
-    limit = 10,
-    department,
-    type,
-    experienceLevel,
-    featured,
-    locale,
-    search,
-  } = req.query;
+  const { department, type, experienceLevel, featured, locale, search } = req.query;
+
+  // Use validated pagination utility
+  const { page, limit } = parsePagination({
+    page: req.query.page,
+    limit: req.query.limit,
+    defaultLimit: 10,
+    maxLimit: 100,
+  });
 
   const cacheKey = `${JOB_CACHE_PREFIX}:list:${page}:${limit}:${department || 'all'}:${type || 'all'}:${experienceLevel || 'all'}:${featured || 'all'}:${locale || 'all'}:${search || 'none'}`;
 
@@ -52,18 +52,18 @@ export const getJobs = asyncHandler(async (req: Request, res: Response) => {
     experienceLevel: experienceLevel as 'entry' | 'mid' | 'senior' | 'lead' | 'executive',
     locale: locale as 'ar' | 'en',
     featured: featured === 'true' ? true : featured === 'false' ? false : undefined,
-    limit: Number(limit),
-    page: Number(page),
+    limit,
+    page,
     search: search as string,
   });
 
   const result = {
     jobs,
     pagination: {
-      page: Number(page),
-      limit: Number(limit),
+      page,
+      limit,
       total,
-      pages: Math.ceil(total / Number(limit)),
+      pages: Math.ceil(total / limit),
     },
   };
 
@@ -199,16 +199,15 @@ export const submitApplication = asyncHandler(async (req: Request, res: Response
  * جلب جميع الوظائف (للمسؤول)
  */
 export const getAllJobs = asyncHandler(async (req: Request, res: Response) => {
-  const {
-    page = 1,
-    limit = 10,
-    department,
-    type,
-    experienceLevel,
-    status,
-    featured,
-    search,
-  } = req.query;
+  const { department, type, experienceLevel, status, featured, search } = req.query;
+
+  // Use validated pagination utility
+  const { page, limit, skip } = parsePagination({
+    page: req.query.page,
+    limit: req.query.limit,
+    defaultLimit: 10,
+    maxLimit: 100,
+  });
 
   const filter: Record<string, unknown> = {};
 
@@ -242,21 +241,20 @@ export const getAllJobs = asyncHandler(async (req: Request, res: Response) => {
     ];
   }
 
-  const skip = (Number(page) - 1) * Number(limit);
   const total = await Job.countDocuments(filter);
 
   const jobs = await Job.find(filter)
     .sort({ createdAt: -1 })
     .skip(skip)
-    .limit(Number(limit))
+    .limit(limit)
     .populate('department', 'name slug')
     .populate('createdBy', 'name email')
     .populate('updatedBy', 'name email');
 
   return paginatedResponse(res, {
     data: jobs,
-    page: Number(page),
-    limit: Number(limit),
+    page,
+    limit,
     total,
   });
 });
@@ -458,7 +456,15 @@ export const bulkUpdateJobStatus = asyncHandler(async (req: Request, res: Respon
  */
 export const getApplicationsByJob = asyncHandler(async (req: Request, res: Response) => {
   const { jobId } = req.params;
-  const { page = 1, limit = 10, status } = req.query;
+  const { status } = req.query;
+
+  // Use validated pagination utility
+  const { page, limit } = parsePagination({
+    page: req.query.page,
+    limit: req.query.limit,
+    defaultLimit: 10,
+    maxLimit: 100,
+  });
 
   const { applications, total } = await JobApplication.getByJob(jobId, {
     status: status as
@@ -471,14 +477,14 @@ export const getApplicationsByJob = asyncHandler(async (req: Request, res: Respo
       | 'rejected'
       | 'withdrawn'
       | undefined,
-    limit: Number(limit),
-    page: Number(page),
+    limit,
+    page,
   });
 
   return paginatedResponse(res, {
     data: applications,
-    page: Number(page),
-    limit: Number(limit),
+    page,
+    limit,
     total,
   });
 });
@@ -488,7 +494,15 @@ export const getApplicationsByJob = asyncHandler(async (req: Request, res: Respo
  * جلب جميع الطلبات (للمسؤول)
  */
 export const getAllApplications = asyncHandler(async (req: Request, res: Response) => {
-  const { page = 1, limit = 10, job, status, email } = req.query;
+  const { job, status, email } = req.query;
+
+  // Use validated pagination utility
+  const { page, limit, skip } = parsePagination({
+    page: req.query.page,
+    limit: req.query.limit,
+    defaultLimit: 10,
+    maxLimit: 100,
+  });
 
   const filter: Record<string, unknown> = {};
 
@@ -504,20 +518,19 @@ export const getAllApplications = asyncHandler(async (req: Request, res: Respons
     filter.email = { $regex: email, $options: 'i' };
   }
 
-  const skip = (Number(page) - 1) * Number(limit);
   const total = await JobApplication.countDocuments(filter);
 
   const applications = await JobApplication.find(filter)
     .sort({ createdAt: -1 })
     .skip(skip)
-    .limit(Number(limit))
+    .limit(limit)
     .populate('job', 'title slug')
     .populate('reviewedBy', 'name email');
 
   return paginatedResponse(res, {
     data: applications,
-    page: Number(page),
-    limit: Number(limit),
+    page,
+    limit,
     total,
   });
 });

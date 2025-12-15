@@ -7,7 +7,7 @@ import { Request, Response } from 'express';
 import mongoose from 'mongoose';
 import { User, UserRoles, IUser } from '../models/User';
 import { asyncHandler } from '../middlewares';
-import { ApiError } from '../utils';
+import { ApiError, parsePagination } from '../utils';
 import { validatePasswordStrength, escapeRegex } from '../utils/security';
 
 /**
@@ -15,11 +15,19 @@ import { validatePasswordStrength, escapeRegex } from '../utils/security';
  * الحصول على جميع المستخدمين مع الترقيم والتصفية
  */
 export const getAllUsers = asyncHandler(async (req: Request, res: Response) => {
-  const { page = 1, limit = 10, role, status, search, sort = '-createdAt' } = req.query;
+  const { role, status, search, sort = '-createdAt' } = req.query;
 
-  const pageNum = parseInt(page as string, 10);
-  const limitNum = parseInt(limit as string, 10);
-  const skip = (pageNum - 1) * limitNum;
+  // Use validated pagination utility
+  const {
+    page: pageNum,
+    limit: limitNum,
+    skip,
+  } = parsePagination({
+    page: req.query.page,
+    limit: req.query.limit,
+    defaultLimit: 10,
+    maxLimit: 100,
+  });
 
   // Build filter
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

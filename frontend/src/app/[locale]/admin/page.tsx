@@ -108,7 +108,15 @@ export default function AdminDashboard() {
     });
 
     // Sort by timestamp (newest first) and take top 10
-    return items.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()).slice(0, 10);
+    return items
+      .sort((a, b) => {
+        const timeA =
+          a.timestamp instanceof Date ? a.timestamp.getTime() : new Date(a.timestamp).getTime();
+        const timeB =
+          b.timestamp instanceof Date ? b.timestamp.getTime() : new Date(b.timestamp).getTime();
+        return timeB - timeA;
+      })
+      .slice(0, 10);
   }, [activity, locale]);
 
   if (loading) {

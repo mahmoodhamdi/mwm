@@ -19,6 +19,37 @@ interface RecaptchaResult {
   success: boolean;
   score: number;
   errorCodes?: string[];
+  skipped?: boolean;
+}
+
+// Track if we've logged the startup warning
+let hasLoggedStartupWarning = false;
+
+/**
+ * Log startup warning about reCAPTCHA configuration
+ * تسجيل تحذير بدء التشغيل حول إعدادات reCAPTCHA
+ */
+function logRecaptchaWarning(): void {
+  if (hasLoggedStartupWarning) return;
+  hasLoggedStartupWarning = true;
+
+  if (env.isProd) {
+    logger.warn(
+      '⚠️ SECURITY WARNING: reCAPTCHA is not configured in production. ' +
+        'Contact form submissions will be accepted without bot protection. ' +
+        'Set RECAPTCHA_SECRET_KEY to enable protection.'
+    );
+  } else {
+    logger.info('reCAPTCHA not configured - verification will be skipped in development/test');
+  }
+}
+
+/**
+ * Check if reCAPTCHA is configured
+ * التحقق مما إذا كان reCAPTCHA مُعدًا
+ */
+export function isRecaptchaConfigured(): boolean {
+  return !!env.recaptchaSecretKey;
 }
 
 /**
@@ -26,10 +57,10 @@ interface RecaptchaResult {
  * التحقق من رمز reCAPTCHA
  */
 export async function verifyRecaptcha(token: string): Promise<RecaptchaResult> {
-  // If no secret key is configured, skip verification
+  // If no secret key is configured, handle appropriately
   if (!env.recaptchaSecretKey) {
-    logger.warn('reCAPTCHA secret key not configured - skipping verification');
-    return { success: true, score: 1.0 };
+    logRecaptchaWarning();
+    return { success: true, score: 1.0, skipped: true };
   }
 
   try {
@@ -68,4 +99,5 @@ export async function verifyRecaptcha(token: string): Promise<RecaptchaResult> {
 
 export default {
   verifyRecaptcha,
+  isRecaptchaConfigured,
 };

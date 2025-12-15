@@ -167,4 +167,21 @@ export const idParamsSchema = Joi.object({
   id: commonSchemas.objectId.required(),
 });
 
+/**
+ * Job ID params schema
+ * مخطط معرف الوظيفة
+ */
+export const jobIdParamsSchema = Joi.object({
+  jobId: commonSchemas.objectId.required(),
+});
+
+/**
+ * ID with Item ID params schema
+ * مخطط معرف مع معرف العنصر
+ */
+export const idWithItemIdParamsSchema = Joi.object({
+  id: commonSchemas.objectId.required(),
+  itemId: commonSchemas.objectId.required(),
+});
+
 export default validate;

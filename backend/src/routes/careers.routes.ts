@@ -6,6 +6,7 @@
 import { Router } from 'express';
 import { careersController } from '../controllers';
 import { authenticate, authorize } from '../middlewares/auth';
+import { validate, idParamsSchema, jobIdParamsSchema } from '../middlewares/validate';
 
 const router = Router();
 
@@ -44,6 +45,7 @@ router.get(
   '/admin/jobs/:id',
   authenticate,
   authorize('careers:read'),
+  validate({ params: idParamsSchema }),
   careersController.getJobById
 );
 
@@ -63,6 +65,7 @@ router.put(
   '/admin/jobs/:id',
   authenticate,
   authorize('careers:update'),
+  validate({ params: idParamsSchema }),
   careersController.updateJob
 );
 
@@ -71,6 +74,7 @@ router.delete(
   '/admin/jobs/:id',
   authenticate,
   authorize('careers:delete'),
+  validate({ params: idParamsSchema }),
   careersController.deleteJob
 );
 
@@ -92,6 +96,7 @@ router.get(
   '/admin/applications/:id',
   authenticate,
   authorize('careers:read'),
+  validate({ params: idParamsSchema }),
   careersController.getApplicationById
 );
 
@@ -108,6 +113,7 @@ router.put(
   '/admin/applications/:id',
   authenticate,
   authorize('careers:update'),
+  validate({ params: idParamsSchema }),
   careersController.updateApplicationStatus
 );
 
@@ -116,6 +122,7 @@ router.delete(
   '/admin/applications/:id',
   authenticate,
   authorize('careers:delete'),
+  validate({ params: idParamsSchema }),
   careersController.deleteApplication
 );
 
@@ -124,6 +131,7 @@ router.get(
   '/admin/jobs/:jobId/applications',
   authenticate,
   authorize('careers:read'),
+  validate({ params: jobIdParamsSchema }),
   careersController.getApplicationsByJob
 );
 
@@ -132,6 +140,7 @@ router.get(
   '/admin/jobs/:jobId/stats',
   authenticate,
   authorize('careers:read'),
+  validate({ params: jobIdParamsSchema }),
   careersController.getApplicationStats
 );
 

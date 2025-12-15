@@ -5,7 +5,7 @@
 
 import { Router } from 'express';
 import { contactController } from '../controllers/contact.controller';
-import { authenticate, authorize, validate } from '../middlewares';
+import { authenticate, authorize, validate, idParamsSchema } from '../middlewares';
 import { contactValidation } from '../validations';
 
 const router = Router();
@@ -84,6 +84,7 @@ router.get(
   '/messages/:id',
   authenticate,
   authorize('messages:read'),
+  validate({ params: idParamsSchema }),
   contactController.getMessageById
 );
 
@@ -96,7 +97,7 @@ router.put(
   '/messages/:id',
   authenticate,
   authorize('messages:update'),
-  validate({ body: contactValidation.updateMessageSchema }),
+  validate({ params: idParamsSchema, body: contactValidation.updateMessageSchema }),
   contactController.updateMessage
 );
 
@@ -109,7 +110,7 @@ router.post(
   '/messages/:id/reply',
   authenticate,
   authorize('messages:update'),
-  validate({ body: contactValidation.replyMessageSchema }),
+  validate({ params: idParamsSchema, body: contactValidation.replyMessageSchema }),
   contactController.replyToMessage
 );
 
@@ -122,6 +123,7 @@ router.put(
   '/messages/:id/star',
   authenticate,
   authorize('messages:update'),
+  validate({ params: idParamsSchema }),
   contactController.toggleStar
 );
 
@@ -134,6 +136,7 @@ router.put(
   '/messages/:id/spam',
   authenticate,
   authorize('messages:update'),
+  validate({ params: idParamsSchema }),
   contactController.markAsSpam
 );
 
@@ -146,6 +149,7 @@ router.put(
   '/messages/:id/archive',
   authenticate,
   authorize('messages:update'),
+  validate({ params: idParamsSchema }),
   contactController.archiveMessage
 );
 
@@ -158,6 +162,7 @@ router.delete(
   '/messages/:id',
   authenticate,
   authorize('messages:delete'),
+  validate({ params: idParamsSchema }),
   contactController.deleteMessage
 );
 

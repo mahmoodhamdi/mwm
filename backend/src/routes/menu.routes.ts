@@ -6,6 +6,7 @@
 import { Router } from 'express';
 import { menuController } from '../controllers';
 import { authenticate, authorize } from '../middlewares/auth';
+import { validate, idParamsSchema, idWithItemIdParamsSchema } from '../middlewares/validate';
 
 const router = Router();
 
@@ -29,16 +30,34 @@ router.get('/slug/:slug', menuController.getMenuBySlug);
 router.get('/', authenticate, authorize('settings:read'), menuController.getAllMenus);
 
 // GET /api/v1/menus/:id - Get single menu
-router.get('/:id', authenticate, authorize('settings:read'), menuController.getMenu);
+router.get(
+  '/:id',
+  authenticate,
+  authorize('settings:read'),
+  validate({ params: idParamsSchema }),
+  menuController.getMenu
+);
 
 // POST /api/v1/menus - Create menu
 router.post('/', authenticate, authorize('settings:update'), menuController.createMenu);
 
 // PUT /api/v1/menus/:id - Update menu
-router.put('/:id', authenticate, authorize('settings:update'), menuController.updateMenu);
+router.put(
+  '/:id',
+  authenticate,
+  authorize('settings:update'),
+  validate({ params: idParamsSchema }),
+  menuController.updateMenu
+);
 
 // DELETE /api/v1/menus/:id - Delete menu
-router.delete('/:id', authenticate, authorize('settings:delete'), menuController.deleteMenu);
+router.delete(
+  '/:id',
+  authenticate,
+  authorize('settings:delete'),
+  validate({ params: idParamsSchema }),
+  menuController.deleteMenu
+);
 
 /**
  * Menu Items Routes
@@ -46,13 +65,20 @@ router.delete('/:id', authenticate, authorize('settings:delete'), menuController
  */
 
 // POST /api/v1/menus/:id/items - Add menu item
-router.post('/:id/items', authenticate, authorize('settings:update'), menuController.addMenuItem);
+router.post(
+  '/:id/items',
+  authenticate,
+  authorize('settings:update'),
+  validate({ params: idParamsSchema }),
+  menuController.addMenuItem
+);
 
 // PUT /api/v1/menus/:id/items/:itemId - Update menu item
 router.put(
   '/:id/items/:itemId',
   authenticate,
   authorize('settings:update'),
+  validate({ params: idWithItemIdParamsSchema }),
   menuController.updateMenuItem
 );
 
@@ -61,6 +87,7 @@ router.delete(
   '/:id/items/:itemId',
   authenticate,
   authorize('settings:update'),
+  validate({ params: idWithItemIdParamsSchema }),
   menuController.removeMenuItem
 );
 
@@ -69,6 +96,7 @@ router.post(
   '/:id/reorder',
   authenticate,
   authorize('settings:update'),
+  validate({ params: idParamsSchema }),
   menuController.reorderMenuItems
 );
 

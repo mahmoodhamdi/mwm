@@ -6,7 +6,7 @@
 import { Router } from 'express';
 import * as newsletterController from '../controllers/newsletter.controller';
 import { authenticate, authorize } from '../middlewares/auth';
-import { validate } from '../middlewares/validate';
+import { validate, idParamsSchema } from '../middlewares/validate';
 import {
   subscribeSchema,
   unsubscribeSchema,
@@ -372,7 +372,7 @@ router.put(
   '/subscribers/:id',
   authenticate,
   authorize('admin', 'super_admin'),
-  validate({ body: updateSubscriberSchema }),
+  validate({ params: idParamsSchema, body: updateSubscriberSchema }),
   newsletterController.updateSubscriber
 );
 
@@ -398,6 +398,7 @@ router.delete(
   '/subscribers/:id',
   authenticate,
   authorize('admin', 'super_admin'),
+  validate({ params: idParamsSchema }),
   newsletterController.deleteSubscriber
 );
 
@@ -529,6 +530,7 @@ router.get(
   '/campaigns/:id',
   authenticate,
   authorize('admin', 'super_admin'),
+  validate({ params: idParamsSchema }),
   newsletterController.getCampaign
 );
 
@@ -554,7 +556,7 @@ router.put(
   '/campaigns/:id',
   authenticate,
   authorize('admin', 'super_admin'),
-  validate({ body: updateCampaignSchema }),
+  validate({ params: idParamsSchema, body: updateCampaignSchema }),
   newsletterController.updateCampaign
 );
 
@@ -580,6 +582,7 @@ router.delete(
   '/campaigns/:id',
   authenticate,
   authorize('admin', 'super_admin'),
+  validate({ params: idParamsSchema }),
   newsletterController.deleteCampaign
 );
 
@@ -605,6 +608,7 @@ router.post(
   '/campaigns/:id/send',
   authenticate,
   authorize('admin', 'super_admin'),
+  validate({ params: idParamsSchema }),
   newsletterController.sendCampaign
 );
 
@@ -642,7 +646,7 @@ router.post(
   '/campaigns/:id/schedule',
   authenticate,
   authorize('admin', 'super_admin'),
-  validate({ body: scheduleCampaignSchema }),
+  validate({ params: idParamsSchema, body: scheduleCampaignSchema }),
   newsletterController.scheduleCampaign
 );
 
@@ -668,6 +672,7 @@ router.post(
   '/campaigns/:id/cancel',
   authenticate,
   authorize('admin', 'super_admin'),
+  validate({ params: idParamsSchema }),
   newsletterController.cancelCampaign
 );
 
@@ -693,6 +698,7 @@ router.post(
   '/campaigns/:id/duplicate',
   authenticate,
   authorize('admin', 'super_admin'),
+  validate({ params: idParamsSchema }),
   newsletterController.duplicateCampaign
 );
 

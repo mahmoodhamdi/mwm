@@ -6,6 +6,7 @@
 import { Router } from 'express';
 import { teamController } from '../controllers';
 import { authenticate, authorize } from '../middlewares/auth';
+import { validate, idParamsSchema } from '../middlewares/validate';
 
 const router = Router();
 
@@ -35,6 +36,7 @@ router.put(
   '/admin/departments/:id',
   authenticate,
   authorize('team:update'),
+  validate({ params: idParamsSchema }),
   teamController.updateDepartment
 );
 
@@ -43,6 +45,7 @@ router.delete(
   '/admin/departments/:id',
   authenticate,
   authorize('team:delete'),
+  validate({ params: idParamsSchema }),
   teamController.deleteDepartment
 );
 
@@ -58,7 +61,13 @@ router.get('/admin', authenticate, authorize('team:read'), teamController.getAll
 router.put('/admin/reorder', authenticate, authorize('team:update'), teamController.reorderMembers);
 
 // GET /api/v1/team/admin/:id - Get team member by ID (Admin)
-router.get('/admin/:id', authenticate, authorize('team:read'), teamController.getMemberById);
+router.get(
+  '/admin/:id',
+  authenticate,
+  authorize('team:read'),
+  validate({ params: idParamsSchema }),
+  teamController.getMemberById
+);
 
 // POST /api/v1/team/admin - Create team member
 router.post('/admin', authenticate, authorize('team:create'), teamController.createMember);
@@ -68,6 +77,7 @@ router.put(
   '/admin/:id/active',
   authenticate,
   authorize('team:update'),
+  validate({ params: idParamsSchema }),
   teamController.toggleActiveStatus
 );
 
@@ -76,6 +86,7 @@ router.put(
   '/admin/:id/featured',
   authenticate,
   authorize('team:update'),
+  validate({ params: idParamsSchema }),
   teamController.toggleFeaturedStatus
 );
 
@@ -84,14 +95,27 @@ router.put(
   '/admin/:id/leader',
   authenticate,
   authorize('team:update'),
+  validate({ params: idParamsSchema }),
   teamController.toggleLeaderStatus
 );
 
 // PUT /api/v1/team/admin/:id - Update team member
-router.put('/admin/:id', authenticate, authorize('team:update'), teamController.updateMember);
+router.put(
+  '/admin/:id',
+  authenticate,
+  authorize('team:update'),
+  validate({ params: idParamsSchema }),
+  teamController.updateMember
+);
 
 // DELETE /api/v1/team/admin/:id - Delete team member
-router.delete('/admin/:id', authenticate, authorize('team:delete'), teamController.deleteMember);
+router.delete(
+  '/admin/:id',
+  authenticate,
+  authorize('team:delete'),
+  validate({ params: idParamsSchema }),
+  teamController.deleteMember
+);
 
 // ============================================
 // Public Routes - Departments

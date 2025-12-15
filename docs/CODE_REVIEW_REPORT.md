@@ -480,6 +480,8 @@ Tests:       23 failed, 856 passed, 879 total
 - [x] ContactStatus type mismatch - Consolidated to @mwm/shared package
 - [x] BlogPostStatus type mismatch - Consolidated to @mwm/shared package
 - [x] Missing unique index on slugs - Verified all models already have unique: true
+- [x] LocalizedString duplicated as IBilingual - Consolidated all backend models to use LocalizedString from @mwm/shared
+- [x] Missing ID validation in routes - Added idParamsSchema validation to service and project routes
 
 ---
 

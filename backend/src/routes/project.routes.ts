@@ -10,32 +10,7 @@ import { authenticate, authorize } from '../middlewares/auth';
 const router = Router();
 
 // ============================================
-// Public Routes - Categories
-// المسارات العامة - الفئات
-// ============================================
-
-// GET /api/v1/projects/categories - Get all active categories
-router.get('/categories', projectController.getCategories);
-
-// GET /api/v1/projects/categories/:slug - Get category by slug
-router.get('/categories/:slug', projectController.getCategoryBySlug);
-
-// ============================================
-// Public Routes - Projects
-// المسارات العامة - المشاريع
-// ============================================
-
-// GET /api/v1/projects/featured - Get featured projects
-router.get('/featured', projectController.getFeaturedProjects);
-
-// GET /api/v1/projects/:slug - Get project by slug
-router.get('/:slug', projectController.getProjectBySlug);
-
-// GET /api/v1/projects - Get all published projects
-router.get('/', projectController.getProjects);
-
-// ============================================
-// Admin Routes - Categories
+// Admin Routes - Categories (MUST come before /:slug)
 // مسارات المسؤول - الفئات
 // ============================================
 
@@ -72,12 +47,20 @@ router.delete(
 );
 
 // ============================================
-// Admin Routes - Projects
+// Admin Routes - Projects (MUST come before /:slug)
 // مسارات المسؤول - المشاريع
 // ============================================
 
 // GET /api/v1/projects/admin - Get all projects (Admin)
 router.get('/admin', authenticate, authorize('projects:read'), projectController.getAllProjects);
+
+// PUT /api/v1/projects/admin/reorder - Reorder projects (MUST come before /admin/:id)
+router.put(
+  '/admin/reorder',
+  authenticate,
+  authorize('projects:update'),
+  projectController.reorderProjects
+);
 
 // GET /api/v1/projects/admin/:id - Get project by ID (Admin)
 router.get(
@@ -89,14 +72,6 @@ router.get(
 
 // POST /api/v1/projects/admin - Create project
 router.post('/admin', authenticate, authorize('projects:create'), projectController.createProject);
-
-// PUT /api/v1/projects/admin/reorder - Reorder projects
-router.put(
-  '/admin/reorder',
-  authenticate,
-  authorize('projects:update'),
-  projectController.reorderProjects
-);
 
 // PUT /api/v1/projects/admin/:id/publish - Toggle publish status
 router.put(
@@ -129,5 +104,30 @@ router.delete(
   authorize('projects:delete'),
   projectController.deleteProject
 );
+
+// ============================================
+// Public Routes - Categories
+// المسارات العامة - الفئات
+// ============================================
+
+// GET /api/v1/projects/categories - Get all active categories
+router.get('/categories', projectController.getCategories);
+
+// GET /api/v1/projects/categories/:slug - Get category by slug
+router.get('/categories/:slug', projectController.getCategoryBySlug);
+
+// ============================================
+// Public Routes - Projects
+// المسارات العامة - المشاريع
+// ============================================
+
+// GET /api/v1/projects/featured - Get featured projects
+router.get('/featured', projectController.getFeaturedProjects);
+
+// GET /api/v1/projects - Get all published projects
+router.get('/', projectController.getProjects);
+
+// GET /api/v1/projects/:slug - Get project by slug (MUST be LAST - catches all remaining paths)
+router.get('/:slug', projectController.getProjectBySlug);
 
 export default router;

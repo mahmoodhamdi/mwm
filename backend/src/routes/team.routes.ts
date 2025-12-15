@@ -10,35 +10,7 @@ import { authenticate, authorize } from '../middlewares/auth';
 const router = Router();
 
 // ============================================
-// Public Routes - Departments
-// المسارات العامة - الأقسام
-// ============================================
-
-// GET /api/v1/team/departments - Get all active departments
-router.get('/departments', teamController.getDepartments);
-
-// GET /api/v1/team/departments/:slug - Get department by slug
-router.get('/departments/:slug', teamController.getDepartmentBySlug);
-
-// ============================================
-// Public Routes - Team Members
-// المسارات العامة - أعضاء الفريق
-// ============================================
-
-// GET /api/v1/team/featured - Get featured team members
-router.get('/featured', teamController.getFeaturedMembers);
-
-// GET /api/v1/team/leaders - Get team leaders
-router.get('/leaders', teamController.getLeaders);
-
-// GET /api/v1/team/:slug - Get team member by slug
-router.get('/:slug', teamController.getMemberBySlug);
-
-// GET /api/v1/team - Get all active team members
-router.get('/', teamController.getTeamMembers);
-
-// ============================================
-// Admin Routes - Departments
+// Admin Routes - Departments (MUST come before /:slug)
 // مسارات المسؤول - الأقسام
 // ============================================
 
@@ -75,21 +47,21 @@ router.delete(
 );
 
 // ============================================
-// Admin Routes - Team Members
+// Admin Routes - Team Members (MUST come before /:slug)
 // مسارات المسؤول - أعضاء الفريق
 // ============================================
 
 // GET /api/v1/team/admin - Get all team members (Admin)
 router.get('/admin', authenticate, authorize('team:read'), teamController.getAllMembers);
 
+// PUT /api/v1/team/admin/reorder - Reorder team members (MUST come before /admin/:id)
+router.put('/admin/reorder', authenticate, authorize('team:update'), teamController.reorderMembers);
+
 // GET /api/v1/team/admin/:id - Get team member by ID (Admin)
 router.get('/admin/:id', authenticate, authorize('team:read'), teamController.getMemberById);
 
 // POST /api/v1/team/admin - Create team member
 router.post('/admin', authenticate, authorize('team:create'), teamController.createMember);
-
-// PUT /api/v1/team/admin/reorder - Reorder team members
-router.put('/admin/reorder', authenticate, authorize('team:update'), teamController.reorderMembers);
 
 // PUT /api/v1/team/admin/:id/active - Toggle active status
 router.put(
@@ -120,5 +92,33 @@ router.put('/admin/:id', authenticate, authorize('team:update'), teamController.
 
 // DELETE /api/v1/team/admin/:id - Delete team member
 router.delete('/admin/:id', authenticate, authorize('team:delete'), teamController.deleteMember);
+
+// ============================================
+// Public Routes - Departments
+// المسارات العامة - الأقسام
+// ============================================
+
+// GET /api/v1/team/departments - Get all active departments
+router.get('/departments', teamController.getDepartments);
+
+// GET /api/v1/team/departments/:slug - Get department by slug
+router.get('/departments/:slug', teamController.getDepartmentBySlug);
+
+// ============================================
+// Public Routes - Team Members
+// المسارات العامة - أعضاء الفريق
+// ============================================
+
+// GET /api/v1/team/featured - Get featured team members
+router.get('/featured', teamController.getFeaturedMembers);
+
+// GET /api/v1/team/leaders - Get team leaders
+router.get('/leaders', teamController.getLeaders);
+
+// GET /api/v1/team - Get all active team members
+router.get('/', teamController.getTeamMembers);
+
+// GET /api/v1/team/:slug - Get team member by slug (MUST be LAST - catches all remaining paths)
+router.get('/:slug', teamController.getMemberBySlug);
 
 export default router;

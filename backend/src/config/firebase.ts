@@ -77,8 +77,41 @@ export function getMessaging(): admin.messaging.Messaging | null {
   return admin.messaging(firebaseApp);
 }
 
+/**
+ * Get Firebase Auth instance
+ * الحصول على مثيل Firebase Auth
+ */
+export function getAuth(): admin.auth.Auth | null {
+  if (!firebaseApp) {
+    return null;
+  }
+  return admin.auth(firebaseApp);
+}
+
+/**
+ * Verify Firebase ID Token
+ * التحقق من توكن Firebase
+ */
+export async function verifyIdToken(idToken: string): Promise<admin.auth.DecodedIdToken | null> {
+  const auth = getAuth();
+  if (!auth) {
+    logger.warn('Firebase Auth not initialized - cannot verify ID token');
+    return null;
+  }
+
+  try {
+    const decodedToken = await auth.verifyIdToken(idToken);
+    return decodedToken;
+  } catch (error) {
+    logger.error('Failed to verify Firebase ID token:', error);
+    return null;
+  }
+}
+
 export default {
   initializeFirebase,
   getFirebaseAdmin,
   getMessaging,
+  getAuth,
+  verifyIdToken,
 };

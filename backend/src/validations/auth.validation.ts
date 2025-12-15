@@ -158,6 +158,16 @@ export const updateProfileSchema = Joi.object({
   }),
 });
 
+/**
+ * Google Auth validation schema
+ * مخطط التحقق من تسجيل الدخول بجوجل
+ */
+export const googleAuthSchema = Joi.object({
+  idToken: Joi.string().required().messages({
+    'any.required': 'Firebase ID token is required | توكن Firebase مطلوب',
+  }),
+});
+
 export const authValidation = {
   register: registerSchema,
   login: loginSchema,
@@ -167,6 +177,7 @@ export const authValidation = {
   verifyEmail: verifyEmailSchema,
   changePassword: changePasswordSchema,
   updateProfile: updateProfileSchema,
+  googleAuth: googleAuthSchema,
 };
 
 export default authValidation;

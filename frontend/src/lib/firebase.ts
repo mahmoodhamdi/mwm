@@ -5,12 +5,20 @@
 
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getMessaging, getToken, onMessage, Messaging, MessagePayload } from 'firebase/messaging';
+import {
+  getAuth,
+  signInWithPopup,
+  GoogleAuthProvider,
+  Auth,
+  UserCredential,
+  signOut as firebaseSignOut,
+} from 'firebase/auth';
 
 // Firebase configuration
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'auth-pro-33cb9',
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
@@ -18,6 +26,8 @@ const firebaseConfig = {
 
 let firebaseApp: FirebaseApp | null = null;
 let messaging: Messaging | null = null;
+let auth: Auth | null = null;
+const googleProvider = new GoogleAuthProvider();
 
 /**
  * Initialize Firebase
@@ -152,10 +162,99 @@ export function showNotification(
   });
 }
 
+/**
+ * Get Firebase Auth instance
+ * الحصول على مثيل Firebase Auth
+ */
+export function getFirebaseAuth(): Auth | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  if (!firebaseApp) {
+    firebaseApp = initializeFirebase();
+  }
+
+  if (!firebaseApp) {
+    return null;
+  }
+
+  if (!auth) {
+    try {
+      auth = getAuth(firebaseApp);
+    } catch (error) {
+      console.error('Firebase Auth initialization error:', error);
+      return null;
+    }
+  }
+
+  return auth;
+}
+
+/**
+ * Sign in with Google
+ * تسجيل الدخول بجوجل
+ */
+export async function signInWithGoogle(): Promise<UserCredential | null> {
+  const firebaseAuth = getFirebaseAuth();
+  if (!firebaseAuth) {
+    console.error('Firebase Auth not initialized');
+    return null;
+  }
+
+  try {
+    const result = await signInWithPopup(firebaseAuth, googleProvider);
+    return result;
+  } catch (error) {
+    console.error('Google sign-in error:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get ID token from current user
+ * الحصول على توكن المستخدم الحالي
+ */
+export async function getIdToken(): Promise<string | null> {
+  const firebaseAuth = getFirebaseAuth();
+  if (!firebaseAuth || !firebaseAuth.currentUser) {
+    return null;
+  }
+
+  try {
+    const token = await firebaseAuth.currentUser.getIdToken();
+    return token;
+  } catch (error) {
+    console.error('Error getting ID token:', error);
+    return null;
+  }
+}
+
+/**
+ * Sign out from Firebase
+ * تسجيل الخروج من Firebase
+ */
+export async function signOut(): Promise<void> {
+  const firebaseAuth = getFirebaseAuth();
+  if (!firebaseAuth) {
+    return;
+  }
+
+  try {
+    await firebaseSignOut(firebaseAuth);
+  } catch (error) {
+    console.error('Sign out error:', error);
+  }
+}
+
 export default {
   initializeFirebase,
   getFirebaseMessaging,
   requestNotificationPermission,
   onForegroundMessage,
   showNotification,
+  getFirebaseAuth,
+  signInWithGoogle,
+  getIdToken,
+  signOut,
 };

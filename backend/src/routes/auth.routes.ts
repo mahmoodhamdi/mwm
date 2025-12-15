@@ -136,6 +136,14 @@ router.post(
   authController.verifyEmail
 );
 
+// Google Sign-in
+router.post(
+  '/google',
+  loginLimiter,
+  validate({ body: authValidation.googleAuth }),
+  authController.googleAuth
+);
+
 /**
  * Protected routes
  * المسارات المحمية

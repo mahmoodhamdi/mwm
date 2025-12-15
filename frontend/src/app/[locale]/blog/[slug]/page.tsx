@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocale } from 'next-intl';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
+import { ImageWithFallback } from '@/components/ui';
 import {
   Calendar,
   User,
@@ -197,7 +197,7 @@ export default function BlogPostPage() {
             <div className="flex items-center gap-3">
               <div className="relative flex size-12 items-center justify-center overflow-hidden rounded-full bg-gray-200">
                 {getAuthorAvatar(post.author) ? (
-                  <Image
+                  <ImageWithFallback
                     src={getAuthorAvatar(post.author)!}
                     alt={getAuthorName(post.author)}
                     fill
@@ -230,7 +230,7 @@ export default function BlogPostPage() {
         <div className="mx-auto max-w-4xl">
           <div className="relative aspect-video overflow-hidden rounded-2xl bg-gradient-to-br from-blue-100 to-blue-200">
             {post.featuredImage && (
-              <Image
+              <ImageWithFallback
                 src={post.featuredImage}
                 alt={getLocalizedText(post.title)}
                 fill
@@ -327,7 +327,7 @@ export default function BlogPostPage() {
               <div className="flex items-start gap-6">
                 <div className="relative flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-200">
                   {getAuthorAvatar(post.author) ? (
-                    <Image
+                    <ImageWithFallback
                       src={getAuthorAvatar(post.author)!}
                       alt={getAuthorName(post.author)}
                       fill
@@ -378,7 +378,7 @@ export default function BlogPostPage() {
                   <article className="group h-full overflow-hidden rounded-xl bg-white shadow-md transition-shadow hover:shadow-lg">
                     <div className="relative aspect-video bg-gradient-to-br from-gray-100 to-gray-200">
                       {relatedPost.featuredImage && (
-                        <Image
+                        <ImageWithFallback
                           src={relatedPost.featuredImage}
                           alt={getLocalizedText(relatedPost.title)}
                           fill

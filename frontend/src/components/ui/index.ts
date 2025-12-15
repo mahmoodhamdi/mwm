@@ -29,3 +29,7 @@ export type { ContainerProps } from './Container';
 
 export { MarkdownEditor } from './MarkdownEditor';
 export type { MarkdownEditorProps } from './MarkdownEditor';
+
+export { ImageWithFallback } from './ImageWithFallback';
+
+export { LazyImage, LazyBackgroundImage } from './LazyImage';

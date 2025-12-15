@@ -3,8 +3,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocale } from 'next-intl';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Search, Calendar, Clock, Tag, ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
+import { ImageWithFallback } from '@/components/ui';
 import {
   getBlogPosts,
   getBlogCategories,
@@ -175,7 +175,7 @@ export default function BlogListingPage() {
                   <div className="group overflow-hidden rounded-2xl bg-white shadow-lg transition-shadow hover:shadow-xl">
                     <div className="relative aspect-video overflow-hidden bg-gray-200">
                       {featuredPost.featuredImage && (
-                        <Image
+                        <ImageWithFallback
                           src={featuredPost.featuredImage}
                           alt={getLocalizedText(featuredPost.title)}
                           fill
@@ -201,7 +201,7 @@ export default function BlogListingPage() {
                         <div className="flex items-center gap-3">
                           <div className="relative size-10 overflow-hidden rounded-full bg-gray-200">
                             {getAuthorAvatar(featuredPost.author) ? (
-                              <Image
+                              <ImageWithFallback
                                 src={getAuthorAvatar(featuredPost.author)!}
                                 alt={getAuthorName(featuredPost.author)}
                                 fill
@@ -261,7 +261,7 @@ export default function BlogListingPage() {
                       <article className="group h-full overflow-hidden rounded-xl bg-white shadow-md transition-shadow hover:shadow-lg">
                         <div className="relative aspect-video overflow-hidden bg-gray-200">
                           {post.featuredImage && (
-                            <Image
+                            <ImageWithFallback
                               src={post.featuredImage}
                               alt={getLocalizedText(post.title)}
                               fill
@@ -288,7 +288,7 @@ export default function BlogListingPage() {
                             <div className="flex items-center gap-2">
                               <div className="relative size-8 overflow-hidden rounded-full bg-gray-200">
                                 {getAuthorAvatar(post.author) ? (
-                                  <Image
+                                  <ImageWithFallback
                                     src={getAuthorAvatar(post.author)!}
                                     alt={getAuthorName(post.author)}
                                     fill

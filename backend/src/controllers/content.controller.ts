@@ -10,6 +10,7 @@ import { asyncHandler } from '../middlewares/asyncHandler';
 import { Errors } from '../utils/ApiError';
 import { successResponse, paginatedResponse } from '../utils/response';
 import { redis } from '../config';
+import { escapeRegex } from '../utils/security';
 
 const CONTENT_CACHE_PREFIX = 'content';
 const CONTENT_CACHE_TTL = 1800; // 30 minutes
@@ -92,10 +93,11 @@ export const getAllContent = asyncHandler(async (req: Request, res: Response) =>
   }
 
   if (search) {
+    const escapedSearch = escapeRegex(search as string);
     filter.$or = [
-      { key: { $regex: search, $options: 'i' } },
-      { 'content.ar': { $regex: search, $options: 'i' } },
-      { 'content.en': { $regex: search, $options: 'i' } },
+      { key: { $regex: escapedSearch, $options: 'i' } },
+      { 'content.ar': { $regex: escapedSearch, $options: 'i' } },
+      { 'content.en': { $regex: escapedSearch, $options: 'i' } },
     ];
   }
 

@@ -11,6 +11,7 @@ import { asyncHandler } from '../middlewares/asyncHandler';
 import { Errors } from '../utils/ApiError';
 import { successResponse, paginatedResponse } from '../utils/response';
 import { redis } from '../config';
+import { escapeRegex } from '../utils/security';
 
 const SERVICE_CACHE_PREFIX = 'service';
 const CATEGORY_CACHE_PREFIX = 'service-category';
@@ -85,9 +86,10 @@ export const getAllCategories = asyncHandler(async (req: Request, res: Response)
   }
 
   if (search) {
+    const escapedSearch = escapeRegex(search as string);
     filter.$or = [
-      { 'name.ar': { $regex: search, $options: 'i' } },
-      { 'name.en': { $regex: search, $options: 'i' } },
+      { 'name.ar': { $regex: escapedSearch, $options: 'i' } },
+      { 'name.en': { $regex: escapedSearch, $options: 'i' } },
     ];
   }
 
@@ -348,11 +350,12 @@ export const getAllServices = asyncHandler(async (req: Request, res: Response) =
   }
 
   if (search) {
+    const escapedSearch = escapeRegex(search as string);
     filter.$or = [
-      { 'title.ar': { $regex: search, $options: 'i' } },
-      { 'title.en': { $regex: search, $options: 'i' } },
-      { 'shortDescription.ar': { $regex: search, $options: 'i' } },
-      { 'shortDescription.en': { $regex: search, $options: 'i' } },
+      { 'title.ar': { $regex: escapedSearch, $options: 'i' } },
+      { 'title.en': { $regex: escapedSearch, $options: 'i' } },
+      { 'shortDescription.ar': { $regex: escapedSearch, $options: 'i' } },
+      { 'shortDescription.en': { $regex: escapedSearch, $options: 'i' } },
     ];
   }
 

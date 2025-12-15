@@ -242,6 +242,16 @@ export function detectSqlInjection(input: string): boolean {
   return sqlPatterns.some(pattern => pattern.test(input));
 }
 
+/**
+ * Escape special regex characters in a string
+ * تهريب الأحرف الخاصة بالتعبيرات المنتظمة في نص
+ *
+ * Prevents NoSQL injection via regex patterns (ReDoS attacks)
+ */
+export function escapeRegex(input: string): string {
+  return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 export default {
   generateSecureToken,
   generateCsrfToken,
@@ -258,4 +268,5 @@ export default {
   checkSecurityHeaders,
   detectXssPayload,
   detectSqlInjection,
+  escapeRegex,
 };

@@ -4,6 +4,7 @@
  */
 
 import { Request, Response } from 'express';
+import mongoose from 'mongoose';
 import { User, UserRoles, IUser } from '../models/User';
 import { asyncHandler } from '../middlewares';
 import { ApiError } from '../utils';
@@ -400,6 +401,12 @@ export const bulkUpdateUsers = asyncHandler(async (req: Request, res: Response) 
     throw ApiError.invalidInput('No users selected');
   }
 
+  // Validate action before starting transaction
+  const validActions = ['activate', 'deactivate', 'unlock', 'delete'];
+  if (!validActions.includes(action)) {
+    throw ApiError.invalidInput('Invalid action');
+  }
+
   // Filter out current user from bulk actions
   const filteredIds = ids.filter(id => id !== currentUser._id.toString());
 
@@ -411,48 +418,67 @@ export const bulkUpdateUsers = asyncHandler(async (req: Request, res: Response) 
 
   const targetIds = targetUsers.map(u => u._id);
 
-  let affected = 0;
-
-  switch (action) {
-    case 'activate': {
-      const activateResult = await User.updateMany({ _id: { $in: targetIds } }, { isActive: true });
-      affected = activateResult.modifiedCount;
-      break;
-    }
-
-    case 'deactivate': {
-      const deactivateResult = await User.updateMany(
-        { _id: { $in: targetIds } },
-        { isActive: false }
-      );
-      affected = deactivateResult.modifiedCount;
-      break;
-    }
-
-    case 'unlock': {
-      const unlockResult = await User.updateMany(
-        { _id: { $in: targetIds } },
-        { loginAttempts: 0, $unset: { lockUntil: 1 } }
-      );
-      affected = unlockResult.modifiedCount;
-      break;
-    }
-
-    case 'delete': {
-      const deleteResult = await User.deleteMany({ _id: { $in: targetIds } });
-      affected = deleteResult.deletedCount;
-      break;
-    }
-
-    default:
-      throw ApiError.invalidInput('Invalid action');
+  if (targetIds.length === 0) {
+    return res.status(200).json({
+      success: true,
+      message: 'No users to update',
+      data: { affected: 0 },
+    });
   }
 
-  res.status(200).json({
-    success: true,
-    message: `${affected} users ${action}d successfully`,
-    data: { affected },
-  });
+  // Start a session for transaction support
+  const session = await mongoose.startSession();
+  let affected = 0;
+
+  try {
+    await session.withTransaction(async () => {
+      switch (action) {
+        case 'activate': {
+          const activateResult = await User.updateMany(
+            { _id: { $in: targetIds } },
+            { isActive: true },
+            { session }
+          );
+          affected = activateResult.modifiedCount;
+          break;
+        }
+
+        case 'deactivate': {
+          const deactivateResult = await User.updateMany(
+            { _id: { $in: targetIds } },
+            { isActive: false },
+            { session }
+          );
+          affected = deactivateResult.modifiedCount;
+          break;
+        }
+
+        case 'unlock': {
+          const unlockResult = await User.updateMany(
+            { _id: { $in: targetIds } },
+            { loginAttempts: 0, $unset: { lockUntil: 1 } },
+            { session }
+          );
+          affected = unlockResult.modifiedCount;
+          break;
+        }
+
+        case 'delete': {
+          const deleteResult = await User.deleteMany({ _id: { $in: targetIds } }, { session });
+          affected = deleteResult.deletedCount;
+          break;
+        }
+      }
+    });
+
+    res.status(200).json({
+      success: true,
+      message: `${affected} users ${action}d successfully`,
+      data: { affected },
+    });
+  } finally {
+    await session.endSession();
+  }
 });
 
 export const userController = {

@@ -63,6 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Redirect to login if on admin page and not authenticated
+  // Use replace instead of push to prevent back navigation to protected pages
   useEffect(() => {
     if (isLoading) return;
 
@@ -70,7 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const isLoginPage = pathname?.includes('/admin/login');
 
     if (isAdminRoute && !isLoginPage && !user) {
-      router.push(`/${locale}/admin/login`);
+      router.replace(`/${locale}/admin/login`);
     }
   }, [isLoading, user, pathname, router, locale]);
 

@@ -25,6 +25,7 @@ import {
   groupBy,
   unique,
   chunk,
+  generateCacheKey,
 } from '../../../src/utils/helpers';
 
 describe('Helper Utilities', () => {
@@ -230,6 +231,46 @@ describe('Helper Utilities', () => {
 
     it('should handle empty array', () => {
       expect(chunk([], 2)).toEqual([]);
+    });
+  });
+
+  describe('generateCacheKey', () => {
+    it('should generate deterministic key with sorted parameters', () => {
+      const key1 = generateCacheKey('test', { b: '2', a: '1' });
+      const key2 = generateCacheKey('test', { a: '1', b: '2' });
+      expect(key1).toBe(key2);
+    });
+
+    it('should exclude undefined and null values', () => {
+      const key1 = generateCacheKey('test', { a: '1', b: undefined, c: null });
+      const key2 = generateCacheKey('test', { a: '1' });
+      expect(key1).toBe(key2);
+    });
+
+    it('should exclude empty string values', () => {
+      const key1 = generateCacheKey('test', { a: '1', b: '' });
+      const key2 = generateCacheKey('test', { a: '1' });
+      expect(key1).toBe(key2);
+    });
+
+    it('should handle arrays by sorting them', () => {
+      const key1 = generateCacheKey('test', { tags: ['b', 'a'] });
+      const key2 = generateCacheKey('test', { tags: ['a', 'b'] });
+      expect(key1).toBe(key2);
+    });
+
+    it('should return prefix:all for empty query', () => {
+      const key = generateCacheKey('test', {});
+      expect(key).toBe('test:all');
+    });
+
+    it('should use hash for long query strings', () => {
+      const longQuery: Record<string, string> = {};
+      for (let i = 0; i < 20; i++) {
+        longQuery[`param${i}`] = `value${i}long`;
+      }
+      const key = generateCacheKey('test', longQuery);
+      expect(key).toMatch(/^test:[a-f0-9]{16}$/);
     });
   });
 });

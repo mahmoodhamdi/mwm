@@ -13,12 +13,10 @@ import { Container, Spinner } from '@/components/ui';
 import { CheckCircleIcon, ArrowRightIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { Suspense } from 'react';
 import { createSanitizedHtml } from '@/lib/sanitize';
+import type { LocalizedString } from '@mwm/shared';
 
-// Types
-interface BilingualText {
-  ar: string;
-  en: string;
-}
+// Type alias for backward compatibility
+type BilingualText = LocalizedString;
 
 interface ServiceFeature {
   title: BilingualText;

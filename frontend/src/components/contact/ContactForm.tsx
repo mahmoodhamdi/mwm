@@ -179,7 +179,11 @@ const ContactForm = forwardRef<HTMLFormElement, ContactFormProps>(
 
       if (!formData.email.trim()) {
         errors.email = isRTL ? 'البريد الإلكتروني مطلوب' : 'Email is required';
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      } else if (
+        !/^[^\s@]+@[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/.test(
+          formData.email
+        )
+      ) {
         errors.email = isRTL ? 'البريد الإلكتروني غير صحيح' : 'Invalid email format';
       }
 

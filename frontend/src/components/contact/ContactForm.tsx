@@ -286,72 +286,108 @@ const ContactForm = forwardRef<HTMLFormElement, ContactFormProps>(
           {/* Name & Email Row */}
           <div className="grid gap-4 md:grid-cols-2">
             <div>
+              <label htmlFor="minimal-name" className="sr-only">
+                {t.name}
+              </label>
               <input
                 type="text"
+                id="minimal-name"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
                 placeholder={t.name}
+                aria-required="true"
+                aria-invalid={!!fieldErrors.name}
+                aria-describedby={fieldErrors.name ? 'minimal-name-error' : undefined}
                 className={cn(
                   'focus:border-primary-500 focus:ring-primary-500/20 w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-900 transition-colors placeholder:text-gray-500 focus:outline-none focus:ring-2 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-400',
                   fieldErrors.name && 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
                 )}
               />
               {fieldErrors.name && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{fieldErrors.name}</p>
+                <p id="minimal-name-error" className="mt-1 text-sm text-red-600 dark:text-red-400">
+                  {fieldErrors.name}
+                </p>
               )}
             </div>
             <div>
+              <label htmlFor="minimal-email" className="sr-only">
+                {t.email}
+              </label>
               <input
                 type="email"
+                id="minimal-email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
                 placeholder={t.email}
+                aria-required="true"
+                aria-invalid={!!fieldErrors.email}
+                aria-describedby={fieldErrors.email ? 'minimal-email-error' : undefined}
                 className={cn(
                   'focus:border-primary-500 focus:ring-primary-500/20 w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-900 transition-colors placeholder:text-gray-500 focus:outline-none focus:ring-2 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-400',
                   fieldErrors.email && 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
                 )}
               />
               {fieldErrors.email && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{fieldErrors.email}</p>
+                <p id="minimal-email-error" className="mt-1 text-sm text-red-600 dark:text-red-400">
+                  {fieldErrors.email}
+                </p>
               )}
             </div>
           </div>
 
           {/* Subject */}
           <div>
+            <label htmlFor="minimal-subject" className="sr-only">
+              {t.subject}
+            </label>
             <input
               type="text"
+              id="minimal-subject"
               name="subject"
               value={formData.subject}
               onChange={handleChange}
               placeholder={t.subject}
+              aria-required="true"
+              aria-invalid={!!fieldErrors.subject}
+              aria-describedby={fieldErrors.subject ? 'minimal-subject-error' : undefined}
               className={cn(
                 'focus:border-primary-500 focus:ring-primary-500/20 w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-900 transition-colors placeholder:text-gray-500 focus:outline-none focus:ring-2 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-400',
                 fieldErrors.subject && 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
               )}
             />
             {fieldErrors.subject && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{fieldErrors.subject}</p>
+              <p id="minimal-subject-error" className="mt-1 text-sm text-red-600 dark:text-red-400">
+                {fieldErrors.subject}
+              </p>
             )}
           </div>
 
           {/* Message */}
           <div>
+            <label htmlFor="minimal-message" className="sr-only">
+              {t.message}
+            </label>
             <textarea
+              id="minimal-message"
               name="message"
               value={formData.message}
               onChange={handleChange}
               placeholder={t.message}
               rows={4}
+              aria-required="true"
+              aria-invalid={!!fieldErrors.message}
+              aria-describedby={fieldErrors.message ? 'minimal-message-error' : undefined}
               className={cn(
                 'focus:border-primary-500 focus:ring-primary-500/20 w-full resize-none rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-900 transition-colors placeholder:text-gray-500 focus:outline-none focus:ring-2 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-400',
                 fieldErrors.message && 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
               )}
             />
             {fieldErrors.message && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{fieldErrors.message}</p>
+              <p id="minimal-message-error" className="mt-1 text-sm text-red-600 dark:text-red-400">
+                {fieldErrors.message}
+              </p>
             )}
           </div>
 
@@ -394,17 +430,24 @@ const ContactForm = forwardRef<HTMLFormElement, ContactFormProps>(
           <div className="grid gap-5 md:grid-cols-2">
             {/* Name */}
             <div>
-              <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label
+                htmlFor="form-name"
+                className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
                 <span>{t.name}</span>
                 <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <input
                   type="text"
+                  id="form-name"
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
                   placeholder={t.namePlaceholder}
+                  aria-required="true"
+                  aria-invalid={!!fieldErrors.name}
+                  aria-describedby={fieldErrors.name ? 'form-name-error' : undefined}
                   className={cn(
                     'focus:border-primary-500 focus:ring-primary-500/20 w-full rounded-lg border border-gray-200 bg-white py-3 pe-4 ps-11 text-gray-900 transition-colors placeholder:text-gray-500 focus:outline-none focus:ring-2 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-400',
                     fieldErrors.name && 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
@@ -422,23 +465,32 @@ const ContactForm = forwardRef<HTMLFormElement, ContactFormProps>(
                 </div>
               </div>
               {fieldErrors.name && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{fieldErrors.name}</p>
+                <p id="form-name-error" className="mt-1 text-sm text-red-600 dark:text-red-400">
+                  {fieldErrors.name}
+                </p>
               )}
             </div>
 
             {/* Email */}
             <div>
-              <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label
+                htmlFor="form-email"
+                className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
                 <span>{t.email}</span>
                 <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <input
                   type="email"
+                  id="form-email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
                   placeholder={t.emailPlaceholder}
+                  aria-required="true"
+                  aria-invalid={!!fieldErrors.email}
+                  aria-describedby={fieldErrors.email ? 'form-email-error' : undefined}
                   className={cn(
                     'focus:border-primary-500 focus:ring-primary-500/20 w-full rounded-lg border border-gray-200 bg-white py-3 pe-4 ps-11 text-gray-900 transition-colors placeholder:text-gray-500 focus:outline-none focus:ring-2 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-400',
                     fieldErrors.email && 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
@@ -449,7 +501,9 @@ const ContactForm = forwardRef<HTMLFormElement, ContactFormProps>(
                 </div>
               </div>
               {fieldErrors.email && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{fieldErrors.email}</p>
+                <p id="form-email-error" className="mt-1 text-sm text-red-600 dark:text-red-400">
+                  {fieldErrors.email}
+                </p>
               )}
             </div>
           </div>
@@ -459,13 +513,17 @@ const ContactForm = forwardRef<HTMLFormElement, ContactFormProps>(
             <div className="grid gap-5 md:grid-cols-2">
               {/* Phone */}
               <div>
-                <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label
+                  htmlFor="form-phone"
+                  className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
                   <span>{t.phone}</span>
                   <span className="text-xs text-gray-400">({t.optional})</span>
                 </label>
                 <div className="relative">
                   <input
                     type="tel"
+                    id="form-phone"
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
@@ -481,13 +539,17 @@ const ContactForm = forwardRef<HTMLFormElement, ContactFormProps>(
               {/* Company */}
               {showCompany && (
                 <div>
-                  <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label
+                    htmlFor="form-company"
+                    className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >
                     <span>{t.company}</span>
                     <span className="text-xs text-gray-400">({t.optional})</span>
                   </label>
                   <div className="relative">
                     <input
                       type="text"
+                      id="form-company"
                       name="company"
                       value={formData.company}
                       onChange={handleChange}
@@ -506,13 +568,17 @@ const ContactForm = forwardRef<HTMLFormElement, ContactFormProps>(
           {/* Website (detailed only) */}
           {(showWebsite || variant === 'detailed') && (
             <div>
-              <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label
+                htmlFor="form-website"
+                className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
                 <span>{t.website}</span>
                 <span className="text-xs text-gray-400">({t.optional})</span>
               </label>
               <div className="relative">
                 <input
                   type="url"
+                  id="form-website"
                   name="website"
                   value={formData.website}
                   onChange={handleChange}
@@ -532,11 +598,15 @@ const ContactForm = forwardRef<HTMLFormElement, ContactFormProps>(
               {/* Service */}
               {showService && services.length > 0 && (
                 <div>
-                  <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label
+                    htmlFor="form-service"
+                    className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >
                     <span>{t.service}</span>
                     <span className="text-xs text-gray-400">({t.optional})</span>
                   </label>
                   <select
+                    id="form-service"
                     name="service"
                     value={formData.service}
                     onChange={handleChange}
@@ -555,11 +625,15 @@ const ContactForm = forwardRef<HTMLFormElement, ContactFormProps>(
               {/* Budget */}
               {showBudget && (
                 <div>
-                  <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label
+                    htmlFor="form-budget"
+                    className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >
                     <span>{t.budget}</span>
                     <span className="text-xs text-gray-400">({t.optional})</span>
                   </label>
                   <select
+                    id="form-budget"
                     name="budget"
                     value={formData.budget}
                     onChange={handleChange}
@@ -611,39 +685,55 @@ const ContactForm = forwardRef<HTMLFormElement, ContactFormProps>(
 
           {/* Subject */}
           <div>
-            <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label
+              htmlFor="form-subject"
+              className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
               <span>{t.subject}</span>
               <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
+              id="form-subject"
               name="subject"
               value={formData.subject}
               onChange={handleChange}
               placeholder={t.subjectPlaceholder}
+              aria-required="true"
+              aria-invalid={!!fieldErrors.subject}
+              aria-describedby={fieldErrors.subject ? 'form-subject-error' : undefined}
               className={cn(
                 'focus:border-primary-500 focus:ring-primary-500/20 w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-900 transition-colors placeholder:text-gray-500 focus:outline-none focus:ring-2 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-400',
                 fieldErrors.subject && 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
               )}
             />
             {fieldErrors.subject && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{fieldErrors.subject}</p>
+              <p id="form-subject-error" className="mt-1 text-sm text-red-600 dark:text-red-400">
+                {fieldErrors.subject}
+              </p>
             )}
           </div>
 
           {/* Message */}
           <div>
-            <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label
+              htmlFor="form-message"
+              className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
               <span>{t.message}</span>
               <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <textarea
+                id="form-message"
                 name="message"
                 value={formData.message}
                 onChange={handleChange}
                 placeholder={t.messagePlaceholder}
                 rows={5}
+                aria-required="true"
+                aria-invalid={!!fieldErrors.message}
+                aria-describedby={fieldErrors.message ? 'form-message-error' : undefined}
                 className={cn(
                   'focus:border-primary-500 focus:ring-primary-500/20 w-full resize-none rounded-lg border border-gray-200 bg-white py-3 pe-4 ps-11 text-gray-900 transition-colors placeholder:text-gray-500 focus:outline-none focus:ring-2 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-400',
                   fieldErrors.message && 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
@@ -654,7 +744,9 @@ const ContactForm = forwardRef<HTMLFormElement, ContactFormProps>(
               </div>
             </div>
             {fieldErrors.message && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{fieldErrors.message}</p>
+              <p id="form-message-error" className="mt-1 text-sm text-red-600 dark:text-red-400">
+                {fieldErrors.message}
+              </p>
             )}
           </div>
 

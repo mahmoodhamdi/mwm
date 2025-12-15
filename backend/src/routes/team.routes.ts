@@ -7,6 +7,7 @@ import { Router } from 'express';
 import { teamController } from '../controllers';
 import { authenticate, authorize } from '../middlewares/auth';
 import { validate, idParamsSchema } from '../middlewares/validate';
+import { teamValidation } from '../validations';
 
 const router = Router();
 
@@ -28,6 +29,7 @@ router.post(
   '/admin/departments',
   authenticate,
   authorize('team:create'),
+  validate({ body: teamValidation.createDepartment }),
   teamController.createDepartment
 );
 
@@ -36,7 +38,7 @@ router.put(
   '/admin/departments/:id',
   authenticate,
   authorize('team:update'),
-  validate({ params: idParamsSchema }),
+  validate({ params: idParamsSchema, body: teamValidation.updateDepartment }),
   teamController.updateDepartment
 );
 
@@ -70,7 +72,13 @@ router.get(
 );
 
 // POST /api/v1/team/admin - Create team member
-router.post('/admin', authenticate, authorize('team:create'), teamController.createMember);
+router.post(
+  '/admin',
+  authenticate,
+  authorize('team:create'),
+  validate({ body: teamValidation.create }),
+  teamController.createMember
+);
 
 // PUT /api/v1/team/admin/:id/active - Toggle active status
 router.put(
@@ -104,7 +112,7 @@ router.put(
   '/admin/:id',
   authenticate,
   authorize('team:update'),
-  validate({ params: idParamsSchema }),
+  validate({ params: idParamsSchema, body: teamValidation.update }),
   teamController.updateMember
 );
 

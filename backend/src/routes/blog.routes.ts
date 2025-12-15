@@ -7,6 +7,7 @@ import { Router } from 'express';
 import { blogController } from '../controllers';
 import { authenticate, authorize } from '../middlewares/auth';
 import { validate, idParamsSchema } from '../middlewares/validate';
+import { blogValidation } from '../validations';
 
 const router = Router();
 
@@ -59,6 +60,7 @@ router.post(
   '/admin/categories',
   authenticate,
   authorize('blog:create'),
+  validate({ body: blogValidation.createCategory }),
   blogController.createCategory
 );
 
@@ -67,7 +69,7 @@ router.put(
   '/admin/categories/:id',
   authenticate,
   authorize('blog:update'),
-  validate({ params: idParamsSchema }),
+  validate({ params: idParamsSchema, body: blogValidation.updateCategory }),
   blogController.updateCategory
 );
 
@@ -98,7 +100,13 @@ router.get(
 );
 
 // POST /api/v1/blog/admin/posts - Create post
-router.post('/admin/posts', authenticate, authorize('blog:create'), blogController.createPost);
+router.post(
+  '/admin/posts',
+  authenticate,
+  authorize('blog:create'),
+  validate({ body: blogValidation.createPost }),
+  blogController.createPost
+);
 
 // PUT /api/v1/blog/admin/posts/bulk-status - Bulk update posts status
 router.put(
@@ -113,7 +121,7 @@ router.put(
   '/admin/posts/:id',
   authenticate,
   authorize('blog:update'),
-  validate({ params: idParamsSchema }),
+  validate({ params: idParamsSchema, body: blogValidation.updatePost }),
   blogController.updatePost
 );
 

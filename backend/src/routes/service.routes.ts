@@ -7,6 +7,7 @@ import { Router } from 'express';
 import { serviceController } from '../controllers';
 import { authenticate, authorize } from '../middlewares/auth';
 import { validate, idParamsSchema } from '../middlewares/validate';
+import { serviceValidation } from '../validations';
 
 const router = Router();
 
@@ -28,6 +29,7 @@ router.post(
   '/admin/categories',
   authenticate,
   authorize('services:create'),
+  validate({ body: serviceValidation.createCategory }),
   serviceController.createCategory
 );
 
@@ -36,7 +38,7 @@ router.put(
   '/admin/categories/:id',
   authenticate,
   authorize('services:update'),
-  validate({ params: idParamsSchema }),
+  validate({ params: idParamsSchema, body: serviceValidation.updateCategory }),
   serviceController.updateCategory
 );
 
@@ -75,14 +77,20 @@ router.get(
 );
 
 // POST /api/v1/services/admin - Create service
-router.post('/admin', authenticate, authorize('services:create'), serviceController.createService);
+router.post(
+  '/admin',
+  authenticate,
+  authorize('services:create'),
+  validate({ body: serviceValidation.create }),
+  serviceController.createService
+);
 
 // PUT /api/v1/services/admin/:id - Update service
 router.put(
   '/admin/:id',
   authenticate,
   authorize('services:update'),
-  validate({ params: idParamsSchema }),
+  validate({ params: idParamsSchema, body: serviceValidation.update }),
   serviceController.updateService
 );
 

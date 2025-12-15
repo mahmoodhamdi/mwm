@@ -86,3 +86,44 @@ export const isClient = typeof window !== 'undefined';
 export function getDirection(locale: string): 'rtl' | 'ltr' {
   return locale === 'ar' ? 'rtl' : 'ltr';
 }
+
+/**
+ * Allowed video embed origins for iframe src
+ * المصادر المسموح بها لتضمين الفيديو
+ */
+const ALLOWED_VIDEO_ORIGINS = [
+  'https://www.youtube.com',
+  'https://youtube.com',
+  'https://www.youtube-nocookie.com',
+  'https://player.vimeo.com',
+  'https://vimeo.com',
+  'https://www.dailymotion.com',
+  'https://www.loom.com',
+  'https://player.twitch.tv',
+  'https://www.facebook.com',
+  'https://streamable.com',
+];
+
+/**
+ * Validate video URL is from a trusted origin
+ * التحقق من أن رابط الفيديو من مصدر موثوق
+ */
+export function isValidVideoUrl(url: string | undefined | null): boolean {
+  if (!url) return false;
+
+  try {
+    const urlObj = new URL(url);
+    return ALLOWED_VIDEO_ORIGINS.some(origin => url.startsWith(origin));
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Get safe video URL or null if invalid
+ * الحصول على رابط الفيديو الآمن أو null إذا كان غير صالح
+ */
+export function getSafeVideoUrl(url: string | undefined | null): string | null {
+  if (!isValidVideoUrl(url)) return null;
+  return url as string;
+}

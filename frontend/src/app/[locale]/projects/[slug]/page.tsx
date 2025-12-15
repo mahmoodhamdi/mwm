@@ -20,6 +20,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { Suspense } from 'react';
 import { createSanitizedHtml } from '@/lib/sanitize';
+import { getSafeVideoUrl } from '@/lib/utils';
 
 // Types
 interface BilingualText {
@@ -389,7 +390,7 @@ async function ProjectContent({ slug, locale }: { slug: string; locale: string }
       )}
 
       {/* Video Section */}
-      {project.video && (
+      {getSafeVideoUrl(project.video) && (
         <section className="py-16">
           <Container>
             <h2 className="mb-8 text-center text-3xl font-bold text-gray-900 dark:text-white">
@@ -398,11 +399,12 @@ async function ProjectContent({ slug, locale }: { slug: string; locale: string }
             <div className="mx-auto max-w-4xl">
               <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-gray-100 dark:bg-gray-800">
                 <iframe
-                  src={project.video}
+                  src={getSafeVideoUrl(project.video)!}
                   title={title}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                   className="absolute inset-0 size-full"
+                  sandbox="allow-scripts allow-same-origin allow-presentation"
                 />
               </div>
             </div>

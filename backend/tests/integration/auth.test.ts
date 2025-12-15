@@ -444,15 +444,22 @@ describe('Auth API', () => {
     it('should logout successfully', async () => {
       if (mongoose.connection.readyState !== 1) return;
 
+      // Use unique email for this test to avoid conflicts
+      const uniqueEmail = `logout-test-${Date.now()}@example.com`;
+
       // Register to get tokens
       const registerResponse = await request(app)
         .post('/api/v1/auth/register')
         .send({
-          name: 'Test User',
-          email: 'test@example.com',
+          name: 'Logout Test User',
+          email: uniqueEmail,
           password: 'Test@1234',
           confirmPassword: 'Test@1234',
-        });
+        })
+        .expect(201);
+
+      expect(registerResponse.body.success).toBe(true);
+      expect(registerResponse.body.data).toBeDefined();
 
       const { accessToken, refreshToken } = registerResponse.body.data;
 

@@ -81,8 +81,11 @@ class NewsletterService {
 
     await subscriber.save();
 
-    // Send welcome email
-    await this.sendWelcomeEmail(subscriber);
+    // Send welcome email (non-blocking, log failure)
+    const emailSent = await this.sendWelcomeEmail(subscriber);
+    if (!emailSent) {
+      logger.warn(`Failed to send newsletter welcome email to ${subscriber.email}`);
+    }
 
     return { subscriber, isNew: true };
   }

@@ -6,7 +6,7 @@
 import { Request, Response } from 'express';
 import { Contact, ContactStatus, ContactPriority } from '../models';
 import { asyncHandler } from '../middlewares';
-import { redis } from '../config/redis';
+import { redis, logger } from '../config';
 import { ApiError } from '../utils/ApiError';
 import { sendSuccess } from '../utils/response';
 import { generateCacheKey } from '../utils/helpers';
@@ -247,14 +247,18 @@ export const replyToMessage = asyncHandler(async (req: Request, res: Response) =
   await contact.save();
 
   // Send email to contact if sendEmail is true
+  let emailSentSuccessfully = true;
   if (sendEmail) {
-    await emailService.sendContactReply(
+    emailSentSuccessfully = await emailService.sendContactReply(
       contact.email,
       contact.name,
       contact.subject,
       replyMessage,
       (contact.locale as 'ar' | 'en') || 'ar'
     );
+    if (!emailSentSuccessfully) {
+      logger.warn(`Failed to send contact reply email to ${contact.email} for message ${id}`);
+    }
   }
 
   // Invalidate cache
@@ -263,7 +267,7 @@ export const replyToMessage = asyncHandler(async (req: Request, res: Response) =
     await redis.del(...cacheKeys);
   }
 
-  sendSuccess(res, { message: contact });
+  sendSuccess(res, { message: contact, emailSent: sendEmail ? emailSentSuccessfully : null });
 });
 
 /**

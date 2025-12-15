@@ -9,6 +9,7 @@ import { authService, emailService } from '../services';
 import { ApiError, Errors } from '../utils/ApiError';
 import { sendSuccess, sendCreated } from '../utils/response';
 import { asyncHandler } from '../middlewares';
+import { logger } from '../config';
 
 /**
  * Register a new user
@@ -35,8 +36,15 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
   const verificationToken = user.generateEmailVerificationToken();
   await user.save();
 
-  // Send verification email
-  await emailService.sendVerificationEmail(user.email, user.name, verificationToken);
+  // Send verification email (non-blocking, log failure)
+  const emailSent = await emailService.sendVerificationEmail(
+    user.email,
+    user.name,
+    verificationToken
+  );
+  if (!emailSent) {
+    logger.warn(`Failed to send verification email to ${user.email} during registration`);
+  }
 
   // Generate tokens
   const tokens = await authService.generateTokenPair(user, req.headers['user-agent'], req.ip);
@@ -173,7 +181,14 @@ export const forgotPassword = asyncHandler(async (req: Request, res: Response) =
 
   // Always return success to prevent email enumeration
   if (result) {
-    await emailService.sendPasswordResetEmail(result.user.email, result.user.name, result.token);
+    const emailSent = await emailService.sendPasswordResetEmail(
+      result.user.email,
+      result.user.name,
+      result.token
+    );
+    if (!emailSent) {
+      logger.warn(`Failed to send password reset email to ${result.user.email}`);
+    }
   }
 
   sendSuccess(res, null, {
@@ -208,8 +223,11 @@ export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
 
   const user = await authService.verifyEmail(token);
 
-  // Send welcome email
-  await emailService.sendWelcomeEmail(user.email, user.name);
+  // Send welcome email (non-blocking, log failure)
+  const emailSent = await emailService.sendWelcomeEmail(user.email, user.name);
+  if (!emailSent) {
+    logger.warn(`Failed to send welcome email to ${user.email} after email verification`);
+  }
 
   sendSuccess(res, null, {
     message: 'Email verified successfully | تم تأكيد البريد الإلكتروني بنجاح',
@@ -240,7 +258,14 @@ export const resendVerification = asyncHandler(async (req: Request, res: Respons
   const verificationToken = user.generateEmailVerificationToken();
   await user.save();
 
-  await emailService.sendVerificationEmail(user.email, user.name, verificationToken);
+  const emailSent = await emailService.sendVerificationEmail(
+    user.email,
+    user.name,
+    verificationToken
+  );
+  if (!emailSent) {
+    logger.warn(`Failed to resend verification email to ${user.email}`);
+  }
 
   sendSuccess(res, null, { message: 'Verification email sent | تم إرسال بريد التحقق' });
 });

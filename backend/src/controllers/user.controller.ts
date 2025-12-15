@@ -455,7 +455,7 @@ export const bulkUpdateUsers = asyncHandler(async (req: Request, res: Response) 
   let affected = 0;
 
   try {
-    await session.withTransaction(async () => {
+    await session.withTransaction(async (): Promise<void> => {
       switch (action) {
         case 'activate': {
           const activateResult = await User.updateMany(
@@ -492,10 +492,13 @@ export const bulkUpdateUsers = asyncHandler(async (req: Request, res: Response) 
           affected = deleteResult.deletedCount;
           break;
         }
+
+        default:
+          break;
       }
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: `${affected} users ${action}d successfully`,
       data: { affected },

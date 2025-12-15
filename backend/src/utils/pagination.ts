@@ -34,8 +34,8 @@ export interface PaginationMeta {
  * واجهة خيارات استعلام الترقيم
  */
 export interface PaginationQueryOptions {
-  page?: string | number;
-  limit?: string | number;
+  page?: string | number | unknown;
+  limit?: string | number | unknown;
   maxLimit?: number;
   defaultLimit?: number;
 }
@@ -149,8 +149,8 @@ export function parseSort(
  */
 export function getPaginationData(
   query: {
-    page?: string | number;
-    limit?: string | number;
+    page?: string | number | unknown;
+    limit?: string | number | unknown;
     sort?: string;
   },
   options: {

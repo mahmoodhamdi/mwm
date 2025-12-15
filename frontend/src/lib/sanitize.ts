@@ -6,7 +6,7 @@
  * before rendering with dangerouslySetInnerHTML
  */
 
-import DOMPurify from 'isomorphic-dompurify';
+import sanitizeHtmlLib from 'sanitize-html';
 
 /**
  * Sanitize HTML content to prevent XSS attacks
@@ -14,9 +14,8 @@ import DOMPurify from 'isomorphic-dompurify';
  */
 export function sanitizeHtml(html: string): string {
   if (!html) return '';
-  return DOMPurify.sanitize(html, {
-    USE_PROFILES: { html: true },
-    ALLOWED_TAGS: [
+  return sanitizeHtmlLib(html, {
+    allowedTags: [
       'h1',
       'h2',
       'h3',
@@ -55,24 +54,28 @@ export function sanitizeHtml(html: string): string {
       'sup',
       'sub',
     ],
-    ALLOWED_ATTR: [
-      'href',
-      'target',
-      'rel',
-      'src',
-      'alt',
-      'title',
-      'width',
-      'height',
-      'class',
-      'id',
-      'colspan',
-      'rowspan',
-    ],
-    ALLOW_DATA_ATTR: false,
-    ADD_ATTR: ['target'],
-    FORBID_TAGS: ['script', 'style', 'iframe', 'form', 'input', 'button'],
-    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover'],
+    allowedAttributes: {
+      a: ['href', 'target', 'rel', 'title'],
+      img: ['src', 'alt', 'title', 'width', 'height'],
+      '*': ['class', 'id'],
+      td: ['colspan', 'rowspan'],
+      th: ['colspan', 'rowspan'],
+    },
+    disallowedTagsMode: 'discard',
+    allowedSchemes: ['http', 'https', 'mailto', 'tel'],
+    allowedSchemesByTag: {
+      img: ['http', 'https', 'data'],
+    },
+    transformTags: {
+      a: (tagName, attribs) => ({
+        tagName,
+        attribs: {
+          ...attribs,
+          target: attribs.target || '_blank',
+          rel: 'noopener noreferrer',
+        },
+      }),
+    },
   });
 }
 

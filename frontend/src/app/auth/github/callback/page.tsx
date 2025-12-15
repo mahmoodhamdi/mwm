@@ -5,12 +5,12 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { authService } from '@/services/auth.service';
 import { verifyState } from '@/lib/github';
 
-export default function GitHubCallbackPage() {
+function GitHubCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
@@ -60,20 +60,39 @@ export default function GitHubCallbackPage() {
   }, [searchParams, router]);
 
   return (
-    <div className="bg-background flex min-h-screen items-center justify-center">
-      <div className="text-center">
-        {error ? (
-          <div className="space-y-4">
-            <div className="text-lg text-red-500">{error}</div>
-            <div className="text-muted-foreground">Redirecting to login...</div>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="border-primary mx-auto size-8 animate-spin rounded-full border-4 border-t-transparent" />
-            <div className="text-muted-foreground">Completing GitHub sign-in...</div>
-          </div>
-        )}
+    <div className="text-center">
+      {error ? (
+        <div className="space-y-4">
+          <div className="text-lg text-red-500">{error}</div>
+          <div className="text-muted-foreground">Redirecting to login...</div>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <div className="border-primary mx-auto size-8 animate-spin rounded-full border-4 border-t-transparent" />
+          <div className="text-muted-foreground">Completing GitHub sign-in...</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function LoadingFallback() {
+  return (
+    <div className="text-center">
+      <div className="space-y-4">
+        <div className="border-primary mx-auto size-8 animate-spin rounded-full border-4 border-t-transparent" />
+        <div className="text-muted-foreground">Loading...</div>
       </div>
+    </div>
+  );
+}
+
+export default function GitHubCallbackPage() {
+  return (
+    <div className="bg-background flex min-h-screen items-center justify-center">
+      <Suspense fallback={<LoadingFallback />}>
+        <GitHubCallbackContent />
+      </Suspense>
     </div>
   );
 }

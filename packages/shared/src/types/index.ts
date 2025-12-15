@@ -66,7 +66,15 @@ export interface FilterParams {
 export type QueryParams = PaginationParams & SortParams & FilterParams;
 
 // User types | أنواع المستخدم
-export type UserRole = 'super_admin' | 'admin' | 'editor' | 'author' | 'viewer';
+export const UserRoles = {
+  SUPER_ADMIN: 'super_admin',
+  ADMIN: 'admin',
+  EDITOR: 'editor',
+  AUTHOR: 'author',
+  VIEWER: 'viewer',
+} as const;
+
+export type UserRole = (typeof UserRoles)[keyof typeof UserRoles];
 
 export interface IUser {
   _id: string;

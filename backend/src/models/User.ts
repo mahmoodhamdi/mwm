@@ -6,20 +6,11 @@
 import mongoose, { Document, Schema, Model } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
+import { UserRoles, UserRole } from '@mwm/shared';
 
-/**
- * User Roles
- * أدوار المستخدم
- */
-export const UserRoles = {
-  SUPER_ADMIN: 'super_admin',
-  ADMIN: 'admin',
-  EDITOR: 'editor',
-  AUTHOR: 'author',
-  VIEWER: 'viewer',
-} as const;
-
-export type UserRole = (typeof UserRoles)[keyof typeof UserRoles];
+// Re-export for backward compatibility
+export { UserRoles };
+export type { UserRole };
 
 /**
  * Refresh Token Interface

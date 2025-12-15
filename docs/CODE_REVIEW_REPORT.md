@@ -61,13 +61,13 @@ user.password = password; // Direct assignment
 
 **Fix:** Add `validatePasswordStrength` utility before saving.
 
-#### 1.3 Insufficient Input Sanitization - Contact Controller
+#### 1.3 ~~Insufficient Input Sanitization - Contact Controller~~ ✅ FIXED
 
 **File:** `backend/src/controllers/contact.controller.ts` (lines 176-180)
 
-**Problem:** `updateMessage` directly applies user-submitted data without field whitelisting.
+~~**Problem:** `updateMessage` directly applies user-submitted data without field whitelisting.~~
 
-**Fix:** Use Joi validation schema with explicit allowed fields.
+**Fix Applied:** Route uses `validate({ body: contactValidation.updateMessageSchema })` with Joi `stripUnknown: true` option, which only allows: status, priority, isStarred, labels, notes, assignedTo fields.
 
 #### 1.4 Hardcoded Firebase Credentials
 
@@ -91,9 +91,15 @@ project_id: process.env.FIREBASE_PROJECT_ID || 'auth-pro-33cb9',
 
 ### High Priority Issues
 
-#### 1.6 Missing Refresh Token Validation
+#### 1.6 ~~Missing Refresh Token Validation~~ ✅ FIXED
 
-**File:** `backend/src/controllers/auth.controller.ts` (lines 151-157)
+**File:** `backend/src/controllers/auth.controller.ts` (lines 159-170)
+
+**Fix Applied:** Complete refresh token validation implemented:
+
+- Route validation: `validate({ body: authValidation.refreshToken })`
+- Controller validation: checks token presence and type
+- Service validation: checks token expiry, user active status, and implements token rotation
 
 #### 1.7 ~~Incomplete TODO Implementation~~ ✅ FIXED
 
@@ -297,8 +303,8 @@ project_id: process.env.FIREBASE_PROJECT_ID || 'auth-pro-33cb9',
 
 ### Medium Priority Issues
 
-1. Frontend defines `BilingualText` in 3+ files (should use `LocalizedString`)
-2. User role type defined in 3 places (shared, backend, frontend)
+1. ~~Frontend defines `BilingualText` in 3+ files (should use `LocalizedString`)~~ ✅ FIXED
+2. ~~User role type defined in 3 places (shared, backend, frontend)~~ ✅ FIXED - Now consolidated to @mwm/shared with UserRoles object and UserRole type
 3. Only 2 actual imports from shared in entire backend
 4. Limited test coverage in shared package
 
@@ -490,6 +496,9 @@ Tests:       23 failed, 856 passed, 879 total
 - [x] Incomplete sendInvite TODO - Implemented email invite functionality in user.controller.ts using emailService.sendVerificationEmail
 - [x] Frontend bypasses shared package - Updated all BilingualText definitions to use LocalizedString from @mwm/shared (16 files: services, pages)
 - [x] Missing domain types - Added JobType, ExperienceLevel, JobStatus, ApplicationStatus, CampaignStatus, RecipientType, CampaignMetrics, SubscriberStatus, SubscriberSource to @mwm/shared
+- [x] Contact Controller input sanitization - Already fixed via Joi validation with stripUnknown: true
+- [x] Refresh Token Validation - Already implemented with route, controller, and service validation
+- [x] UserRole type consolidation - Added UserRoles object and UserRole type to @mwm/shared, updated backend and frontend
 
 ---
 

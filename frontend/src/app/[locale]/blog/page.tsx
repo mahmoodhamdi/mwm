@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocale } from 'next-intl';
 import Link from 'next/link';
 import { Search, Calendar, Clock, Tag, ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
@@ -30,6 +30,9 @@ export default function BlogListingPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Ref for aborting pending requests
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Fetch categories and tags on mount
   // Using Promise.allSettled for graceful degradation if any request fails
@@ -66,35 +69,68 @@ export default function BlogListingPage() {
     fetchInitialData();
   }, [locale]);
 
-  // Fetch posts when filters change
-  const fetchPosts = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await getBlogPosts({
-        page: currentPage,
-        limit: postsPerPage,
-        category: selectedCategory !== 'all' ? selectedCategory : undefined,
-        search: searchQuery || undefined,
-        locale,
-      });
-
-      if (response.data) {
-        setPosts(response.data.posts);
-        setTotalPages(response.data.pagination.pages);
-      }
-    } catch (err) {
-      console.error('Error fetching posts:', err);
-      setError(isRTL ? 'حدث خطأ أثناء تحميل المقالات' : 'Error loading articles');
-    } finally {
-      setLoading(false);
-    }
-  }, [currentPage, selectedCategory, searchQuery, locale, isRTL]);
-
+  // Fetch posts when filters change with request cancellation
   useEffect(() => {
+    // Cancel any pending request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create new abort controller for this request
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    const fetchPosts = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const response = await getBlogPosts(
+          {
+            page: currentPage,
+            limit: postsPerPage,
+            category: selectedCategory !== 'all' ? selectedCategory : undefined,
+            search: searchQuery || undefined,
+            locale,
+          },
+          { signal: controller.signal }
+        );
+
+        if (response.data) {
+          setPosts(response.data.posts);
+          setTotalPages(response.data.pagination.pages);
+        }
+      } catch (err) {
+        // Ignore abort errors - they're expected when cancelling
+        if (err instanceof Error && err.name === 'AbortError') {
+          return;
+        }
+        // Check for axios cancel error
+        if (
+          typeof err === 'object' &&
+          err !== null &&
+          'code' in err &&
+          err.code === 'ERR_CANCELED'
+        ) {
+          return;
+        }
+        console.error('Error fetching posts:', err);
+        setError(isRTL ? 'حدث خطأ أثناء تحميل المقالات' : 'Error loading articles');
+      } finally {
+        // Only set loading false if this request wasn't aborted
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
+      }
+    };
+
     fetchPosts();
-  }, [fetchPosts]);
+
+    // Cleanup: abort on unmount or when dependencies change
+    return () => {
+      controller.abort();
+    };
+  }, [currentPage, selectedCategory, searchQuery, locale, isRTL]);
 
   // Reset page when filters change
   useEffect(() => {

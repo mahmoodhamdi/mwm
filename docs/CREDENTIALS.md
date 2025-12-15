@@ -61,6 +61,10 @@ EMAIL_FROM="MWM <mwm.softwars.solutions@gmail.com>"
 # reCAPTCHA (Form protection)
 RECAPTCHA_SECRET_KEY=
 
+# GitHub OAuth (for GitHub Sign-in)
+GITHUB_CLIENT_ID=Ov23likxc956Bu4pjDNt
+GITHUB_CLIENT_SECRET=7134678552de97be598d9951675837f8e12361c2
+
 # Sentry (Error tracking)
 SENTRY_DSN=
 ```
@@ -97,6 +101,9 @@ NEXT_PUBLIC_FIREBASE_VAPID_KEY=
 
 # reCAPTCHA Site Key (from Google reCAPTCHA admin console)
 NEXT_PUBLIC_RECAPTCHA_SITE_KEY=
+
+# GitHub OAuth (for GitHub Sign-in)
+NEXT_PUBLIC_GITHUB_CLIENT_ID=Ov23likxc956Bu4pjDNt
 ```
 
 ---
@@ -124,6 +131,14 @@ Add these secrets in: **GitHub Repository > Settings > Secrets and variables > A
 | `FIREBASE_CLIENT_EMAIL`   | Service account email              |
 | `FIREBASE_CLIENT_ID`      | Service account client ID          |
 | `FIREBASE_CERT_URL`       | Certificate URL                    |
+
+### GitHub OAuth Secrets
+
+| Secret Name                    | Description               | Value                                      |
+| ------------------------------ | ------------------------- | ------------------------------------------ |
+| `GITHUB_CLIENT_ID`             | GitHub OAuth Client ID    | `Ov23likxc956Bu4pjDNt`                     |
+| `GITHUB_CLIENT_SECRET`         | GitHub OAuth Secret       | `7134678552de97be598d9951675837f8e12361c2` |
+| `NEXT_PUBLIC_GITHUB_CLIENT_ID` | Frontend GitHub Client ID | `Ov23likxc956Bu4pjDNt`                     |
 
 ### Frontend Public Variables
 
@@ -217,11 +232,16 @@ env:
   FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
   FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
 
+  # GitHub OAuth
+  GITHUB_CLIENT_ID: ${{ secrets.GITHUB_CLIENT_ID }}
+  GITHUB_CLIENT_SECRET: ${{ secrets.GITHUB_CLIENT_SECRET }}
+
   # Frontend
   NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
   NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
   NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
   NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
+  NEXT_PUBLIC_GITHUB_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_GITHUB_CLIENT_ID }}
 ```
 
 ---

@@ -168,6 +168,16 @@ export const googleAuthSchema = Joi.object({
   }),
 });
 
+/**
+ * GitHub Auth validation schema
+ * مخطط التحقق من تسجيل الدخول بجيت هب
+ */
+export const githubAuthSchema = Joi.object({
+  code: Joi.string().required().messages({
+    'any.required': 'GitHub authorization code is required | كود التفويض من GitHub مطلوب',
+  }),
+});
+
 export const authValidation = {
   register: registerSchema,
   login: loginSchema,
@@ -178,6 +188,7 @@ export const authValidation = {
   changePassword: changePasswordSchema,
   updateProfile: updateProfileSchema,
   googleAuth: googleAuthSchema,
+  githubAuth: githubAuthSchema,
 };
 
 export default authValidation;

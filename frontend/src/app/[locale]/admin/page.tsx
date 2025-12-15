@@ -150,10 +150,10 @@ export default function AdminDashboard() {
         <StatsCard
           titleAr="إجمالي المشاريع"
           titleEn="Total Projects"
-          value={stats?.projects.total || 0}
+          value={stats?.projects?.total ?? 0}
           icon={<FolderKanban className="size-6" />}
           trend={{
-            value: stats?.projects.published || 0,
+            value: stats?.projects?.published ?? 0,
             isPositive: true,
           }}
           variant="primary"
@@ -161,10 +161,10 @@ export default function AdminDashboard() {
         <StatsCard
           titleAr="الرسائل الجديدة"
           titleEn="New Messages"
-          value={stats?.contacts.unread || 0}
+          value={stats?.contacts?.unread ?? 0}
           icon={<MessageSquare className="size-6" />}
           trend={{
-            value: stats?.contacts.total || 0,
+            value: stats?.contacts?.total ?? 0,
             isPositive: true,
           }}
           variant="warning"
@@ -172,10 +172,10 @@ export default function AdminDashboard() {
         <StatsCard
           titleAr="الخدمات النشطة"
           titleEn="Active Services"
-          value={stats?.services.active || 0}
+          value={stats?.services?.active ?? 0}
           icon={<Briefcase className="size-6" />}
           trend={{
-            value: stats?.services.total || 0,
+            value: stats?.services?.total ?? 0,
             isPositive: true,
           }}
           variant="success"
@@ -183,10 +183,10 @@ export default function AdminDashboard() {
         <StatsCard
           titleAr="مشتركي النشرة"
           titleEn="Newsletter Subscribers"
-          value={stats?.subscribers.active || 0}
+          value={stats?.subscribers?.active ?? 0}
           icon={<Mail className="size-6" />}
           trend={{
-            value: stats?.subscribers.total || 0,
+            value: stats?.subscribers?.total ?? 0,
             isPositive: true,
           }}
           variant="default"
@@ -198,28 +198,28 @@ export default function AdminDashboard() {
         <StatsCard
           titleAr="أعضاء الفريق"
           titleEn="Team Members"
-          value={stats?.team.active || 0}
+          value={stats?.team?.active ?? 0}
           icon={<Users className="size-6" />}
           variant="default"
         />
         <StatsCard
           titleAr="المقالات المنشورة"
           titleEn="Published Posts"
-          value={stats?.posts.published || 0}
+          value={stats?.posts?.published ?? 0}
           icon={<TrendingUp className="size-6" />}
           variant="default"
         />
         <StatsCard
           titleAr="الوظائف المتاحة"
           titleEn="Open Jobs"
-          value={stats?.jobs.open || 0}
+          value={stats?.jobs?.open ?? 0}
           icon={<Briefcase className="size-6" />}
           variant="default"
         />
         <StatsCard
           titleAr="طلبات التوظيف"
           titleEn="Pending Applications"
-          value={stats?.applications.pending || 0}
+          value={stats?.applications?.pending ?? 0}
           icon={<Users className="size-6" />}
           variant="default"
         />

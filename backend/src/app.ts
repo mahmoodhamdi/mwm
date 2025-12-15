@@ -3,7 +3,7 @@
  * إعداد تطبيق Express
  */
 
-import express, { Express } from 'express';
+import express, { Express, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
@@ -12,6 +12,7 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import mongoSanitize from 'express-mongo-sanitize';
 import hpp from 'hpp';
+import crypto from 'crypto';
 
 import swaggerUi from 'swagger-ui-express';
 import { env, morganStream } from './config';
@@ -46,8 +47,27 @@ export function createApp(): Express {
   // Trust proxy (for rate limiting behind reverse proxy)
   app.set('trust proxy', 1);
 
-  // Security middleware
-  app.use(helmet());
+  // Request ID middleware for request tracking
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    const requestId = (req.headers['x-request-id'] as string) || crypto.randomUUID();
+    req.headers['x-request-id'] = requestId;
+    res.setHeader('x-request-id', requestId);
+    next();
+  });
+
+  // Security middleware with HSTS configuration
+  app.use(
+    helmet({
+      // Enable HSTS in production
+      hsts: {
+        maxAge: 31536000, // 1 year in seconds
+        includeSubDomains: true,
+        preload: true,
+      },
+      // Content Security Policy
+      contentSecurityPolicy: env.nodeEnv === 'production',
+    })
+  );
 
   // CORS configuration
   app.use(

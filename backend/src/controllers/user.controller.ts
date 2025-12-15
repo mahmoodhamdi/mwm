@@ -7,6 +7,7 @@ import { Request, Response } from 'express';
 import { User, UserRoles, IUser } from '../models/User';
 import { asyncHandler } from '../middlewares';
 import { ApiError } from '../utils';
+import { validatePasswordStrength } from '../utils/security';
 
 /**
  * Get all users with pagination and filtering
@@ -256,6 +257,19 @@ export const resetUserPassword = asyncHandler(async (req: Request, res: Response
   const { id } = req.params;
   const { password } = req.body;
   const currentUser = req.user as IUser;
+
+  // Validate password is provided
+  if (!password || typeof password !== 'string') {
+    throw ApiError.validationError({ password: 'Password is required' });
+  }
+
+  // Validate password strength
+  const passwordValidation = validatePasswordStrength(password);
+  if (!passwordValidation.valid) {
+    throw ApiError.validationError({
+      password: passwordValidation.errors.join(', '),
+    });
+  }
 
   const user = await User.findById(id).select('+password');
 

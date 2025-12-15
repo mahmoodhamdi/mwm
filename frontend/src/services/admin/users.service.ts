@@ -4,9 +4,12 @@
  */
 
 import { api, extractData } from '@/lib/api';
+import { UserRole } from '@mwm/shared';
+
+// Re-export type from shared
+export type { UserRole };
 
 // Types
-export type UserRole = 'super_admin' | 'admin' | 'editor' | 'author' | 'viewer';
 export type UserStatus = 'active' | 'inactive' | 'locked' | 'pending';
 
 export interface User {

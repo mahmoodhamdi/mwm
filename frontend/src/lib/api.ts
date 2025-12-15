@@ -122,20 +122,27 @@ export const api = createApiClient(API_BASE_URL);
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const extractData = <T>(response: any): T => response.data.data as T;
 
+// Request options interface
+export interface RequestOptions {
+  signal?: AbortSignal;
+}
+
 // Helper methods with proper typing
 export const apiClient = {
-  get: <T>(url: string, params?: Record<string, unknown>) =>
-    api.get<ApiResponse<T>>(url, { params }).then(res => res.data),
+  get: <T>(url: string, params?: Record<string, unknown>, options?: RequestOptions) =>
+    api.get<ApiResponse<T>>(url, { params, signal: options?.signal }).then(res => res.data),
 
-  post: <T>(url: string, data?: unknown) =>
-    api.post<ApiResponse<T>>(url, data).then(res => res.data),
+  post: <T>(url: string, data?: unknown, options?: RequestOptions) =>
+    api.post<ApiResponse<T>>(url, data, { signal: options?.signal }).then(res => res.data),
 
-  put: <T>(url: string, data?: unknown) => api.put<ApiResponse<T>>(url, data).then(res => res.data),
+  put: <T>(url: string, data?: unknown, options?: RequestOptions) =>
+    api.put<ApiResponse<T>>(url, data, { signal: options?.signal }).then(res => res.data),
 
-  patch: <T>(url: string, data?: unknown) =>
-    api.patch<ApiResponse<T>>(url, data).then(res => res.data),
+  patch: <T>(url: string, data?: unknown, options?: RequestOptions) =>
+    api.patch<ApiResponse<T>>(url, data, { signal: options?.signal }).then(res => res.data),
 
-  delete: <T>(url: string) => api.delete<ApiResponse<T>>(url).then(res => res.data),
+  delete: <T>(url: string, options?: RequestOptions) =>
+    api.delete<ApiResponse<T>>(url, { signal: options?.signal }).then(res => res.data),
 };
 
 export default apiClient;

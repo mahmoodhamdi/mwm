@@ -3,7 +3,7 @@
  * خدمة واجهة برمجة المدونة
  */
 
-import { apiClient, ApiResponse } from '@/lib/api';
+import { apiClient, ApiResponse, RequestOptions } from '@/lib/api';
 
 // Types
 export interface BilingualText {
@@ -89,9 +89,14 @@ const BLOG_ENDPOINT = '/blog';
  * جلب مقالات المدونة مع الفلاتر
  */
 export async function getBlogPosts(
-  filters: BlogPostsFilters = {}
+  filters: BlogPostsFilters = {},
+  options?: RequestOptions
 ): Promise<ApiResponse<BlogPostsResponse>> {
-  const response = await apiClient.get<BlogPostsResponse>(`${BLOG_ENDPOINT}/posts`, { ...filters });
+  const response = await apiClient.get<BlogPostsResponse>(
+    `${BLOG_ENDPOINT}/posts`,
+    { ...filters },
+    options
+  );
   return response;
 }
 

@@ -112,7 +112,8 @@ export function isValidVideoUrl(url: string | undefined | null): boolean {
   if (!url) return false;
 
   try {
-    const urlObj = new URL(url);
+    // Validate URL format by attempting to parse it
+    new URL(url);
     return ALLOWED_VIDEO_ORIGINS.some(origin => url.startsWith(origin));
   } catch {
     return false;

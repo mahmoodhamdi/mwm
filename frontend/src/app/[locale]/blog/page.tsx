@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocale } from 'next-intl';
 import Link from 'next/link';
 import { Search, Calendar, Clock, Tag, ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';

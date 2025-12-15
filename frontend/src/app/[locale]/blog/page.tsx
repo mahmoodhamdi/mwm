@@ -32,19 +32,34 @@ export default function BlogListingPage() {
   const [error, setError] = useState<string | null>(null);
 
   // Fetch categories and tags on mount
+  // Using Promise.allSettled for graceful degradation if any request fails
   useEffect(() => {
     const fetchInitialData = async () => {
-      try {
-        const [categoriesData, tagsData, featuredData] = await Promise.all([
-          getBlogCategories(locale),
-          getBlogTags(locale),
-          getFeaturedBlogPosts(1, locale),
-        ]);
-        setCategories(categoriesData);
-        setTags(tagsData);
-        setFeaturedPost(featuredData[0] || null);
-      } catch (err) {
-        console.error('Error fetching initial data:', err);
+      const results = await Promise.allSettled([
+        getBlogCategories(locale),
+        getBlogTags(locale),
+        getFeaturedBlogPosts(1, locale),
+      ]);
+
+      // Handle categories result
+      if (results[0].status === 'fulfilled') {
+        setCategories(results[0].value);
+      } else {
+        console.error('Error fetching categories:', results[0].reason);
+      }
+
+      // Handle tags result
+      if (results[1].status === 'fulfilled') {
+        setTags(results[1].value);
+      } else {
+        console.error('Error fetching tags:', results[1].reason);
+      }
+
+      // Handle featured posts result
+      if (results[2].status === 'fulfilled') {
+        setFeaturedPost(results[2].value[0] || null);
+      } else {
+        console.error('Error fetching featured posts:', results[2].reason);
       }
     };
 

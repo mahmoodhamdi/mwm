@@ -4,15 +4,10 @@
  */
 
 import mongoose, { Document, Schema } from 'mongoose';
+import { LocalizedString } from '@mwm/shared';
 
-/**
- * Bilingual content interface
- * واجهة المحتوى ثنائي اللغة
- */
-export interface IBilingual {
-  ar: string;
-  en: string;
-}
+// Type alias for backward compatibility (exported for external use)
+export type IBilingual = LocalizedString;
 
 /**
  * General settings interface

@@ -4,12 +4,10 @@
  */
 
 import mongoose, { Schema, Document, Model } from 'mongoose';
+import { LocalizedString } from '@mwm/shared';
 
-// Bilingual interface
-interface IBilingual {
-  ar: string;
-  en: string;
-}
+// Type alias for backward compatibility
+type IBilingual = LocalizedString;
 
 // Campaign Status
 export type CampaignStatus = 'draft' | 'scheduled' | 'sending' | 'sent' | 'cancelled';

@@ -1,479 +1,603 @@
 'use client';
 
-import { useState } from 'react';
+/**
+ * Analytics Page - Uses real backend data
+ * صفحة التحليلات - تستخدم بيانات حقيقية من الخادم
+ */
+
+import { useState, useEffect } from 'react';
+import { useLocale } from 'next-intl';
 import {
   BarChart3,
   Users,
-  Eye,
-  Clock,
-  Globe,
-  Smartphone,
-  Monitor,
-  Tablet,
+  Mail,
+  Briefcase,
+  FileText,
   ArrowUp,
-  ArrowDown,
   Download,
   RefreshCw,
-  Filter,
-  MapPin,
-  FileText,
-  MousePointer,
+  UserPlus,
   Target,
+  AlertCircle,
 } from 'lucide-react';
+import { dashboardService } from '@/services/admin';
+import { Spinner } from '@/components/ui';
 
-// Mock analytics data
-const analyticsData = {
-  overview: {
-    totalVisitors: 45678,
-    visitorsTrend: 12.5,
-    pageViews: 128450,
-    pageViewsTrend: 8.3,
-    avgSessionDuration: '3:45',
-    sessionTrend: -2.1,
-    bounceRate: 42.3,
-    bounceTrend: -5.2,
-  },
-  trafficSources: [
-    { source: 'Organic Search', visitors: 18500, percentage: 40.5, color: 'bg-blue-500' },
-    { source: 'Direct', visitors: 12300, percentage: 26.9, color: 'bg-green-500' },
-    { source: 'Social Media', visitors: 8900, percentage: 19.5, color: 'bg-purple-500' },
-    { source: 'Referral', visitors: 4200, percentage: 9.2, color: 'bg-yellow-500' },
-    { source: 'Email', visitors: 1778, percentage: 3.9, color: 'bg-red-500' },
-  ],
-  topPages: [
-    { page: '/services', views: 24500, avgTime: '2:30', bounceRate: 35.2 },
-    { page: '/portfolio', views: 18200, avgTime: '3:15', bounceRate: 28.5 },
-    { page: '/about', views: 15800, avgTime: '2:45', bounceRate: 42.1 },
-    { page: '/contact', views: 12400, avgTime: '1:50', bounceRate: 55.3 },
-    { page: '/blog', views: 9800, avgTime: '4:20', bounceRate: 25.8 },
-  ],
-  devices: [
-    { device: 'Desktop', icon: Monitor, visitors: 25200, percentage: 55.2 },
-    { device: 'Mobile', icon: Smartphone, visitors: 17500, percentage: 38.3 },
-    { device: 'Tablet', icon: Tablet, visitors: 2978, percentage: 6.5 },
-  ],
-  locations: [
-    { country: 'Egypt', flag: '🇪🇬', visitors: 18500, percentage: 40.5 },
-    { country: 'Saudi Arabia', flag: '🇸🇦', visitors: 8200, percentage: 17.9 },
-    { country: 'UAE', flag: '🇦🇪', visitors: 6500, percentage: 14.2 },
-    { country: 'Kuwait', flag: '🇰🇼', visitors: 4200, percentage: 9.2 },
-    { country: 'Qatar', flag: '🇶🇦', visitors: 3100, percentage: 6.8 },
-    { country: 'Others', flag: '🌍', visitors: 5178, percentage: 11.4 },
-  ],
-  dailyVisitors: [
-    { day: 'Mon', visitors: 6200 },
-    { day: 'Tue', visitors: 7100 },
-    { day: 'Wed', visitors: 6800 },
-    { day: 'Thu', visitors: 7500 },
-    { day: 'Fri', visitors: 5800 },
-    { day: 'Sat', visitors: 5200 },
-    { day: 'Sun', visitors: 7078 },
-  ],
-  conversions: {
-    contactForms: { count: 245, rate: 3.2 },
-    newsletter: { count: 890, rate: 5.8 },
-    applications: { count: 67, rate: 1.4 },
-    downloads: { count: 432, rate: 2.9 },
-  },
-  realtime: {
-    activeUsers: 127,
-    pageViews: 342,
-    avgTimeOnPage: '2:15',
-    topActivePages: [
-      { page: '/services/web-development', users: 23 },
-      { page: '/portfolio', users: 18 },
-      { page: '/contact', users: 15 },
-      { page: '/blog/latest-trends', users: 12 },
-    ],
-  },
-};
+interface Stats {
+  contacts: { total: number; unread: number };
+  projects: { total: number; published: number };
+  services: { total: number; active: number };
+  posts: { total: number; published: number };
+  jobs: { total: number; open: number };
+  applications: { total: number; pending: number };
+  subscribers: { total: number; active: number };
+  team: { total: number; active: number };
+}
 
-type DateRange = '7d' | '30d' | '90d' | '1y';
+interface TimeSeriesData {
+  contacts: { date: string; count: number }[];
+  subscribers: { date: string; count: number }[];
+  applications: { date: string; count: number }[];
+  posts: { date: string; count: number }[];
+}
+
+interface Distributions {
+  contactsByStatus: Record<string, number>;
+  applicationsByStatus: Record<string, number>;
+  jobsByType: Record<string, number>;
+}
+
+interface ChartsData {
+  timeSeries: TimeSeriesData;
+  distributions: Distributions;
+}
+
+type DateRange = '7' | '30' | '90';
 
 export default function AnalyticsPage() {
-  const [dateRange, setDateRange] = useState<DateRange>('30d');
+  const locale = useLocale();
+  const isRTL = locale === 'ar';
+
+  const [dateRange, setDateRange] = useState<DateRange>('30');
+  const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [chartsData, setChartsData] = useState<ChartsData | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = async (showRefreshSpinner = false) => {
+    try {
+      if (showRefreshSpinner) {
+        setIsRefreshing(true);
+      } else {
+        setIsLoading(true);
+      }
+      setError(null);
+
+      const [statsResponse, chartsResponse] = await Promise.all([
+        dashboardService.getStats(),
+        dashboardService.getChartsData(dateRange),
+      ]);
+
+      setStats(statsResponse as Stats);
+      setChartsData(chartsResponse as ChartsData);
+    } catch (err) {
+      console.error('Failed to fetch analytics data:', err);
+      setError(isRTL ? 'فشل في تحميل البيانات' : 'Failed to load data');
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dateRange]);
 
   const handleRefresh = () => {
-    setIsRefreshing(true);
-    setTimeout(() => setIsRefreshing(false), 1500);
+    fetchData(true);
   };
 
-  const formatNumber = (num: number) => {
-    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
-    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
-    return num.toString();
+  const handleExport = () => {
+    // Generate CSV from current data
+    if (!stats || !chartsData) return;
+
+    const csvContent = [
+      ['Metric', 'Total', 'Active/Published'],
+      ['Contacts', stats.contacts.total, stats.contacts.unread],
+      ['Subscribers', stats.subscribers.total, stats.subscribers.active],
+      ['Applications', stats.applications.total, stats.applications.pending],
+      ['Posts', stats.posts.total, stats.posts.published],
+      ['Projects', stats.projects.total, stats.projects.published],
+      ['Services', stats.services.total, stats.services.active],
+      ['Jobs', stats.jobs.total, stats.jobs.open],
+      ['Team', stats.team.total, stats.team.active],
+    ]
+      .map(row => row.join(','))
+      .join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `analytics-${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
   };
 
-  const maxDailyVisitors = Math.max(...analyticsData.dailyVisitors.map(d => d.visitors));
+  // Calculate totals for time series
+  const calculateTotal = (data: { date: string; count: number }[] | undefined) => {
+    return data?.reduce((sum, item) => sum + item.count, 0) || 0;
+  };
+
+  // Get status distribution as percentage
+  const getStatusPercentage = (
+    distribution: Record<string, number> | undefined,
+    status: string
+  ) => {
+    if (!distribution) return 0;
+    const total = Object.values(distribution).reduce((sum, count) => sum + count, 0);
+    return total > 0 ? Math.round(((distribution[status] || 0) / total) * 100) : 0;
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="mx-auto size-12 text-red-500" />
+          <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">{error}</p>
+          <button
+            onClick={() => fetchData()}
+            className="bg-primary-600 hover:bg-primary-700 mt-4 rounded-lg px-4 py-2 text-white"
+          >
+            {isRTL ? 'إعادة المحاولة' : 'Retry'}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Analytics Dashboard</h1>
-          <p className="text-gray-600">Monitor your website performance and visitor insights</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            {isRTL ? 'التحليلات' : 'Analytics'}
+          </h1>
+          <p className="mt-1 text-gray-500 dark:text-gray-400">
+            {isRTL ? 'نظرة عامة على أداء الموقع' : 'Overview of site performance'}
+          </p>
         </div>
-        <div className="flex gap-2">
-          <div className="flex rounded-lg border bg-white p-1">
-            {(['7d', '30d', '90d', '1y'] as DateRange[]).map(range => (
+        <div className="flex items-center gap-3">
+          {/* Date Range Selector */}
+          <div className="flex items-center gap-2 rounded-lg bg-gray-100 p-1 dark:bg-gray-800">
+            {[
+              { value: '7', label: isRTL ? '7 أيام' : '7 Days' },
+              { value: '30', label: isRTL ? '30 يوم' : '30 Days' },
+              { value: '90', label: isRTL ? '90 يوم' : '90 Days' },
+            ].map(option => (
               <button
-                key={range}
-                onClick={() => setDateRange(range)}
+                key={option.value}
+                onClick={() => setDateRange(option.value as DateRange)}
                 className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                  dateRange === range ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100'
+                  dateRange === option.value
+                    ? 'text-primary-600 dark:text-primary-400 bg-white shadow dark:bg-gray-700'
+                    : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
                 }`}
               >
-                {range === '7d'
-                  ? '7 Days'
-                  : range === '30d'
-                    ? '30 Days'
-                    : range === '90d'
-                      ? '90 Days'
-                      : '1 Year'}
+                {option.label}
               </button>
             ))}
           </div>
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="flex items-center gap-2 rounded-lg border bg-white px-4 py-2 text-gray-700 hover:bg-gray-50"
+            className="rounded-lg bg-gray-100 p-2 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"
           >
-            <RefreshCw className={`size-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            Refresh
+            <RefreshCw className={`size-5 ${isRefreshing ? 'animate-spin' : ''}`} />
           </button>
-          <button className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">
+          <button
+            onClick={handleExport}
+            className="bg-primary-600 hover:bg-primary-700 flex items-center gap-2 rounded-lg px-4 py-2 text-white"
+          >
             <Download className="size-4" />
-            Export
+            <span>{isRTL ? 'تصدير' : 'Export'}</span>
           </button>
-        </div>
-      </div>
-
-      {/* Real-time Stats */}
-      <div className="rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
-        <div className="mb-4 flex items-center gap-2">
-          <span className="relative flex size-3">
-            <span className="absolute inline-flex size-full animate-ping rounded-full bg-green-400 opacity-75"></span>
-            <span className="relative inline-flex size-3 rounded-full bg-green-500"></span>
-          </span>
-          <span className="font-medium">Real-time</span>
-        </div>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          <div>
-            <p className="text-sm text-white/70">Active Users</p>
-            <p className="text-3xl font-bold">{analyticsData.realtime.activeUsers}</p>
-          </div>
-          <div>
-            <p className="text-sm text-white/70">Page Views (Last Hour)</p>
-            <p className="text-3xl font-bold">{analyticsData.realtime.pageViews}</p>
-          </div>
-          <div>
-            <p className="text-sm text-white/70">Avg. Time on Page</p>
-            <p className="text-3xl font-bold">{analyticsData.realtime.avgTimeOnPage}</p>
-          </div>
-          <div>
-            <p className="text-sm text-white/70">Top Active Page</p>
-            <p className="truncate text-lg font-medium">
-              {analyticsData.realtime.topActivePages[0].page}
-            </p>
-            <p className="text-sm text-white/70">
-              {analyticsData.realtime.topActivePages[0].users} users
-            </p>
-          </div>
         </div>
       </div>
 
       {/* Overview Stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="Total Visitors"
-          value={formatNumber(analyticsData.overview.totalVisitors)}
-          trend={analyticsData.overview.visitorsTrend}
-          icon={Users}
+          title={isRTL ? 'جهات الاتصال' : 'Contacts'}
+          value={stats?.contacts.total || 0}
+          subValue={stats?.contacts.unread || 0}
+          subLabel={isRTL ? 'جديد' : 'New'}
+          icon={Mail}
           color="blue"
+          trend={calculateTotal(chartsData?.timeSeries.contacts)}
+          trendLabel={isRTL ? `في ${dateRange} يوم` : `in ${dateRange} days`}
         />
         <StatCard
-          title="Page Views"
-          value={formatNumber(analyticsData.overview.pageViews)}
-          trend={analyticsData.overview.pageViewsTrend}
-          icon={Eye}
+          title={isRTL ? 'المشتركين' : 'Subscribers'}
+          value={stats?.subscribers.total || 0}
+          subValue={stats?.subscribers.active || 0}
+          subLabel={isRTL ? 'نشط' : 'Active'}
+          icon={UserPlus}
           color="green"
+          trend={calculateTotal(chartsData?.timeSeries.subscribers)}
+          trendLabel={isRTL ? `في ${dateRange} يوم` : `in ${dateRange} days`}
         />
         <StatCard
-          title="Avg. Session Duration"
-          value={analyticsData.overview.avgSessionDuration}
-          trend={analyticsData.overview.sessionTrend}
-          icon={Clock}
+          title={isRTL ? 'طلبات التوظيف' : 'Applications'}
+          value={stats?.applications.total || 0}
+          subValue={stats?.applications.pending || 0}
+          subLabel={isRTL ? 'قيد الانتظار' : 'Pending'}
+          icon={Briefcase}
           color="purple"
+          trend={calculateTotal(chartsData?.timeSeries.applications)}
+          trendLabel={isRTL ? `في ${dateRange} يوم` : `in ${dateRange} days`}
         />
         <StatCard
-          title="Bounce Rate"
-          value={`${analyticsData.overview.bounceRate}%`}
-          trend={analyticsData.overview.bounceTrend}
-          icon={Target}
-          color="yellow"
-          invertTrend
+          title={isRTL ? 'المقالات' : 'Blog Posts'}
+          value={stats?.posts.total || 0}
+          subValue={stats?.posts.published || 0}
+          subLabel={isRTL ? 'منشور' : 'Published'}
+          icon={FileText}
+          color="orange"
+          trend={calculateTotal(chartsData?.timeSeries.posts)}
+          trendLabel={isRTL ? `في ${dateRange} يوم` : `in ${dateRange} days`}
         />
       </div>
 
       {/* Charts Row */}
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Daily Visitors Chart */}
-        <div className="rounded-xl bg-white p-6 shadow-md">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-lg font-bold">Daily Visitors</h2>
-            <BarChart3 className="size-5 text-gray-400" />
+        {/* Time Series Chart */}
+        <div className="rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
+          <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+            {isRTL ? 'النشاط خلال الفترة' : 'Activity Over Time'}
+          </h3>
+          <div className="h-64">
+            <SimpleLineChart
+              data={chartsData?.timeSeries.contacts || []}
+              dataKey="count"
+              color="#3B82F6"
+              label={isRTL ? 'جهات الاتصال' : 'Contacts'}
+            />
           </div>
-          <div className="flex h-64 items-end gap-4">
-            {analyticsData.dailyVisitors.map((day, index) => (
-              <div key={index} className="flex flex-1 flex-col items-center gap-2">
-                <div
-                  className="w-full rounded-t-lg bg-blue-500 transition-all hover:bg-blue-600"
-                  style={{ height: `${(day.visitors / maxDailyVisitors) * 100}%` }}
-                  title={`${day.visitors} visitors`}
+          <div className="mt-4 flex justify-center gap-6 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="size-3 rounded-full bg-blue-500" />
+              <span className="text-gray-600 dark:text-gray-400">
+                {isRTL ? 'جهات الاتصال' : 'Contacts'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Status Distribution */}
+        <div className="rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
+          <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+            {isRTL ? 'توزيع حالة الرسائل' : 'Message Status Distribution'}
+          </h3>
+          <div className="space-y-4">
+            {chartsData?.distributions.contactsByStatus &&
+              Object.entries(chartsData.distributions.contactsByStatus).map(([status, count]) => (
+                <StatusBar
+                  key={status}
+                  label={getStatusLabel(status, isRTL)}
+                  count={count}
+                  percentage={getStatusPercentage(
+                    chartsData.distributions.contactsByStatus,
+                    status
+                  )}
+                  color={getStatusColor(status)}
                 />
-                <span className="text-xs text-gray-500">{day.day}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Traffic Sources */}
-        <div className="rounded-xl bg-white p-6 shadow-md">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-lg font-bold">Traffic Sources</h2>
-            <Globe className="size-5 text-gray-400" />
-          </div>
-          <div className="space-y-4">
-            {analyticsData.trafficSources.map((source, index) => (
-              <div key={index}>
-                <div className="mb-1 flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">{source.source}</span>
-                  <span className="text-sm text-gray-500">
-                    {formatNumber(source.visitors)} ({source.percentage}%)
-                  </span>
-                </div>
-                <div className="h-2 overflow-hidden rounded-full bg-gray-100">
-                  <div
-                    className={`h-full ${source.color} transition-all`}
-                    style={{ width: `${source.percentage}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Middle Row */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Devices */}
-        <div className="rounded-xl bg-white p-6 shadow-md">
-          <h2 className="mb-4 text-lg font-bold">Devices</h2>
-          <div className="space-y-4">
-            {analyticsData.devices.map((device, index) => (
-              <div key={index} className="flex items-center gap-4">
-                <div className="rounded-lg bg-gray-100 p-3">
-                  <device.icon className="size-5 text-gray-600" />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">{device.device}</span>
-                    <span className="text-sm text-gray-500">{device.percentage}%</span>
-                  </div>
-                  <div className="mt-1 h-2 overflow-hidden rounded-full bg-gray-100">
-                    <div
-                      className="h-full bg-blue-500"
-                      style={{ width: `${device.percentage}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Top Locations */}
-        <div className="rounded-xl bg-white p-6 shadow-md">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-bold">Top Locations</h2>
-            <MapPin className="size-5 text-gray-400" />
-          </div>
-          <div className="space-y-3">
-            {analyticsData.locations.map((location, index) => (
-              <div key={index} className="flex items-center gap-3">
-                <span className="text-xl">{location.flag}</span>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">{location.country}</span>
-                    <span className="text-xs text-gray-500">
-                      {formatNumber(location.visitors)} ({location.percentage}%)
-                    </span>
-                  </div>
-                  <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-gray-100">
-                    <div
-                      className="h-full bg-green-500"
-                      style={{ width: `${location.percentage}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Conversions */}
-        <div className="rounded-xl bg-white p-6 shadow-md">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-bold">Conversions</h2>
-            <MousePointer className="size-5 text-gray-400" />
-          </div>
-          <div className="space-y-4">
-            <ConversionItem
-              title="Contact Forms"
-              count={analyticsData.conversions.contactForms.count}
-              rate={analyticsData.conversions.contactForms.rate}
-              color="bg-blue-500"
-            />
-            <ConversionItem
-              title="Newsletter Signups"
-              count={analyticsData.conversions.newsletter.count}
-              rate={analyticsData.conversions.newsletter.rate}
-              color="bg-green-500"
-            />
-            <ConversionItem
-              title="Job Applications"
-              count={analyticsData.conversions.applications.count}
-              rate={analyticsData.conversions.applications.rate}
-              color="bg-purple-500"
-            />
-            <ConversionItem
-              title="Resource Downloads"
-              count={analyticsData.conversions.downloads.count}
-              rate={analyticsData.conversions.downloads.rate}
-              color="bg-yellow-500"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Top Pages Table */}
-      <div className="rounded-xl bg-white p-6 shadow-md">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-bold">Top Pages</h2>
-          <button className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700">
-            <Filter className="size-4" />
-            Filter
-          </button>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b text-left">
-                <th className="pb-3 font-medium text-gray-500">Page</th>
-                <th className="pb-3 font-medium text-gray-500">Views</th>
-                <th className="pb-3 font-medium text-gray-500">Avg. Time</th>
-                <th className="pb-3 font-medium text-gray-500">Bounce Rate</th>
-              </tr>
-            </thead>
-            <tbody>
-              {analyticsData.topPages.map((page, index) => (
-                <tr key={index} className="border-b last:border-b-0">
-                  <td className="py-3">
-                    <div className="flex items-center gap-2">
-                      <FileText className="size-4 text-gray-400" />
-                      <span className="font-medium text-blue-600 hover:underline">{page.page}</span>
-                    </div>
-                  </td>
-                  <td className="py-3 text-gray-600">{formatNumber(page.views)}</td>
-                  <td className="py-3 text-gray-600">{page.avgTime}</td>
-                  <td className="py-3">
-                    <span
-                      className={`rounded-full px-2 py-1 text-xs font-medium ${
-                        page.bounceRate < 35
-                          ? 'bg-green-100 text-green-700'
-                          : page.bounceRate < 50
-                            ? 'bg-yellow-100 text-yellow-700'
-                            : 'bg-red-100 text-red-700'
-                      }`}
-                    >
-                      {page.bounceRate}%
-                    </span>
-                  </td>
-                </tr>
               ))}
-            </tbody>
-          </table>
+          </div>
+        </div>
+      </div>
+
+      {/* Secondary Stats */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Content Stats */}
+        <div className="rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
+          <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+            {isRTL ? 'المحتوى' : 'Content'}
+          </h3>
+          <div className="space-y-4">
+            <ContentStat
+              icon={Briefcase}
+              label={isRTL ? 'المشاريع' : 'Projects'}
+              total={stats?.projects.total || 0}
+              active={stats?.projects.published || 0}
+              activeLabel={isRTL ? 'منشور' : 'Published'}
+            />
+            <ContentStat
+              icon={Target}
+              label={isRTL ? 'الخدمات' : 'Services'}
+              total={stats?.services.total || 0}
+              active={stats?.services.active || 0}
+              activeLabel={isRTL ? 'نشط' : 'Active'}
+            />
+            <ContentStat
+              icon={Briefcase}
+              label={isRTL ? 'الوظائف' : 'Jobs'}
+              total={stats?.jobs.total || 0}
+              active={stats?.jobs.open || 0}
+              activeLabel={isRTL ? 'مفتوح' : 'Open'}
+            />
+          </div>
+        </div>
+
+        {/* Application Status */}
+        <div className="rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
+          <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+            {isRTL ? 'حالة الطلبات' : 'Application Status'}
+          </h3>
+          <div className="space-y-4">
+            {chartsData?.distributions.applicationsByStatus &&
+              Object.entries(chartsData.distributions.applicationsByStatus).map(
+                ([status, count]) => (
+                  <StatusBar
+                    key={status}
+                    label={getApplicationStatusLabel(status, isRTL)}
+                    count={count}
+                    percentage={getStatusPercentage(
+                      chartsData.distributions.applicationsByStatus,
+                      status
+                    )}
+                    color={getApplicationStatusColor(status)}
+                  />
+                )
+              )}
+          </div>
+        </div>
+
+        {/* Team Stats */}
+        <div className="rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
+          <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+            {isRTL ? 'الفريق' : 'Team'}
+          </h3>
+          <div className="flex items-center justify-center">
+            <div className="text-center">
+              <Users className="text-primary-500 mx-auto size-12" />
+              <p className="mt-2 text-4xl font-bold text-gray-900 dark:text-white">
+                {stats?.team.active || 0}
+              </p>
+              <p className="text-gray-500 dark:text-gray-400">
+                {isRTL ? 'عضو نشط' : 'Active Members'}
+              </p>
+              <p className="mt-2 text-sm text-gray-400">
+                {isRTL
+                  ? `من أصل ${stats?.team.total || 0} عضو`
+                  : `out of ${stats?.team.total || 0} total`}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Info Banner */}
+      <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20">
+        <div className="flex items-start gap-3">
+          <BarChart3 className="size-5 shrink-0 text-blue-600 dark:text-blue-400" />
+          <div>
+            <h4 className="font-medium text-blue-900 dark:text-blue-100">
+              {isRTL ? 'تحليلات الزوار' : 'Visitor Analytics'}
+            </h4>
+            <p className="mt-1 text-sm text-blue-700 dark:text-blue-300">
+              {isRTL
+                ? 'لتفعيل تحليلات الزوار المفصلة (عدد الزيارات، مصادر الترافيك، المواقع الجغرافية)، يرجى ربط Google Analytics مع الموقع.'
+                : 'To enable detailed visitor analytics (page views, traffic sources, geographic locations), please integrate Google Analytics with the site.'}
+            </p>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
+// Stat Card Component
 interface StatCardProps {
   title: string;
-  value: string;
-  trend: number;
+  value: number;
+  subValue: number;
+  subLabel: string;
   icon: React.ElementType;
-  color: 'blue' | 'green' | 'purple' | 'yellow';
-  invertTrend?: boolean;
+  color: 'blue' | 'green' | 'purple' | 'orange';
+  trend?: number;
+  trendLabel?: string;
 }
 
-function StatCard({ title, value, trend, icon: Icon, color, invertTrend }: StatCardProps) {
+function StatCard({
+  title,
+  value,
+  subValue,
+  subLabel,
+  icon: Icon,
+  color,
+  trend,
+  trendLabel,
+}: StatCardProps) {
   const colorClasses = {
-    blue: 'bg-blue-100 text-blue-600',
-    green: 'bg-green-100 text-green-600',
-    purple: 'bg-purple-100 text-purple-600',
-    yellow: 'bg-yellow-100 text-yellow-600',
+    blue: 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400',
+    green: 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400',
+    purple: 'bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400',
+    orange: 'bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400',
   };
 
-  const isPositive = invertTrend ? trend < 0 : trend > 0;
-
   return (
-    <div className="rounded-xl bg-white p-6 shadow-md">
-      <div className="mb-4 flex items-center justify-between">
+    <div className="rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
+      <div className="flex items-center justify-between">
         <div className={`rounded-lg p-3 ${colorClasses[color]}`}>
-          <Icon className="size-5" />
+          <Icon className="size-6" />
         </div>
-        <div
-          className={`flex items-center gap-1 text-sm font-medium ${
-            isPositive ? 'text-green-600' : 'text-red-600'
-          }`}
-        >
-          {isPositive ? <ArrowUp className="size-4" /> : <ArrowDown className="size-4" />}
-          {Math.abs(trend)}%
-        </div>
+        {trend !== undefined && trend > 0 && (
+          <div className="flex items-center gap-1 text-green-600">
+            <ArrowUp className="size-4" />
+            <span className="text-sm">+{trend}</span>
+          </div>
+        )}
       </div>
-      <p className="text-2xl font-bold text-gray-900">{value}</p>
-      <p className="text-sm text-gray-500">{title}</p>
+      <div className="mt-4">
+        <p className="text-3xl font-bold text-gray-900 dark:text-white">{value.toLocaleString()}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{title}</p>
+      </div>
+      <div className="mt-2 flex items-center justify-between border-t border-gray-100 pt-2 dark:border-gray-700">
+        <span className="text-sm text-gray-500 dark:text-gray-400">
+          {subValue} {subLabel}
+        </span>
+        {trendLabel && (
+          <span className="text-xs text-gray-400 dark:text-gray-500">{trendLabel}</span>
+        )}
+      </div>
     </div>
   );
 }
 
-interface ConversionItemProps {
-  title: string;
+// Simple Line Chart Component
+interface SimpleLineChartProps {
+  data: { date: string; count: number }[];
+  dataKey: string;
+  color: string;
+  label: string;
+}
+
+function SimpleLineChart({ data, color }: SimpleLineChartProps) {
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex h-full items-center justify-center text-gray-400">No data available</div>
+    );
+  }
+
+  const maxCount = Math.max(...data.map(d => d.count), 1);
+  const height = 200;
+  const width = 100; // percentage
+
+  const points = data.map((item, index) => {
+    const x = (index / (data.length - 1 || 1)) * width;
+    const y = height - (item.count / maxCount) * height;
+    return `${x},${y}`;
+  });
+
+  return (
+    <svg viewBox={`0 0 100 ${height}`} className="size-full" preserveAspectRatio="none">
+      <polyline
+        fill="none"
+        stroke={color}
+        strokeWidth="2"
+        points={points.join(' ')}
+        vectorEffect="non-scaling-stroke"
+      />
+      {data.map((item, index) => {
+        const x = (index / (data.length - 1 || 1)) * width;
+        const y = height - (item.count / maxCount) * height;
+        return (
+          <circle key={index} cx={x} cy={y} r="3" fill={color} vectorEffect="non-scaling-stroke" />
+        );
+      })}
+    </svg>
+  );
+}
+
+// Status Bar Component
+interface StatusBarProps {
+  label: string;
   count: number;
-  rate: number;
+  percentage: number;
   color: string;
 }
 
-function ConversionItem({ title, count, rate, color }: ConversionItemProps) {
+function StatusBar({ label, count, percentage, color }: StatusBarProps) {
   return (
-    <div className="flex items-center gap-4">
-      <div className={`size-3 rounded-full ${color}`} />
-      <div className="flex-1">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-700">{title}</span>
-          <span className="text-sm font-bold text-gray-900">{count}</span>
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="mt-1 h-1 flex-1 overflow-hidden rounded-full bg-gray-100">
-            <div className={`h-full ${color}`} style={{ width: `${rate * 10}%` }} />
-          </div>
-          <span className="ml-2 text-xs text-gray-500">{rate}%</span>
-        </div>
+    <div>
+      <div className="mb-1 flex items-center justify-between text-sm">
+        <span className="text-gray-600 dark:text-gray-400">{label}</span>
+        <span className="font-medium text-gray-900 dark:text-white">{count}</span>
+      </div>
+      <div className="h-2 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+        <div className={`h-full rounded-full ${color}`} style={{ width: `${percentage}%` }} />
       </div>
     </div>
   );
+}
+
+// Content Stat Component
+interface ContentStatProps {
+  icon: React.ElementType;
+  label: string;
+  total: number;
+  active: number;
+  activeLabel: string;
+}
+
+function ContentStat({ icon: Icon, label, total, active, activeLabel }: ContentStatProps) {
+  return (
+    <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
+      <div className="flex items-center gap-3">
+        <Icon className="size-5 text-gray-400" />
+        <span className="text-gray-600 dark:text-gray-300">{label}</span>
+      </div>
+      <div className="text-right">
+        <span className="font-semibold text-gray-900 dark:text-white">{total}</span>
+        <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
+          ({active} {activeLabel})
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// Helper functions for status labels and colors
+function getStatusLabel(status: string, isRTL: boolean): string {
+  const labels: Record<string, { ar: string; en: string }> = {
+    new: { ar: 'جديد', en: 'New' },
+    read: { ar: 'مقروء', en: 'Read' },
+    replied: { ar: 'تم الرد', en: 'Replied' },
+    archived: { ar: 'مؤرشف', en: 'Archived' },
+  };
+  return labels[status]?.[isRTL ? 'ar' : 'en'] || status;
+}
+
+function getStatusColor(status: string): string {
+  const colors: Record<string, string> = {
+    new: 'bg-blue-500',
+    read: 'bg-gray-500',
+    replied: 'bg-green-500',
+    archived: 'bg-yellow-500',
+  };
+  return colors[status] || 'bg-gray-500';
+}
+
+function getApplicationStatusLabel(status: string, isRTL: boolean): string {
+  const labels: Record<string, { ar: string; en: string }> = {
+    pending: { ar: 'قيد الانتظار', en: 'Pending' },
+    reviewing: { ar: 'قيد المراجعة', en: 'Reviewing' },
+    shortlisted: { ar: 'مختار', en: 'Shortlisted' },
+    interviewed: { ar: 'تمت المقابلة', en: 'Interviewed' },
+    accepted: { ar: 'مقبول', en: 'Accepted' },
+    rejected: { ar: 'مرفوض', en: 'Rejected' },
+  };
+  return labels[status]?.[isRTL ? 'ar' : 'en'] || status;
+}
+
+function getApplicationStatusColor(status: string): string {
+  const colors: Record<string, string> = {
+    pending: 'bg-yellow-500',
+    reviewing: 'bg-blue-500',
+    shortlisted: 'bg-purple-500',
+    interviewed: 'bg-indigo-500',
+    accepted: 'bg-green-500',
+    rejected: 'bg-red-500',
+  };
+  return colors[status] || 'bg-gray-500';
 }

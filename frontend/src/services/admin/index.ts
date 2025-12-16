@@ -310,3 +310,10 @@ export {
 } from './users.service';
 
 export { usersAdminService } from './users.service';
+
+// Upload service
+export type { UploadedImage, UploadOptions } from './upload.service';
+
+export { uploadImage, uploadImages, deleteImage } from './upload.service';
+
+export { uploadService } from './upload.service';

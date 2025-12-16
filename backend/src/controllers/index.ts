@@ -15,3 +15,4 @@ export { contactController } from './contact.controller';
 export { blogController } from './blog.controller';
 export { careersController } from './careers.controller';
 export { userController } from './user.controller';
+export { uploadController } from './upload.controller';

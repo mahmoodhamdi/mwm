@@ -15,6 +15,7 @@ export default function HomePage() {
       <section className="from-primary-600 to-primary-900 relative bg-gradient-to-br text-white">
         {/* Background Image Overlay */}
         <div className="absolute inset-0 opacity-10">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&h=1080&fit=crop"
             alt=""

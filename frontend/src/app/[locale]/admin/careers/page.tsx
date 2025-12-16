@@ -69,6 +69,7 @@ export default function CareersPage() {
   const [jobsTotal, setJobsTotal] = useState(0);
   const [applicationsPage, setApplicationsPage] = useState(1);
   const [applicationsTotalPages, setApplicationsTotalPages] = useState(1);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_applicationsTotal, setApplicationsTotal] = useState(0);
   const itemsPerPage = 10;
 

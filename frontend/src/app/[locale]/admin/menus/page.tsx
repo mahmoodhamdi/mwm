@@ -99,6 +99,7 @@ export default function MenusPage() {
 
   const [menus, setMenus] = useState<Menu[]>([]);
   const [selectedMenu, setSelectedMenu] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_editingItem, _setEditingItem] = useState<string | null>(null);
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [showAddItem, setShowAddItem] = useState(false);

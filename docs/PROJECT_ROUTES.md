@@ -153,6 +153,97 @@ Quick reference for all frontend pages and backend API endpoints.
 | GET    | /settings | Public | Get site settings |
 | PUT    | /settings | Admin  | Update settings   |
 
+### Blog
+
+| Method | Endpoint                  | Auth   | Description           |
+| ------ | ------------------------- | ------ | --------------------- |
+| GET    | /blog/posts               | Public | Get all posts         |
+| GET    | /blog/posts/:slug         | Public | Get post by slug      |
+| GET    | /blog/posts/:slug/related | Public | Get related posts     |
+| GET    | /blog/categories          | Public | Get blog categories   |
+| GET    | /blog/categories/:slug    | Public | Get category by slug  |
+| GET    | /blog/tags                | Public | Get all tags          |
+| GET    | /blog/featured            | Public | Get featured posts    |
+| GET    | /blog/admin/posts         | Admin  | Get all posts (admin) |
+| POST   | /blog/admin/posts         | Admin  | Create post           |
+| PUT    | /blog/admin/posts/:id     | Admin  | Update post           |
+| DELETE | /blog/admin/posts/:id     | Admin  | Delete post           |
+
+### Careers
+
+| Method | Endpoint                               | Auth   | Description          |
+| ------ | -------------------------------------- | ------ | -------------------- |
+| GET    | /careers/jobs                          | Public | Get all jobs         |
+| GET    | /careers/jobs/:slug                    | Public | Get job by slug      |
+| GET    | /careers/featured                      | Public | Get featured jobs    |
+| POST   | /careers/jobs/:slug/apply              | Public | Submit application   |
+| GET    | /careers/admin/jobs                    | Admin  | Get all jobs (admin) |
+| POST   | /careers/admin/jobs                    | Admin  | Create job           |
+| PUT    | /careers/admin/jobs/:id                | Admin  | Update job           |
+| DELETE | /careers/admin/jobs/:id                | Admin  | Delete job           |
+| GET    | /careers/admin/jobs/:id/applications   | Admin  | Get applications     |
+| PATCH  | /careers/admin/applications/:id/status | Admin  | Update app status    |
+
+### Newsletter
+
+| Method | Endpoint                             | Auth   | Description       |
+| ------ | ------------------------------------ | ------ | ----------------- |
+| POST   | /newsletter/subscribe                | Public | Subscribe         |
+| POST   | /newsletter/unsubscribe              | Public | Unsubscribe       |
+| GET    | /newsletter/admin/subscribers        | Admin  | List subscribers  |
+| POST   | /newsletter/admin/subscribers        | Admin  | Add subscriber    |
+| PUT    | /newsletter/admin/subscribers/:id    | Admin  | Update subscriber |
+| GET    | /newsletter/admin/subscribers/stats  | Admin  | Subscriber stats  |
+| GET    | /newsletter/admin/campaigns          | Admin  | List campaigns    |
+| POST   | /newsletter/admin/campaigns          | Admin  | Create campaign   |
+| PUT    | /newsletter/admin/campaigns/:id      | Admin  | Update campaign   |
+| POST   | /newsletter/admin/campaigns/:id/send | Admin  | Send campaign     |
+
+### Dashboard
+
+| Method | Endpoint               | Auth  | Description     |
+| ------ | ---------------------- | ----- | --------------- |
+| GET    | /dashboard/stats       | Admin | Get all stats   |
+| GET    | /dashboard/activity    | Admin | Recent activity |
+| GET    | /dashboard/charts      | Admin | Charts data     |
+| GET    | /dashboard/quick-stats | Admin | Quick stats     |
+
+### Activity
+
+| Method | Endpoint                     | Auth  | Description         |
+| ------ | ---------------------------- | ----- | ------------------- |
+| GET    | /activity                    | Admin | List activity logs  |
+| GET    | /activity/user/:userId       | Admin | Logs by user        |
+| GET    | /activity/resource/:resource | Admin | Logs by resource    |
+| GET    | /activity/recent             | Admin | Recent logs         |
+| GET    | /activity/stats              | Admin | Activity statistics |
+| GET    | /activity/me                 | Auth  | My activity         |
+
+### Notifications
+
+| Method | Endpoint                       | Auth  | Description         |
+| ------ | ------------------------------ | ----- | ------------------- |
+| GET    | /notifications                 | Auth  | Get notifications   |
+| GET    | /notifications/unread-count    | Auth  | Unread count        |
+| PUT    | /notifications/:id/read        | Auth  | Mark as read        |
+| PUT    | /notifications/read-all        | Auth  | Mark all as read    |
+| DELETE | /notifications/:id             | Auth  | Delete notification |
+| POST   | /notifications/device-token    | Auth  | Register device     |
+| DELETE | /notifications/device-token    | Auth  | Remove device token |
+| POST   | /notifications/admin/send      | Admin | Send notification   |
+| POST   | /notifications/admin/broadcast | Admin | Broadcast to all    |
+
+### Users
+
+| Method | Endpoint          | Auth  | Description        |
+| ------ | ----------------- | ----- | ------------------ |
+| GET    | /users            | Admin | List users         |
+| GET    | /users/:id        | Admin | Get user by ID     |
+| POST   | /users            | Admin | Create user        |
+| PUT    | /users/:id        | Admin | Update user        |
+| DELETE | /users/:id        | Admin | Delete user        |
+| PATCH  | /users/:id/status | Admin | Toggle user status |
+
 ---
 
 ## API Documentation
@@ -162,4 +253,4 @@ Quick reference for all frontend pages and backend API endpoints.
 
 ---
 
-_Last Updated: 2025-12-08_
+_Last Updated: 2025-12-16_

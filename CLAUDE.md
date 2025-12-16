@@ -152,7 +152,8 @@ Current endpoints:
 - Frontend: Jest with React Testing Library (jsdom environment)
 - Test files colocated in `__tests__/` directories or as `*.test.{ts,tsx}`
 - E2E: Playwright (`npm run test:e2e` in frontend) - tests in `frontend/e2e/` directory
-- Backend coverage threshold: 80% | Frontend coverage threshold: 70%
+- Backend coverage threshold: 80% | Frontend: no coverage threshold (uses `--passWithNoTests`)
+- Backend e2e tests: `cd backend && npm run test:e2e` (uses `jest.e2e.config.js`)
 - Backend tests run with `maxWorkers: 1` to prevent port binding issues on Windows
 
 ### Frontend Services Pattern

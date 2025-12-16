@@ -1,5 +1,10 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+
+// Mock next-intl
+jest.mock('next-intl', () => ({
+  useLocale: () => 'en',
+}));
 
 // Mock lucide-react icons
 jest.mock('lucide-react', () => ({
@@ -8,64 +13,29 @@ jest.mock('lucide-react', () => ({
       BarChart3
     </span>
   ),
-  TrendingUp: ({ className }: { className?: string }) => (
-    <span data-testid="icon-trendingup" className={className}>
-      TrendingUp
-    </span>
-  ),
-  TrendingDown: ({ className }: { className?: string }) => (
-    <span data-testid="icon-trendingdown" className={className}>
-      TrendingDown
-    </span>
-  ),
   Users: ({ className }: { className?: string }) => (
     <span data-testid="icon-users" className={className}>
       Users
     </span>
   ),
-  Eye: ({ className }: { className?: string }) => (
-    <span data-testid="icon-eye" className={className}>
-      Eye
+  Mail: ({ className }: { className?: string }) => (
+    <span data-testid="icon-mail" className={className}>
+      Mail
     </span>
   ),
-  Clock: ({ className }: { className?: string }) => (
-    <span data-testid="icon-clock" className={className}>
-      Clock
+  Briefcase: ({ className }: { className?: string }) => (
+    <span data-testid="icon-briefcase" className={className}>
+      Briefcase
     </span>
   ),
-  Globe: ({ className }: { className?: string }) => (
-    <span data-testid="icon-globe" className={className}>
-      Globe
-    </span>
-  ),
-  Smartphone: ({ className }: { className?: string }) => (
-    <span data-testid="icon-smartphone" className={className}>
-      Smartphone
-    </span>
-  ),
-  Monitor: ({ className }: { className?: string }) => (
-    <span data-testid="icon-monitor" className={className}>
-      Monitor
-    </span>
-  ),
-  Tablet: ({ className }: { className?: string }) => (
-    <span data-testid="icon-tablet" className={className}>
-      Tablet
+  FileText: ({ className }: { className?: string }) => (
+    <span data-testid="icon-filetext" className={className}>
+      FileText
     </span>
   ),
   ArrowUp: ({ className }: { className?: string }) => (
     <span data-testid="icon-arrowup" className={className}>
       ArrowUp
-    </span>
-  ),
-  ArrowDown: ({ className }: { className?: string }) => (
-    <span data-testid="icon-arrowdown" className={className}>
-      ArrowDown
-    </span>
-  ),
-  Calendar: ({ className }: { className?: string }) => (
-    <span data-testid="icon-calendar" className={className}>
-      Calendar
     </span>
   ),
   Download: ({ className }: { className?: string }) => (
@@ -78,24 +48,9 @@ jest.mock('lucide-react', () => ({
       RefreshCw
     </span>
   ),
-  Filter: ({ className }: { className?: string }) => (
-    <span data-testid="icon-filter" className={className}>
-      Filter
-    </span>
-  ),
-  MapPin: ({ className }: { className?: string }) => (
-    <span data-testid="icon-mappin" className={className}>
-      MapPin
-    </span>
-  ),
-  FileText: ({ className }: { className?: string }) => (
-    <span data-testid="icon-filetext" className={className}>
-      FileText
-    </span>
-  ),
-  MousePointer: ({ className }: { className?: string }) => (
-    <span data-testid="icon-mousepointer" className={className}>
-      MousePointer
+  UserPlus: ({ className }: { className?: string }) => (
+    <span data-testid="icon-userplus" className={className}>
+      UserPlus
     </span>
   ),
   Target: ({ className }: { className?: string }) => (
@@ -103,245 +58,242 @@ jest.mock('lucide-react', () => ({
       Target
     </span>
   ),
+  AlertCircle: ({ className }: { className?: string }) => (
+    <span data-testid="icon-alertcircle" className={className}>
+      AlertCircle
+    </span>
+  ),
+}));
+
+// Mock the dashboard service
+const mockStats = {
+  contacts: { total: 50, unread: 5 },
+  projects: { total: 20, published: 15 },
+  services: { total: 10, active: 8 },
+  posts: { total: 30, published: 25 },
+  jobs: { total: 5, open: 3 },
+  applications: { total: 15, pending: 4 },
+  subscribers: { total: 100, active: 95 },
+  team: { total: 12, active: 10 },
+};
+
+const mockChartsData = {
+  timeSeries: {
+    contacts: [
+      { date: '2025-01-01', count: 2 },
+      { date: '2025-01-02', count: 5 },
+    ],
+    subscribers: [{ date: '2025-01-01', count: 3 }],
+    applications: [{ date: '2025-01-01', count: 1 }],
+    posts: [{ date: '2025-01-01', count: 2 }],
+  },
+  distributions: {
+    contactsByStatus: { new: 5, read: 30, replied: 10, archived: 5 },
+    applicationsByStatus: { pending: 4, reviewing: 3, accepted: 5, rejected: 3 },
+    jobsByType: { fulltime: 3, parttime: 1, contract: 1 },
+  },
+};
+
+jest.mock('@/services/admin', () => ({
+  dashboardService: {
+    getStats: jest.fn(() => Promise.resolve(mockStats)),
+    getChartsData: jest.fn(() => Promise.resolve(mockChartsData)),
+  },
+}));
+
+// Mock Spinner component
+jest.mock('@/components/ui', () => ({
+  Spinner: ({ size }: { size?: string }) => (
+    <div data-testid="spinner" data-size={size}>
+      Loading...
+    </div>
+  ),
 }));
 
 describe('Analytics Dashboard', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('Page Rendering', () => {
-    it('renders the analytics page title', async () => {
+    it('renders the analytics page with real data', async () => {
       const AnalyticsPage = (await import('@/app/[locale]/admin/analytics/page')).default;
       render(<AnalyticsPage />);
 
-      expect(screen.getByText('Analytics Dashboard')).toBeInTheDocument();
-      expect(
-        screen.getByText('Monitor your website performance and visitor insights')
-      ).toBeInTheDocument();
+      // Wait for data to load
+      await waitFor(() => {
+        expect(screen.getByText('Analytics')).toBeInTheDocument();
+      });
+    });
+
+    it('shows loading spinner initially', async () => {
+      const AnalyticsPage = (await import('@/app/[locale]/admin/analytics/page')).default;
+      render(<AnalyticsPage />);
+
+      expect(screen.getByTestId('spinner')).toBeInTheDocument();
     });
 
     it('renders date range selector', async () => {
       const AnalyticsPage = (await import('@/app/[locale]/admin/analytics/page')).default;
       render(<AnalyticsPage />);
 
-      expect(screen.getByText('7 Days')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('7 Days')).toBeInTheDocument();
+      });
       expect(screen.getByText('30 Days')).toBeInTheDocument();
       expect(screen.getByText('90 Days')).toBeInTheDocument();
-      expect(screen.getByText('1 Year')).toBeInTheDocument();
     });
 
-    it('renders refresh and export buttons', async () => {
+    it('renders export button', async () => {
       const AnalyticsPage = (await import('@/app/[locale]/admin/analytics/page')).default;
       render(<AnalyticsPage />);
 
-      expect(screen.getByText('Refresh')).toBeInTheDocument();
-      expect(screen.getByText('Export')).toBeInTheDocument();
-    });
-  });
-
-  describe('Real-time Section', () => {
-    it('renders real-time indicator', async () => {
-      const AnalyticsPage = (await import('@/app/[locale]/admin/analytics/page')).default;
-      render(<AnalyticsPage />);
-
-      expect(screen.getByText('Real-time')).toBeInTheDocument();
-    });
-
-    it('renders active users count', async () => {
-      const AnalyticsPage = (await import('@/app/[locale]/admin/analytics/page')).default;
-      render(<AnalyticsPage />);
-
-      expect(screen.getByText('Active Users')).toBeInTheDocument();
-      expect(screen.getByText('127')).toBeInTheDocument();
-    });
-
-    it('renders page views in last hour', async () => {
-      const AnalyticsPage = (await import('@/app/[locale]/admin/analytics/page')).default;
-      render(<AnalyticsPage />);
-
-      expect(screen.getByText('Page Views (Last Hour)')).toBeInTheDocument();
-      expect(screen.getByText('342')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Export')).toBeInTheDocument();
+      });
     });
   });
 
-  describe('Overview Stats', () => {
-    it('renders total visitors stat card', async () => {
+  describe('Stats Display', () => {
+    it('displays contacts stats', async () => {
       const AnalyticsPage = (await import('@/app/[locale]/admin/analytics/page')).default;
       render(<AnalyticsPage />);
 
-      expect(screen.getByText('Total Visitors')).toBeInTheDocument();
-      expect(screen.getByText('45.7K')).toBeInTheDocument();
+      await waitFor(() => {
+        // "Contacts" appears multiple times (stat card + chart legend)
+        expect(screen.getAllByText('Contacts').length).toBeGreaterThan(0);
+      });
+      // Check for the total count in the stat card
+      expect(screen.getAllByText('50').length).toBeGreaterThan(0);
     });
 
-    it('renders page views stat card', async () => {
+    it('displays subscribers stats', async () => {
       const AnalyticsPage = (await import('@/app/[locale]/admin/analytics/page')).default;
       render(<AnalyticsPage />);
 
-      expect(screen.getByText('Page Views')).toBeInTheDocument();
-      // formatNumber(128450) = 128.4K (rounding)
-      expect(screen.getByText(/128\.\d+K/)).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Subscribers')).toBeInTheDocument();
+      });
+      expect(screen.getByText('100')).toBeInTheDocument();
     });
 
-    it('renders average session duration', async () => {
+    it('displays applications stats', async () => {
       const AnalyticsPage = (await import('@/app/[locale]/admin/analytics/page')).default;
       render(<AnalyticsPage />);
 
-      expect(screen.getByText('Avg. Session Duration')).toBeInTheDocument();
-      expect(screen.getByText('3:45')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Applications')).toBeInTheDocument();
+      });
+      expect(screen.getByText('15')).toBeInTheDocument();
     });
 
-    it('renders bounce rate', async () => {
+    it('displays blog posts stats', async () => {
       const AnalyticsPage = (await import('@/app/[locale]/admin/analytics/page')).default;
       render(<AnalyticsPage />);
 
-      expect(screen.getAllByText('Bounce Rate').length).toBeGreaterThan(0);
-      expect(screen.getAllByText('42.3%').length).toBeGreaterThan(0);
-    });
-  });
-
-  describe('Traffic Sources', () => {
-    it('renders traffic sources section', async () => {
-      const AnalyticsPage = (await import('@/app/[locale]/admin/analytics/page')).default;
-      render(<AnalyticsPage />);
-
-      expect(screen.getByText('Traffic Sources')).toBeInTheDocument();
-    });
-
-    it('displays traffic source breakdown', async () => {
-      const AnalyticsPage = (await import('@/app/[locale]/admin/analytics/page')).default;
-      render(<AnalyticsPage />);
-
-      expect(screen.getByText('Organic Search')).toBeInTheDocument();
-      expect(screen.getByText('Direct')).toBeInTheDocument();
-      expect(screen.getByText('Social Media')).toBeInTheDocument();
-      expect(screen.getByText('Referral')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Blog Posts')).toBeInTheDocument();
+      });
+      // Value "30" appears in stats - use getAllByText since there may be multiple
+      expect(screen.getAllByText('30').length).toBeGreaterThan(0);
     });
   });
 
-  describe('Daily Visitors Chart', () => {
-    it('renders daily visitors section', async () => {
+  describe('Content Section', () => {
+    it('displays projects content stat', async () => {
       const AnalyticsPage = (await import('@/app/[locale]/admin/analytics/page')).default;
       render(<AnalyticsPage />);
 
-      expect(screen.getByText('Daily Visitors')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Projects')).toBeInTheDocument();
+      });
     });
 
-    it('displays day labels', async () => {
+    it('displays services content stat', async () => {
       const AnalyticsPage = (await import('@/app/[locale]/admin/analytics/page')).default;
       render(<AnalyticsPage />);
 
-      expect(screen.getByText('Mon')).toBeInTheDocument();
-      expect(screen.getByText('Tue')).toBeInTheDocument();
-      expect(screen.getByText('Wed')).toBeInTheDocument();
-      expect(screen.getByText('Thu')).toBeInTheDocument();
-      expect(screen.getByText('Fri')).toBeInTheDocument();
-      expect(screen.getByText('Sat')).toBeInTheDocument();
-      expect(screen.getByText('Sun')).toBeInTheDocument();
-    });
-  });
-
-  describe('Devices Section', () => {
-    it('renders devices section', async () => {
-      const AnalyticsPage = (await import('@/app/[locale]/admin/analytics/page')).default;
-      render(<AnalyticsPage />);
-
-      expect(screen.getByText('Devices')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Services')).toBeInTheDocument();
+      });
     });
 
-    it('displays device breakdown', async () => {
+    it('displays jobs content stat', async () => {
       const AnalyticsPage = (await import('@/app/[locale]/admin/analytics/page')).default;
       render(<AnalyticsPage />);
 
-      expect(screen.getAllByText('Desktop').length).toBeGreaterThan(0);
-      expect(screen.getAllByText('Mobile').length).toBeGreaterThan(0);
-      expect(screen.getAllByText('Tablet').length).toBeGreaterThan(0);
+      await waitFor(() => {
+        expect(screen.getByText('Jobs')).toBeInTheDocument();
+      });
     });
   });
 
-  describe('Top Locations', () => {
-    it('renders top locations section', async () => {
+  describe('Team Section', () => {
+    it('displays team stats', async () => {
       const AnalyticsPage = (await import('@/app/[locale]/admin/analytics/page')).default;
       render(<AnalyticsPage />);
 
-      expect(screen.getByText('Top Locations')).toBeInTheDocument();
-    });
-
-    it('displays country data', async () => {
-      const AnalyticsPage = (await import('@/app/[locale]/admin/analytics/page')).default;
-      render(<AnalyticsPage />);
-
-      expect(screen.getByText('Egypt')).toBeInTheDocument();
-      expect(screen.getByText('Saudi Arabia')).toBeInTheDocument();
-      expect(screen.getByText('UAE')).toBeInTheDocument();
-    });
-  });
-
-  describe('Conversions', () => {
-    it('renders conversions section', async () => {
-      const AnalyticsPage = (await import('@/app/[locale]/admin/analytics/page')).default;
-      render(<AnalyticsPage />);
-
-      expect(screen.getByText('Conversions')).toBeInTheDocument();
-    });
-
-    it('displays conversion metrics', async () => {
-      const AnalyticsPage = (await import('@/app/[locale]/admin/analytics/page')).default;
-      render(<AnalyticsPage />);
-
-      expect(screen.getByText('Contact Forms')).toBeInTheDocument();
-      expect(screen.getByText('Newsletter Signups')).toBeInTheDocument();
-      expect(screen.getByText('Job Applications')).toBeInTheDocument();
-      expect(screen.getByText('Resource Downloads')).toBeInTheDocument();
-    });
-  });
-
-  describe('Top Pages Table', () => {
-    it('renders top pages section', async () => {
-      const AnalyticsPage = (await import('@/app/[locale]/admin/analytics/page')).default;
-      render(<AnalyticsPage />);
-
-      expect(screen.getByText('Top Pages')).toBeInTheDocument();
-    });
-
-    it('displays table headers', async () => {
-      const AnalyticsPage = (await import('@/app/[locale]/admin/analytics/page')).default;
-      render(<AnalyticsPage />);
-
-      expect(screen.getByText('Page')).toBeInTheDocument();
-      expect(screen.getByText('Views')).toBeInTheDocument();
-      expect(screen.getByText('Avg. Time')).toBeInTheDocument();
-    });
-
-    it('displays page data', async () => {
-      const AnalyticsPage = (await import('@/app/[locale]/admin/analytics/page')).default;
-      render(<AnalyticsPage />);
-
-      expect(screen.getByText('/services')).toBeInTheDocument();
-      expect(screen.getByText('/portfolio')).toBeInTheDocument();
-      expect(screen.getByText('/about')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Team')).toBeInTheDocument();
+      });
+      // Check for "Active Members" text which indicates team section loaded
+      expect(screen.getByText('Active Members')).toBeInTheDocument();
+      // Check that total team count is shown
+      expect(screen.getByText(/out of 12 total/)).toBeInTheDocument();
     });
   });
 
   describe('Date Range Selection', () => {
     it('changes date range on click', async () => {
       const AnalyticsPage = (await import('@/app/[locale]/admin/analytics/page')).default;
+      const { dashboardService } = await import('@/services/admin');
       render(<AnalyticsPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText('7 Days')).toBeInTheDocument();
+      });
 
       const sevenDaysButton = screen.getByText('7 Days');
       fireEvent.click(sevenDaysButton);
 
-      // Button should be selected (has different styling)
-      expect(sevenDaysButton).toHaveClass('bg-blue-600');
+      // Should call getChartsData with new period
+      await waitFor(() => {
+        expect(dashboardService.getChartsData).toHaveBeenCalledWith('7');
+      });
     });
   });
 
   describe('Refresh Functionality', () => {
-    it('clicking refresh button triggers refresh', async () => {
+    it('refreshes data when refresh button clicked', async () => {
+      const AnalyticsPage = (await import('@/app/[locale]/admin/analytics/page')).default;
+      const { dashboardService } = await import('@/services/admin');
+      render(<AnalyticsPage />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('icon-refreshcw')).toBeInTheDocument();
+      });
+
+      const refreshButton = screen.getByTestId('icon-refreshcw').closest('button');
+      if (refreshButton) {
+        fireEvent.click(refreshButton);
+      }
+
+      // Should call getStats and getChartsData again
+      await waitFor(() => {
+        expect(dashboardService.getStats).toHaveBeenCalledTimes(2);
+      });
+    });
+  });
+
+  describe('Info Banner', () => {
+    it('displays visitor analytics info banner', async () => {
       const AnalyticsPage = (await import('@/app/[locale]/admin/analytics/page')).default;
       render(<AnalyticsPage />);
 
-      const refreshButton = screen.getByText('Refresh');
-      fireEvent.click(refreshButton);
-
-      // The button should be disabled during refresh
-      expect(refreshButton.closest('button')).toBeDisabled();
+      await waitFor(() => {
+        expect(screen.getByText('Visitor Analytics')).toBeInTheDocument();
+      });
+      expect(screen.getByText(/integrate Google Analytics/i)).toBeInTheDocument();
     });
   });
 });

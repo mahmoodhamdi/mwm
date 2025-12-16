@@ -13,6 +13,7 @@ import { Container, Spinner } from '@/components/ui';
 import { CheckCircleIcon, ArrowRightIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { Suspense } from 'react';
 import { createSanitizedHtml } from '@/lib/sanitize';
+import { ShareButtons } from '@/components/common';
 import type { LocalizedString } from '@mwm/shared';
 
 // Type alias for backward compatibility
@@ -199,7 +200,16 @@ async function ServiceContent({ slug, locale }: { slug: string; locale: string }
             </nav>
 
             <h1 className="mb-4 text-4xl font-bold md:text-5xl">{title}</h1>
-            <p className="text-primary-100 text-lg md:text-xl">{shortDescription}</p>
+            <p className="text-primary-100 mb-6 text-lg md:text-xl">{shortDescription}</p>
+
+            {/* Share Buttons */}
+            <div className="flex justify-center">
+              <ShareButtons
+                url={`/${locale}/services/${slug}`}
+                title={title}
+                description={shortDescription}
+              />
+            </div>
           </div>
         </Container>
       </section>

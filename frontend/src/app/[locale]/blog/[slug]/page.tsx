@@ -10,16 +10,13 @@ import {
   User,
   Clock,
   Tag,
-  Facebook,
-  Twitter,
-  Linkedin,
-  Link as LinkIcon,
   ArrowRight,
   ArrowLeft,
   ChevronRight,
   Bookmark,
   Loader2,
 } from 'lucide-react';
+import { ShareButtons } from '@/components/common';
 import {
   getBlogPostBySlug,
   getRelatedPosts,
@@ -313,21 +310,14 @@ export default function BlogPostPage() {
 
               {/* Share */}
               <div className="mt-8 border-t pt-8">
-                <h3 className="mb-4 font-bold text-gray-900">{isRTL ? 'شارك المقال' : 'Share'}</h3>
-                <div className="flex gap-2">
-                  <button className="rounded-lg bg-blue-600 p-2 text-white hover:bg-blue-700">
-                    <Facebook className="size-5" />
-                  </button>
-                  <button className="rounded-lg bg-sky-500 p-2 text-white hover:bg-sky-600">
-                    <Twitter className="size-5" />
-                  </button>
-                  <button className="rounded-lg bg-blue-700 p-2 text-white hover:bg-blue-800">
-                    <Linkedin className="size-5" />
-                  </button>
-                  <button className="rounded-lg border bg-white p-2 text-gray-600 hover:bg-gray-50">
-                    <LinkIcon className="size-5" />
-                  </button>
-                </div>
+                <h3 className="mb-4 font-bold text-gray-900 dark:text-white">
+                  {isRTL ? 'شارك المقال' : 'Share'}
+                </h3>
+                <ShareButtons
+                  url={`/${locale}/blog/${slug}`}
+                  title={isRTL ? post.title.ar : post.title.en}
+                  description={isRTL ? post.excerpt?.ar : post.excerpt?.en}
+                />
               </div>
 
               {/* Actions */}

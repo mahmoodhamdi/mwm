@@ -30,21 +30,18 @@ jest.mock('next/image', () => {
 // Mock framer-motion
 jest.mock('framer-motion', () => ({
   motion: {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    div: ({
-      children,
-      layout: _layout,
-      ...props
-    }: React.PropsWithChildren<Record<string, unknown>>) => {
-      // Filter out framer-motion specific props
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const {
-        variants: _v,
-        initial: _i,
-        animate: _a,
-        exit: _e,
-        ...htmlProps
-      } = props as Record<string, unknown>;
+    div: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) => {
+      // Filter out framer-motion specific props and keep only HTML-valid props
+      const { layout, variants, initial, animate, exit, ...htmlProps } = props as Record<
+        string,
+        unknown
+      >;
+      // Suppress unused variable warnings - these props are intentionally removed
+      void layout;
+      void variants;
+      void initial;
+      void animate;
+      void exit;
       return <div {...htmlProps}>{children}</div>;
     },
   },

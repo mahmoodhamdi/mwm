@@ -52,6 +52,7 @@ const mockJob = {
   updatedAt: '2024-01-15',
 };
 
+/* Application mock - reserved for future application tests
 const mockApplication = {
   _id: '1',
   job: mockJob,
@@ -66,6 +67,7 @@ const mockApplication = {
   createdAt: '2024-01-15',
   updatedAt: '2024-01-15',
 };
+*/
 
 // Mock the public careers service
 jest.mock('@/services/public', () => {

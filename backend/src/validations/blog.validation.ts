@@ -197,6 +197,86 @@ export const queryBlogCategoriesSchema = Joi.object({
   search: Joi.string().max(200),
 });
 
+// ============================================
+// Blog Comment Validations
+// ============================================
+
+/**
+ * Create comment validation (authenticated users)
+ * التحقق من إنشاء تعليق (للمستخدمين المسجلين)
+ */
+export const createCommentSchema = Joi.object({
+  post: objectIdSchema.required().messages({
+    'any.required': 'Post ID is required | معرف المقال مطلوب',
+  }),
+  content: Joi.string().trim().min(1).max(2000).required().messages({
+    'any.required': 'Comment content is required | محتوى التعليق مطلوب',
+    'string.empty': 'Comment cannot be empty | التعليق لا يمكن أن يكون فارغاً',
+    'string.max': 'Comment cannot exceed 2000 characters | التعليق لا يمكن أن يتجاوز 2000 حرف',
+  }),
+  parent: objectIdSchema.allow(null),
+});
+
+/**
+ * Create guest comment validation
+ * التحقق من إنشاء تعليق الضيف
+ */
+export const createGuestCommentSchema = Joi.object({
+  post: objectIdSchema.required().messages({
+    'any.required': 'Post ID is required | معرف المقال مطلوب',
+  }),
+  content: Joi.string().trim().min(1).max(2000).required().messages({
+    'any.required': 'Comment content is required | محتوى التعليق مطلوب',
+    'string.empty': 'Comment cannot be empty | التعليق لا يمكن أن يكون فارغاً',
+    'string.max': 'Comment cannot exceed 2000 characters | التعليق لا يمكن أن يتجاوز 2000 حرف',
+  }),
+  guestName: Joi.string().trim().max(100).required().messages({
+    'any.required': 'Name is required | الاسم مطلوب',
+    'string.max': 'Name cannot exceed 100 characters | الاسم لا يمكن أن يتجاوز 100 حرف',
+  }),
+  guestEmail: Joi.string().email().required().messages({
+    'any.required': 'Email is required | البريد الإلكتروني مطلوب',
+    'string.email': 'Please provide a valid email | يرجى تقديم بريد إلكتروني صالح',
+  }),
+  parent: objectIdSchema.allow(null),
+});
+
+/**
+ * Update comment validation
+ * التحقق من تحديث التعليق
+ */
+export const updateCommentSchema = Joi.object({
+  content: Joi.string().trim().min(1).max(2000).required().messages({
+    'any.required': 'Comment content is required | محتوى التعليق مطلوب',
+    'string.empty': 'Comment cannot be empty | التعليق لا يمكن أن يكون فارغاً',
+    'string.max': 'Comment cannot exceed 2000 characters | التعليق لا يمكن أن يتجاوز 2000 حرف',
+  }),
+});
+
+/**
+ * Update comment status validation (Admin)
+ * التحقق من تحديث حالة التعليق (للمسؤول)
+ */
+export const updateCommentStatusSchema = Joi.object({
+  status: Joi.string().valid('pending', 'approved', 'rejected', 'spam').required().messages({
+    'any.required': 'Status is required | الحالة مطلوبة',
+    'any.only': 'Invalid status | الحالة غير صالحة',
+  }),
+});
+
+/**
+ * Query comments validation
+ * التحقق من استعلام التعليقات
+ */
+export const queryCommentsSchema = Joi.object({
+  page: Joi.number().integer().min(1).default(1),
+  limit: Joi.number().integer().min(1).max(100).default(20),
+  status: Joi.string().valid('pending', 'approved', 'rejected', 'spam'),
+  post: objectIdSchema,
+  author: objectIdSchema,
+  sort: Joi.string().valid('newest', 'oldest', 'popular').default('newest'),
+});
+
 export const blogValidation = {
   createCategory: createBlogCategorySchema,
   updateCategory: updateBlogCategorySchema,
@@ -204,6 +284,12 @@ export const blogValidation = {
   createPost: createBlogPostSchema,
   updatePost: updateBlogPostSchema,
   queryPosts: queryBlogPostsSchema,
+  // Comments
+  createComment: createCommentSchema,
+  createGuestComment: createGuestCommentSchema,
+  updateComment: updateCommentSchema,
+  updateCommentStatus: updateCommentStatusSchema,
+  queryComments: queryCommentsSchema,
 };
 
 export default blogValidation;

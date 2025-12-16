@@ -5,3 +5,4 @@
 
 export { LanguageSwitcher } from './LanguageSwitcher';
 export { Newsletter } from './Newsletter';
+export { ShareButtons } from './ShareButtons';

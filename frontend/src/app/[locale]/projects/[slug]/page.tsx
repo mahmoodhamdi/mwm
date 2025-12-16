@@ -21,6 +21,7 @@ import {
 import { Suspense } from 'react';
 import { createSanitizedHtml } from '@/lib/sanitize';
 import { getSafeVideoUrl } from '@/lib/utils';
+import { ShareButtons } from '@/components/common';
 import type { LocalizedString } from '@mwm/shared';
 
 // Type alias for backward compatibility
@@ -251,6 +252,18 @@ async function ProjectContent({ slug, locale }: { slug: string; locale: string }
                   <span>GitHub</span>
                 </a>
               )}
+            </div>
+
+            {/* Share Buttons */}
+            <div className="mt-6">
+              <p className="mb-2 text-sm text-white/80">
+                {isRTL ? 'شارك المشروع' : 'Share this project'}
+              </p>
+              <ShareButtons
+                url={`/${locale}/projects/${slug}`}
+                title={title}
+                description={shortDescription}
+              />
             </div>
           </div>
         </Container>

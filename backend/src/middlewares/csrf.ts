@@ -53,7 +53,7 @@ export const csrfTokenGenerator = (req: Request, res: Response, next: NextFuncti
  * CSRF validation middleware
  * Validates CSRF token on state-changing requests
  */
-export const csrfValidation = (req: Request, res: Response, next: NextFunction): void => {
+export const csrfValidation = (req: Request, _res: Response, next: NextFunction): void => {
   // Skip validation for safe methods
   const safeMethods = ['GET', 'HEAD', 'OPTIONS'];
   if (safeMethods.includes(req.method.toUpperCase())) {

@@ -14,7 +14,6 @@ import {
   waitForPageReady,
   waitForContent,
   loginToAdmin,
-  ADMIN_CREDENTIALS,
 } from './utils/screenshot-helper';
 
 // Increase timeout for screenshot tests

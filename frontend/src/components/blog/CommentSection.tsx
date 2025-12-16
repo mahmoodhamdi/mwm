@@ -51,7 +51,7 @@ interface CommentItemProps {
 
 function CommentItem({
   comment,
-  postId,
+  postId: _postId, // Reserved for future nested replies feature
   onReply,
   onRefresh,
   isAuthenticated,
@@ -68,8 +68,6 @@ function CommentItem({
     currentUserId ? comment.likedBy?.includes(currentUserId) : false
   );
   const [showReplies, setShowReplies] = useState(false);
-  const [replies, setReplies] = useState<BlogComment[]>([]);
-  const [loadingReplies, setLoadingReplies] = useState(false);
 
   const isOwner = currentUserId && comment.author?._id === currentUserId;
   const authorName = comment.author?.name || comment.guestName || (isRTL ? 'ضيف' : 'Guest');
@@ -133,19 +131,7 @@ function CommentItem({
     }
   };
 
-  const loadReplies = async () => {
-    if (loadingReplies || !comment.repliesCount) return;
-    setLoadingReplies(true);
-    try {
-      // Note: replies are fetched as comments with parent filter
-      // For now, we'll show the replies inline
-      setShowReplies(true);
-    } catch (err) {
-      console.error('Failed to load replies:', err);
-    } finally {
-      setLoadingReplies(false);
-    }
-  };
+  // Future: nested replies feature will be implemented here
 
   return (
     <div className="group">

@@ -3,8 +3,16 @@
  * نقطة دخول الخادم
  */
 
+import { createServer } from 'http';
 import { createApp } from './app';
-import { env, logger, connectDatabase, connectRedis, initializeFirebase } from './config';
+import {
+  env,
+  logger,
+  connectDatabase,
+  connectRedis,
+  initializeFirebase,
+  initializeSocket,
+} from './config';
 
 /**
  * Start the server
@@ -24,8 +32,15 @@ async function startServer(): Promise<void> {
     // Create Express app
     const app = createApp();
 
+    // Create HTTP server
+    const httpServer = createServer(app);
+
+    // Initialize Socket.io
+    logger.info('🔌 Initializing Socket.io...');
+    initializeSocket(httpServer);
+
     // Start HTTP server
-    const server = app.listen(env.port, () => {
+    const server = httpServer.listen(env.port, () => {
       logger.info(`
 ╔════════════════════════════════════════════════════╗
 ║                                                    ║

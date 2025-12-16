@@ -9,6 +9,7 @@ import { asyncHandler } from '../middlewares';
 import { ApiError } from '../utils/ApiError';
 import { sendSuccess } from '../utils/response';
 import * as notificationService from '../services/notification.service';
+import { emitToUser } from '../config';
 
 /**
  * Get user notifications
@@ -84,6 +85,15 @@ export const deleteNotification = asyncHandler(async (req: Request, res: Respons
     throw new ApiError(404, 'NOTIFICATION_NOT_FOUND', 'Notification not found');
   }
 
+  // Emit socket event for real-time update
+  emitToUser(userId, 'notification:deleted', { id });
+
+  // Update unread count if the deleted notification was unread
+  if (!notification.isRead) {
+    const unreadCount = await notificationService.getUnreadCount(userId);
+    emitToUser(userId, 'notification:count', { count: unreadCount });
+  }
+
   sendSuccess(res, { message: 'Notification deleted' });
 });
 
@@ -96,6 +106,12 @@ export const deleteReadNotifications = asyncHandler(async (req: Request, res: Re
   const userId = (req as Request & { user: { _id: string } }).user._id;
 
   const result = await Notification.deleteMany({ user: userId, isRead: true });
+
+  // Emit socket event for real-time update
+  if (result.deletedCount > 0) {
+    emitToUser(userId, 'notification:deleted-read', { count: result.deletedCount });
+  }
+
   sendSuccess(res, {
     message: `${result.deletedCount} notifications deleted`,
     count: result.deletedCount,

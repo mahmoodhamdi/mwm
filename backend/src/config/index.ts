@@ -17,3 +17,12 @@ export {
 } from './redis';
 export { logger, morganStream } from './logger';
 export { initializeFirebase, getFirebaseAdmin, getMessaging } from './firebase';
+export {
+  initializeSocket,
+  getIO,
+  emitToUser,
+  emitToAdmins,
+  broadcast,
+  getConnectedCount,
+  isUserOnline,
+} from './socket';

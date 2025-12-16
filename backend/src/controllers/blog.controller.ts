@@ -5,7 +5,7 @@
 
 import { Request, Response } from 'express';
 import mongoose from 'mongoose';
-import { BlogPost, BlogCategory, User } from '../models';
+import { BlogPost, BlogCategory, User, BlogComment } from '../models';
 import { blogValidation } from '../validations';
 import { asyncHandler } from '../middlewares/asyncHandler';
 import { Errors } from '../utils/ApiError';
@@ -855,6 +855,372 @@ export const isPostSaved = asyncHandler(async (req: Request, res: Response) => {
 });
 
 // ============================================
+// Comment Controllers (Public)
+// متحكمات التعليقات (عام)
+// ============================================
+
+/**
+ * Get comments for a post (Public)
+ * جلب تعليقات المقال (عام)
+ */
+export const getPostComments = asyncHandler(async (req: Request, res: Response) => {
+  const { slug } = req.params;
+  const { page = 1, limit = 20, sort = 'newest', parent } = req.query;
+
+  // Find post by slug
+  const post = await BlogPost.findOne({ slug, status: 'published' });
+  if (!post) {
+    throw Errors.NOT_FOUND('Post | المقال');
+  }
+
+  const pageNum = Math.max(1, parseInt(page as string) || 1);
+  const limitNum = Math.min(100, Math.max(1, parseInt(limit as string) || 20));
+
+  const { comments, total } = await BlogComment.getByPost(post._id.toString(), {
+    status: 'approved',
+    parentId: parent ? (parent as string) : null,
+    limit: limitNum,
+    page: pageNum,
+    sort: sort as 'newest' | 'oldest' | 'popular',
+  });
+
+  return paginatedResponse(res, {
+    data: comments,
+    page: pageNum,
+    limit: limitNum,
+    total,
+  });
+});
+
+/**
+ * Create comment (Authenticated user)
+ * إنشاء تعليق (للمستخدم المسجل)
+ */
+export const createComment = asyncHandler(async (req: Request, res: Response) => {
+  const { error, value } = blogValidation.createComment.validate(req.body, {
+    abortEarly: false,
+  });
+
+  if (error) {
+    throw Errors.VALIDATION_ERROR(
+      error.details.map(d => ({ field: d.path.join('.'), message: d.message }))
+    );
+  }
+
+  // Check if post exists
+  const post = await BlogPost.findOne({ _id: value.post, status: 'published' });
+  if (!post) {
+    throw Errors.NOT_FOUND('Post | المقال');
+  }
+
+  // Check if parent comment exists
+  if (value.parent) {
+    const parentComment = await BlogComment.findById(value.parent);
+    if (!parentComment || parentComment.post.toString() !== value.post) {
+      throw Errors.NOT_FOUND('Parent comment | التعليق الأصلي');
+    }
+  }
+
+  const comment = await BlogComment.create({
+    ...value,
+    author: req.user?._id,
+    status: 'approved', // Auto-approve authenticated users
+    ip: req.ip,
+    userAgent: req.get('User-Agent'),
+  });
+
+  await comment.populate('author', 'name avatar');
+
+  return successResponse(
+    res,
+    {
+      message: 'Comment created successfully | تم إنشاء التعليق بنجاح',
+      comment,
+    },
+    201
+  );
+});
+
+/**
+ * Create guest comment (Public)
+ * إنشاء تعليق للضيف (عام)
+ */
+export const createGuestComment = asyncHandler(async (req: Request, res: Response) => {
+  const { error, value } = blogValidation.createGuestComment.validate(req.body, {
+    abortEarly: false,
+  });
+
+  if (error) {
+    throw Errors.VALIDATION_ERROR(
+      error.details.map(d => ({ field: d.path.join('.'), message: d.message }))
+    );
+  }
+
+  // Check if post exists
+  const post = await BlogPost.findOne({ _id: value.post, status: 'published' });
+  if (!post) {
+    throw Errors.NOT_FOUND('Post | المقال');
+  }
+
+  // Check if parent comment exists
+  if (value.parent) {
+    const parentComment = await BlogComment.findById(value.parent);
+    if (!parentComment || parentComment.post.toString() !== value.post) {
+      throw Errors.NOT_FOUND('Parent comment | التعليق الأصلي');
+    }
+  }
+
+  const comment = await BlogComment.create({
+    ...value,
+    status: 'pending', // Guest comments require moderation
+    ip: req.ip,
+    userAgent: req.get('User-Agent'),
+  });
+
+  return successResponse(
+    res,
+    {
+      message: 'Comment submitted for review | تم إرسال التعليق للمراجعة',
+      comment: {
+        _id: comment._id,
+        post: comment.post,
+        guestName: comment.guestName,
+        content: comment.content,
+        status: comment.status,
+        createdAt: comment.createdAt,
+      },
+    },
+    201
+  );
+});
+
+/**
+ * Update comment (Owner only)
+ * تحديث التعليق (للمالك فقط)
+ */
+export const updateComment = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const { error, value } = blogValidation.updateComment.validate(req.body, {
+    abortEarly: false,
+  });
+
+  if (error) {
+    throw Errors.VALIDATION_ERROR(
+      error.details.map(d => ({ field: d.path.join('.'), message: d.message }))
+    );
+  }
+
+  const comment = await BlogComment.findById(id);
+  if (!comment) {
+    throw Errors.NOT_FOUND('Comment | التعليق');
+  }
+
+  // Check ownership
+  if (!comment.author || comment.author.toString() !== req.user?._id?.toString()) {
+    throw Errors.FORBIDDEN('You can only edit your own comments | يمكنك تعديل تعليقاتك فقط');
+  }
+
+  comment.content = value.content;
+  comment.isEdited = true;
+  comment.editedAt = new Date();
+  await comment.save();
+
+  await comment.populate('author', 'name avatar');
+
+  return successResponse(res, {
+    message: 'Comment updated successfully | تم تحديث التعليق بنجاح',
+    comment,
+  });
+});
+
+/**
+ * Delete comment (Owner only)
+ * حذف التعليق (للمالك فقط)
+ */
+export const deleteComment = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const comment = await BlogComment.findById(id);
+  if (!comment) {
+    throw Errors.NOT_FOUND('Comment | التعليق');
+  }
+
+  // Check ownership
+  if (!comment.author || comment.author.toString() !== req.user?._id?.toString()) {
+    throw Errors.FORBIDDEN('You can only delete your own comments | يمكنك حذف تعليقاتك فقط');
+  }
+
+  await comment.deleteOne();
+
+  return successResponse(res, {
+    message: 'Comment deleted successfully | تم حذف التعليق بنجاح',
+  });
+});
+
+/**
+ * Like/unlike comment (Authenticated)
+ * إعجاب/إلغاء إعجاب بالتعليق (للمستخدم المسجل)
+ */
+export const toggleCommentLike = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const userId = req.user?._id?.toString();
+
+  if (!userId) {
+    throw Errors.UNAUTHORIZED();
+  }
+
+  const comment = await BlogComment.findById(id);
+  if (!comment || comment.status !== 'approved') {
+    throw Errors.NOT_FOUND('Comment | التعليق');
+  }
+
+  const result = await BlogComment.toggleLike(id, userId);
+
+  return successResponse(res, {
+    message: result.liked
+      ? 'Comment liked | تم الإعجاب بالتعليق'
+      : 'Like removed | تم إزالة الإعجاب',
+    liked: result.liked,
+    likesCount: result.likesCount,
+  });
+});
+
+// ============================================
+// Comment Controllers (Admin)
+// متحكمات التعليقات (للمسؤول)
+// ============================================
+
+/**
+ * Get all comments (Admin)
+ * جلب جميع التعليقات (للمسؤول)
+ */
+export const getAllComments = asyncHandler(async (req: Request, res: Response) => {
+  const { post, status, author } = req.query;
+
+  const { page, limit, skip } = parsePagination({
+    page: req.query.page,
+    limit: req.query.limit,
+    defaultLimit: 20,
+    maxLimit: 100,
+  });
+
+  const filter: Record<string, unknown> = {};
+
+  if (post) {
+    filter.post = post;
+  }
+
+  if (status) {
+    filter.status = status;
+  }
+
+  if (author) {
+    filter.author = author;
+  }
+
+  const total = await BlogComment.countDocuments(filter);
+
+  const comments = await BlogComment.find(filter)
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit)
+    .populate('author', 'name avatar email')
+    .populate('post', 'title slug')
+    .populate('approvedBy', 'name');
+
+  return paginatedResponse(res, {
+    data: comments,
+    page,
+    limit,
+    total,
+  });
+});
+
+/**
+ * Update comment status (Admin)
+ * تحديث حالة التعليق (للمسؤول)
+ */
+export const updateCommentStatus = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const { error, value } = blogValidation.updateCommentStatus.validate(req.body, {
+    abortEarly: false,
+  });
+
+  if (error) {
+    throw Errors.VALIDATION_ERROR(
+      error.details.map(d => ({ field: d.path.join('.'), message: d.message }))
+    );
+  }
+
+  const comment = await BlogComment.updateStatus(id, value.status, req.user?._id?.toString());
+
+  if (!comment) {
+    throw Errors.NOT_FOUND('Comment | التعليق');
+  }
+
+  return successResponse(res, {
+    message: 'Comment status updated successfully | تم تحديث حالة التعليق بنجاح',
+    comment,
+  });
+});
+
+/**
+ * Delete comment (Admin)
+ * حذف التعليق (للمسؤول)
+ */
+export const adminDeleteComment = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const comment = await BlogComment.findByIdAndDelete(id);
+
+  if (!comment) {
+    throw Errors.NOT_FOUND('Comment | التعليق');
+  }
+
+  return successResponse(res, {
+    message: 'Comment deleted successfully | تم حذف التعليق بنجاح',
+  });
+});
+
+/**
+ * Bulk update comments status (Admin)
+ * تحديث حالة التعليقات بالجملة (للمسؤول)
+ */
+export const bulkUpdateCommentStatus = asyncHandler(async (req: Request, res: Response) => {
+  const { ids, status } = req.body;
+
+  if (!Array.isArray(ids) || ids.length === 0) {
+    throw Errors.VALIDATION_ERROR([
+      { field: 'ids', message: 'IDs array is required | مصفوفة المعرفات مطلوبة' },
+    ]);
+  }
+
+  if (!['pending', 'approved', 'rejected', 'spam'].includes(status)) {
+    throw Errors.VALIDATION_ERROR([
+      { field: 'status', message: 'Invalid status | الحالة غير صالحة' },
+    ]);
+  }
+
+  const updateData: Record<string, unknown> = { status };
+  if (status === 'approved') {
+    updateData.approvedBy = req.user?._id;
+    updateData.approvedAt = new Date();
+  }
+
+  const result = await BlogComment.updateMany(
+    { _id: { $in: ids.map((id: string) => new mongoose.Types.ObjectId(id)) } },
+    { $set: updateData }
+  );
+
+  return successResponse(res, {
+    message: `${result.modifiedCount} comments updated successfully | تم تحديث ${result.modifiedCount} تعليقات بنجاح`,
+    modifiedCount: result.modifiedCount,
+  });
+});
+
+// ============================================
 // Helper Functions
 // ============================================
 
@@ -905,6 +1271,18 @@ export const blogController = {
   unsavePost,
   getSavedPosts,
   isPostSaved,
+  // Comments (Public)
+  getPostComments,
+  createComment,
+  createGuestComment,
+  updateComment,
+  deleteComment,
+  toggleCommentLike,
+  // Comments (Admin)
+  getAllComments,
+  updateCommentStatus,
+  adminDeleteComment,
+  bulkUpdateCommentStatus,
 };
 
 export default blogController;

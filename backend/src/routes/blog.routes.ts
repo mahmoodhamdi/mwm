@@ -60,6 +60,47 @@ router.post('/posts/:slug/save', authenticate, csrfValidation, blogController.sa
 router.delete('/posts/:slug/save', authenticate, csrfValidation, blogController.unsavePost);
 
 // ============================================
+// Public Routes - Comments
+// المسارات العامة - التعليقات
+// ============================================
+
+// GET /api/v1/blog/posts/:slug/comments - Get comments for a post
+router.get('/posts/:slug/comments', blogController.getPostComments);
+
+// POST /api/v1/blog/posts/comments - Create comment (authenticated)
+router.post('/posts/comments', authenticate, csrfValidation, blogController.createComment);
+
+// POST /api/v1/blog/posts/comments/guest - Create guest comment (public)
+router.post('/posts/comments/guest', blogController.createGuestComment);
+
+// PUT /api/v1/blog/comments/:id - Update own comment
+router.put(
+  '/comments/:id',
+  authenticate,
+  csrfValidation,
+  validate({ params: idParamsSchema }),
+  blogController.updateComment
+);
+
+// DELETE /api/v1/blog/comments/:id - Delete own comment
+router.delete(
+  '/comments/:id',
+  authenticate,
+  csrfValidation,
+  validate({ params: idParamsSchema }),
+  blogController.deleteComment
+);
+
+// POST /api/v1/blog/comments/:id/like - Like/unlike a comment
+router.post(
+  '/comments/:id/like',
+  authenticate,
+  csrfValidation,
+  validate({ params: idParamsSchema }),
+  blogController.toggleCommentLike
+);
+
+// ============================================
 // Admin Routes - Categories
 // مسارات المسؤول - الفئات
 // ============================================
@@ -149,6 +190,40 @@ router.delete(
   authorize('blog:delete'),
   validate({ params: idParamsSchema }),
   blogController.deletePost
+);
+
+// ============================================
+// Admin Routes - Comments
+// مسارات المسؤول - التعليقات
+// ============================================
+
+// GET /api/v1/blog/admin/comments - Get all comments (Admin)
+router.get('/admin/comments', authenticate, authorize('blog:read'), blogController.getAllComments);
+
+// PUT /api/v1/blog/admin/comments/bulk-status - Bulk update comments status
+router.put(
+  '/admin/comments/bulk-status',
+  authenticate,
+  authorize('blog:update'),
+  blogController.bulkUpdateCommentStatus
+);
+
+// PUT /api/v1/blog/admin/comments/:id - Update comment status (Admin)
+router.put(
+  '/admin/comments/:id',
+  authenticate,
+  authorize('blog:update'),
+  validate({ params: idParamsSchema }),
+  blogController.updateCommentStatus
+);
+
+// DELETE /api/v1/blog/admin/comments/:id - Delete comment (Admin)
+router.delete(
+  '/admin/comments/:id',
+  authenticate,
+  authorize('blog:delete'),
+  validate({ params: idParamsSchema }),
+  blogController.adminDeleteComment
 );
 
 export default router;

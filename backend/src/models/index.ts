@@ -65,6 +65,12 @@ export {
 export { BlogCategory, type IBlogCategory, type IBlogCategoryModel } from './BlogCategory';
 export { BlogPost, type IBlogPost, type IBlogPostModel, type BlogPostStatus } from './BlogPost';
 export {
+  BlogComment,
+  type IBlogComment,
+  type IBlogCommentModel,
+  type CommentStatus,
+} from './BlogComment';
+export {
   Job,
   type IJob,
   type IJobModel,

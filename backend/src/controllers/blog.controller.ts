@@ -5,7 +5,7 @@
 
 import { Request, Response } from 'express';
 import mongoose from 'mongoose';
-import { BlogPost, BlogCategory } from '../models';
+import { BlogPost, BlogCategory, User } from '../models';
 import { blogValidation } from '../validations';
 import { asyncHandler } from '../middlewares/asyncHandler';
 import { Errors } from '../utils/ApiError';
@@ -704,7 +704,6 @@ export const savePost = asyncHandler(async (req: Request, res: Response) => {
   }
 
   // Add post to user's savedPosts if not already saved
-  const { User } = await import('../models');
   const user = await User.findById(userId);
 
   if (!user) {
@@ -749,7 +748,6 @@ export const unsavePost = asyncHandler(async (req: Request, res: Response) => {
   }
 
   // Remove post from user's savedPosts
-  const { User } = await import('../models');
   await User.findByIdAndUpdate(userId, { $pull: { savedPosts: post._id } });
 
   return successResponse(res, {
@@ -772,7 +770,6 @@ export const getSavedPosts = asyncHandler(async (req: Request, res: Response) =>
   const skip = (pageNum - 1) * limitNum;
 
   // Get user with saved posts
-  const { User } = await import('../models');
   const user = await User.findById(userId).select('savedPosts');
 
   if (!user || !user.savedPosts || user.savedPosts.length === 0) {
@@ -844,7 +841,6 @@ export const isPostSaved = asyncHandler(async (req: Request, res: Response) => {
   }
 
   // Check if post is in user's savedPosts
-  const { User } = await import('../models');
   const user = await User.findById(userId).select('savedPosts');
 
   if (!user) {

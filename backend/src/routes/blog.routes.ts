@@ -5,7 +5,7 @@
 
 import { Router } from 'express';
 import { blogController } from '../controllers';
-import { authenticate, authorize, optionalAuth } from '../middlewares/auth';
+import { authenticate, authorize } from '../middlewares/auth';
 import { validate, idParamsSchema, csrfValidation } from '../middlewares';
 import { blogValidation } from '../validations';
 

@@ -19,6 +19,7 @@ import { env, morganStream } from './config';
 import { swaggerSpec } from './config/swagger';
 import { errorHandler } from './middlewares/errorHandler';
 import { notFoundHandler } from './middlewares/notFoundHandler';
+import { csrfTokenGenerator, CSRF_COOKIE_NAME } from './middlewares/csrf';
 import healthRouter from './routes/health.routes';
 import authRouter from './routes/auth.routes';
 import settingsRouter from './routes/settings.routes';
@@ -75,7 +76,8 @@ export function createApp(): Express {
       origin: env.corsOrigin.split(','),
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'Accept-Language'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'Accept-Language', 'X-CSRF-Token'],
+      exposedHeaders: ['X-CSRF-Token'],
     })
   );
 
@@ -101,6 +103,19 @@ export function createApp(): Express {
 
   // Cookie parser
   app.use(cookieParser());
+
+  // CSRF token generator (generates token for all requests)
+  app.use(csrfTokenGenerator);
+
+  // CSRF token endpoint - returns the current CSRF token
+  app.get('/api/v1/csrf-token', (req, res) => {
+    res.json({
+      success: true,
+      data: {
+        csrfToken: req.cookies?.[CSRF_COOKIE_NAME] || req.csrfToken,
+      },
+    });
+  });
 
   // Compression
   app.use(compression());

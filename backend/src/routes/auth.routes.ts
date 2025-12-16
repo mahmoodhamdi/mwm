@@ -6,7 +6,7 @@
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { authController } from '../controllers';
-import { validate } from '../middlewares';
+import { validate, csrfValidation } from '../middlewares';
 import { authenticate } from '../middlewares/auth';
 import { authValidation } from '../validations';
 
@@ -158,7 +158,7 @@ router.post(
  */
 
 // Logout
-router.post('/logout', authenticate, authController.logout);
+router.post('/logout', authenticate, csrfValidation, authController.logout);
 
 // Get current user
 router.get('/me', authenticate, authController.getMe);
@@ -167,6 +167,7 @@ router.get('/me', authenticate, authController.getMe);
 router.put(
   '/me',
   authenticate,
+  csrfValidation,
   validate({ body: authValidation.updateProfile }),
   authController.updateProfile
 );
@@ -175,6 +176,7 @@ router.put(
 router.put(
   '/change-password',
   authenticate,
+  csrfValidation,
   validate({ body: authValidation.changePassword }),
   authController.changePassword
 );
@@ -183,6 +185,7 @@ router.put(
 router.post(
   '/resend-verification',
   authenticate,
+  csrfValidation,
   verificationLimiter,
   authController.resendVerification
 );

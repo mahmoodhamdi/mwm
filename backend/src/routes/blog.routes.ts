@@ -5,8 +5,8 @@
 
 import { Router } from 'express';
 import { blogController } from '../controllers';
-import { authenticate, authorize } from '../middlewares/auth';
-import { validate, idParamsSchema } from '../middlewares/validate';
+import { authenticate, authorize, optionalAuth } from '../middlewares/auth';
+import { validate, idParamsSchema, csrfValidation } from '../middlewares';
 import { blogValidation } from '../validations';
 
 const router = Router();
@@ -41,6 +41,23 @@ router.get('/posts/:slug', blogController.getPostBySlug);
 
 // GET /api/v1/blog/posts - Get all published posts
 router.get('/posts', blogController.getPosts);
+
+// ============================================
+// User Saved Posts Routes
+// مسارات المقالات المحفوظة للمستخدم
+// ============================================
+
+// GET /api/v1/blog/saved - Get user's saved posts
+router.get('/saved', authenticate, blogController.getSavedPosts);
+
+// GET /api/v1/blog/posts/:slug/saved - Check if post is saved
+router.get('/posts/:slug/saved', authenticate, blogController.isPostSaved);
+
+// POST /api/v1/blog/posts/:slug/save - Save a post
+router.post('/posts/:slug/save', authenticate, csrfValidation, blogController.savePost);
+
+// DELETE /api/v1/blog/posts/:slug/save - Unsave a post
+router.delete('/posts/:slug/save', authenticate, csrfValidation, blogController.unsavePost);
 
 // ============================================
 // Admin Routes - Categories

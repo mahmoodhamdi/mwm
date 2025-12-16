@@ -8,6 +8,7 @@ import { User, IUser, UserRole, UserRoles } from '../models';
 import { authService } from '../services';
 import { Errors } from '../utils/ApiError';
 import { asyncHandler } from './asyncHandler';
+import { COOKIE_NAMES } from '../utils/cookies';
 
 // Extend Express Request type to include user
 declare global {
@@ -91,14 +92,20 @@ function hasPermission(userRole: UserRole, requiredPermissions: string[]): boole
  */
 export const authenticate = asyncHandler(
   async (req: Request, _res: Response, next: NextFunction) => {
-    // Get token from header
-    const authHeader = req.headers.authorization;
+    // Get token from cookies first, then fall back to Authorization header
+    let token = req.cookies?.[COOKIE_NAMES.ACCESS_TOKEN];
 
-    if (!authHeader?.startsWith('Bearer ')) {
-      throw Errors.UNAUTHORIZED('No token provided | لم يتم توفير توكن');
+    // Fall back to Authorization header for backward compatibility
+    if (!token) {
+      const authHeader = req.headers.authorization;
+      if (authHeader?.startsWith('Bearer ')) {
+        token = authHeader.split(' ')[1];
+      }
     }
 
-    const token = authHeader.split(' ')[1];
+    if (!token) {
+      throw Errors.UNAUTHORIZED('No token provided | لم يتم توفير توكن');
+    }
 
     // Check if token is blacklisted
     const isBlacklisted = await authService.isTokenBlacklisted(token);
@@ -166,15 +173,22 @@ export const authorize = (...permissions: string[]) => {
  */
 export const optionalAuth = asyncHandler(
   async (req: Request, _res: Response, next: NextFunction) => {
-    const authHeader = req.headers.authorization;
+    // Get token from cookies first, then fall back to Authorization header
+    let token = req.cookies?.[COOKIE_NAMES.ACCESS_TOKEN];
 
-    if (!authHeader?.startsWith('Bearer ')) {
+    // Fall back to Authorization header for backward compatibility
+    if (!token) {
+      const authHeader = req.headers.authorization;
+      if (authHeader?.startsWith('Bearer ')) {
+        token = authHeader.split(' ')[1];
+      }
+    }
+
+    if (!token) {
       return next();
     }
 
     try {
-      const token = authHeader.split(' ')[1];
-
       // Check if token is blacklisted
       const isBlacklisted = await authService.isTokenBlacklisted(token);
       if (isBlacklisted) {

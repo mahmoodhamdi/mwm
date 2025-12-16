@@ -11,7 +11,6 @@ export {
   type User,
   type LoginCredentials,
   type RegisterData,
-  type AuthTokens,
   type LoginResponse,
   tokenUtils,
   authService,

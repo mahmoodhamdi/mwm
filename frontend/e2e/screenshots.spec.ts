@@ -1,293 +1,454 @@
 /**
- * Screenshot Tests - Capture all app pages
- * اختبارات لقطات الشاشة - التقاط جميع صفحات التطبيق
+ * Comprehensive Screenshot Tests
+ * اختبارات شاملة لالتقاط الشاشة لجميع صفحات التطبيق
+ *
+ * This file captures screenshots for documentation purposes.
+ * Screenshots are saved to docs/screenshots/ directory.
  */
 
 import { test, expect } from '@playwright/test';
-import * as fs from 'fs';
-import * as path from 'path';
+import {
+  VIEWPORTS,
+  ensureScreenshotDir,
+  takeScreenshot,
+  waitForPageReady,
+  waitForContent,
+  loginToAdmin,
+  ADMIN_CREDENTIALS,
+} from './utils/screenshot-helper';
 
-// Screenshot output directory
-const SCREENSHOTS_DIR = path.join(__dirname, '../../docs/screenshots');
+// Increase timeout for screenshot tests
+test.setTimeout(90000);
 
-// Increase timeout for slow pages
-test.setTimeout(60000);
-
-// Ensure screenshots directory exists
+// Ensure screenshots directory exists before all tests
 test.beforeAll(async () => {
-  if (!fs.existsSync(SCREENSHOTS_DIR)) {
-    fs.mkdirSync(SCREENSHOTS_DIR, { recursive: true });
-  }
+  ensureScreenshotDir();
 });
 
-test.describe('Public Pages Screenshots - Arabic', () => {
-  test.use({ locale: 'ar' });
+// ============================================
+// PUBLIC PAGES - ARABIC (RTL)
+// ============================================
+test.describe('Public Pages - Arabic', () => {
+  test.describe.configure({ mode: 'serial' });
 
   test('Home Page - Arabic', async ({ page }) => {
     await page.goto('/ar');
-    await page.waitForLoadState('networkidle');
-    await page.screenshot({
-      path: path.join(SCREENSHOTS_DIR, 'home-ar.png'),
-      fullPage: true,
-    });
-    // Page loaded successfully
+    // Wait for hero section or main content
+    await waitForContent(page, ['section', '.hero', 'main', 'h1']);
+    await waitForPageReady(page);
+    await takeScreenshot(page, 'home-ar.png');
   });
 
   test('About Page - Arabic', async ({ page }) => {
     await page.goto('/ar/about');
-    await page.waitForLoadState('networkidle');
-    await page.screenshot({
-      path: path.join(SCREENSHOTS_DIR, 'about-ar.png'),
-      fullPage: true,
-    });
+    await waitForContent(page, ['section', '.about', 'main', 'h1']);
+    await waitForPageReady(page);
+    await takeScreenshot(page, 'about-ar.png');
   });
 
-  test.skip('Services Page - Arabic (requires backend)', async ({ page }) => {
-    await page.goto('/ar/services', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(2000);
-    await page.screenshot({
-      path: path.join(SCREENSHOTS_DIR, 'services-ar.png'),
-      fullPage: true,
-    });
+  test('Services Page - Arabic', async ({ page }) => {
+    await page.goto('/ar/services');
+    await waitForContent(page, ['.service', '[class*="card"]', 'main', 'h1']);
+    await waitForPageReady(page);
+    await takeScreenshot(page, 'services-ar.png');
   });
 
-  test.skip('Projects Page - Arabic (requires backend)', async ({ page }) => {
-    await page.goto('/ar/projects', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(2000);
-    await page.screenshot({
-      path: path.join(SCREENSHOTS_DIR, 'projects-ar.png'),
-      fullPage: true,
-    });
+  test('Projects Page - Arabic', async ({ page }) => {
+    await page.goto('/ar/projects');
+    await waitForContent(page, ['.project', '[class*="card"]', 'main', 'h1']);
+    await waitForPageReady(page);
+    await takeScreenshot(page, 'projects-ar.png');
   });
 
   test('Team Page - Arabic', async ({ page }) => {
     await page.goto('/ar/team');
-    await page.waitForLoadState('networkidle');
-    await page.screenshot({
-      path: path.join(SCREENSHOTS_DIR, 'team-ar.png'),
-      fullPage: true,
-    });
+    await waitForContent(page, ['.team', '[class*="card"]', 'main', 'h1']);
+    await waitForPageReady(page);
+    await takeScreenshot(page, 'team-ar.png');
   });
 
   test('Blog Page - Arabic', async ({ page }) => {
     await page.goto('/ar/blog');
-    await page.waitForLoadState('networkidle');
-    await page.screenshot({
-      path: path.join(SCREENSHOTS_DIR, 'blog-ar.png'),
-      fullPage: true,
-    });
+    await waitForContent(page, ['.blog', 'article', '[class*="card"]', 'main', 'h1']);
+    await waitForPageReady(page);
+    await takeScreenshot(page, 'blog-ar.png');
   });
 
   test('Careers Page - Arabic', async ({ page }) => {
     await page.goto('/ar/careers');
-    await page.waitForLoadState('networkidle');
-    await page.screenshot({
-      path: path.join(SCREENSHOTS_DIR, 'careers-ar.png'),
-      fullPage: true,
-    });
+    await waitForContent(page, ['.job', '.career', '[class*="card"]', 'main', 'h1']);
+    await waitForPageReady(page);
+    await takeScreenshot(page, 'careers-ar.png');
   });
 
   test('Contact Page - Arabic', async ({ page }) => {
     await page.goto('/ar/contact');
-    await page.waitForLoadState('networkidle');
-    await page.screenshot({
-      path: path.join(SCREENSHOTS_DIR, 'contact-ar.png'),
-      fullPage: true,
-    });
+    await waitForContent(page, ['form', '.contact', 'main', 'h1']);
+    await waitForPageReady(page);
+    await takeScreenshot(page, 'contact-ar.png');
   });
 });
 
-test.describe('Public Pages Screenshots - English', () => {
-  test.use({ locale: 'en' });
+// ============================================
+// PUBLIC PAGES - ENGLISH (LTR)
+// ============================================
+test.describe('Public Pages - English', () => {
+  test.describe.configure({ mode: 'serial' });
 
   test('Home Page - English', async ({ page }) => {
     await page.goto('/en');
-    await page.waitForLoadState('networkidle');
-    await page.screenshot({
-      path: path.join(SCREENSHOTS_DIR, 'home-en.png'),
-      fullPage: true,
-    });
-    // Page loaded successfully
+    await waitForContent(page, ['section', '.hero', 'main', 'h1']);
+    await waitForPageReady(page);
+    await takeScreenshot(page, 'home-en.png');
   });
 
   test('About Page - English', async ({ page }) => {
     await page.goto('/en/about');
-    await page.waitForLoadState('networkidle');
-    await page.screenshot({
-      path: path.join(SCREENSHOTS_DIR, 'about-en.png'),
-      fullPage: true,
-    });
+    await waitForContent(page, ['section', '.about', 'main', 'h1']);
+    await waitForPageReady(page);
+    await takeScreenshot(page, 'about-en.png');
   });
 
-  test.skip('Services Page - English (requires backend)', async ({ page }) => {
-    await page.goto('/en/services', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(2000);
-    await page.screenshot({
-      path: path.join(SCREENSHOTS_DIR, 'services-en.png'),
-      fullPage: true,
-    });
+  test('Services Page - English', async ({ page }) => {
+    await page.goto('/en/services');
+    await waitForContent(page, ['.service', '[class*="card"]', 'main', 'h1']);
+    await waitForPageReady(page);
+    await takeScreenshot(page, 'services-en.png');
   });
 
-  test.skip('Projects Page - English (requires backend)', async ({ page }) => {
-    await page.goto('/en/projects', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(2000);
-    await page.screenshot({
-      path: path.join(SCREENSHOTS_DIR, 'projects-en.png'),
-      fullPage: true,
-    });
+  test('Projects Page - English', async ({ page }) => {
+    await page.goto('/en/projects');
+    await waitForContent(page, ['.project', '[class*="card"]', 'main', 'h1']);
+    await waitForPageReady(page);
+    await takeScreenshot(page, 'projects-en.png');
   });
 
   test('Team Page - English', async ({ page }) => {
     await page.goto('/en/team');
-    await page.waitForLoadState('networkidle');
-    await page.screenshot({
-      path: path.join(SCREENSHOTS_DIR, 'team-en.png'),
-      fullPage: true,
-    });
+    await waitForContent(page, ['.team', '[class*="card"]', 'main', 'h1']);
+    await waitForPageReady(page);
+    await takeScreenshot(page, 'team-en.png');
   });
 
   test('Blog Page - English', async ({ page }) => {
     await page.goto('/en/blog');
-    await page.waitForLoadState('networkidle');
-    await page.screenshot({
-      path: path.join(SCREENSHOTS_DIR, 'blog-en.png'),
-      fullPage: true,
-    });
+    await waitForContent(page, ['.blog', 'article', '[class*="card"]', 'main', 'h1']);
+    await waitForPageReady(page);
+    await takeScreenshot(page, 'blog-en.png');
   });
 
   test('Careers Page - English', async ({ page }) => {
     await page.goto('/en/careers');
-    await page.waitForLoadState('networkidle');
-    await page.screenshot({
-      path: path.join(SCREENSHOTS_DIR, 'careers-en.png'),
-      fullPage: true,
-    });
+    await waitForContent(page, ['.job', '.career', '[class*="card"]', 'main', 'h1']);
+    await waitForPageReady(page);
+    await takeScreenshot(page, 'careers-en.png');
   });
 
   test('Contact Page - English', async ({ page }) => {
     await page.goto('/en/contact');
-    await page.waitForLoadState('networkidle');
-    await page.screenshot({
-      path: path.join(SCREENSHOTS_DIR, 'contact-en.png'),
-      fullPage: true,
-    });
+    await waitForContent(page, ['form', '.contact', 'main', 'h1']);
+    await waitForPageReady(page);
+    await takeScreenshot(page, 'contact-en.png');
   });
 });
 
+// ============================================
+// MOBILE SCREENSHOTS
+// ============================================
 test.describe('Mobile Screenshots', () => {
-  test.use({
-    viewport: { width: 375, height: 667 },
+  test.describe.configure({ mode: 'serial' });
+
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize(VIEWPORTS.mobile);
   });
 
-  test('Home Page - Mobile Arabic', async ({ page }) => {
+  test('Home Mobile - Arabic', async ({ page }) => {
     await page.goto('/ar');
-    await page.waitForLoadState('networkidle');
-    await page.screenshot({
-      path: path.join(SCREENSHOTS_DIR, 'home-mobile-ar.png'),
-      fullPage: true,
-    });
+    await waitForContent(page, ['section', '.hero', 'main', 'h1']);
+    await waitForPageReady(page);
+    await takeScreenshot(page, 'home-mobile-ar.png', { viewport: VIEWPORTS.mobile });
   });
 
-  test('Home Page - Mobile English', async ({ page }) => {
+  test('Home Mobile - English', async ({ page }) => {
     await page.goto('/en');
-    await page.waitForLoadState('networkidle');
-    await page.screenshot({
-      path: path.join(SCREENSHOTS_DIR, 'home-mobile-en.png'),
-      fullPage: true,
-    });
+    await waitForContent(page, ['section', '.hero', 'main', 'h1']);
+    await waitForPageReady(page);
+    await takeScreenshot(page, 'home-mobile-en.png', { viewport: VIEWPORTS.mobile });
   });
 
-  test.skip('Services Page - Mobile (requires backend)', async ({ page }) => {
-    await page.goto('/ar/services', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(2000);
-    await page.screenshot({
-      path: path.join(SCREENSHOTS_DIR, 'services-mobile.png'),
-      fullPage: true,
-    });
+  test('Services Mobile', async ({ page }) => {
+    await page.goto('/ar/services');
+    await waitForContent(page, ['.service', '[class*="card"]', 'main', 'h1']);
+    await waitForPageReady(page);
+    await takeScreenshot(page, 'services-mobile.png', { viewport: VIEWPORTS.mobile });
   });
 
-  test('Contact Page - Mobile', async ({ page }) => {
+  test('Blog Mobile', async ({ page }) => {
+    await page.goto('/ar/blog');
+    await waitForContent(page, ['.blog', 'article', '[class*="card"]', 'main', 'h1']);
+    await waitForPageReady(page);
+    await takeScreenshot(page, 'blog-mobile.png', { viewport: VIEWPORTS.mobile });
+  });
+
+  test('Contact Mobile', async ({ page }) => {
     await page.goto('/ar/contact');
-    await page.waitForLoadState('networkidle');
-    await page.screenshot({
-      path: path.join(SCREENSHOTS_DIR, 'contact-mobile.png'),
-      fullPage: true,
-    });
+    await waitForContent(page, ['form', '.contact', 'main', 'h1']);
+    await waitForPageReady(page);
+    await takeScreenshot(page, 'contact-mobile.png', { viewport: VIEWPORTS.mobile });
+  });
+
+  test('Careers Mobile', async ({ page }) => {
+    await page.goto('/ar/careers');
+    await waitForContent(page, ['.job', '.career', '[class*="card"]', 'main', 'h1']);
+    await waitForPageReady(page);
+    await takeScreenshot(page, 'careers-mobile.png', { viewport: VIEWPORTS.mobile });
   });
 });
 
-test.describe('Admin Pages Screenshots', () => {
+// ============================================
+// ADMIN PAGES
+// Note: Admin pages require valid user credentials in the database.
+// These tests capture the login page or redirect state.
+// For authenticated screenshots, seed the database with a test user first.
+// ============================================
+test.describe('Admin Pages', () => {
+  test.describe.configure({ mode: 'serial' });
+
   test('Admin Login Page', async ({ page }) => {
     await page.goto('/ar/admin/login');
-    await page.waitForLoadState('networkidle');
-    await page.screenshot({
-      path: path.join(SCREENSHOTS_DIR, 'admin-login.png'),
-      fullPage: true,
-    });
+    await waitForContent(page, ['form', 'input[type="email"]', 'button[type="submit"]']);
+    await waitForPageReady(page);
+    await takeScreenshot(page, 'admin-login.png');
   });
 
-  // Note: Admin pages require authentication
-  // These tests will capture the login redirect or login page
-  test('Admin Dashboard (requires auth)', async ({ page }) => {
-    await page.goto('/ar/admin');
-    await page.waitForLoadState('networkidle');
-    await page.screenshot({
-      path: path.join(SCREENSHOTS_DIR, 'admin-dashboard.png'),
-      fullPage: true,
-    });
+  // Skip authenticated admin tests - require valid user in database
+  test.skip('Admin Dashboard (requires auth)', async ({ page }) => {
+    const loggedIn = await loginToAdmin(page);
+    if (loggedIn) {
+      await page.goto('/ar/admin');
+      await waitForContent(page, ['[class*="stat"]', '[class*="card"]', 'main', 'h1', 'h2']);
+      await waitForPageReady(page);
+    }
+    await takeScreenshot(page, 'admin-dashboard.png');
   });
 
-  test('Admin Services (requires auth)', async ({ page }) => {
-    await page.goto('/ar/admin/services');
-    await page.waitForLoadState('networkidle');
-    await page.screenshot({
-      path: path.join(SCREENSHOTS_DIR, 'admin-services.png'),
-      fullPage: true,
-    });
+  test.skip('Admin Services (requires auth)', async ({ page }) => {
+    const loggedIn = await loginToAdmin(page);
+    if (loggedIn) {
+      await page.goto('/ar/admin/services');
+      await waitForContent(page, ['table', '[class*="card"]', 'main', 'h1']);
+      await waitForPageReady(page);
+    }
+    await takeScreenshot(page, 'admin-services.png');
   });
 
-  test('Admin Projects (requires auth)', async ({ page }) => {
-    await page.goto('/ar/admin/projects');
-    await page.waitForLoadState('networkidle');
-    await page.screenshot({
-      path: path.join(SCREENSHOTS_DIR, 'admin-projects.png'),
-      fullPage: true,
-    });
+  test.skip('Admin Projects (requires auth)', async ({ page }) => {
+    const loggedIn = await loginToAdmin(page);
+    if (loggedIn) {
+      await page.goto('/ar/admin/projects');
+      await waitForContent(page, ['table', '[class*="card"]', 'main', 'h1']);
+      await waitForPageReady(page);
+    }
+    await takeScreenshot(page, 'admin-projects.png');
   });
 
-  test('Admin Blog (requires auth)', async ({ page }) => {
-    await page.goto('/ar/admin/blog');
-    await page.waitForLoadState('networkidle');
-    await page.screenshot({
-      path: path.join(SCREENSHOTS_DIR, 'admin-blog.png'),
-      fullPage: true,
-    });
+  test.skip('Admin Team (requires auth)', async ({ page }) => {
+    const loggedIn = await loginToAdmin(page);
+    if (loggedIn) {
+      await page.goto('/ar/admin/team');
+      await waitForContent(page, ['table', '[class*="card"]', 'main', 'h1']);
+      await waitForPageReady(page);
+    }
+    await takeScreenshot(page, 'admin-team.png');
   });
 
-  test('Admin Careers (requires auth)', async ({ page }) => {
-    await page.goto('/ar/admin/careers');
-    await page.waitForLoadState('networkidle');
-    await page.screenshot({
-      path: path.join(SCREENSHOTS_DIR, 'admin-careers.png'),
-      fullPage: true,
-    });
+  test.skip('Admin Blog (requires auth)', async ({ page }) => {
+    const loggedIn = await loginToAdmin(page);
+    if (loggedIn) {
+      await page.goto('/ar/admin/blog');
+      await waitForContent(page, ['table', '[class*="card"]', 'main', 'h1']);
+      await waitForPageReady(page);
+    }
+    await takeScreenshot(page, 'admin-blog.png');
   });
 
-  test('Admin Newsletter (requires auth)', async ({ page }) => {
-    await page.goto('/ar/admin/newsletter');
-    await page.waitForLoadState('networkidle');
-    await page.screenshot({
-      path: path.join(SCREENSHOTS_DIR, 'admin-newsletter.png'),
-      fullPage: true,
-    });
+  test.skip('Admin Careers (requires auth)', async ({ page }) => {
+    const loggedIn = await loginToAdmin(page);
+    if (loggedIn) {
+      await page.goto('/ar/admin/careers');
+      await waitForContent(page, ['table', '[class*="card"]', 'main', 'h1']);
+      await waitForPageReady(page);
+    }
+    await takeScreenshot(page, 'admin-careers.png');
   });
 
-  test('Admin Settings (requires auth)', async ({ page }) => {
-    await page.goto('/ar/admin/settings');
-    await page.waitForLoadState('networkidle');
-    await page.screenshot({
-      path: path.join(SCREENSHOTS_DIR, 'admin-settings.png'),
-      fullPage: true,
-    });
+  test.skip('Admin Newsletter (requires auth)', async ({ page }) => {
+    const loggedIn = await loginToAdmin(page);
+    if (loggedIn) {
+      await page.goto('/ar/admin/newsletter');
+      await waitForContent(page, ['table', '[class*="card"]', 'main', 'h1']);
+      await waitForPageReady(page);
+    }
+    await takeScreenshot(page, 'admin-newsletter.png');
+  });
+
+  test.skip('Admin Messages (requires auth)', async ({ page }) => {
+    const loggedIn = await loginToAdmin(page);
+    if (loggedIn) {
+      await page.goto('/ar/admin/messages');
+      await waitForContent(page, ['table', '[class*="card"]', 'main', 'h1']);
+      await waitForPageReady(page);
+    }
+    await takeScreenshot(page, 'admin-messages.png');
+  });
+
+  test.skip('Admin Users (requires auth)', async ({ page }) => {
+    const loggedIn = await loginToAdmin(page);
+    if (loggedIn) {
+      await page.goto('/ar/admin/users');
+      await waitForContent(page, ['table', '[class*="card"]', 'main', 'h1']);
+      await waitForPageReady(page);
+    }
+    await takeScreenshot(page, 'admin-users.png');
+  });
+
+  test.skip('Admin Settings (requires auth)', async ({ page }) => {
+    const loggedIn = await loginToAdmin(page);
+    if (loggedIn) {
+      await page.goto('/ar/admin/settings');
+      await waitForContent(page, ['form', '[class*="card"]', 'main', 'h1']);
+      await waitForPageReady(page);
+    }
+    await takeScreenshot(page, 'admin-settings.png');
+  });
+
+  test.skip('Admin Content (requires auth)', async ({ page }) => {
+    const loggedIn = await loginToAdmin(page);
+    if (loggedIn) {
+      await page.goto('/ar/admin/content');
+      await waitForContent(page, ['form', 'textarea', '[class*="card"]', 'main', 'h1']);
+      await waitForPageReady(page);
+    }
+    await takeScreenshot(page, 'admin-content.png');
+  });
+
+  test.skip('Admin Menus (requires auth)', async ({ page }) => {
+    const loggedIn = await loginToAdmin(page);
+    if (loggedIn) {
+      await page.goto('/ar/admin/menus');
+      await waitForContent(page, ['table', '[class*="card"]', 'main', 'h1']);
+      await waitForPageReady(page);
+    }
+    await takeScreenshot(page, 'admin-menus.png');
+  });
+
+  test.skip('Admin Translations (requires auth)', async ({ page }) => {
+    const loggedIn = await loginToAdmin(page);
+    if (loggedIn) {
+      await page.goto('/ar/admin/translations');
+      await waitForContent(page, ['table', '[class*="card"]', 'main', 'h1']);
+      await waitForPageReady(page);
+    }
+    await takeScreenshot(page, 'admin-translations.png');
+  });
+
+  test.skip('Admin Activity (requires auth)', async ({ page }) => {
+    const loggedIn = await loginToAdmin(page);
+    if (loggedIn) {
+      await page.goto('/ar/admin/activity');
+      await waitForContent(page, ['table', '[class*="card"]', 'main', 'h1']);
+      await waitForPageReady(page);
+    }
+    await takeScreenshot(page, 'admin-activity.png');
+  });
+
+  test.skip('Admin Analytics (requires auth)', async ({ page }) => {
+    const loggedIn = await loginToAdmin(page);
+    if (loggedIn) {
+      await page.goto('/ar/admin/analytics');
+      await waitForContent(page, ['[class*="chart"]', '[class*="card"]', 'main', 'h1']);
+      await waitForPageReady(page);
+    }
+    await takeScreenshot(page, 'admin-analytics.png');
+  });
+
+  test.skip('Admin Notifications (requires auth)', async ({ page }) => {
+    const loggedIn = await loginToAdmin(page);
+    if (loggedIn) {
+      await page.goto('/ar/admin/notifications');
+      await waitForContent(page, ['[class*="card"]', 'main', 'h1']);
+      await waitForPageReady(page);
+    }
+    await takeScreenshot(page, 'admin-notifications.png');
+  });
+});
+
+// ============================================
+// UI STATES
+// ============================================
+test.describe('UI States', () => {
+  test('Dark Mode - Home', async ({ page }) => {
+    await page.goto('/ar');
+    await waitForContent(page, ['section', '.hero', 'main', 'h1']);
+    await waitForPageReady(page);
+
+    // Try to find and click dark mode toggle
+    const themeToggle = page.locator('button[aria-label*="dark"], button[aria-label*="mode"]').first();
+
+    if ((await themeToggle.count()) > 0) {
+      await themeToggle.scrollIntoViewIfNeeded();
+      await themeToggle.click({ force: true });
+      await page.waitForTimeout(1000);
+    }
+
+    await takeScreenshot(page, 'home-dark.png');
+  });
+
+  test('404 Page', async ({ page }) => {
+    await page.goto('/ar/nonexistent-page-404');
+    await waitForPageReady(page);
+    await takeScreenshot(page, '404-page.png');
+  });
+
+  test('Contact Form Validation', async ({ page }) => {
+    await page.goto('/ar/contact');
+    await waitForContent(page, ['form', '.contact', 'main', 'h1']);
+    await waitForPageReady(page);
+
+    // Try to submit empty form to trigger validation
+    const submitBtn = page.locator('button[type="submit"]').first();
+    if (await submitBtn.isVisible()) {
+      await submitBtn.click();
+      await page.waitForTimeout(1000);
+    }
+
+    await takeScreenshot(page, 'form-validation.png');
+  });
+});
+
+// ============================================
+// TABLET SCREENSHOTS
+// ============================================
+test.describe('Tablet Screenshots', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize(VIEWPORTS.tablet);
+  });
+
+  test('Home Tablet - Arabic', async ({ page }) => {
+    await page.goto('/ar');
+    await waitForContent(page, ['section', '.hero', 'main', 'h1']);
+    await waitForPageReady(page);
+    await takeScreenshot(page, 'home-tablet-ar.png', { viewport: VIEWPORTS.tablet });
+  });
+
+  test.skip('Admin Dashboard Tablet (requires auth)', async ({ page }) => {
+    const loggedIn = await loginToAdmin(page);
+
+    if (loggedIn) {
+      await page.goto('/ar/admin');
+      await waitForContent(page, ['[class*="stat"]', '[class*="card"]', 'main', 'h1', 'h2']);
+      await waitForPageReady(page);
+    }
+    await takeScreenshot(page, 'admin-dashboard-tablet.png', { viewport: VIEWPORTS.tablet });
   });
 });

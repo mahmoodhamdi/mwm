@@ -47,38 +47,138 @@ mwm/
 - **Activity Logging**: Track all admin actions
 - **Push Notifications**: FCM integration for real-time alerts
 
+---
+
 ## Screenshots
 
-### Public Pages
+### Public Pages (Arabic - RTL)
 
-| Arabic                                           | English                                          |
-| ------------------------------------------------ | ------------------------------------------------ |
-| ![Home AR](./docs/screenshots/home-ar.png)       | ![Home EN](./docs/screenshots/home-en.png)       |
-| ![About AR](./docs/screenshots/about-ar.png)     | ![About EN](./docs/screenshots/about-en.png)     |
-| ![Contact AR](./docs/screenshots/contact-ar.png) | ![Contact EN](./docs/screenshots/contact-en.png) |
-| ![Blog AR](./docs/screenshots/blog-ar.png)       | ![Blog EN](./docs/screenshots/blog-en.png)       |
-| ![Careers AR](./docs/screenshots/careers-ar.png) | ![Careers EN](./docs/screenshots/careers-en.png) |
-| ![Team AR](./docs/screenshots/team-ar.png)       | ![Team EN](./docs/screenshots/team-en.png)       |
+<table>
+  <tr>
+    <td align="center"><strong>Home</strong></td>
+    <td align="center"><strong>About</strong></td>
+  </tr>
+  <tr>
+    <td><img src="./docs/screenshots/home-ar.png" alt="Home Arabic" width="400"/></td>
+    <td><img src="./docs/screenshots/about-ar.png" alt="About Arabic" width="400"/></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>Services</strong></td>
+    <td align="center"><strong>Projects</strong></td>
+  </tr>
+  <tr>
+    <td><img src="./docs/screenshots/services-ar.png" alt="Services Arabic" width="400"/></td>
+    <td><img src="./docs/screenshots/projects-ar.png" alt="Projects Arabic" width="400"/></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>Team</strong></td>
+    <td align="center"><strong>Blog</strong></td>
+  </tr>
+  <tr>
+    <td><img src="./docs/screenshots/team-ar.png" alt="Team Arabic" width="400"/></td>
+    <td><img src="./docs/screenshots/blog-ar.png" alt="Blog Arabic" width="400"/></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>Careers</strong></td>
+    <td align="center"><strong>Contact</strong></td>
+  </tr>
+  <tr>
+    <td><img src="./docs/screenshots/careers-ar.png" alt="Careers Arabic" width="400"/></td>
+    <td><img src="./docs/screenshots/contact-ar.png" alt="Contact Arabic" width="400"/></td>
+  </tr>
+</table>
+
+### Public Pages (English - LTR)
+
+<table>
+  <tr>
+    <td align="center"><strong>Home</strong></td>
+    <td align="center"><strong>About</strong></td>
+  </tr>
+  <tr>
+    <td><img src="./docs/screenshots/home-en.png" alt="Home English" width="400"/></td>
+    <td><img src="./docs/screenshots/about-en.png" alt="About English" width="400"/></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>Services</strong></td>
+    <td align="center"><strong>Projects</strong></td>
+  </tr>
+  <tr>
+    <td><img src="./docs/screenshots/services-en.png" alt="Services English" width="400"/></td>
+    <td><img src="./docs/screenshots/projects-en.png" alt="Projects English" width="400"/></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>Team</strong></td>
+    <td align="center"><strong>Blog</strong></td>
+  </tr>
+  <tr>
+    <td><img src="./docs/screenshots/team-en.png" alt="Team English" width="400"/></td>
+    <td><img src="./docs/screenshots/blog-en.png" alt="Blog English" width="400"/></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>Careers</strong></td>
+    <td align="center"><strong>Contact</strong></td>
+  </tr>
+  <tr>
+    <td><img src="./docs/screenshots/careers-en.png" alt="Careers English" width="400"/></td>
+    <td><img src="./docs/screenshots/contact-en.png" alt="Contact English" width="400"/></td>
+  </tr>
+</table>
 
 ### Mobile Views
 
-| Home Mobile AR                                      | Home Mobile EN                                      | Contact Mobile                                    |
-| --------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------- |
-| ![Mobile AR](./docs/screenshots/home-mobile-ar.png) | ![Mobile EN](./docs/screenshots/home-mobile-en.png) | ![Contact](./docs/screenshots/contact-mobile.png) |
+<table>
+  <tr>
+    <td align="center"><strong>Home (AR)</strong></td>
+    <td align="center"><strong>Home (EN)</strong></td>
+    <td align="center"><strong>Services</strong></td>
+  </tr>
+  <tr>
+    <td><img src="./docs/screenshots/home-mobile-ar.png" alt="Home Mobile Arabic" width="200"/></td>
+    <td><img src="./docs/screenshots/home-mobile-en.png" alt="Home Mobile English" width="200"/></td>
+    <td><img src="./docs/screenshots/services-mobile.png" alt="Services Mobile" width="200"/></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>Blog</strong></td>
+    <td align="center"><strong>Contact</strong></td>
+    <td align="center"><strong>Careers</strong></td>
+  </tr>
+  <tr>
+    <td><img src="./docs/screenshots/blog-mobile.png" alt="Blog Mobile" width="200"/></td>
+    <td><img src="./docs/screenshots/contact-mobile.png" alt="Contact Mobile" width="200"/></td>
+    <td><img src="./docs/screenshots/careers-mobile.png" alt="Careers Mobile" width="200"/></td>
+  </tr>
+</table>
 
-### Admin Dashboard
+### Admin Panel
 
-| Dashboard                                            | Services                                           | Projects                                           |
-| ---------------------------------------------------- | -------------------------------------------------- | -------------------------------------------------- |
-| ![Dashboard](./docs/screenshots/admin-dashboard.png) | ![Services](./docs/screenshots/admin-services.png) | ![Projects](./docs/screenshots/admin-projects.png) |
+<table>
+  <tr>
+    <td align="center"><strong>Login Page</strong></td>
+  </tr>
+  <tr>
+    <td><img src="./docs/screenshots/admin-login.png" alt="Admin Login" width="500"/></td>
+  </tr>
+</table>
 
-| Blog                                       | Careers                                          | Newsletter                                             |
-| ------------------------------------------ | ------------------------------------------------ | ------------------------------------------------------ |
-| ![Blog](./docs/screenshots/admin-blog.png) | ![Careers](./docs/screenshots/admin-careers.png) | ![Newsletter](./docs/screenshots/admin-newsletter.png) |
+> **Note:** Admin dashboard screenshots require a seeded database with test users. Run `npm run seed` in the backend to create test data, then run the E2E screenshot tests.
 
-| Settings                                           | Login                                        |
-| -------------------------------------------------- | -------------------------------------------- |
-| ![Settings](./docs/screenshots/admin-settings.png) | ![Login](./docs/screenshots/admin-login.png) |
+### UI States
+
+<table>
+  <tr>
+    <td align="center"><strong>Dark Mode</strong></td>
+    <td align="center"><strong>404 Page</strong></td>
+    <td align="center"><strong>Form Validation</strong></td>
+  </tr>
+  <tr>
+    <td><img src="./docs/screenshots/home-dark.png" alt="Dark Mode" width="300"/></td>
+    <td><img src="./docs/screenshots/404-page.png" alt="404 Page" width="300"/></td>
+    <td><img src="./docs/screenshots/form-validation.png" alt="Form Validation" width="300"/></td>
+  </tr>
+</table>
+
+---
 
 ## Tech Stack
 
@@ -156,6 +256,9 @@ npx playwright test --ui
 
 # Run specific test file
 npx playwright test e2e/screenshots.spec.ts
+
+# Generate screenshots
+npx playwright test screenshots.spec.ts --project=chromium
 ```
 
 ## API Documentation
@@ -165,13 +268,15 @@ npx playwright test e2e/screenshots.spec.ts
 
 ## Documentation
 
-| Document                                          | Description                     |
-| ------------------------------------------------- | ------------------------------- |
-| [DEVELOPMENT_PLAN.md](./docs/DEVELOPMENT_PLAN.md) | Development roadmap and status  |
-| [PROJECT_ROUTES.md](./docs/PROJECT_ROUTES.md)     | Frontend pages and API routes   |
-| [ADMIN_GUIDE.md](./docs/ADMIN_GUIDE.md)           | Admin panel user guide          |
-| [DEPLOYMENT.md](./docs/DEPLOYMENT.md)             | Production deployment guide     |
-| [PENDING_FEATURES.md](./docs/PENDING_FEATURES.md) | Remaining features to implement |
+| Document                                                            | Description                    |
+| ------------------------------------------------------------------- | ------------------------------ |
+| [DEVELOPMENT_PLAN.md](./docs/DEVELOPMENT_PLAN.md)                   | Development roadmap and status |
+| [PROJECT_ROUTES.md](./docs/PROJECT_ROUTES.md)                       | Frontend pages and API routes  |
+| [ADMIN_GUIDE.md](./docs/ADMIN_GUIDE.md)                             | Admin panel user guide         |
+| [DEPLOYMENT.md](./docs/DEPLOYMENT.md)                               | Production deployment guide    |
+| [CREDENTIALS.md](./docs/CREDENTIALS.md)                             | Environment setup guide        |
+| [CODE_REVIEW_REPORT.md](./docs/CODE_REVIEW_REPORT.md)               | Comprehensive code review      |
+| [PRODUCTION_READINESS_PLAN.md](./docs/PRODUCTION_READINESS_PLAN.md) | Production readiness checklist |
 
 ## Project Status
 
@@ -182,7 +287,7 @@ npx playwright test e2e/screenshots.spec.ts
 - Frontend (13 public pages, 16 admin pages)
 - Authentication (JWT with refresh tokens)
 - i18n (Arabic/English with RTL)
-- Testing (unit, integration & E2E)
+- Testing (unit, integration & E2E with 28 screenshots)
 - SEO (meta tags, sitemap, robots.txt)
 - Blog System (full implementation)
 - Careers System (jobs & applications)

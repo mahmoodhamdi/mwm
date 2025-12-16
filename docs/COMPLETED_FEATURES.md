@@ -1027,7 +1027,7 @@ All models have dedicated test files covering:
 
 **Service Tests (2):** Blog and careers services with 35+ tests each
 
-### E2E Tests (10 files)
+### E2E Tests (14 files)
 
 - `home.spec.ts` - Home page, language switching, performance
 - `navigation.spec.ts` - Public page navigation
@@ -1037,8 +1037,12 @@ All models have dedicated test files covering:
 - `projects.spec.ts` - Portfolio
 - `team.spec.ts` - Team pages
 - `services.spec.ts` - Services pages
+- `forms.spec.ts` - Form submissions
+- `comprehensive.spec.ts` - Full user journeys
+- `screenshots.spec.ts` - Screenshot generation
 - `admin/auth.spec.ts` - Admin authentication
 - `admin/dashboard.spec.ts` - Admin dashboard
+- `admin/comprehensive.spec.ts` - Admin CRUD operations
 
 ---
 
@@ -1110,8 +1114,8 @@ All models have dedicated test files covering:
 | Shared Utilities      | 18    |
 | Backend Test Files    | 27    |
 | Frontend Test Files   | 42    |
-| E2E Test Files        | 10    |
+| E2E Test Files        | 14    |
 
 ---
 
-_Last Updated: 2025-12-08_
+_Last Updated: 2025-12-16_

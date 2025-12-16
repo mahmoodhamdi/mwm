@@ -96,6 +96,40 @@ export interface JobApplication {
 const CAREERS_ENDPOINT = '/careers';
 
 /**
+ * Upload resume file
+ * رفع ملف السيرة الذاتية
+ */
+export async function uploadResume(file: File): Promise<{ url: string; filename: string }> {
+  const formData = new FormData();
+  formData.append('resume', file);
+
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}${CAREERS_ENDPOINT}/upload-resume`,
+    {
+      method: 'POST',
+      body: formData,
+      credentials: 'include',
+      headers: {
+        // Get CSRF token from cookie
+        'x-csrf-token':
+          document.cookie
+            .split('; ')
+            .find(row => row.startsWith('csrf_token='))
+            ?.split('=')[1] || '',
+      },
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Upload failed' }));
+    throw new Error(error.message || 'Failed to upload resume');
+  }
+
+  const data = await response.json();
+  return data.data || { url: '', filename: '' };
+}
+
+/**
  * Get jobs with filters
  * جلب الوظائف مع الفلاتر
  */
@@ -164,6 +198,7 @@ export const careersService = {
   getFeaturedJobs,
   getDepartments,
   submitApplication,
+  uploadResume,
 };
 
 export default careersService;

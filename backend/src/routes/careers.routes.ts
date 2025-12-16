@@ -8,6 +8,7 @@ import rateLimit from 'express-rate-limit';
 import { careersController } from '../controllers';
 import { authenticate, authorize } from '../middlewares/auth';
 import { validate, idParamsSchema, jobIdParamsSchema } from '../middlewares/validate';
+import { csrfValidation } from '../middlewares/csrf';
 import { careersValidation } from '../validations';
 import { resumeUpload } from '../utils/upload';
 
@@ -69,6 +70,7 @@ router.get('/jobs', careersController.getJobs);
 router.post(
   '/upload-resume',
   uploadLimiter,
+  csrfValidation,
   resumeUpload.single('resume'),
   careersController.uploadResume
 );
@@ -77,6 +79,7 @@ router.post(
 router.post(
   '/apply',
   applicationLimiter,
+  csrfValidation,
   validate({ body: careersValidation.createApplication }),
   careersController.submitApplication
 );

@@ -78,7 +78,7 @@ npm run docker:logs            # View Docker container logs
 - `routes/` - API route definitions (versioned at `/api/v1/`)
 - `middlewares/` - Auth, validation, error handling, asyncHandler
 - `validations/` - Joi validation schemas (one per domain)
-- `services/` - Business logic (auth, email)
+- `services/` - Business logic (auth, email, push notifications)
 - `config/` - Environment, database, Redis, logging, swagger
 - `utils/` - Utilities: `ApiError` (custom error class), `response` (standardized responses), `pagination` (query helpers), `security` (sanitization)
 
@@ -192,6 +192,17 @@ Frontend uses:
 - Backend: Firebase Admin SDK (`firebase-admin`) for sending FCM notifications
 - Frontend: Firebase Web SDK for receiving push notifications in browser
 - Service worker handles background notification delivery
+
+### File Uploads
+
+- Backend uses `multer` middleware for handling multipart/form-data
+- Resume uploads for job applications stored in `backend/uploads/resumes/`
+- Image uploads configured for Cloudinary integration (partial implementation)
+
+### Real-time (Planned)
+
+- Socket.io configured in backend dependencies for WebSocket support
+- Real-time notifications planned but not fully implemented
 
 ## Environment Setup
 

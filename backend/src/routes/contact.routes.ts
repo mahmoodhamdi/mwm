@@ -6,7 +6,7 @@
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { contactController } from '../controllers/contact.controller';
-import { authenticate, authorize, validate, idParamsSchema } from '../middlewares';
+import { authenticate, authorize, validate, idParamsSchema, csrfValidation } from '../middlewares';
 import { contactValidation } from '../validations';
 
 const router = Router();
@@ -39,6 +39,7 @@ const contactFormLimiter = rateLimit({
 router.post(
   '/',
   contactFormLimiter,
+  csrfValidation,
   validate({ body: contactValidation.submitContactSchema }),
   contactController.submitContact
 );

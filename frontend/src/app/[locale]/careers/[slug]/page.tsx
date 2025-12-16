@@ -26,6 +26,7 @@ import {
   getJobBySlug,
   getJobs,
   submitApplication,
+  uploadResume,
   type Job,
   type JobType,
   type JobApplication,
@@ -55,6 +56,8 @@ export default function JobDetailPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState<{ name: string; url: string } | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -71,6 +74,41 @@ export default function JobDetailPage() {
     education: '',
     resume: '',
   });
+
+  // Handle file upload
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    ];
+    if (!allowedTypes.includes(file.type)) {
+      alert(isRTL ? 'يرجى رفع ملف PDF أو Word فقط' : 'Please upload PDF or Word files only');
+      return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      alert(isRTL ? 'حجم الملف يجب أن يكون أقل من 5 ميجابايت' : 'File size must be less than 5MB');
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const result = await uploadResume(file);
+      setUploadedFile({ name: file.name, url: result.url });
+      setFormData(prev => ({ ...prev, resume: result.url }));
+    } catch (err) {
+      console.error('Failed to upload resume:', err);
+      alert(isRTL ? 'فشل في رفع الملف' : 'Failed to upload file');
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -701,25 +739,62 @@ export default function JobDetailPage() {
                       </div>
                     </div>
 
-                    {/* Resume URL */}
+                    {/* Resume Upload */}
                     <div>
                       <label className="mb-1 block text-sm font-medium">
-                        {isRTL ? 'رابط السيرة الذاتية' : 'Resume URL'} *
+                        {isRTL ? 'السيرة الذاتية' : 'Resume'} *
                       </label>
-                      <div className="flex items-center gap-2 rounded-lg border p-3">
-                        <Upload className="size-5 text-gray-400" />
-                        <input
-                          type="url"
-                          name="resume"
-                          value={formData.resume}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full outline-none"
-                          placeholder={
-                            isRTL ? 'رابط Google Drive أو Dropbox' : 'Google Drive or Dropbox link'
-                          }
-                        />
+                      <div className="rounded-lg border-2 border-dashed p-4">
+                        {uploadedFile ? (
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <CheckCircle className="size-5 text-green-500" />
+                              <span className="text-sm font-medium">{uploadedFile.name}</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setUploadedFile(null);
+                                setFormData(prev => ({ ...prev, resume: '' }));
+                              }}
+                              className="text-sm text-red-500 hover:underline"
+                            >
+                              {isRTL ? 'إزالة' : 'Remove'}
+                            </button>
+                          </div>
+                        ) : (
+                          <label className="flex cursor-pointer flex-col items-center gap-2">
+                            {isUploading ? (
+                              <Loader2 className="size-8 animate-spin text-blue-500" />
+                            ) : (
+                              <Upload className="size-8 text-gray-400" />
+                            )}
+                            <span className="text-sm text-gray-600">
+                              {isUploading
+                                ? isRTL
+                                  ? 'جاري الرفع...'
+                                  : 'Uploading...'
+                                : isRTL
+                                  ? 'اضغط لرفع السيرة الذاتية'
+                                  : 'Click to upload resume'}
+                            </span>
+                            <span className="text-xs text-gray-400">
+                              {isRTL
+                                ? 'PDF, DOC, DOCX (حتى 5 ميجابايت)'
+                                : 'PDF, DOC, DOCX (up to 5MB)'}
+                            </span>
+                            <input
+                              type="file"
+                              accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                              onChange={handleFileUpload}
+                              className="hidden"
+                              disabled={isUploading}
+                            />
+                          </label>
+                        )}
                       </div>
+                      {/* Hidden input for form validation */}
+                      <input type="hidden" name="resume" value={formData.resume} required />
                     </div>
 
                     {/* Cover Letter */}

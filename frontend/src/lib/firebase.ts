@@ -247,7 +247,7 @@ export async function signOut(): Promise<void> {
   }
 }
 
-export default {
+const firebaseUtils = {
   initializeFirebase,
   getFirebaseMessaging,
   requestNotificationPermission,
@@ -258,3 +258,5 @@ export default {
   getIdToken,
   signOut,
 };
+
+export default firebaseUtils;

@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { MessagePayload } from 'firebase/messaging';
 import {
@@ -13,6 +13,7 @@ import {
   onForegroundMessage,
   showNotification,
 } from '@/lib/firebase';
+import { connectSocket, disconnectSocket, subscribeToEvent, NotificationData } from '@/lib/socket';
 import api from '@/lib/api';
 
 interface Notification {
@@ -35,6 +36,7 @@ interface NotificationsResponse {
 interface UseNotificationsOptions {
   enabled?: boolean;
   locale?: 'ar' | 'en';
+  token?: string | null; // JWT token for socket auth
 }
 
 /**
@@ -42,12 +44,14 @@ interface UseNotificationsOptions {
  * هوك لإدارة الإشعارات
  */
 export function useNotifications(options: UseNotificationsOptions = {}) {
-  const { enabled = true, locale = 'ar' } = options;
+  const { enabled = true, locale = 'ar', token = null } = options;
   const queryClient = useQueryClient();
   const [fcmToken, setFcmToken] = useState<string | null>(null);
   const [permissionGranted, setPermissionGranted] = useState(false);
+  const [socketConnected, setSocketConnected] = useState(false);
+  const socketConnectedRef = useRef(false);
 
-  // Fetch notifications
+  // Fetch notifications (reduced polling when socket connected)
   const {
     data: notificationsData,
     isLoading,
@@ -61,10 +65,11 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
       return (response.data as any).data as NotificationsResponse;
     },
     enabled,
-    refetchInterval: 60000, // Refetch every minute
+    // Reduce polling when socket is connected (5 min backup vs 1 min without socket)
+    refetchInterval: socketConnectedRef.current ? 300000 : 60000,
   });
 
-  // Fetch unread count
+  // Fetch unread count (reduced polling when socket connected)
   const { data: unreadCountData } = useQuery<{ count: number }>({
     queryKey: ['notifications-unread-count'],
     queryFn: async (): Promise<{ count: number }> => {
@@ -73,7 +78,8 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
       return (response.data as any).data as { count: number };
     },
     enabled,
-    refetchInterval: 30000, // Refetch every 30 seconds
+    // Reduce polling when socket is connected (5 min backup vs 30 sec without socket)
+    refetchInterval: socketConnectedRef.current ? 300000 : 30000,
   });
 
   // Mark as read mutation
@@ -169,6 +175,107 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
     }
   }, []);
 
+  // Socket connection and event handling
+  useEffect(() => {
+    if (!enabled || !token || typeof window === 'undefined') return;
+
+    // Connect to socket
+    const socket = connectSocket(token);
+
+    socket.on('connect', () => {
+      setSocketConnected(true);
+      socketConnectedRef.current = true;
+    });
+
+    socket.on('disconnect', () => {
+      setSocketConnected(false);
+      socketConnectedRef.current = false;
+    });
+
+    // Handle real-time notification events
+    const unsubscribeNew = subscribeToEvent<{ notification: NotificationData }>(
+      'notification:new',
+      data => {
+        // Add new notification to cache
+        queryClient.setQueryData<NotificationsResponse>(['notifications'], old => {
+          if (!old) return old;
+          return {
+            ...old,
+            notifications: [data.notification as unknown as Notification, ...old.notifications],
+            total: old.total + 1,
+            unreadCount: old.unreadCount + 1,
+          };
+        });
+
+        // Show browser notification
+        const title = locale === 'ar' ? data.notification.title.ar : data.notification.title.en;
+        const body = locale === 'ar' ? data.notification.body.ar : data.notification.body.en;
+        showNotification(title, {
+          body,
+          icon: '/favicon.svg',
+          data: { link: data.notification.link },
+        });
+      }
+    );
+
+    const unsubscribeUpdated = subscribeToEvent<{ id: string; isRead: boolean }>(
+      'notification:updated',
+      data => {
+        // Update notification in cache
+        queryClient.setQueryData<NotificationsResponse>(['notifications'], old => {
+          if (!old) return old;
+          return {
+            ...old,
+            notifications: old.notifications.map(n =>
+              n._id === data.id ? { ...n, isRead: data.isRead } : n
+            ),
+          };
+        });
+      }
+    );
+
+    const unsubscribeDeleted = subscribeToEvent<{ id: string }>('notification:deleted', data => {
+      // Remove notification from cache
+      queryClient.setQueryData<NotificationsResponse>(['notifications'], old => {
+        if (!old) return old;
+        return {
+          ...old,
+          notifications: old.notifications.filter(n => n._id !== data.id),
+          total: old.total - 1,
+        };
+      });
+    });
+
+    const unsubscribeCount = subscribeToEvent<{ count: number }>('notification:count', data => {
+      // Update unread count
+      queryClient.setQueryData<{ count: number }>(['notifications-unread-count'], {
+        count: data.count,
+      });
+    });
+
+    const unsubscribeReadAll = subscribeToEvent<{ count: number }>('notification:read-all', () => {
+      // Mark all as read in cache
+      queryClient.setQueryData<NotificationsResponse>(['notifications'], old => {
+        if (!old) return old;
+        return {
+          ...old,
+          notifications: old.notifications.map(n => ({ ...n, isRead: true })),
+          unreadCount: 0,
+        };
+      });
+    });
+
+    // Cleanup on unmount
+    return () => {
+      unsubscribeNew();
+      unsubscribeUpdated();
+      unsubscribeDeleted();
+      unsubscribeCount();
+      unsubscribeReadAll();
+      disconnectSocket();
+    };
+  }, [enabled, token, locale, queryClient]);
+
   return {
     notifications: (notificationsData?.notifications || []) as Notification[],
     total: notificationsData?.total || 0,
@@ -182,6 +289,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
     requestPermission,
     fcmToken,
     permissionGranted,
+    socketConnected,
     locale,
   };
 }

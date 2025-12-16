@@ -5,7 +5,7 @@
 
 import * as admin from 'firebase-admin';
 import { getMessaging } from '../config/firebase';
-import { logger } from '../config';
+import { logger, emitToUser, emitToAdmins } from '../config';
 import { Notification, INotification } from '../models/Notification';
 import { User } from '../models';
 import { DeviceToken } from '../models/DeviceToken';
@@ -187,6 +187,16 @@ export async function sendNotification(options: SendNotificationOptions): Promis
     }));
 
     savedNotifications = await Notification.insertMany(notificationsToCreate);
+
+    // Emit socket events for real-time updates
+    for (const notification of savedNotifications) {
+      const userId = notification.user.toString();
+      emitToUser(userId, 'notification:new', { notification });
+
+      // Get updated unread count
+      const unreadCount = await Notification.countDocuments({ user: userId, isRead: false });
+      emitToUser(userId, 'notification:count', { count: unreadCount });
+    }
   }
 
   // Get device tokens for target users
@@ -340,11 +350,22 @@ export async function notifyUser(userId: string, payload: NotificationPayload): 
  * تحديد الإشعار كمقروء
  */
 export async function markAsRead(notificationId: string): Promise<INotification | null> {
-  return Notification.findByIdAndUpdate(
+  const notification = await Notification.findByIdAndUpdate(
     notificationId,
     { isRead: true, readAt: new Date() },
     { new: true }
   );
+
+  if (notification) {
+    const userId = notification.user.toString();
+    emitToUser(userId, 'notification:updated', { id: notificationId, isRead: true });
+
+    // Get updated unread count
+    const unreadCount = await Notification.countDocuments({ user: userId, isRead: false });
+    emitToUser(userId, 'notification:count', { count: unreadCount });
+  }
+
+  return notification;
 }
 
 /**
@@ -356,6 +377,12 @@ export async function markAllAsRead(userId: string): Promise<number> {
     { user: userId, isRead: false },
     { isRead: true, readAt: new Date() }
   );
+
+  if (result.modifiedCount > 0) {
+    emitToUser(userId, 'notification:read-all', { count: result.modifiedCount });
+    emitToUser(userId, 'notification:count', { count: 0 });
+  }
+
   return result.modifiedCount;
 }
 

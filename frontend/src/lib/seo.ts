@@ -326,7 +326,7 @@ export function generateFAQSchema(faqs: Array<{ question: string; answer: string
   };
 }
 
-export default {
+const seoUtils = {
   generateMetadata,
   generateOrganizationSchema,
   generateWebsiteSchema,
@@ -337,3 +337,5 @@ export default {
   generateBreadcrumbSchema,
   generateFAQSchema,
 };
+
+export default seoUtils;

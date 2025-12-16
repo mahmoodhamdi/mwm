@@ -18,11 +18,11 @@ import {
   ArrowLeft,
   ChevronRight,
   Bookmark,
-  MessageCircle,
   Loader2,
 } from 'lucide-react';
 import { getBlogPostBySlug, getRelatedPosts, type BlogPost } from '@/services/public';
 import { createSanitizedHtml } from '@/lib/sanitize';
+import { CommentSection } from '@/components/blog';
 
 export default function BlogPostPage() {
   const locale = useLocale() as 'ar' | 'en';
@@ -347,20 +347,7 @@ export default function BlogPostPage() {
             </div>
 
             {/* Comments Section */}
-            <div className="mt-12 border-t pt-12">
-              <h2 className="mb-6 text-2xl font-bold">{isRTL ? 'التعليقات' : 'Comments'}</h2>
-              <div className="rounded-xl border p-8 text-center">
-                <MessageCircle className="mx-auto mb-4 size-12 text-gray-300" />
-                <p className="mb-4 text-gray-500">
-                  {isRTL
-                    ? 'لا توجد تعليقات بعد. كن أول من يعلق!'
-                    : 'No comments yet. Be the first to comment!'}
-                </p>
-                <button className="rounded-lg bg-blue-600 px-6 py-2 text-white hover:bg-blue-700">
-                  {isRTL ? 'أضف تعليق' : 'Add Comment'}
-                </button>
-              </div>
-            </div>
+            <CommentSection postId={post._id} postSlug={slug} />
           </article>
         </div>
       </div>

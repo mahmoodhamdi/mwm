@@ -253,7 +253,7 @@ export const colorContrast = {
   },
 };
 
-export default {
+const accessibilityUtils = {
   announceToScreenReader,
   focusUtils,
   createSkipLinkTarget,
@@ -262,3 +262,5 @@ export default {
   keyboardNav,
   colorContrast,
 };
+
+export default accessibilityUtils;

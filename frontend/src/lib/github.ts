@@ -58,8 +58,10 @@ export function initiateGitHubAuth(): void {
   window.location.href = authUrl;
 }
 
-export default {
+const githubOAuth = {
   getGitHubAuthUrl,
   verifyState,
   initiateGitHubAuth,
 };
+
+export default githubOAuth;

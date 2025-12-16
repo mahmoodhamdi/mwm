@@ -23,7 +23,9 @@ jest.mock('next/link', () => {
 
 // Mock next/image
 jest.mock('next/image', () => {
-  const MockImage = (props: React.ImgHTMLAttributes<HTMLImageElement>) => <img {...props} />;
+  const MockImage = (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
+    <img {...props} alt={props.alt || ''} />
+  );
   MockImage.displayName = 'MockImage';
   return MockImage;
 });

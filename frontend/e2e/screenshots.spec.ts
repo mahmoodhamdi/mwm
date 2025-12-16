@@ -221,164 +221,148 @@ test.describe('Admin Pages', () => {
     await takeScreenshot(page, 'admin-login.png');
   });
 
-  // Skip authenticated admin tests - require valid user in database
-  test.skip('Admin Dashboard (requires auth)', async ({ page }) => {
+  // Authenticated admin tests - require valid user in database
+  test('Admin Dashboard', async ({ page }) => {
     const loggedIn = await loginToAdmin(page);
-    if (loggedIn) {
-      await page.goto('/ar/admin');
-      await waitForContent(page, ['[class*="stat"]', '[class*="card"]', 'main', 'h1', 'h2']);
-      await waitForPageReady(page);
-    }
+    expect(loggedIn).toBe(true);
+    await page.goto('/ar/admin');
+    await waitForContent(page, ['[class*="stat"]', '[class*="card"]', 'main', 'h1', 'h2']);
+    await waitForPageReady(page);
     await takeScreenshot(page, 'admin-dashboard.png');
   });
 
-  test.skip('Admin Services (requires auth)', async ({ page }) => {
+  test('Admin Services', async ({ page }) => {
     const loggedIn = await loginToAdmin(page);
-    if (loggedIn) {
-      await page.goto('/ar/admin/services');
-      await waitForContent(page, ['table', '[class*="card"]', 'main', 'h1']);
-      await waitForPageReady(page);
-    }
+    expect(loggedIn).toBe(true);
+    await page.goto('/ar/admin/services');
+    await waitForContent(page, ['table', '[class*="card"]', 'main', 'h1']);
+    await waitForPageReady(page);
     await takeScreenshot(page, 'admin-services.png');
   });
 
-  test.skip('Admin Projects (requires auth)', async ({ page }) => {
+  test('Admin Projects', async ({ page }) => {
     const loggedIn = await loginToAdmin(page);
-    if (loggedIn) {
-      await page.goto('/ar/admin/projects');
-      await waitForContent(page, ['table', '[class*="card"]', 'main', 'h1']);
-      await waitForPageReady(page);
-    }
+    expect(loggedIn).toBe(true);
+    await page.goto('/ar/admin/projects');
+    await waitForContent(page, ['table', '[class*="card"]', 'main', 'h1']);
+    await waitForPageReady(page);
     await takeScreenshot(page, 'admin-projects.png');
   });
 
-  test.skip('Admin Team (requires auth)', async ({ page }) => {
+  test('Admin Team', async ({ page }) => {
     const loggedIn = await loginToAdmin(page);
-    if (loggedIn) {
-      await page.goto('/ar/admin/team');
-      await waitForContent(page, ['table', '[class*="card"]', 'main', 'h1']);
-      await waitForPageReady(page);
-    }
+    expect(loggedIn).toBe(true);
+    await page.goto('/ar/admin/team');
+    await waitForContent(page, ['table', '[class*="card"]', 'main', 'h1']);
+    await waitForPageReady(page);
     await takeScreenshot(page, 'admin-team.png');
   });
 
-  test.skip('Admin Blog (requires auth)', async ({ page }) => {
+  test('Admin Blog', async ({ page }) => {
     const loggedIn = await loginToAdmin(page);
-    if (loggedIn) {
-      await page.goto('/ar/admin/blog');
-      await waitForContent(page, ['table', '[class*="card"]', 'main', 'h1']);
-      await waitForPageReady(page);
-    }
+    expect(loggedIn).toBe(true);
+    await page.goto('/ar/admin/blog');
+    await waitForContent(page, ['table', '[class*="card"]', 'main', 'h1']);
+    await waitForPageReady(page);
     await takeScreenshot(page, 'admin-blog.png');
   });
 
-  test.skip('Admin Careers (requires auth)', async ({ page }) => {
+  test('Admin Careers', async ({ page }) => {
     const loggedIn = await loginToAdmin(page);
-    if (loggedIn) {
-      await page.goto('/ar/admin/careers');
-      await waitForContent(page, ['table', '[class*="card"]', 'main', 'h1']);
-      await waitForPageReady(page);
-    }
+    expect(loggedIn).toBe(true);
+    await page.goto('/ar/admin/careers');
+    await waitForContent(page, ['table', '[class*="card"]', 'main', 'h1']);
+    await waitForPageReady(page);
     await takeScreenshot(page, 'admin-careers.png');
   });
 
-  test.skip('Admin Newsletter (requires auth)', async ({ page }) => {
+  test('Admin Newsletter', async ({ page }) => {
     const loggedIn = await loginToAdmin(page);
-    if (loggedIn) {
-      await page.goto('/ar/admin/newsletter');
-      await waitForContent(page, ['table', '[class*="card"]', 'main', 'h1']);
-      await waitForPageReady(page);
-    }
+    expect(loggedIn).toBe(true);
+    await page.goto('/ar/admin/newsletter');
+    await waitForContent(page, ['table', '[class*="card"]', 'main', 'h1']);
+    await waitForPageReady(page);
     await takeScreenshot(page, 'admin-newsletter.png');
   });
 
-  test.skip('Admin Messages (requires auth)', async ({ page }) => {
+  test('Admin Messages', async ({ page }) => {
     const loggedIn = await loginToAdmin(page);
-    if (loggedIn) {
-      await page.goto('/ar/admin/messages');
-      await waitForContent(page, ['table', '[class*="card"]', 'main', 'h1']);
-      await waitForPageReady(page);
-    }
+    expect(loggedIn).toBe(true);
+    await page.goto('/ar/admin/messages');
+    await waitForContent(page, ['table', '[class*="card"]', 'main', 'h1']);
+    await waitForPageReady(page);
     await takeScreenshot(page, 'admin-messages.png');
   });
 
-  test.skip('Admin Users (requires auth)', async ({ page }) => {
+  test('Admin Users', async ({ page }) => {
     const loggedIn = await loginToAdmin(page);
-    if (loggedIn) {
-      await page.goto('/ar/admin/users');
-      await waitForContent(page, ['table', '[class*="card"]', 'main', 'h1']);
-      await waitForPageReady(page);
-    }
+    expect(loggedIn).toBe(true);
+    await page.goto('/ar/admin/users');
+    await waitForContent(page, ['table', '[class*="card"]', 'main', 'h1']);
+    await waitForPageReady(page);
     await takeScreenshot(page, 'admin-users.png');
   });
 
-  test.skip('Admin Settings (requires auth)', async ({ page }) => {
+  test('Admin Settings', async ({ page }) => {
     const loggedIn = await loginToAdmin(page);
-    if (loggedIn) {
-      await page.goto('/ar/admin/settings');
-      await waitForContent(page, ['form', '[class*="card"]', 'main', 'h1']);
-      await waitForPageReady(page);
-    }
+    expect(loggedIn).toBe(true);
+    await page.goto('/ar/admin/settings');
+    await waitForContent(page, ['form', '[class*="card"]', 'main', 'h1']);
+    await waitForPageReady(page);
     await takeScreenshot(page, 'admin-settings.png');
   });
 
-  test.skip('Admin Content (requires auth)', async ({ page }) => {
+  test('Admin Content', async ({ page }) => {
     const loggedIn = await loginToAdmin(page);
-    if (loggedIn) {
-      await page.goto('/ar/admin/content');
-      await waitForContent(page, ['form', 'textarea', '[class*="card"]', 'main', 'h1']);
-      await waitForPageReady(page);
-    }
+    expect(loggedIn).toBe(true);
+    await page.goto('/ar/admin/content');
+    await waitForContent(page, ['form', 'textarea', '[class*="card"]', 'main', 'h1']);
+    await waitForPageReady(page);
     await takeScreenshot(page, 'admin-content.png');
   });
 
-  test.skip('Admin Menus (requires auth)', async ({ page }) => {
+  test('Admin Menus', async ({ page }) => {
     const loggedIn = await loginToAdmin(page);
-    if (loggedIn) {
-      await page.goto('/ar/admin/menus');
-      await waitForContent(page, ['table', '[class*="card"]', 'main', 'h1']);
-      await waitForPageReady(page);
-    }
+    expect(loggedIn).toBe(true);
+    await page.goto('/ar/admin/menus');
+    await waitForContent(page, ['table', '[class*="card"]', 'main', 'h1']);
+    await waitForPageReady(page);
     await takeScreenshot(page, 'admin-menus.png');
   });
 
-  test.skip('Admin Translations (requires auth)', async ({ page }) => {
+  test('Admin Translations', async ({ page }) => {
     const loggedIn = await loginToAdmin(page);
-    if (loggedIn) {
-      await page.goto('/ar/admin/translations');
-      await waitForContent(page, ['table', '[class*="card"]', 'main', 'h1']);
-      await waitForPageReady(page);
-    }
+    expect(loggedIn).toBe(true);
+    await page.goto('/ar/admin/translations');
+    await waitForContent(page, ['table', '[class*="card"]', 'main', 'h1']);
+    await waitForPageReady(page);
     await takeScreenshot(page, 'admin-translations.png');
   });
 
-  test.skip('Admin Activity (requires auth)', async ({ page }) => {
+  test('Admin Activity', async ({ page }) => {
     const loggedIn = await loginToAdmin(page);
-    if (loggedIn) {
-      await page.goto('/ar/admin/activity');
-      await waitForContent(page, ['table', '[class*="card"]', 'main', 'h1']);
-      await waitForPageReady(page);
-    }
+    expect(loggedIn).toBe(true);
+    await page.goto('/ar/admin/activity');
+    await waitForContent(page, ['table', '[class*="card"]', 'main', 'h1']);
+    await waitForPageReady(page);
     await takeScreenshot(page, 'admin-activity.png');
   });
 
-  test.skip('Admin Analytics (requires auth)', async ({ page }) => {
+  test('Admin Analytics', async ({ page }) => {
     const loggedIn = await loginToAdmin(page);
-    if (loggedIn) {
-      await page.goto('/ar/admin/analytics');
-      await waitForContent(page, ['[class*="chart"]', '[class*="card"]', 'main', 'h1']);
-      await waitForPageReady(page);
-    }
+    expect(loggedIn).toBe(true);
+    await page.goto('/ar/admin/analytics');
+    await waitForContent(page, ['[class*="chart"]', '[class*="card"]', 'main', 'h1']);
+    await waitForPageReady(page);
     await takeScreenshot(page, 'admin-analytics.png');
   });
 
-  test.skip('Admin Notifications (requires auth)', async ({ page }) => {
+  test('Admin Notifications', async ({ page }) => {
     const loggedIn = await loginToAdmin(page);
-    if (loggedIn) {
-      await page.goto('/ar/admin/notifications');
-      await waitForContent(page, ['[class*="card"]', 'main', 'h1']);
-      await waitForPageReady(page);
-    }
+    expect(loggedIn).toBe(true);
+    await page.goto('/ar/admin/notifications');
+    await waitForContent(page, ['[class*="card"]', 'main', 'h1']);
+    await waitForPageReady(page);
     await takeScreenshot(page, 'admin-notifications.png');
   });
 });
@@ -441,14 +425,12 @@ test.describe('Tablet Screenshots', () => {
     await takeScreenshot(page, 'home-tablet-ar.png', { viewport: VIEWPORTS.tablet });
   });
 
-  test.skip('Admin Dashboard Tablet (requires auth)', async ({ page }) => {
+  test('Admin Dashboard Tablet', async ({ page }) => {
     const loggedIn = await loginToAdmin(page);
-
-    if (loggedIn) {
-      await page.goto('/ar/admin');
-      await waitForContent(page, ['[class*="stat"]', '[class*="card"]', 'main', 'h1', 'h2']);
-      await waitForPageReady(page);
-    }
+    expect(loggedIn).toBe(true);
+    await page.goto('/ar/admin');
+    await waitForContent(page, ['[class*="stat"]', '[class*="card"]', 'main', 'h1', 'h2']);
+    await waitForPageReady(page);
     await takeScreenshot(page, 'admin-dashboard-tablet.png', { viewport: VIEWPORTS.tablet });
   });
 });

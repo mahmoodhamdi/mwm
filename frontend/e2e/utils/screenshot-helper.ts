@@ -82,34 +82,75 @@ export async function takeScreenshot(
   });
 }
 
-// Login to admin panel
+// Login to admin panel using direct API call
 export async function loginToAdmin(page: Page): Promise<boolean> {
   try {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+
+    // Make direct API request to login
+    const response = await page.request.post(`${API_URL}/auth/login`, {
+      data: {
+        email: ADMIN_CREDENTIALS.email,
+        password: ADMIN_CREDENTIALS.password,
+      },
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok()) {
+      console.error('Login API failed:', response.status(), await response.text());
+      return false;
+    }
+
+    const responseData = await response.json();
+
+    if (!responseData.success || !responseData.data?.accessToken) {
+      console.error('Login response invalid:', responseData);
+      return false;
+    }
+
+    // Get cookies from response and set them in browser context
+    const cookies = response.headers()['set-cookie'];
+    if (cookies) {
+      // Parse and set cookies from response
+      const cookieStrings = Array.isArray(cookies) ? cookies : [cookies];
+      for (const cookieStr of cookieStrings) {
+        const parts = cookieStr.split(';')[0].split('=');
+        if (parts.length >= 2) {
+          const name = parts[0].trim();
+          const value = parts.slice(1).join('=').trim();
+          await page.context().addCookies([
+            {
+              name,
+              value,
+              domain: 'localhost',
+              path: '/',
+            },
+          ]);
+        }
+      }
+    }
+
+    // Also store auth state in localStorage for frontend
     await page.goto('/ar/admin/login');
-    await page.waitForLoadState('networkidle', { timeout: 10000 });
+    await page.waitForLoadState('domcontentloaded');
 
-    // Check if already logged in (redirected to dashboard)
-    if (page.url().includes('/admin') && !page.url().includes('/login')) {
-      return true;
-    }
+    // Set localStorage to indicate authenticated state
+    await page.evaluate(() => {
+      localStorage.setItem('mwm_auth_state', 'true');
+    });
 
-    // Fill login form
-    const emailInput = page.locator('input[type="email"], input[name="email"]').first();
-    const passwordInput = page.locator('input[type="password"], input[name="password"]').first();
-    const submitButton = page.locator('button[type="submit"]').first();
+    // Navigate to admin dashboard
+    await page.goto('/ar/admin');
+    await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => null);
+    await page.waitForTimeout(2000);
 
-    if (await emailInput.isVisible()) {
-      await emailInput.fill(ADMIN_CREDENTIALS.email);
-      await passwordInput.fill(ADMIN_CREDENTIALS.password);
-      await submitButton.click();
-
-      // Wait for redirect
-      await page.waitForTimeout(3000);
-      return !page.url().includes('/login');
-    }
-
-    return false;
-  } catch {
+    // Check if we're on admin dashboard (not redirected to login)
+    const currentUrl = page.url();
+    return currentUrl.includes('/admin') && !currentUrl.includes('/login');
+  } catch (error) {
+    console.error('Login failed:', error);
     return false;
   }
 }

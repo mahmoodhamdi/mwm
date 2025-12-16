@@ -9,6 +9,7 @@
 'use client';
 
 import React from 'react';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '@/providers/AuthProvider';
 
 interface AdminAuthGuardProps {
@@ -32,6 +33,13 @@ function AuthLoadingSpinner({ message }: { message: string }) {
 
 export function AdminAuthGuard({ children }: AdminAuthGuardProps) {
   const { isLoading, isAuthenticated } = useAuth();
+  const pathname = usePathname();
+
+  // Check if on login page - always allow login page to render
+  const isLoginPage = pathname?.includes('/admin/login');
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
 
   // Show loading spinner while checking auth
   if (isLoading) {

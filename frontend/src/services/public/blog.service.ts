@@ -192,6 +192,152 @@ export async function getBlogTags(locale?: 'ar' | 'en'): Promise<string[]> {
   return response.data?.tags || [];
 }
 
+// ============================================
+// Comment Types and API
+// ============================================
+
+export interface BlogComment {
+  _id: string;
+  post: string;
+  author?: {
+    _id: string;
+    name: string;
+    avatar?: string;
+  };
+  guestName?: string;
+  guestEmail?: string;
+  content: string;
+  parent?: string;
+  status: 'pending' | 'approved' | 'rejected' | 'spam';
+  likesCount: number;
+  likedBy: string[];
+  isEdited: boolean;
+  editedAt?: string;
+  repliesCount?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CommentsResponse {
+  data: BlogComment[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
+}
+
+export interface CreateCommentData {
+  post: string;
+  content: string;
+  parent?: string;
+}
+
+export interface CreateGuestCommentData {
+  post: string;
+  content: string;
+  guestName: string;
+  guestEmail: string;
+  parent?: string;
+}
+
+/**
+ * Get comments for a blog post
+ * جلب تعليقات المقال
+ */
+export async function getPostComments(
+  slug: string,
+  options: {
+    page?: number;
+    limit?: number;
+    sort?: 'newest' | 'oldest' | 'popular';
+    parent?: string;
+  } = {}
+): Promise<CommentsResponse> {
+  const params: Record<string, unknown> = {
+    page: options.page || 1,
+    limit: options.limit || 20,
+    sort: options.sort || 'newest',
+  };
+  if (options.parent !== undefined) {
+    params.parent = options.parent;
+  }
+
+  const response = await apiClient.get<CommentsResponse>(
+    `${BLOG_ENDPOINT}/posts/${slug}/comments`,
+    params
+  );
+  return response.data || { data: [], pagination: { page: 1, limit: 20, total: 0, pages: 0 } };
+}
+
+/**
+ * Create a comment (authenticated user)
+ * إنشاء تعليق (للمستخدم المسجل)
+ */
+export async function createComment(
+  data: CreateCommentData
+): Promise<{ message: string; comment: BlogComment }> {
+  const response = await apiClient.post<{ message: string; comment: BlogComment }>(
+    `${BLOG_ENDPOINT}/posts/comments`,
+    data
+  );
+  return response.data || { message: '', comment: {} as BlogComment };
+}
+
+/**
+ * Create a guest comment (unauthenticated user)
+ * إنشاء تعليق للضيف
+ */
+export async function createGuestComment(
+  data: CreateGuestCommentData
+): Promise<{ message: string; comment: Partial<BlogComment> }> {
+  const response = await apiClient.post<{ message: string; comment: Partial<BlogComment> }>(
+    `${BLOG_ENDPOINT}/posts/comments/guest`,
+    data
+  );
+  return response.data || { message: '', comment: {} };
+}
+
+/**
+ * Update own comment
+ * تحديث التعليق الخاص
+ */
+export async function updateComment(
+  commentId: string,
+  content: string
+): Promise<{ message: string; comment: BlogComment }> {
+  const response = await apiClient.put<{ message: string; comment: BlogComment }>(
+    `${BLOG_ENDPOINT}/comments/${commentId}`,
+    { content }
+  );
+  return response.data || { message: '', comment: {} as BlogComment };
+}
+
+/**
+ * Delete own comment
+ * حذف التعليق الخاص
+ */
+export async function deleteComment(commentId: string): Promise<{ message: string }> {
+  const response = await apiClient.delete<{ message: string }>(
+    `${BLOG_ENDPOINT}/comments/${commentId}`
+  );
+  return response.data || { message: '' };
+}
+
+/**
+ * Like/unlike a comment
+ * إعجاب/إلغاء إعجاب بتعليق
+ */
+export async function toggleCommentLike(
+  commentId: string
+): Promise<{ message: string; liked: boolean; likesCount: number }> {
+  const response = await apiClient.post<{ message: string; liked: boolean; likesCount: number }>(
+    `${BLOG_ENDPOINT}/comments/${commentId}/like`
+  );
+  return response.data || { message: '', liked: false, likesCount: 0 };
+}
+
 export const blogService = {
   getBlogPosts,
   getBlogPostBySlug,
@@ -200,6 +346,13 @@ export const blogService = {
   getBlogCategories,
   getBlogCategoryBySlug,
   getBlogTags,
+  // Comments
+  getPostComments,
+  createComment,
+  createGuestComment,
+  updateComment,
+  deleteComment,
+  toggleCommentLike,
 };
 
 export default blogService;

@@ -21,6 +21,10 @@ import { ServiceCategory } from '../models/ServiceCategory';
 import { Service } from '../models/Service';
 import { ProjectCategory } from '../models/ProjectCategory';
 import { Project } from '../models/Project';
+import { User, UserRoles } from '../models/User';
+import { BlogPost } from '../models/BlogPost';
+import { BlogCategory } from '../models/BlogCategory';
+import { Job } from '../models/Job';
 
 const MONGODB_URI =
   process.env.MONGODB_URI || 'mongodb://admin:password@localhost:27017/mwm?authSource=admin';
@@ -849,6 +853,214 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
   console.log('Projects seeded successfully!');
 };
 
+const seedUsers = async () => {
+  console.log('Seeding Users...');
+
+  // Delete existing admin user first to ensure clean password hash
+  await User.deleteOne({ email: 'admin@mwm.com' });
+
+  // Create fresh admin user with correct password
+  const adminData = {
+    name: 'Admin',
+    email: 'admin@mwm.com',
+    password: 'Admin123!@#',
+    role: UserRoles.SUPER_ADMIN,
+    isEmailVerified: true,
+    isActive: true,
+    loginAttempts: 0, // Reset login attempts
+    lockUntil: undefined, // Clear any lock
+  };
+
+  await User.create(adminData);
+  console.log('Admin user created with fresh password');
+
+  console.log('Users seeded successfully!');
+};
+
+const seedBlogCategories = async () => {
+  console.log('Seeding Blog Categories...');
+
+  const categories = [
+    {
+      name: { ar: 'تقنية', en: 'Technology' },
+      slug: 'technology',
+      description: { ar: 'مقالات تقنية', en: 'Technology articles' },
+      isActive: true,
+    },
+    {
+      name: { ar: 'تصميم', en: 'Design' },
+      slug: 'design',
+      description: { ar: 'مقالات التصميم', en: 'Design articles' },
+      isActive: true,
+    },
+    {
+      name: { ar: 'أعمال', en: 'Business' },
+      slug: 'business',
+      description: { ar: 'مقالات الأعمال', en: 'Business articles' },
+      isActive: true,
+    },
+  ];
+
+  const createdCategories: Record<string, mongoose.Types.ObjectId> = {};
+
+  for (const cat of categories) {
+    const created = await BlogCategory.findOneAndUpdate(
+      { slug: cat.slug },
+      { $set: cat },
+      { upsert: true, new: true }
+    );
+    createdCategories[cat.slug] = created._id;
+  }
+
+  console.log('Blog Categories seeded successfully!');
+  return createdCategories;
+};
+
+const seedBlogPosts = async (categories: Record<string, mongoose.Types.ObjectId>) => {
+  console.log('Seeding Blog Posts...');
+
+  // Get admin user for author
+  const admin = await User.findOne({ email: 'admin@mwm.com' });
+  if (!admin) {
+    console.log('Admin user not found, skipping blog posts...');
+    return;
+  }
+
+  const posts = [
+    {
+      title: { ar: 'مستقبل تطوير الويب', en: 'The Future of Web Development' },
+      slug: 'future-of-web-development',
+      excerpt: {
+        ar: 'نظرة على التقنيات الجديدة في تطوير الويب',
+        en: 'A look at new technologies in web development',
+      },
+      content: {
+        ar: '<p>تطوير الويب يتطور بسرعة كبيرة. في هذا المقال سنتعرف على أحدث التقنيات والأدوات المستخدمة في بناء تطبيقات الويب الحديثة.</p><p>React و Next.js أصبحا من أهم الأدوات في عالم تطوير الويب الحديث.</p>',
+        en: '<p>Web development is evolving rapidly. In this article, we will learn about the latest technologies and tools used in building modern web applications.</p><p>React and Next.js have become some of the most important tools in modern web development.</p>',
+      },
+      category: categories['technology'],
+      author: admin._id,
+      featuredImage:
+        'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=600&fit=crop',
+      tags: [
+        { ar: 'ريأكت', en: 'React' },
+        { ar: 'نيكست', en: 'Next.js' },
+        { ar: 'تايب سكريبت', en: 'TypeScript' },
+      ],
+      status: 'published',
+      isFeatured: true,
+      publishedAt: new Date(),
+    },
+    {
+      title: { ar: 'أساسيات تصميم UI/UX', en: 'UI/UX Design Fundamentals' },
+      slug: 'ui-ux-design-fundamentals',
+      excerpt: {
+        ar: 'دليل شامل لأساسيات تصميم واجهات المستخدم',
+        en: 'A comprehensive guide to UI design fundamentals',
+      },
+      content: {
+        ar: '<p>تصميم واجهات المستخدم هو فن وعلم. في هذا المقال سنتعلم أساسيات التصميم الجيد وكيفية إنشاء تجارب مستخدم ممتازة.</p>',
+        en: '<p>User interface design is both an art and a science. In this article, we will learn the fundamentals of good design and how to create excellent user experiences.</p>',
+      },
+      category: categories['design'],
+      author: admin._id,
+      featuredImage:
+        'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&h=600&fit=crop',
+      tags: [
+        { ar: 'واجهة المستخدم', en: 'UI' },
+        { ar: 'تجربة المستخدم', en: 'UX' },
+        { ar: 'تصميم', en: 'Design' },
+      ],
+      status: 'published',
+      isFeatured: true,
+      publishedAt: new Date(),
+    },
+  ];
+
+  for (const post of posts) {
+    await BlogPost.findOneAndUpdate(
+      { slug: post.slug },
+      { $set: post },
+      { upsert: true, new: true }
+    );
+  }
+
+  console.log('Blog Posts seeded successfully!');
+};
+
+const seedJobs = async (departments: Record<string, mongoose.Types.ObjectId>) => {
+  console.log('Seeding Jobs...');
+
+  const jobs = [
+    {
+      title: { ar: 'مطور Full Stack', en: 'Full Stack Developer' },
+      slug: 'full-stack-developer',
+      description: {
+        ar: '<p>نبحث عن مطور Full Stack متميز للانضمام لفريقنا. يجب أن يكون لديك خبرة في React و Node.js.</p>',
+        en: '<p>We are looking for an exceptional Full Stack Developer to join our team. You should have experience with React and Node.js.</p>',
+      },
+      requirements: [
+        { ar: '3+ سنوات خبرة', en: '3+ years experience' },
+        { ar: 'إتقان React و Node.js', en: 'Proficiency in React and Node.js' },
+        { ar: 'معرفة بقواعد البيانات', en: 'Database knowledge' },
+      ],
+      responsibilities: [
+        { ar: 'تطوير الواجهة الأمامية والخلفية', en: 'Develop frontend and backend' },
+        { ar: 'العمل مع فريق التصميم', en: 'Work with design team' },
+      ],
+      benefits: [
+        { ar: 'راتب تنافسي', en: 'Competitive salary' },
+        { ar: 'تأمين صحي', en: 'Health insurance' },
+        { ar: 'بيئة عمل مرنة', en: 'Flexible work environment' },
+      ],
+      department: departments['development'],
+      type: 'full-time',
+      location: { ar: 'القاهرة، مصر', en: 'Cairo, Egypt' },
+      experienceLevel: 'mid',
+      skills: ['React', 'Node.js', 'MongoDB', 'TypeScript'],
+      salaryRange: { min: 15000, max: 25000, currency: 'EGP', period: 'monthly', isPublic: true },
+      status: 'open',
+      isFeatured: true,
+    },
+    {
+      title: { ar: 'مصمم UI/UX', en: 'UI/UX Designer' },
+      slug: 'ui-ux-designer',
+      description: {
+        ar: '<p>نبحث عن مصمم UI/UX مبدع للعمل على مشاريعنا المتنوعة.</p>',
+        en: '<p>We are looking for a creative UI/UX Designer to work on our diverse projects.</p>',
+      },
+      requirements: [
+        { ar: '2+ سنوات خبرة', en: '2+ years experience' },
+        { ar: 'إتقان Figma', en: 'Proficiency in Figma' },
+        { ar: 'معرض أعمال قوي', en: 'Strong portfolio' },
+      ],
+      responsibilities: [
+        { ar: 'تصميم واجهات المستخدم', en: 'Design user interfaces' },
+        { ar: 'إنشاء النماذج الأولية', en: 'Create prototypes' },
+      ],
+      benefits: [
+        { ar: 'راتب تنافسي', en: 'Competitive salary' },
+        { ar: 'تأمين صحي', en: 'Health insurance' },
+        { ar: 'فرص تطوير', en: 'Growth opportunities' },
+      ],
+      department: departments['design'],
+      type: 'full-time',
+      location: { ar: 'القاهرة، مصر', en: 'Cairo, Egypt' },
+      experienceLevel: 'mid',
+      skills: ['Figma', 'Adobe XD', 'Sketch', 'Prototyping'],
+      salaryRange: { min: 12000, max: 20000, currency: 'EGP', period: 'monthly', isPublic: true },
+      status: 'open',
+      isFeatured: true,
+    },
+  ];
+
+  for (const job of jobs) {
+    await Job.findOneAndUpdate({ slug: job.slug }, { $set: job }, { upsert: true, new: true });
+  }
+
+  console.log('Jobs seeded successfully!');
+};
+
 // Main seed function
 const seed = async () => {
   try {
@@ -870,6 +1082,13 @@ const seed = async () => {
 
     const projectCategories = await seedProjectCategories();
     await seedProjects(projectCategories);
+
+    await seedUsers();
+
+    const blogCategories = await seedBlogCategories();
+    await seedBlogPosts(blogCategories);
+
+    await seedJobs(departments);
 
     console.log('\n✅ All seed data has been inserted successfully!');
   } catch (error) {

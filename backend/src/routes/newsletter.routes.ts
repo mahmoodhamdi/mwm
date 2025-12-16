@@ -8,6 +8,7 @@ import rateLimit from 'express-rate-limit';
 import * as newsletterController from '../controllers/newsletter.controller';
 import { authenticate, authorize } from '../middlewares/auth';
 import { validate, idParamsSchema } from '../middlewares/validate';
+import { csrfValidation } from '../middlewares/csrf';
 import {
   subscribeSchema,
   unsubscribeSchema,
@@ -75,6 +76,7 @@ const subscriptionLimiter = rateLimit({
 router.post(
   '/subscribe',
   subscriptionLimiter,
+  csrfValidation,
   validate({ body: subscribeSchema }),
   newsletterController.subscribe
 );
@@ -108,6 +110,7 @@ router.post(
  */
 router.post(
   '/unsubscribe',
+  csrfValidation,
   validate({ body: unsubscribeSchema }),
   newsletterController.unsubscribe
 );

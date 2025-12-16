@@ -29,17 +29,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const locale = useLocale();
 
   const checkAuth = useCallback(async () => {
-    if (!tokenUtils.isAuthenticated()) {
-      setUser(null);
-      setIsLoading(false);
-      return;
-    }
-
     try {
+      // Try to get current user - cookies are sent automatically
       const userData = await authService.getMe();
       setUser(userData);
+      // Update auth state to reflect successful authentication
+      tokenUtils.setAuthState(true);
     } catch {
-      // Token invalid or expired
+      // Token invalid, expired, or not present
       tokenUtils.clearTokens();
       setUser(null);
     } finally {

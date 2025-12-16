@@ -48,6 +48,9 @@ const envSchema = Joi.object({
   // Sentry
   SENTRY_DSN: Joi.string().allow('').optional(),
 
+  // Cookie
+  COOKIE_DOMAIN: Joi.string().allow('').optional(),
+
   // Firebase
   FIREBASE_PROJECT_ID: Joi.string().allow('').optional(),
   FIREBASE_PRIVATE_KEY_ID: Joi.string().allow('').optional(),
@@ -116,6 +119,13 @@ export const env = {
 
   // Sentry
   sentryDsn: envVars.SENTRY_DSN as string | undefined,
+
+  // Cookie settings
+  cookie: {
+    domain: envVars.COOKIE_DOMAIN as string | undefined,
+    secure: envVars.NODE_ENV === 'production',
+    sameSite: (envVars.NODE_ENV === 'production' ? 'strict' : 'lax') as 'strict' | 'lax' | 'none',
+  },
 
   // Firebase
   firebase: {

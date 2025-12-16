@@ -684,6 +684,181 @@ export const bulkUpdateStatus = asyncHandler(async (req: Request, res: Response)
 });
 
 // ============================================
+// User Saved Posts Controllers
+// متحكمات المقالات المحفوظة للمستخدم
+// ============================================
+
+/**
+ * Save a post
+ * حفظ مقال
+ * POST /api/v1/blog/posts/:slug/save
+ */
+export const savePost = asyncHandler(async (req: Request, res: Response) => {
+  const { slug } = req.params;
+  const userId = req.user?._id;
+
+  // Find the post by slug
+  const post = await BlogPost.findOne({ slug, status: 'published' });
+  if (!post) {
+    throw Errors.NOT_FOUND('Post | المقال');
+  }
+
+  // Add post to user's savedPosts if not already saved
+  const { User } = await import('../models');
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw Errors.NOT_FOUND('User | المستخدم');
+  }
+
+  const postId = post._id.toString();
+  const savedPostIds = (user.savedPosts || []).map((id: mongoose.Types.ObjectId) => id.toString());
+
+  if (savedPostIds.includes(postId)) {
+    return successResponse(res, {
+      message: 'Post already saved | المقال محفوظ مسبقاً',
+      saved: true,
+    });
+  }
+
+  await User.findByIdAndUpdate(userId, { $addToSet: { savedPosts: post._id } });
+
+  return successResponse(
+    res,
+    {
+      message: 'Post saved successfully | تم حفظ المقال بنجاح',
+      saved: true,
+    },
+    201
+  );
+});
+
+/**
+ * Unsave a post
+ * إلغاء حفظ مقال
+ * DELETE /api/v1/blog/posts/:slug/save
+ */
+export const unsavePost = asyncHandler(async (req: Request, res: Response) => {
+  const { slug } = req.params;
+  const userId = req.user?._id;
+
+  // Find the post by slug
+  const post = await BlogPost.findOne({ slug });
+  if (!post) {
+    throw Errors.NOT_FOUND('Post | المقال');
+  }
+
+  // Remove post from user's savedPosts
+  const { User } = await import('../models');
+  await User.findByIdAndUpdate(userId, { $pull: { savedPosts: post._id } });
+
+  return successResponse(res, {
+    message: 'Post unsaved successfully | تم إلغاء حفظ المقال بنجاح',
+    saved: false,
+  });
+});
+
+/**
+ * Get user's saved posts
+ * جلب المقالات المحفوظة للمستخدم
+ * GET /api/v1/blog/saved
+ */
+export const getSavedPosts = asyncHandler(async (req: Request, res: Response) => {
+  const userId = req.user?._id;
+  const { page = 1, limit = 10, locale } = req.query;
+
+  const pageNum = Math.max(1, parseInt(page as string) || 1);
+  const limitNum = Math.min(100, Math.max(1, parseInt(limit as string) || 10));
+  const skip = (pageNum - 1) * limitNum;
+
+  // Get user with saved posts
+  const { User } = await import('../models');
+  const user = await User.findById(userId).select('savedPosts');
+
+  if (!user || !user.savedPosts || user.savedPosts.length === 0) {
+    return paginatedResponse(res, {
+      data: [],
+      page: pageNum,
+      limit: limitNum,
+      total: 0,
+    });
+  }
+
+  // Get posts with pagination
+  const filter: Record<string, unknown> = {
+    _id: { $in: user.savedPosts },
+    status: 'published',
+  };
+
+  const total = await BlogPost.countDocuments(filter);
+
+  let postsQuery = BlogPost.find(filter)
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limitNum)
+    .populate('category', 'name slug')
+    .populate('author', 'name avatar');
+
+  // Apply locale selection if provided
+  if (locale === 'ar' || locale === 'en') {
+    postsQuery = postsQuery.select({
+      [`title.${locale}`]: 1,
+      [`excerpt.${locale}`]: 1,
+      [`content.${locale}`]: 1,
+      slug: 1,
+      featuredImage: 1,
+      tags: 1,
+      readTime: 1,
+      status: 1,
+      viewCount: 1,
+      publishedAt: 1,
+      createdAt: 1,
+      category: 1,
+      author: 1,
+    });
+  }
+
+  const posts = await postsQuery;
+
+  return paginatedResponse(res, {
+    data: posts,
+    page: pageNum,
+    limit: limitNum,
+    total,
+  });
+});
+
+/**
+ * Check if post is saved
+ * التحقق مما إذا كان المقال محفوظاً
+ * GET /api/v1/blog/posts/:slug/saved
+ */
+export const isPostSaved = asyncHandler(async (req: Request, res: Response) => {
+  const { slug } = req.params;
+  const userId = req.user?._id;
+
+  // Find the post by slug
+  const post = await BlogPost.findOne({ slug });
+  if (!post) {
+    throw Errors.NOT_FOUND('Post | المقال');
+  }
+
+  // Check if post is in user's savedPosts
+  const { User } = await import('../models');
+  const user = await User.findById(userId).select('savedPosts');
+
+  if (!user) {
+    throw Errors.NOT_FOUND('User | المستخدم');
+  }
+
+  const postId = post._id.toString();
+  const savedPostIds = (user.savedPosts || []).map((id: mongoose.Types.ObjectId) => id.toString());
+  const isSaved = savedPostIds.includes(postId);
+
+  return successResponse(res, { saved: isSaved });
+});
+
+// ============================================
 // Helper Functions
 // ============================================
 
@@ -729,6 +904,11 @@ export const blogController = {
   updatePost,
   deletePost,
   bulkUpdateStatus,
+  // Saved Posts
+  savePost,
+  unsavePost,
+  getSavedPosts,
+  isPostSaved,
 };
 
 export default blogController;

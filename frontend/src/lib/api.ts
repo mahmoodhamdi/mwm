@@ -5,6 +5,25 @@
 
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
 
+// CSRF token cookie name (must match backend)
+const CSRF_COOKIE_NAME = 'csrfToken';
+
+/**
+ * Get CSRF token from cookie
+ */
+const getCsrfTokenFromCookie = (): string | null => {
+  if (typeof document === 'undefined') return null;
+
+  const cookies = document.cookie.split(';');
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=');
+    if (name === CSRF_COOKIE_NAME) {
+      return decodeURIComponent(value);
+    }
+  }
+  return null;
+};
+
 // API Response types
 export interface ApiResponse<T = unknown> {
   success: boolean;
@@ -32,6 +51,19 @@ export interface ApiError {
   statusCode: number;
 }
 
+// Track if refresh is in progress to prevent multiple refresh calls
+let isRefreshing = false;
+let refreshSubscribers: ((success: boolean) => void)[] = [];
+
+const onRefreshComplete = (success: boolean) => {
+  refreshSubscribers.forEach(callback => callback(success));
+  refreshSubscribers = [];
+};
+
+const addRefreshSubscriber = (callback: (success: boolean) => void) => {
+  refreshSubscribers.push(callback);
+};
+
 // Create axios instance
 const createApiClient = (baseURL: string): AxiosInstance => {
   const client = axios.create({
@@ -40,22 +72,26 @@ const createApiClient = (baseURL: string): AxiosInstance => {
     headers: {
       'Content-Type': 'application/json',
     },
-    withCredentials: true,
+    withCredentials: true, // Important: enables cookies to be sent with requests
   });
 
   // Request interceptor
   client.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
-      // Add auth token if available
       if (typeof window !== 'undefined') {
-        const token = localStorage.getItem('accessToken');
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-
         // Add language header
         const locale = localStorage.getItem('locale') || 'ar';
         config.headers['Accept-Language'] = locale;
+
+        // Add CSRF token for state-changing requests
+        const method = config.method?.toUpperCase();
+        if (method && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
+          // Get CSRF token from cookie
+          const csrfToken = getCsrfTokenFromCookie();
+          if (csrfToken) {
+            config.headers['X-CSRF-Token'] = csrfToken;
+          }
+        }
       }
 
       return config;
@@ -67,30 +103,39 @@ const createApiClient = (baseURL: string): AxiosInstance => {
   client.interceptors.response.use(
     response => response,
     async (error: AxiosError<ApiResponse>) => {
-      const originalRequest = error.config;
+      const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
       // Handle 401 - Unauthorized (token expired)
-      if (error.response?.status === 401 && originalRequest) {
-        // Try to refresh token
-        try {
-          const refreshToken = localStorage.getItem('refreshToken');
-          if (refreshToken) {
-            const response = await axios.post<ApiResponse<{ accessToken: string }>>(
-              `${baseURL}/auth/refresh`,
-              { refreshToken }
-            );
+      if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+        // If already refreshing, wait for it to complete
+        if (isRefreshing) {
+          return new Promise((resolve, reject) => {
+            addRefreshSubscriber((success: boolean) => {
+              if (success) {
+                resolve(client(originalRequest));
+              } else {
+                reject(error);
+              }
+            });
+          });
+        }
 
-            if (response.data.success && response.data.data) {
-              localStorage.setItem('accessToken', response.data.data.accessToken);
-              originalRequest.headers.Authorization = `Bearer ${response.data.data.accessToken}`;
-              return client(originalRequest);
-            }
-          }
+        originalRequest._retry = true;
+        isRefreshing = true;
+
+        try {
+          // Try to refresh token - cookies are sent automatically with withCredentials: true
+          await axios.post(`${baseURL}/auth/refresh-token`, {}, { withCredentials: true });
+
+          isRefreshing = false;
+          onRefreshComplete(true);
+
+          // Retry original request - new cookies will be sent automatically
+          return client(originalRequest);
         } catch {
-          // Refresh failed, clear tokens
-          // AuthProvider will handle redirect to login
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
+          // Refresh failed - AuthProvider will handle redirect to login
+          isRefreshing = false;
+          onRefreshComplete(false);
         }
       }
 

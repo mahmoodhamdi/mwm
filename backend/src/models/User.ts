@@ -62,6 +62,9 @@ export interface IUser extends Document {
   passwordResetExpires?: Date;
   passwordChangedAt?: Date;
 
+  // Saved posts
+  savedPosts: mongoose.Types.ObjectId[];
+
   // Timestamps
   createdAt: Date;
   updatedAt: Date;
@@ -210,6 +213,14 @@ const userSchema = new Schema<IUser, UserModel, IUserMethods>(
     passwordResetToken: String,
     passwordResetExpires: Date,
     passwordChangedAt: Date,
+
+    // Saved posts
+    savedPosts: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'BlogPost',
+      },
+    ],
   },
   {
     timestamps: true,

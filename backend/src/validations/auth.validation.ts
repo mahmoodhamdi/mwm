@@ -69,10 +69,11 @@ export const loginSchema = Joi.object({
 /**
  * Refresh token validation schema
  * مخطط التحقق من توكن التحديث
+ * Note: refreshToken is optional in body since it can come from httpOnly cookie
  */
 export const refreshTokenSchema = Joi.object({
-  refreshToken: Joi.string().required().messages({
-    'any.required': 'Refresh token is required | توكن التحديث مطلوب',
+  refreshToken: Joi.string().optional().messages({
+    'string.base': 'Refresh token must be a string | توكن التحديث يجب أن يكون نص',
   }),
 });
 

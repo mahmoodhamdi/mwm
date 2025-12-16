@@ -13,6 +13,7 @@ import { successResponse, paginatedResponse } from '../utils/response';
 import { parsePagination } from '../utils/pagination';
 import { redis } from '../config';
 import { escapeRegex } from '../utils/security';
+import { uploadToCloudinary } from '../utils/upload';
 
 const JOB_CACHE_PREFIX = 'careers-job';
 const CACHE_TTL = 1800; // 30 minutes
@@ -667,6 +668,43 @@ export const getApplicationStats = asyncHandler(async (req: Request, res: Respon
 });
 
 // ============================================
+// Public File Upload
+// رفع الملفات العامة
+// ============================================
+
+/**
+ * Upload resume file (Public)
+ * رفع ملف السيرة الذاتية (عام)
+ */
+export const uploadResume = asyncHandler(async (req: Request, res: Response) => {
+  if (!req.file) {
+    throw Errors.VALIDATION_ERROR([
+      {
+        field: 'resume',
+        message: 'Resume file is required | ملف السيرة الذاتية مطلوب',
+      },
+    ]);
+  }
+
+  // Upload to Cloudinary
+  const result = await uploadToCloudinary(req.file, 'resumes');
+
+  return successResponse(
+    res,
+    {
+      message: 'Resume uploaded successfully | تم رفع السيرة الذاتية بنجاح',
+      resume: {
+        url: result.secure_url,
+        publicId: result.public_id,
+        format: result.format,
+        size: result.bytes,
+      },
+    },
+    201
+  );
+});
+
+// ============================================
 // Helper Functions
 // ============================================
 
@@ -688,6 +726,7 @@ export const careersController = {
   getFeaturedJobs,
   // Public Applications
   submitApplication,
+  uploadResume,
   // Admin Jobs
   getAllJobs,
   getJobById,

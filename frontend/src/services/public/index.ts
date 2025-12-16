@@ -87,6 +87,7 @@ export type {
   BlogPostsFilters,
   BlogPostsPagination,
   BlogPostsResponse,
+  SavedPostsResponse,
 } from './blog.service';
 export {
   getBlogPosts,
@@ -96,6 +97,12 @@ export {
   getBlogCategories,
   getBlogCategoryBySlug,
   getBlogTags,
+  // Bookmarks
+  getSavedPosts,
+  isPostSaved,
+  savePost,
+  unsavePost,
+  togglePostSave,
   blogService,
 } from './blog.service';
 
@@ -117,6 +124,7 @@ export {
   getJobBySlug,
   getFeaturedJobs,
   submitApplication,
+  uploadResume,
   careersService,
   getDepartments as getCareersDepartments,
 } from './careers.service';

@@ -338,6 +338,87 @@ export async function toggleCommentLike(
   return response.data || { message: '', liked: false, likesCount: 0 };
 }
 
+// ============================================
+// Bookmark/Save Post API
+// ============================================
+
+export interface SavedPostsResponse {
+  posts: BlogPost[];
+  pagination: BlogPostsPagination;
+}
+
+/**
+ * Get user's saved posts
+ * جلب المقالات المحفوظة للمستخدم
+ */
+export async function getSavedPosts(
+  options: {
+    page?: number;
+    limit?: number;
+    locale?: 'ar' | 'en';
+  } = {}
+): Promise<SavedPostsResponse> {
+  const params: Record<string, unknown> = {
+    page: options.page || 1,
+    limit: options.limit || 10,
+  };
+  if (options.locale) params.locale = options.locale;
+
+  const response = await apiClient.get<SavedPostsResponse>(`${BLOG_ENDPOINT}/saved`, params);
+  return response.data || { posts: [], pagination: { page: 1, limit: 10, total: 0, pages: 0 } };
+}
+
+/**
+ * Check if a post is saved
+ * التحقق مما إذا كان المقال محفوظاً
+ */
+export async function isPostSaved(slug: string): Promise<boolean> {
+  try {
+    const response = await apiClient.get<{ saved: boolean }>(
+      `${BLOG_ENDPOINT}/posts/${slug}/saved`
+    );
+    return response.data?.saved || false;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Save a post to user's collection
+ * حفظ مقال في مجموعة المستخدم
+ */
+export async function savePost(slug: string): Promise<{ message: string; saved: boolean }> {
+  const response = await apiClient.post<{ message: string; saved: boolean }>(
+    `${BLOG_ENDPOINT}/posts/${slug}/save`
+  );
+  return response.data || { message: '', saved: true };
+}
+
+/**
+ * Remove a post from user's saved collection
+ * إزالة مقال من المحفوظات
+ */
+export async function unsavePost(slug: string): Promise<{ message: string; saved: boolean }> {
+  const response = await apiClient.delete<{ message: string; saved: boolean }>(
+    `${BLOG_ENDPOINT}/posts/${slug}/save`
+  );
+  return response.data || { message: '', saved: false };
+}
+
+/**
+ * Toggle post save status
+ * تبديل حالة حفظ المقال
+ */
+export async function togglePostSave(
+  slug: string,
+  currentSaved: boolean
+): Promise<{ message: string; saved: boolean }> {
+  if (currentSaved) {
+    return unsavePost(slug);
+  }
+  return savePost(slug);
+}
+
 export const blogService = {
   getBlogPosts,
   getBlogPostBySlug,
@@ -353,6 +434,12 @@ export const blogService = {
   updateComment,
   deleteComment,
   toggleCommentLike,
+  // Bookmarks
+  getSavedPosts,
+  isPostSaved,
+  savePost,
+  unsavePost,
+  togglePostSave,
 };
 
 export default blogService;

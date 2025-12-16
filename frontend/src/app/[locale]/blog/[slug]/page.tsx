@@ -20,20 +20,64 @@ import {
   Bookmark,
   Loader2,
 } from 'lucide-react';
-import { getBlogPostBySlug, getRelatedPosts, type BlogPost } from '@/services/public';
+import {
+  getBlogPostBySlug,
+  getRelatedPosts,
+  isPostSaved,
+  togglePostSave,
+  type BlogPost,
+} from '@/services/public';
 import { createSanitizedHtml } from '@/lib/sanitize';
 import { CommentSection } from '@/components/blog';
+import { useAuth } from '@/providers/AuthProvider';
 
 export default function BlogPostPage() {
   const locale = useLocale() as 'ar' | 'en';
   const isRTL = locale === 'ar';
   const params = useParams();
   const slug = params.slug as string;
+  const { isAuthenticated } = useAuth();
 
   const [post, setPost] = useState<BlogPost | null>(null);
   const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSaved, setIsSaved] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Check if post is saved when user is authenticated
+  useEffect(() => {
+    const checkSavedStatus = async () => {
+      if (isAuthenticated && slug) {
+        try {
+          const saved = await isPostSaved(slug);
+          setIsSaved(saved);
+        } catch {
+          // Silently fail - user just won't see saved status
+        }
+      }
+    };
+    checkSavedStatus();
+  }, [isAuthenticated, slug]);
+
+  // Handle bookmark toggle
+  const handleToggleSave = async () => {
+    if (!isAuthenticated) {
+      // Could redirect to login or show a message
+      alert(isRTL ? 'يجب تسجيل الدخول لحفظ المقالات' : 'Please login to save posts');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const result = await togglePostSave(slug, isSaved);
+      setIsSaved(result.saved);
+    } catch (err) {
+      console.error('Error toggling save:', err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -288,9 +332,27 @@ export default function BlogPostPage() {
 
               {/* Actions */}
               <div className="mt-6 space-y-2">
-                <button className="flex w-full items-center gap-2 rounded-lg border px-4 py-2 text-gray-700 hover:bg-gray-50">
-                  <Bookmark className="size-5" />
-                  {isRTL ? 'حفظ للقراءة لاحقاً' : 'Save for later'}
+                <button
+                  onClick={handleToggleSave}
+                  disabled={isSaving}
+                  className={`flex w-full items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+                    isSaved
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  } disabled:cursor-not-allowed disabled:opacity-50`}
+                >
+                  {isSaving ? (
+                    <Loader2 className="size-5 animate-spin" />
+                  ) : (
+                    <Bookmark className={`size-5 ${isSaved ? 'fill-current' : ''}`} />
+                  )}
+                  {isSaved
+                    ? isRTL
+                      ? 'تم الحفظ'
+                      : 'Saved'
+                    : isRTL
+                      ? 'حفظ للقراءة لاحقاً'
+                      : 'Save for later'}
                 </button>
               </div>
             </div>

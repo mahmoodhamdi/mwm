@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocale } from 'next-intl';
 import {
   Activity,
@@ -17,184 +17,48 @@ import {
   LogIn,
   LogOut,
   Key,
-  Shield,
   Download,
   RefreshCw,
   ChevronLeft,
   ChevronRight,
+  Upload,
+  Globe,
+  EyeOff,
 } from 'lucide-react';
+import { activityService, type ActivityLogEntry } from '@/services/admin/activity.service';
+import { Spinner } from '@/components/ui';
 
-type ActivityType =
-  | 'login'
-  | 'logout'
+type ActivityAction =
   | 'create'
   | 'update'
   | 'delete'
+  | 'login'
+  | 'logout'
   | 'view'
-  | 'password_change'
-  | 'settings_update'
-  | 'permission_change'
-  | 'export';
-
-interface ActivityLog {
-  id: string;
-  userId: string;
-  userName: string;
-  userEmail: string;
-  userAvatar?: string;
-  type: ActivityType;
-  resource: string;
-  resourceId?: string;
-  resourceName?: string;
-  details?: string;
-  ip: string;
-  userAgent: string;
-  createdAt: string;
-}
+  | 'export'
+  | 'import'
+  | 'publish'
+  | 'unpublish';
 
 export default function ActivityLogsPage() {
   const locale = useLocale();
   const isRTL = locale === 'ar';
 
+  const [logs, setLogs] = useState<ActivityLogEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [actionFilter, setActionFilter] = useState<string>('all');
   const [resourceFilter, setResourceFilter] = useState<string>('all');
   const [dateRange, setDateRange] = useState({ from: '', to: '' });
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalLogs, setTotalLogs] = useState(0);
   const itemsPerPage = 20;
 
-  // Mock data
-  const [logs] = useState<ActivityLog[]>([
-    {
-      id: '1',
-      userId: '1',
-      userName: 'Ahmed Hassan',
-      userEmail: 'ahmed@mwm.com',
-      type: 'login',
-      resource: 'auth',
-      details: 'Successful login',
-      ip: '192.168.1.100',
-      userAgent: 'Chrome/120.0 Windows',
-      createdAt: '2024-01-22T10:30:00',
-    },
-    {
-      id: '2',
-      userId: '1',
-      userName: 'Ahmed Hassan',
-      userEmail: 'ahmed@mwm.com',
-      type: 'create',
-      resource: 'projects',
-      resourceId: 'proj-123',
-      resourceName: 'New Website Project',
-      ip: '192.168.1.100',
-      userAgent: 'Chrome/120.0 Windows',
-      createdAt: '2024-01-22T10:45:00',
-    },
-    {
-      id: '3',
-      userId: '2',
-      userName: 'Sarah Ahmed',
-      userEmail: 'sarah@mwm.com',
-      type: 'update',
-      resource: 'services',
-      resourceId: 'srv-456',
-      resourceName: 'Web Development',
-      details: 'Updated pricing',
-      ip: '192.168.1.101',
-      userAgent: 'Firefox/121.0 MacOS',
-      createdAt: '2024-01-22T11:00:00',
-    },
-    {
-      id: '4',
-      userId: '1',
-      userName: 'Ahmed Hassan',
-      userEmail: 'ahmed@mwm.com',
-      type: 'settings_update',
-      resource: 'settings',
-      details: 'Updated site settings',
-      ip: '192.168.1.100',
-      userAgent: 'Chrome/120.0 Windows',
-      createdAt: '2024-01-22T11:15:00',
-    },
-    {
-      id: '5',
-      userId: '3',
-      userName: 'Mohamed Ali',
-      userEmail: 'mohamed@mwm.com',
-      type: 'delete',
-      resource: 'blog',
-      resourceId: 'blog-789',
-      resourceName: 'Old Blog Post',
-      ip: '192.168.1.102',
-      userAgent: 'Safari/17.0 iOS',
-      createdAt: '2024-01-22T11:30:00',
-    },
-    {
-      id: '6',
-      userId: '2',
-      userName: 'Sarah Ahmed',
-      userEmail: 'sarah@mwm.com',
-      type: 'permission_change',
-      resource: 'users',
-      resourceId: 'user-101',
-      resourceName: 'Youssef Khaled',
-      details: 'Changed role from viewer to editor',
-      ip: '192.168.1.101',
-      userAgent: 'Firefox/121.0 MacOS',
-      createdAt: '2024-01-22T12:00:00',
-    },
-    {
-      id: '7',
-      userId: '1',
-      userName: 'Ahmed Hassan',
-      userEmail: 'ahmed@mwm.com',
-      type: 'export',
-      resource: 'messages',
-      details: 'Exported 150 messages to CSV',
-      ip: '192.168.1.100',
-      userAgent: 'Chrome/120.0 Windows',
-      createdAt: '2024-01-22T12:30:00',
-    },
-    {
-      id: '8',
-      userId: '3',
-      userName: 'Mohamed Ali',
-      userEmail: 'mohamed@mwm.com',
-      type: 'view',
-      resource: 'projects',
-      resourceId: 'proj-123',
-      resourceName: 'New Website Project',
-      ip: '192.168.1.102',
-      userAgent: 'Safari/17.0 iOS',
-      createdAt: '2024-01-22T13:00:00',
-    },
-    {
-      id: '9',
-      userId: '2',
-      userName: 'Sarah Ahmed',
-      userEmail: 'sarah@mwm.com',
-      type: 'password_change',
-      resource: 'auth',
-      details: 'Password updated successfully',
-      ip: '192.168.1.101',
-      userAgent: 'Firefox/121.0 MacOS',
-      createdAt: '2024-01-22T14:00:00',
-    },
-    {
-      id: '10',
-      userId: '1',
-      userName: 'Ahmed Hassan',
-      userEmail: 'ahmed@mwm.com',
-      type: 'logout',
-      resource: 'auth',
-      ip: '192.168.1.100',
-      userAgent: 'Chrome/120.0 Windows',
-      createdAt: '2024-01-22T18:00:00',
-    },
-  ]);
-
   const activityTypes: {
-    value: ActivityType;
+    value: ActivityAction;
     labelAr: string;
     labelEn: string;
     icon: React.ReactNode;
@@ -205,70 +69,70 @@ export default function ActivityLogsPage() {
       labelAr: 'تسجيل دخول',
       labelEn: 'Login',
       icon: <LogIn className="size-4" />,
-      color: 'bg-green-100 text-green-800',
+      color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
     },
     {
       value: 'logout',
       labelAr: 'تسجيل خروج',
       labelEn: 'Logout',
       icon: <LogOut className="size-4" />,
-      color: 'bg-gray-100 text-gray-800',
+      color: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
     },
     {
       value: 'create',
       labelAr: 'إنشاء',
       labelEn: 'Create',
       icon: <Plus className="size-4" />,
-      color: 'bg-blue-100 text-blue-800',
+      color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
     },
     {
       value: 'update',
       labelAr: 'تحديث',
       labelEn: 'Update',
       icon: <Edit className="size-4" />,
-      color: 'bg-yellow-100 text-yellow-800',
+      color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
     },
     {
       value: 'delete',
       labelAr: 'حذف',
       labelEn: 'Delete',
       icon: <Trash2 className="size-4" />,
-      color: 'bg-red-100 text-red-800',
+      color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
     },
     {
       value: 'view',
       labelAr: 'عرض',
       labelEn: 'View',
       icon: <Eye className="size-4" />,
-      color: 'bg-purple-100 text-purple-800',
-    },
-    {
-      value: 'password_change',
-      labelAr: 'تغيير كلمة المرور',
-      labelEn: 'Password Change',
-      icon: <Key className="size-4" />,
-      color: 'bg-orange-100 text-orange-800',
-    },
-    {
-      value: 'settings_update',
-      labelAr: 'تحديث الإعدادات',
-      labelEn: 'Settings Update',
-      icon: <Settings className="size-4" />,
-      color: 'bg-indigo-100 text-indigo-800',
-    },
-    {
-      value: 'permission_change',
-      labelAr: 'تغيير الصلاحيات',
-      labelEn: 'Permission Change',
-      icon: <Shield className="size-4" />,
-      color: 'bg-pink-100 text-pink-800',
+      color: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
     },
     {
       value: 'export',
       labelAr: 'تصدير',
       labelEn: 'Export',
       icon: <Download className="size-4" />,
-      color: 'bg-teal-100 text-teal-800',
+      color: 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-400',
+    },
+    {
+      value: 'import',
+      labelAr: 'استيراد',
+      labelEn: 'Import',
+      icon: <Upload className="size-4" />,
+      color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400',
+    },
+    {
+      value: 'publish',
+      labelAr: 'نشر',
+      labelEn: 'Publish',
+      icon: <Globe className="size-4" />,
+      color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400',
+    },
+    {
+      value: 'unpublish',
+      labelAr: 'إلغاء النشر',
+      labelEn: 'Unpublish',
+      icon: <EyeOff className="size-4" />,
+      color: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
     },
   ];
 
@@ -282,7 +146,45 @@ export default function ActivityLogsPage() {
     'settings',
     'messages',
     'newsletter',
+    'careers',
+    'contact',
   ];
+
+  const fetchLogs = useCallback(async () => {
+    try {
+      setIsRefreshing(true);
+      const params: Record<string, string | number> = {
+        page: currentPage,
+        limit: itemsPerPage,
+      };
+
+      if (actionFilter !== 'all') params.action = actionFilter;
+      if (resourceFilter !== 'all') params.resource = resourceFilter;
+      if (dateRange.from) params.startDate = dateRange.from;
+      if (dateRange.to) params.endDate = dateRange.to;
+
+      const response = await activityService.getLogs(params);
+      setLogs(response.logs);
+      setTotalPages(response.pagination.totalPages);
+      setTotalLogs(response.pagination.total);
+      setError(null);
+    } catch (err) {
+      setError(locale === 'ar' ? 'فشل في تحميل سجلات النشاط' : 'Failed to load activity logs');
+      // eslint-disable-next-line no-console
+      console.error('Error fetching activity logs:', err);
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  }, [currentPage, actionFilter, resourceFilter, dateRange, locale]);
+
+  useEffect(() => {
+    fetchLogs();
+  }, [fetchLogs]);
+
+  const handleRefresh = () => {
+    fetchLogs();
+  };
 
   const getResourceIcon = (resource: string) => {
     switch (resource) {
@@ -301,33 +203,31 @@ export default function ActivityLogsPage() {
       case 'settings':
         return <Settings className="size-4" />;
       case 'messages':
+      case 'contact':
         return <FileText className="size-4" />;
       case 'newsletter':
+        return <FileText className="size-4" />;
+      case 'careers':
         return <FileText className="size-4" />;
       default:
         return <FileText className="size-4" />;
     }
   };
 
+  // Filter logs by search query (client-side for immediate feedback)
   const filteredLogs = logs.filter(log => {
-    const matchesSearch =
-      log.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      log.userEmail.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      log.resourceName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      log.details?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesType = typeFilter === 'all' || log.type === typeFilter;
-    const matchesResource = resourceFilter === 'all' || log.resource === resourceFilter;
-    return matchesSearch && matchesType && matchesResource;
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      log.user?.name?.toLowerCase().includes(query) ||
+      log.user?.email?.toLowerCase().includes(query) ||
+      log.resourceTitle?.toLowerCase().includes(query) ||
+      log.resource?.toLowerCase().includes(query)
+    );
   });
 
-  const paginatedLogs = filteredLogs.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
-  const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
-
-  const getActivityTypeInfo = (type: ActivityType) => activityTypes.find(t => t.value === type);
+  const getActivityTypeInfo = (action: ActivityAction) =>
+    activityTypes.find(t => t.value === action);
 
   const formatDateTime = (dateStr: string) => {
     return new Date(dateStr).toLocaleString(locale === 'ar' ? 'ar-EG' : 'en-US', {
@@ -362,26 +262,26 @@ export default function ActivityLogsPage() {
 
   const handleExport = () => {
     const csvContent = [
-      ['Date', 'User', 'Email', 'Action', 'Resource', 'Details', 'IP', 'User Agent'],
+      ['Date', 'User', 'Email', 'Action', 'Resource', 'Resource Title', 'IP', 'User Agent'],
       ...filteredLogs.map(log => [
         formatDateTime(log.createdAt),
-        log.userName,
-        log.userEmail,
-        log.type,
+        log.user?.name || '',
+        log.user?.email || '',
+        log.action,
         log.resource,
-        log.details || '',
-        log.ip,
-        log.userAgent,
+        log.resourceTitle || '',
+        log.ip || '',
+        log.userAgent || '',
       ]),
     ]
-      .map(row => row.join(','))
+      .map(row => row.map(cell => `"${cell}"`).join(','))
       .join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'activity-logs.csv';
+    a.download = `activity-logs-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
   };
 
@@ -389,7 +289,7 @@ export default function ActivityLogsPage() {
     ar: {
       title: 'سجل النشاط',
       search: 'بحث...',
-      allTypes: 'جميع الأنواع',
+      allActions: 'جميع الإجراءات',
       allResources: 'جميع الموارد',
       from: 'من',
       to: 'إلى',
@@ -408,11 +308,12 @@ export default function ActivityLogsPage() {
       of: 'من',
       showing: 'عرض',
       results: 'نتيجة',
+      error: 'حدث خطأ',
     },
     en: {
       title: 'Activity Logs',
       search: 'Search...',
-      allTypes: 'All Types',
+      allActions: 'All Actions',
       allResources: 'All Resources',
       from: 'From',
       to: 'To',
@@ -431,27 +332,37 @@ export default function ActivityLogsPage() {
       of: 'of',
       showing: 'Showing',
       results: 'results',
+      error: 'An error occurred',
     },
   };
 
   const t = texts[locale as keyof typeof texts] || texts.en;
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
 
   return (
     <div className={`p-6 ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold text-gray-900">
+          <h1 className="flex items-center gap-2 text-2xl font-bold text-gray-900 dark:text-white">
             <Activity className="size-7" />
             {t.title}
           </h1>
         </div>
         <div className="flex gap-2">
           <button
-            onClick={() => window.location.reload()}
-            className="flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-gray-700 hover:bg-gray-200"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-gray-700 hover:bg-gray-200 disabled:opacity-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
           >
-            <RefreshCw className="size-4" />
+            <RefreshCw className={`size-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             {t.refresh}
           </button>
           <button
@@ -464,28 +375,38 @@ export default function ActivityLogsPage() {
         </div>
       </div>
 
+      {/* Error Message */}
+      {error && (
+        <div className="mb-6 rounded-lg bg-red-50 p-4 text-red-600 dark:bg-red-900/20 dark:text-red-400">
+          {error}
+        </div>
+      )}
+
       {/* Filters */}
-      <div className="mb-6 rounded-lg bg-white p-4 shadow">
+      <div className="mb-6 rounded-lg bg-white p-4 shadow dark:bg-gray-800">
         <div className="flex flex-wrap gap-4">
           <div className="relative min-w-64 flex-1">
             <Search
-              className={`absolute top-1/2 size-4 -translate-y-1/2 text-gray-400${isRTL ? 'right-3' : 'left-3'}`}
+              className={`absolute top-1/2 size-4 -translate-y-1/2 text-gray-400 ${isRTL ? 'right-3' : 'left-3'}`}
             />
             <input
               type="text"
               placeholder={t.search}
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className={`w-full rounded-lg border py-2 ${isRTL ? 'pl-4 pr-10' : 'pl-10 pr-4'}`}
+              className={`w-full rounded-lg border py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white ${isRTL ? 'pl-4 pr-10' : 'pl-10 pr-4'}`}
             />
           </div>
 
           <select
-            value={typeFilter}
-            onChange={e => setTypeFilter(e.target.value)}
-            className="rounded-lg border px-3 py-2"
+            value={actionFilter}
+            onChange={e => {
+              setActionFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
           >
-            <option value="all">{t.allTypes}</option>
+            <option value="all">{t.allActions}</option>
             {activityTypes.map(type => (
               <option key={type.value} value={type.value}>
                 {locale === 'ar' ? type.labelAr : type.labelEn}
@@ -495,8 +416,11 @@ export default function ActivityLogsPage() {
 
           <select
             value={resourceFilter}
-            onChange={e => setResourceFilter(e.target.value)}
-            className="rounded-lg border px-3 py-2 capitalize"
+            onChange={e => {
+              setResourceFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="rounded-lg border px-3 py-2 capitalize dark:border-gray-600 dark:bg-gray-700 dark:text-white"
           >
             <option value="all">{t.allResources}</option>
             {resources.map(resource => (
@@ -507,77 +431,120 @@ export default function ActivityLogsPage() {
           </select>
 
           <div className="flex items-center gap-2">
-            <label className="text-sm text-gray-500">{t.from}:</label>
+            <label className="text-sm text-gray-500 dark:text-gray-400">{t.from}:</label>
             <input
               type="date"
               value={dateRange.from}
-              onChange={e => setDateRange(prev => ({ ...prev, from: e.target.value }))}
-              className="rounded-lg border px-3 py-2"
+              onChange={e => {
+                setDateRange(prev => ({ ...prev, from: e.target.value }));
+                setCurrentPage(1);
+              }}
+              className="rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
           </div>
 
           <div className="flex items-center gap-2">
-            <label className="text-sm text-gray-500">{t.to}:</label>
+            <label className="text-sm text-gray-500 dark:text-gray-400">{t.to}:</label>
             <input
               type="date"
               value={dateRange.to}
-              onChange={e => setDateRange(prev => ({ ...prev, to: e.target.value }))}
-              className="rounded-lg border px-3 py-2"
+              onChange={e => {
+                setDateRange(prev => ({ ...prev, to: e.target.value }));
+                setCurrentPage(1);
+              }}
+              className="rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
           </div>
         </div>
       </div>
 
       {/* Activity Timeline */}
-      <div className="rounded-lg bg-white shadow">
-        <div className="divide-y">
-          {paginatedLogs.map(log => {
-            const typeInfo = getActivityTypeInfo(log.type);
+      <div className="rounded-lg bg-white shadow dark:bg-gray-800">
+        <div className="divide-y dark:divide-gray-700">
+          {filteredLogs.map(log => {
+            const typeInfo = getActivityTypeInfo(log.action);
             return (
-              <div key={log.id} className="p-4 hover:bg-gray-50">
+              <div key={log._id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                 <div className="flex items-start gap-4">
                   {/* User Avatar */}
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gray-200 font-medium text-gray-600">
-                    {log.userName.charAt(0)}
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gray-200 font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                    {log.user?.avatar ? (
+                      <img
+                        src={log.user.avatar}
+                        alt={log.user.name}
+                        className="size-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      log.user?.name?.charAt(0) || '?'
+                    )}
                   </div>
 
                   {/* Activity Content */}
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-medium text-gray-900">{log.userName}</span>
+                      <span className="font-medium text-gray-900 dark:text-white">
+                        {log.user?.name || 'Unknown User'}
+                      </span>
                       <span
                         className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${typeInfo?.color}`}
                       >
                         {typeInfo?.icon}
                         {locale === 'ar' ? typeInfo?.labelAr : typeInfo?.labelEn}
                       </span>
-                      <span className="flex items-center gap-1 text-sm text-gray-500">
+                      <span className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
                         {getResourceIcon(log.resource)}
                         <span className="capitalize">{log.resource}</span>
                       </span>
-                      {log.resourceName && (
-                        <span className="text-sm font-medium text-blue-600">
-                          {log.resourceName}
+                      {log.resourceTitle && (
+                        <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                          {log.resourceTitle}
                         </span>
                       )}
                     </div>
 
-                    {log.details && <p className="mt-1 text-sm text-gray-600">{log.details}</p>}
+                    {log.details && (
+                      <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                        {typeof log.details === 'object'
+                          ? JSON.stringify(log.details)
+                          : String(log.details)}
+                      </p>
+                    )}
 
-                    <div className="mt-2 flex items-center gap-4 text-xs text-gray-400">
+                    {log.changes && log.changes.length > 0 && (
+                      <div className="mt-2 rounded-lg bg-gray-50 p-2 text-sm dark:bg-gray-700">
+                        {log.changes.slice(0, 3).map((change, idx) => (
+                          <div key={idx} className="text-gray-600 dark:text-gray-400">
+                            <span className="font-medium">{change.field}:</span>{' '}
+                            <span className="text-red-500 line-through">
+                              {String(change.oldValue)}
+                            </span>{' '}
+                            → <span className="text-green-500">{String(change.newValue)}</span>
+                          </div>
+                        ))}
+                        {log.changes.length > 3 && (
+                          <div className="text-gray-500">
+                            +{log.changes.length - 3} more changes
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="mt-2 flex items-center gap-4 text-xs text-gray-400 dark:text-gray-500">
                       <span className="flex items-center gap-1">
                         <Calendar className="size-3" />
                         {formatDateTime(log.createdAt)}
                       </span>
-                      <span>
-                        {t.ip}: {log.ip}
-                      </span>
-                      <span className="max-w-xs truncate">{log.userAgent}</span>
+                      {log.ip && (
+                        <span>
+                          {t.ip}: {log.ip}
+                        </span>
+                      )}
+                      {log.userAgent && <span className="max-w-xs truncate">{log.userAgent}</span>}
                     </div>
                   </div>
 
                   {/* Relative Time */}
-                  <div className="shrink-0 text-sm text-gray-500">
+                  <div className="shrink-0 text-sm text-gray-500 dark:text-gray-400">
                     {getRelativeTime(log.createdAt)}
                   </div>
                 </div>
@@ -586,33 +553,32 @@ export default function ActivityLogsPage() {
           })}
         </div>
 
-        {paginatedLogs.length === 0 && (
-          <div className="py-12 text-center text-gray-500">{t.noLogs}</div>
+        {filteredLogs.length === 0 && (
+          <div className="py-12 text-center text-gray-500 dark:text-gray-400">{t.noLogs}</div>
         )}
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between border-t p-4">
-            <div className="text-sm text-gray-500">
+          <div className="flex items-center justify-between border-t p-4 dark:border-gray-700">
+            <div className="text-sm text-gray-500 dark:text-gray-400">
               {t.showing} {(currentPage - 1) * itemsPerPage + 1}-
-              {Math.min(currentPage * itemsPerPage, filteredLogs.length)} {t.of}{' '}
-              {filteredLogs.length} {t.results}
+              {Math.min(currentPage * itemsPerPage, totalLogs)} {t.of} {totalLogs} {t.results}
             </div>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
-                className="rounded-lg border px-3 py-1 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-lg border px-3 py-1 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:hover:bg-gray-700"
               >
                 <ChevronLeft className="size-4" />
               </button>
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-gray-600 dark:text-gray-400">
                 {t.page} {currentPage} {t.of} {totalPages}
               </span>
               <button
                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                 disabled={currentPage === totalPages}
-                className="rounded-lg border px-3 py-1 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-lg border px-3 py-1 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:hover:bg-gray-700"
               >
                 <ChevronRight className="size-4" />
               </button>

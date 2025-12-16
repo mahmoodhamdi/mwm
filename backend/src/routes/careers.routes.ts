@@ -9,6 +9,7 @@ import { careersController } from '../controllers';
 import { authenticate, authorize } from '../middlewares/auth';
 import { validate, idParamsSchema, jobIdParamsSchema } from '../middlewares/validate';
 import { careersValidation } from '../validations';
+import { resumeUpload } from '../utils/upload';
 
 const router = Router();
 
@@ -24,6 +25,21 @@ const applicationLimiter = rateLimit({
     success: false,
     message:
       'Too many job applications submitted. Please try again later | تم إرسال طلبات كثيرة. يرجى المحاولة لاحقاً',
+    code: 'TOO_MANY_REQUESTS',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Rate limit for resume uploads (10 per hour per IP)
+const uploadLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 10,
+  skip: () => isTestEnv, // Skip in test environment
+  message: {
+    success: false,
+    message:
+      'Too many file uploads. Please try again later | تم رفع ملفات كثيرة. يرجى المحاولة لاحقاً',
     code: 'TOO_MANY_REQUESTS',
   },
   standardHeaders: true,
@@ -48,6 +64,14 @@ router.get('/jobs', careersController.getJobs);
 // Public Routes - Applications
 // المسارات العامة - الطلبات
 // ============================================
+
+// POST /api/v1/careers/upload-resume - Upload resume file
+router.post(
+  '/upload-resume',
+  uploadLimiter,
+  resumeUpload.single('resume'),
+  careersController.uploadResume
+);
 
 // POST /api/v1/careers/apply - Submit job application
 router.post(

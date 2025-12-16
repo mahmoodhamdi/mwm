@@ -97,7 +97,7 @@ export function NotificationBell({ className = '' }: NotificationBellProps) {
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 z-50 mt-2 w-80 rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 sm:w-96 dark:bg-gray-800">
+        <div className="absolute right-0 z-50 mt-2 w-80 rounded-lg bg-white shadow-lg ring-1 ring-black/5 sm:w-96 dark:bg-gray-800">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-gray-700">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">

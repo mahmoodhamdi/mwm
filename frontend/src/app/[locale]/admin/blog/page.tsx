@@ -11,7 +11,7 @@ import {
   User,
   Clock,
   FileText,
-  Image,
+  Image as ImageIcon,
   X,
   Save,
   Loader2,
@@ -627,7 +627,7 @@ export default function BlogPage() {
                         <div className="size-16 overflow-hidden rounded-lg bg-gray-100">
                           {post.featuredImage ? (
                             <div className="flex size-full items-center justify-center bg-gray-200">
-                              <Image className="size-6 text-gray-400" />
+                              <ImageIcon className="size-6 text-gray-400" />
                             </div>
                           ) : (
                             <div className="flex size-full items-center justify-center">

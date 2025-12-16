@@ -11,6 +11,13 @@ import rateLimit from 'express-rate-limit';
 
 const router = Router();
 
+/**
+ * @swagger
+ * tags:
+ *   - name: Upload
+ *     description: File upload management
+ */
+
 // Rate limiter for uploads (20 per hour)
 const uploadLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
@@ -29,13 +36,54 @@ const uploadLimiter = rateLimit({
 router.use(authenticate);
 
 /**
- * @route   POST /api/v1/upload/image
- * @desc    Upload a single image
- * @access  Private (authenticated users with upload permission)
- * @query   folder - Cloudinary folder (default: 'images')
- * @query   width - Optional max width
- * @query   height - Optional max height
- * @query   crop - Optional crop mode (fill, fit, scale, thumb, limit)
+ * @swagger
+ * /upload/image:
+ *   post:
+ *     summary: Upload a single image
+ *     tags: [Upload]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: folder
+ *         schema:
+ *           type: string
+ *         description: Cloudinary folder (default 'images')
+ *       - in: query
+ *         name: width
+ *         schema:
+ *           type: integer
+ *         description: Max width
+ *       - in: query
+ *         name: height
+ *         schema:
+ *           type: integer
+ *         description: Max height
+ *       - in: query
+ *         name: crop
+ *         schema:
+ *           type: string
+ *           enum: [fill, fit, scale, thumb, limit]
+ *         description: Crop mode
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - image
+ *             properties:
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Image uploaded successfully
+ *       400:
+ *         description: No image provided
+ *       429:
+ *         description: Too many requests
  */
 router.post(
   '/image',
@@ -53,13 +101,53 @@ router.post(
 );
 
 /**
- * @route   POST /api/v1/upload/images
- * @desc    Upload multiple images (max 10)
- * @access  Private (authenticated users with upload permission)
- * @query   folder - Cloudinary folder (default: 'images')
- * @query   width - Optional max width
- * @query   height - Optional max height
- * @query   crop - Optional crop mode
+ * @swagger
+ * /upload/images:
+ *   post:
+ *     summary: Upload multiple images (max 10)
+ *     tags: [Upload]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: folder
+ *         schema:
+ *           type: string
+ *         description: Cloudinary folder
+ *       - in: query
+ *         name: width
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: height
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: crop
+ *         schema:
+ *           type: string
+ *           enum: [fill, fit, scale, thumb, limit]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - images
+ *             properties:
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *     responses:
+ *       200:
+ *         description: Images uploaded successfully
+ *       400:
+ *         description: No images provided
+ *       429:
+ *         description: Too many requests
  */
 router.post(
   '/images',
@@ -77,9 +165,25 @@ router.post(
 );
 
 /**
- * @route   DELETE /api/v1/upload/image/:publicId
- * @desc    Delete an image by public ID
- * @access  Private (authenticated users with upload permission)
+ * @swagger
+ * /upload/image/{publicId}:
+ *   delete:
+ *     summary: Delete an image by public ID
+ *     tags: [Upload]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: publicId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Cloudinary public ID
+ *     responses:
+ *       200:
+ *         description: Image deleted successfully
+ *       404:
+ *         description: Image not found
  */
 router.delete(
   '/image/:publicId',

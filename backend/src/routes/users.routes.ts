@@ -10,43 +10,198 @@ import { validate, idParamsSchema } from '../middlewares/validate';
 
 const router = Router();
 
+/**
+ * @swagger
+ * tags:
+ *   - name: Users
+ *     description: User management (Admin only)
+ */
+
 // All user management routes require authentication and admin permissions
 router.use(authenticate);
 router.use(authorize('users:read'));
 
 /**
- * GET /api/v1/users - Get all users
- * الحصول على جميع المستخدمين
+ * @swagger
+ * /users:
+ *   get:
+ *     summary: Get all users
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: role
+ *         schema:
+ *           type: string
+ *           enum: [super_admin, admin, editor, author, viewer]
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [active, inactive, locked]
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of users
+ *       401:
+ *         description: Unauthorized
  */
 router.get('/', userController.getAllUsers);
 
 /**
- * GET /api/v1/users/stats - Get user statistics
- * الحصول على إحصائيات المستخدمين
+ * @swagger
+ * /users/stats:
+ *   get:
+ *     summary: Get user statistics
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User statistics
+ *       401:
+ *         description: Unauthorized
  */
 router.get('/stats', userController.getUserStats);
 
 /**
- * GET /api/v1/users/:id - Get user by ID
- * الحصول على مستخدم بواسطة المعرف
+ * @swagger
+ * /users/{id}:
+ *   get:
+ *     summary: Get user by ID
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User details
+ *       404:
+ *         description: User not found
  */
 router.get('/:id', validate({ params: idParamsSchema }), userController.getUserById);
 
 /**
- * POST /api/v1/users - Create new user
- * إنشاء مستخدم جديد
+ * @swagger
+ * /users:
+ *   post:
+ *     summary: Create new user
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *               - name
+ *               - role
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *               name:
+ *                 type: string
+ *               role:
+ *                 type: string
+ *                 enum: [admin, editor, author, viewer]
+ *     responses:
+ *       201:
+ *         description: User created
+ *       400:
+ *         description: Validation error
+ *       409:
+ *         description: Email already exists
  */
 router.post('/', authorize('users:create'), userController.createUser);
 
 /**
- * POST /api/v1/users/bulk - Bulk update users
- * تحديث مجموعة من المستخدمين
+ * @swagger
+ * /users/bulk:
+ *   post:
+ *     summary: Bulk update users
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - ids
+ *               - action
+ *             properties:
+ *               ids:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               action:
+ *                 type: string
+ *                 enum: [activate, deactivate, delete]
+ *     responses:
+ *       200:
+ *         description: Bulk action completed
+ *       401:
+ *         description: Unauthorized
  */
 router.post('/bulk', authorize('users:update'), userController.bulkUpdateUsers);
 
 /**
- * PUT /api/v1/users/:id - Update user
- * تحديث المستخدم
+ * @swagger
+ * /users/{id}:
+ *   put:
+ *     summary: Update user
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               role:
+ *                 type: string
+ *               isActive:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: User updated
+ *       404:
+ *         description: User not found
  */
 router.put(
   '/:id',
@@ -56,8 +211,24 @@ router.put(
 );
 
 /**
- * PUT /api/v1/users/:id/status - Toggle user active status
- * تبديل حالة نشاط المستخدم
+ * @swagger
+ * /users/{id}/status:
+ *   put:
+ *     summary: Toggle user active status
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Status toggled
+ *       404:
+ *         description: User not found
  */
 router.put(
   '/:id/status',
@@ -67,8 +238,24 @@ router.put(
 );
 
 /**
- * PUT /api/v1/users/:id/unlock - Unlock user account
- * فتح قفل حساب المستخدم
+ * @swagger
+ * /users/{id}/unlock:
+ *   put:
+ *     summary: Unlock user account
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User unlocked
+ *       404:
+ *         description: User not found
  */
 router.put(
   '/:id/unlock',
@@ -78,8 +265,35 @@ router.put(
 );
 
 /**
- * PUT /api/v1/users/:id/password - Reset user password
- * إعادة تعيين كلمة مرور المستخدم
+ * @swagger
+ * /users/{id}/password:
+ *   put:
+ *     summary: Reset user password
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - password
+ *             properties:
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Password reset
+ *       404:
+ *         description: User not found
  */
 router.put(
   '/:id/password',
@@ -89,8 +303,24 @@ router.put(
 );
 
 /**
- * DELETE /api/v1/users/:id - Delete user
- * حذف المستخدم
+ * @swagger
+ * /users/{id}:
+ *   delete:
+ *     summary: Delete user
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User deleted
+ *       404:
+ *         description: User not found
  */
 router.delete(
   '/:id',

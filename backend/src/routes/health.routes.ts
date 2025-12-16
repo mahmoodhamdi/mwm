@@ -32,9 +32,57 @@ interface HealthStatus {
 }
 
 /**
- * @route GET /api/v1/health
- * @desc Health check endpoint
- * @access Public
+ * @swagger
+ * /health:
+ *   get:
+ *     summary: Health check endpoint
+ *     description: Returns the health status of the API and its dependencies
+ *     tags: [Health]
+ *     responses:
+ *       200:
+ *         description: System is healthy
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     status:
+ *                       type: string
+ *                       enum: [healthy, unhealthy]
+ *                     timestamp:
+ *                       type: string
+ *                       format: date-time
+ *                     uptime:
+ *                       type: number
+ *                     environment:
+ *                       type: string
+ *                     version:
+ *                       type: string
+ *                     services:
+ *                       type: object
+ *                       properties:
+ *                         database:
+ *                           type: object
+ *                           properties:
+ *                             status:
+ *                               type: string
+ *                             name:
+ *                               type: string
+ *                         cache:
+ *                           type: object
+ *                           properties:
+ *                             status:
+ *                               type: string
+ *                             name:
+ *                               type: string
+ *       503:
+ *         description: System is unhealthy
  */
 router.get('/', async (_req: Request, res: Response) => {
   const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
@@ -67,9 +115,32 @@ router.get('/', async (_req: Request, res: Response) => {
 });
 
 /**
- * @route GET /api/v1/health/live
- * @desc Liveness probe (is the app running?)
- * @access Public
+ * @swagger
+ * /health/live:
+ *   get:
+ *     summary: Liveness probe
+ *     description: Kubernetes liveness probe - is the app running?
+ *     tags: [Health]
+ *     responses:
+ *       200:
+ *         description: Application is alive
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     status:
+ *                       type: string
+ *                       example: alive
+ *                     timestamp:
+ *                       type: string
+ *                       format: date-time
  */
 router.get('/live', (_req: Request, res: Response) => {
   res.status(200).json({
@@ -82,9 +153,41 @@ router.get('/live', (_req: Request, res: Response) => {
 });
 
 /**
- * @route GET /api/v1/health/ready
- * @desc Readiness probe (is the app ready to receive traffic?)
- * @access Public
+ * @swagger
+ * /health/ready:
+ *   get:
+ *     summary: Readiness probe
+ *     description: Kubernetes readiness probe - is the app ready to receive traffic?
+ *     tags: [Health]
+ *     responses:
+ *       200:
+ *         description: Application is ready
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     status:
+ *                       type: string
+ *                       example: ready
+ *                     timestamp:
+ *                       type: string
+ *                       format: date-time
+ *                     checks:
+ *                       type: object
+ *                       properties:
+ *                         database:
+ *                           type: boolean
+ *                         cache:
+ *                           type: boolean
+ *       503:
+ *         description: Application is not ready
  */
 router.get('/ready', async (_req: Request, res: Response) => {
   const dbReady = mongoose.connection.readyState === 1;

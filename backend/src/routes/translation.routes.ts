@@ -10,17 +10,69 @@ import { authenticate, authorize } from '../middlewares/auth';
 const router = Router();
 
 /**
+ * @swagger
+ * tags:
+ *   - name: Translations
+ *     description: Translation and i18n management
+ */
+
+/**
  * Public Routes
  * المسارات العامة
  */
 
-// GET /api/v1/translations/all - Get all translations for a locale
+/**
+ * @swagger
+ * /translations/all:
+ *   get:
+ *     summary: Get all translations for a locale
+ *     tags: [Translations]
+ *     parameters:
+ *       - in: query
+ *         name: locale
+ *         schema:
+ *           type: string
+ *           enum: [ar, en]
+ *         description: Locale to get translations for
+ *     responses:
+ *       200:
+ *         description: Translations for the locale
+ */
 router.get('/all', translationController.getAllByLocale);
 
-// GET /api/v1/translations/namespaces - Get namespaces list
+/**
+ * @swagger
+ * /translations/namespaces:
+ *   get:
+ *     summary: Get all translation namespaces
+ *     tags: [Translations]
+ *     responses:
+ *       200:
+ *         description: List of namespaces
+ */
 router.get('/namespaces', translationController.getNamespaces);
 
-// GET /api/v1/translations/namespace/:namespace - Get translations by namespace
+/**
+ * @swagger
+ * /translations/namespace/{namespace}:
+ *   get:
+ *     summary: Get translations by namespace
+ *     tags: [Translations]
+ *     parameters:
+ *       - in: path
+ *         name: namespace
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: locale
+ *         schema:
+ *           type: string
+ *           enum: [ar, en]
+ *     responses:
+ *       200:
+ *         description: Translations for the namespace
+ */
 router.get('/namespace/:namespace', translationController.getByNamespace);
 
 /**
@@ -28,10 +80,59 @@ router.get('/namespace/:namespace', translationController.getByNamespace);
  * مسارات المسؤول
  */
 
-// GET /api/v1/translations - Get all translations (Admin)
+/**
+ * @swagger
+ * /translations:
+ *   get:
+ *     summary: Get all translations
+ *     tags: [Translations]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: namespace
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: All translations
+ *       401:
+ *         description: Unauthorized
+ */
 router.get('/', authenticate, authorize('settings:read'), translationController.getAllTranslations);
 
-// GET /api/v1/translations/search - Search translations
+/**
+ * @swagger
+ * /translations/search:
+ *   get:
+ *     summary: Search translations
+ *     tags: [Translations]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         schema:
+ *           type: string
+ *         description: Search query
+ *       - in: query
+ *         name: namespace
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Search results
+ *       401:
+ *         description: Unauthorized
+ */
 router.get(
   '/search',
   authenticate,
@@ -39,10 +140,64 @@ router.get(
   translationController.searchTranslations
 );
 
-// GET /api/v1/translations/:id - Get single translation
+/**
+ * @swagger
+ * /translations/{id}:
+ *   get:
+ *     summary: Get translation by ID
+ *     tags: [Translations]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Translation details
+ *       404:
+ *         description: Translation not found
+ */
 router.get('/:id', authenticate, authorize('settings:read'), translationController.getTranslation);
 
-// POST /api/v1/translations - Create translation
+/**
+ * @swagger
+ * /translations:
+ *   post:
+ *     summary: Create translation
+ *     tags: [Translations]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - key
+ *               - namespace
+ *               - value
+ *             properties:
+ *               key:
+ *                 type: string
+ *               namespace:
+ *                 type: string
+ *               value:
+ *                 type: object
+ *                 properties:
+ *                   ar:
+ *                     type: string
+ *                   en:
+ *                     type: string
+ *     responses:
+ *       201:
+ *         description: Translation created
+ *       401:
+ *         description: Unauthorized
+ */
 router.post(
   '/',
   authenticate,
@@ -50,7 +205,37 @@ router.post(
   translationController.createTranslation
 );
 
-// POST /api/v1/translations/upsert - Upsert translation
+/**
+ * @swagger
+ * /translations/upsert:
+ *   post:
+ *     summary: Upsert translation
+ *     tags: [Translations]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - key
+ *               - namespace
+ *               - value
+ *             properties:
+ *               key:
+ *                 type: string
+ *               namespace:
+ *                 type: string
+ *               value:
+ *                 type: object
+ *     responses:
+ *       200:
+ *         description: Translation upserted
+ *       401:
+ *         description: Unauthorized
+ */
 router.post(
   '/upsert',
   authenticate,
@@ -58,7 +243,40 @@ router.post(
   translationController.upsertTranslation
 );
 
-// POST /api/v1/translations/bulk - Bulk upsert translations
+/**
+ * @swagger
+ * /translations/bulk:
+ *   post:
+ *     summary: Bulk upsert translations
+ *     tags: [Translations]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - translations
+ *             properties:
+ *               translations:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     key:
+ *                       type: string
+ *                     namespace:
+ *                       type: string
+ *                     value:
+ *                       type: object
+ *     responses:
+ *       200:
+ *         description: Bulk upsert completed
+ *       401:
+ *         description: Unauthorized
+ */
 router.post(
   '/bulk',
   authenticate,
@@ -66,7 +284,36 @@ router.post(
   translationController.bulkUpsertTranslations
 );
 
-// PUT /api/v1/translations/:id - Update translation
+/**
+ * @swagger
+ * /translations/{id}:
+ *   put:
+ *     summary: Update translation
+ *     tags: [Translations]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               value:
+ *                 type: object
+ *               namespace:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Translation updated
+ *       404:
+ *         description: Translation not found
+ */
 router.put(
   '/:id',
   authenticate,
@@ -74,7 +321,26 @@ router.put(
   translationController.updateTranslation
 );
 
-// DELETE /api/v1/translations/:id - Delete translation
+/**
+ * @swagger
+ * /translations/{id}:
+ *   delete:
+ *     summary: Delete translation
+ *     tags: [Translations]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Translation deleted
+ *       404:
+ *         description: Translation not found
+ */
 router.delete(
   '/:id',
   authenticate,

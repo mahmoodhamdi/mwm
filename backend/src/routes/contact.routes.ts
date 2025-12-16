@@ -11,6 +11,15 @@ import { contactValidation } from '../validations';
 
 const router = Router();
 
+/**
+ * @swagger
+ * tags:
+ *   - name: Contact
+ *     description: Public contact form submission
+ *   - name: Contact Admin
+ *     description: Contact message management (Admin only)
+ */
+
 // Check if running in test environment
 const isTestEnv = process.env.NODE_ENV === 'test';
 
@@ -32,9 +41,47 @@ const contactFormLimiter = rateLimit({
 // ============ PUBLIC ROUTES ============
 
 /**
- * @route   POST /api/v1/contact
- * @desc    Submit contact form
- * @access  Public
+ * @swagger
+ * /contact:
+ *   post:
+ *     summary: Submit contact form
+ *     description: Public endpoint to submit a contact form message
+ *     tags: [Contact]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - email
+ *               - subject
+ *               - message
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: John Doe
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: john@example.com
+ *               phone:
+ *                 type: string
+ *                 example: +1234567890
+ *               subject:
+ *                 type: string
+ *                 example: Business Inquiry
+ *               message:
+ *                 type: string
+ *                 example: I would like to discuss a project...
+ *     responses:
+ *       201:
+ *         description: Message submitted successfully
+ *       400:
+ *         description: Validation error
+ *       429:
+ *         description: Too many requests
  */
 router.post(
   '/',
@@ -47,9 +94,18 @@ router.post(
 // ============ ADMIN ROUTES ============
 
 /**
- * @route   GET /api/v1/contact/messages/statistics
- * @desc    Get message statistics
- * @access  Private (Admin)
+ * @swagger
+ * /contact/messages/statistics:
+ *   get:
+ *     summary: Get message statistics
+ *     tags: [Contact Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Message statistics
+ *       401:
+ *         description: Unauthorized
  */
 router.get(
   '/messages/statistics',
@@ -59,9 +115,18 @@ router.get(
 );
 
 /**
- * @route   GET /api/v1/contact/messages/unread-count
- * @desc    Get unread message count
- * @access  Private (Admin)
+ * @swagger
+ * /contact/messages/unread-count:
+ *   get:
+ *     summary: Get unread message count
+ *     tags: [Contact Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Unread count
+ *       401:
+ *         description: Unauthorized
  */
 router.get(
   '/messages/unread-count',
@@ -71,9 +136,35 @@ router.get(
 );
 
 /**
- * @route   POST /api/v1/contact/messages/bulk
- * @desc    Bulk action on messages
- * @access  Private (Admin)
+ * @swagger
+ * /contact/messages/bulk:
+ *   post:
+ *     summary: Bulk action on messages
+ *     tags: [Contact Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - ids
+ *               - action
+ *             properties:
+ *               ids:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               action:
+ *                 type: string
+ *                 enum: [delete, archive, markRead, markUnread, markSpam]
+ *     responses:
+ *       200:
+ *         description: Bulk action completed
+ *       401:
+ *         description: Unauthorized
  */
 router.post(
   '/messages/bulk',
@@ -84,9 +175,40 @@ router.post(
 );
 
 /**
- * @route   GET /api/v1/contact/messages
- * @desc    Get all messages
- * @access  Private (Admin)
+ * @swagger
+ * /contact/messages:
+ *   get:
+ *     summary: Get all messages
+ *     tags: [Contact Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [new, read, replied, archived, spam]
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: starred
+ *         schema:
+ *           type: boolean
+ *     responses:
+ *       200:
+ *         description: List of messages
+ *       401:
+ *         description: Unauthorized
  */
 router.get(
   '/messages',
@@ -97,9 +219,24 @@ router.get(
 );
 
 /**
- * @route   GET /api/v1/contact/messages/:id
- * @desc    Get message by ID
- * @access  Private (Admin)
+ * @swagger
+ * /contact/messages/{id}:
+ *   get:
+ *     summary: Get message by ID
+ *     tags: [Contact Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Message details
+ *       404:
+ *         description: Message not found
  */
 router.get(
   '/messages/:id',
@@ -110,9 +247,36 @@ router.get(
 );
 
 /**
- * @route   PUT /api/v1/contact/messages/:id
- * @desc    Update message
- * @access  Private (Admin)
+ * @swagger
+ * /contact/messages/{id}:
+ *   put:
+ *     summary: Update message
+ *     tags: [Contact Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *               starred:
+ *                 type: boolean
+ *               notes:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Message updated
+ *       404:
+ *         description: Message not found
  */
 router.put(
   '/messages/:id',
@@ -123,9 +287,35 @@ router.put(
 );
 
 /**
- * @route   POST /api/v1/contact/messages/:id/reply
- * @desc    Reply to message
- * @access  Private (Admin)
+ * @swagger
+ * /contact/messages/{id}/reply:
+ *   post:
+ *     summary: Reply to message
+ *     tags: [Contact Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - message
+ *             properties:
+ *               message:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Reply sent successfully
+ *       404:
+ *         description: Message not found
  */
 router.post(
   '/messages/:id/reply',
@@ -136,9 +326,24 @@ router.post(
 );
 
 /**
- * @route   PUT /api/v1/contact/messages/:id/star
- * @desc    Toggle message starred status
- * @access  Private (Admin)
+ * @swagger
+ * /contact/messages/{id}/star:
+ *   put:
+ *     summary: Toggle message starred status
+ *     tags: [Contact Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Star status toggled
+ *       404:
+ *         description: Message not found
  */
 router.put(
   '/messages/:id/star',
@@ -149,9 +354,24 @@ router.put(
 );
 
 /**
- * @route   PUT /api/v1/contact/messages/:id/spam
- * @desc    Mark message as spam
- * @access  Private (Admin)
+ * @swagger
+ * /contact/messages/{id}/spam:
+ *   put:
+ *     summary: Mark message as spam
+ *     tags: [Contact Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Message marked as spam
+ *       404:
+ *         description: Message not found
  */
 router.put(
   '/messages/:id/spam',
@@ -162,9 +382,24 @@ router.put(
 );
 
 /**
- * @route   PUT /api/v1/contact/messages/:id/archive
- * @desc    Archive message
- * @access  Private (Admin)
+ * @swagger
+ * /contact/messages/{id}/archive:
+ *   put:
+ *     summary: Archive message
+ *     tags: [Contact Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Message archived
+ *       404:
+ *         description: Message not found
  */
 router.put(
   '/messages/:id/archive',
@@ -175,9 +410,24 @@ router.put(
 );
 
 /**
- * @route   DELETE /api/v1/contact/messages/:id
- * @desc    Delete message
- * @access  Private (Admin)
+ * @swagger
+ * /contact/messages/{id}:
+ *   delete:
+ *     summary: Delete message
+ *     tags: [Contact Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Message deleted
+ *       404:
+ *         description: Message not found
  */
 router.delete(
   '/messages/:id',

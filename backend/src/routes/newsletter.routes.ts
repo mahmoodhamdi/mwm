@@ -4,6 +4,7 @@
  */
 
 import { Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import * as newsletterController from '../controllers/newsletter.controller';
 import { authenticate, authorize } from '../middlewares/auth';
 import { validate, idParamsSchema } from '../middlewares/validate';
@@ -21,6 +22,24 @@ import {
 } from '../validations/newsletter.validation';
 
 const router = Router();
+
+// Check if running in test environment
+const isTestEnv = process.env.NODE_ENV === 'test';
+
+// Rate limit for newsletter subscriptions (10 per hour per IP)
+const subscriptionLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 10,
+  skip: () => isTestEnv, // Skip in test environment
+  message: {
+    success: false,
+    message:
+      'Too many subscription attempts. Please try again later | تم إرسال طلبات كثيرة. يرجى المحاولة لاحقاً',
+    code: 'TOO_MANY_REQUESTS',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // ============ PUBLIC ROUTES ============
 
@@ -53,7 +72,12 @@ const router = Router();
  *       400:
  *         description: Invalid input
  */
-router.post('/subscribe', validate({ body: subscribeSchema }), newsletterController.subscribe);
+router.post(
+  '/subscribe',
+  subscriptionLimiter,
+  validate({ body: subscribeSchema }),
+  newsletterController.subscribe
+);
 
 /**
  * @swagger

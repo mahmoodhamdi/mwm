@@ -4,11 +4,30 @@
  */
 
 import { Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import { contactController } from '../controllers/contact.controller';
 import { authenticate, authorize, validate, idParamsSchema } from '../middlewares';
 import { contactValidation } from '../validations';
 
 const router = Router();
+
+// Check if running in test environment
+const isTestEnv = process.env.NODE_ENV === 'test';
+
+// Rate limit for contact form submissions (5 per hour per IP)
+const contactFormLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 5,
+  skip: () => isTestEnv, // Skip in test environment
+  message: {
+    success: false,
+    message:
+      'Too many contact form submissions. Please try again later | تم إرسال طلبات كثيرة. يرجى المحاولة لاحقاً',
+    code: 'TOO_MANY_REQUESTS',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // ============ PUBLIC ROUTES ============
 
@@ -19,6 +38,7 @@ const router = Router();
  */
 router.post(
   '/',
+  contactFormLimiter,
   validate({ body: contactValidation.submitContactSchema }),
   contactController.submitContact
 );

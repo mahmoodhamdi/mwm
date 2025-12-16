@@ -4,12 +4,31 @@
  */
 
 import { Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import { careersController } from '../controllers';
 import { authenticate, authorize } from '../middlewares/auth';
 import { validate, idParamsSchema, jobIdParamsSchema } from '../middlewares/validate';
 import { careersValidation } from '../validations';
 
 const router = Router();
+
+// Check if running in test environment
+const isTestEnv = process.env.NODE_ENV === 'test';
+
+// Rate limit for job applications (3 per hour per IP)
+const applicationLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 3,
+  skip: () => isTestEnv, // Skip in test environment
+  message: {
+    success: false,
+    message:
+      'Too many job applications submitted. Please try again later | تم إرسال طلبات كثيرة. يرجى المحاولة لاحقاً',
+    code: 'TOO_MANY_REQUESTS',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // ============================================
 // Public Routes - Jobs
@@ -33,6 +52,7 @@ router.get('/jobs', careersController.getJobs);
 // POST /api/v1/careers/apply - Submit job application
 router.post(
   '/apply',
+  applicationLimiter,
   validate({ body: careersValidation.createApplication }),
   careersController.submitApplication
 );

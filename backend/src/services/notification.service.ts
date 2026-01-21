@@ -5,7 +5,7 @@
 
 import * as admin from 'firebase-admin';
 import { getMessaging } from '../config/firebase';
-import { logger, emitToUser, emitToAdmins } from '../config';
+import { logger, emitToUser } from '../config';
 import { Notification, INotification } from '../models/Notification';
 import { User } from '../models';
 import { DeviceToken } from '../models/DeviceToken';
@@ -411,6 +411,72 @@ export async function deleteOldNotifications(daysOld: number = 30): Promise<numb
   return result.deletedCount;
 }
 
+/**
+ * Subscribe a device token to an FCM topic
+ * اشتراك جهاز في موضوع FCM
+ */
+export async function subscribeToTopic(
+  token: string,
+  topic: string
+): Promise<{ success: boolean; error?: string }> {
+  const messaging = getMessaging();
+
+  if (!messaging) {
+    logger.warn('FCM not initialized - cannot subscribe to topic');
+    return { success: false, error: 'FCM not initialized' };
+  }
+
+  try {
+    const response = await messaging.subscribeToTopic([token], topic);
+
+    if (response.failureCount > 0) {
+      const errorMsg = response.errors?.[0]?.error?.message || 'Unknown error';
+      logger.warn(`Failed to subscribe token to topic ${topic}: ${errorMsg}`);
+      return { success: false, error: errorMsg };
+    }
+
+    logger.info(`Token subscribed to topic: ${topic}`);
+    return { success: true };
+  } catch (error) {
+    const errorMsg = (error as Error).message;
+    logger.error(`Error subscribing to topic ${topic}:`, error);
+    return { success: false, error: errorMsg };
+  }
+}
+
+/**
+ * Unsubscribe a device token from an FCM topic
+ * إلغاء اشتراك جهاز من موضوع FCM
+ */
+export async function unsubscribeFromTopic(
+  token: string,
+  topic: string
+): Promise<{ success: boolean; error?: string }> {
+  const messaging = getMessaging();
+
+  if (!messaging) {
+    logger.warn('FCM not initialized - cannot unsubscribe from topic');
+    return { success: false, error: 'FCM not initialized' };
+  }
+
+  try {
+    const response = await messaging.unsubscribeFromTopic([token], topic);
+
+    if (response.failureCount > 0) {
+      const errorMsg = response.errors?.[0]?.error?.message || 'Unknown error';
+      logger.warn(`Failed to unsubscribe token from topic ${topic}: ${errorMsg}`);
+      return { success: false, error: errorMsg };
+    }
+
+    logger.info(`Token unsubscribed from topic: ${topic}`);
+    return { success: true };
+  } catch (error) {
+    const errorMsg = (error as Error).message;
+    logger.error(`Error unsubscribing from topic ${topic}:`, error);
+    return { success: false, error: errorMsg };
+  }
+}
+
 export default {
   sendPushNotification,
   sendNotification,
@@ -423,4 +489,6 @@ export default {
   markAllAsRead,
   getUnreadCount,
   deleteOldNotifications,
+  subscribeToTopic,
+  unsubscribeFromTopic,
 };

@@ -54,7 +54,7 @@ export interface ContactFilters {
   limit?: number;
   status?: ContactStatus;
   priority?: ContactPriority;
-  isStarred?: boolean;
+  starred?: boolean; // Backend expects 'starred', not 'isStarred'
   search?: string;
   sort?: string;
   startDate?: string;

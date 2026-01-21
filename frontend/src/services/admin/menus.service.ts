@@ -182,8 +182,10 @@ export async function removeMenuItem(menuId: string, itemId: string): Promise<Me
  * Reorder menu items
  */
 export async function reorderMenuItems(menuId: string, itemIds: string[]): Promise<Menu> {
-  const response = await apiClient.put<{ menu: Menu }>(`${MENUS_ENDPOINT}/${menuId}/reorder`, {
-    itemIds,
+  // Transform itemIds array to items array with { id, order } format expected by backend
+  const items = itemIds.map((id, index) => ({ id, order: index }));
+  const response = await apiClient.post<{ menu: Menu }>(`${MENUS_ENDPOINT}/${menuId}/reorder`, {
+    items,
   });
   return response.data?.menu as Menu;
 }

@@ -134,7 +134,7 @@ export async function updateContent(key: string, data: UpdateContentData): Promi
  */
 export async function upsertContent(key: string, data: CreateContentData): Promise<ContentItem> {
   const response = await apiClient.put<{ content: ContentItem }>(
-    `${CONTENT_ENDPOINT}/upsert/${key}`,
+    `${CONTENT_ENDPOINT}/${key}/upsert`,
     data
   );
   return response.data?.content as ContentItem;

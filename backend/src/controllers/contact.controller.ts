@@ -201,7 +201,15 @@ export const getMessageById = asyncHandler(async (req: Request, res: Response) =
  */
 export const updateMessage = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const updateData = req.body;
+
+  // Whitelist allowed fields for update to prevent mass assignment
+  const allowedFields = ['status', 'priority', 'notes', 'isStarred', 'labels', 'assignedTo'];
+  const updateData: Record<string, unknown> = {};
+  for (const field of allowedFields) {
+    if (req.body[field] !== undefined) {
+      updateData[field] = req.body[field];
+    }
+  }
 
   const message = await Contact.findByIdAndUpdate(id, updateData, { new: true });
 

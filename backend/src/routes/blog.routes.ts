@@ -838,6 +838,42 @@ router.delete(
  *       403:
  *         description: Forbidden - Insufficient permissions
  */
+/**
+ * @swagger
+ * /blog/admin/stats:
+ *   get:
+ *     summary: Get blog statistics
+ *     description: Retrieves blog statistics including post counts by status and total views (Admin only)
+ *     tags: [Blog Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Blog statistics
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 total:
+ *                   type: number
+ *                 published:
+ *                   type: number
+ *                 draft:
+ *                   type: number
+ *                 scheduled:
+ *                   type: number
+ *                 archived:
+ *                   type: number
+ *                 totalViews:
+ *                   type: number
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - Insufficient permissions
+ */
+router.get('/admin/stats', authenticate, authorize('blog:read'), blogController.getStats);
+
 router.get('/admin/posts', authenticate, authorize('blog:read'), blogController.getAllPosts);
 
 /**

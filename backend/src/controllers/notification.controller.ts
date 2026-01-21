@@ -183,8 +183,16 @@ export const subscribeToTopic = asyncHandler(async (req: Request, res: Response)
   const { topic } = req.params;
   const { token } = req.body;
 
-  // This would use Firebase Admin SDK to subscribe to topic
-  // For now, just acknowledge the request
+  if (!token) {
+    throw new ApiError(400, 'TOKEN_REQUIRED', 'Device token is required');
+  }
+
+  const result = await notificationService.subscribeToTopic(token, topic);
+
+  if (!result.success) {
+    throw new ApiError(500, 'SUBSCRIPTION_FAILED', result.error || 'Failed to subscribe to topic');
+  }
+
   sendSuccess(res, { message: `Subscribed to topic: ${topic}`, topic, token });
 });
 
@@ -197,7 +205,16 @@ export const unsubscribeFromTopic = asyncHandler(async (req: Request, res: Respo
   const { topic } = req.params;
   const { token } = req.body;
 
-  // This would use Firebase Admin SDK to unsubscribe from topic
+  if (!token) {
+    throw new ApiError(400, 'TOKEN_REQUIRED', 'Device token is required');
+  }
+
+  const result = await notificationService.unsubscribeFromTopic(token, topic);
+
+  if (!result.success) {
+    throw new ApiError(500, 'UNSUBSCRIPTION_FAILED', result.error || 'Failed to unsubscribe from topic');
+  }
+
   sendSuccess(res, { message: `Unsubscribed from topic: ${topic}`, topic, token });
 });
 

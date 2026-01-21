@@ -1246,6 +1246,41 @@ async function invalidateCategoryCache() {
   }
 }
 
+/**
+ * Get blog statistics (Admin)
+ * جلب إحصائيات المدونة (للمسؤول)
+ */
+export const getStats = asyncHandler(async (_req: Request, res: Response) => {
+  const [
+    total,
+    published,
+    draft,
+    scheduled,
+    archived,
+    totalViewsResult,
+  ] = await Promise.all([
+    BlogPost.countDocuments(),
+    BlogPost.countDocuments({ status: 'published' }),
+    BlogPost.countDocuments({ status: 'draft' }),
+    BlogPost.countDocuments({ status: 'scheduled' }),
+    BlogPost.countDocuments({ status: 'archived' }),
+    BlogPost.aggregate([
+      { $group: { _id: null, totalViews: { $sum: '$views' } } },
+    ]),
+  ]);
+
+  const totalViews = totalViewsResult[0]?.totalViews || 0;
+
+  return successResponse(res, {
+    total,
+    published,
+    draft,
+    scheduled,
+    archived,
+    totalViews,
+  });
+});
+
 export const blogController = {
   // Categories
   getCategories,
@@ -1266,6 +1301,8 @@ export const blogController = {
   updatePost,
   deletePost,
   bulkUpdateStatus,
+  // Stats
+  getStats,
   // Saved Posts
   savePost,
   unsavePost,

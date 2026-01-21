@@ -516,7 +516,7 @@ export const getAllApplications = asyncHandler(async (req: Request, res: Respons
   }
 
   if (email) {
-    filter.email = { $regex: email, $options: 'i' };
+    filter.email = { $regex: escapeRegex(email as string), $options: 'i' };
   }
 
   const total = await JobApplication.countDocuments(filter);

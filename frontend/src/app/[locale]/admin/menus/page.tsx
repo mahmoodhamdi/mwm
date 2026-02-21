@@ -11,7 +11,6 @@ import {
   Save,
   Plus,
   Trash2,
-  GripVertical,
   ChevronDown,
   ChevronRight,
   ExternalLink,
@@ -47,11 +46,14 @@ interface MenuItem {
   children?: MenuItem[];
 }
 
-// Menu type
+/**
+ * Local Menu type.
+ * The backend Menu model stores `name` as a plain string (not bilingual).
+ * There is no separate `nameAr` field — use `name` for display in both locales.
+ */
 interface Menu {
   id: string;
   name: string;
-  nameAr: string;
   location: 'header' | 'footer' | 'sidebar' | 'mobile';
   items: MenuItem[];
   isActive: boolean;
@@ -69,7 +71,6 @@ const locationIcons = {
 const mapApiMenuToLocal = (apiMenu: ApiMenu): Menu => ({
   id: apiMenu._id,
   name: apiMenu.name,
-  nameAr: apiMenu.nameAr,
   location: apiMenu.location,
   isActive: apiMenu.isActive,
   items: apiMenu.items.map(mapApiItemToLocal),
@@ -107,10 +108,9 @@ export default function MenusPage() {
   const [hasChanges, setHasChanges] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
 
-  // New menu form
+  // New menu form — backend only stores a single `name` string.
   const [newMenu, setNewMenu] = useState({
     name: '',
-    nameAr: '',
     location: 'header' as Menu['location'],
   });
 
@@ -166,7 +166,7 @@ export default function MenusPage() {
 
   // Add new menu
   const addMenu = async () => {
-    if (!newMenu.name || !newMenu.nameAr) return;
+    if (!newMenu.name) return;
 
     try {
       setIsSaving(true);
@@ -174,7 +174,6 @@ export default function MenusPage() {
 
       const createData: CreateMenuData = {
         name: newMenu.name,
-        nameAr: newMenu.nameAr,
         slug: newMenu.name.toLowerCase().replace(/\s+/g, '-'),
         location: newMenu.location,
         items: [],
@@ -186,7 +185,7 @@ export default function MenusPage() {
 
       setMenus(prev => [...prev, localMenu]);
       setSelectedMenu(localMenu.id);
-      setNewMenu({ name: '', nameAr: '', location: 'header' });
+      setNewMenu({ name: '', location: 'header' });
       setShowAddMenu(false);
     } catch (err) {
       const apiError = err as ApiError;
@@ -310,7 +309,11 @@ export default function MenusPage() {
     }
   };
 
-  // Move item up
+  // ---------------------------------------------------------------------------
+  // Reorder helpers
+  // ---------------------------------------------------------------------------
+
+  /** Swap an item one position earlier in its list. */
   const moveItemUp = (itemId: string, parentId?: string) => {
     setMenus(prev =>
       prev.map(menu => {
@@ -325,6 +328,38 @@ export default function MenusPage() {
 
         const newItems = [...items];
         [newItems[index - 1], newItems[index]] = [newItems[index], newItems[index - 1]];
+        newItems.forEach((item, i) => (item.order = i + 1));
+
+        if (parentId) {
+          return {
+            ...menu,
+            items: menu.items.map(item =>
+              item.id === parentId ? { ...item, children: newItems } : item
+            ),
+          };
+        }
+
+        return { ...menu, items: newItems };
+      })
+    );
+    setHasChanges(true);
+  };
+
+  /** Swap an item one position later in its list. */
+  const moveItemDown = (itemId: string, parentId?: string) => {
+    setMenus(prev =>
+      prev.map(menu => {
+        if (menu.id !== selectedMenu) return menu;
+
+        const items = parentId
+          ? menu.items.find(i => i.id === parentId)?.children || []
+          : menu.items;
+
+        const index = items.findIndex(i => i.id === itemId);
+        if (index < 0 || index >= items.length - 1) return menu;
+
+        const newItems = [...items];
+        [newItems[index], newItems[index + 1]] = [newItems[index + 1], newItems[index]];
         newItems.forEach((item, i) => (item.order = i + 1));
 
         if (parentId) {
@@ -358,10 +393,21 @@ export default function MenusPage() {
     }
   };
 
+  // ---------------------------------------------------------------------------
   // Render menu item
+  // ---------------------------------------------------------------------------
+
   const renderMenuItem = (item: MenuItem, parentId?: string, level = 0) => {
     const hasChildren = item.children && item.children.length > 0;
     const isExpanded = expandedItems.has(item.id);
+
+    // Determine sibling list to know boundary positions
+    const siblingList = parentId
+      ? currentMenu?.items.find(i => i.id === parentId)?.children || []
+      : currentMenu?.items || [];
+    const itemIndex = siblingList.findIndex(i => i.id === item.id);
+    const isFirst = itemIndex === 0;
+    const isLast = itemIndex === siblingList.length - 1;
 
     return (
       <div key={item.id} className={`${level > 0 ? 'ms-6 border-s-2 ps-4' : ''}`}>
@@ -370,8 +416,6 @@ export default function MenusPage() {
             !item.isActive ? 'opacity-50' : ''
           } hover:bg-muted/50 group transition-colors`}
         >
-          <GripVertical className="text-muted-foreground size-4 cursor-grab" />
-
           {hasChildren ? (
             <button
               onClick={() => toggleItemExpansion(item.id)}
@@ -403,13 +447,27 @@ export default function MenusPage() {
           </div>
 
           <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+            {/* Move Up */}
             <button
               onClick={() => moveItemUp(item.id, parentId)}
-              className="hover:bg-muted rounded p-1.5 transition-colors"
+              disabled={isFirst}
+              className="hover:bg-muted rounded p-1.5 transition-colors disabled:cursor-not-allowed disabled:opacity-30"
               title={isArabic ? 'تحريك لأعلى' : 'Move Up'}
             >
               <ChevronDown className="size-4 rotate-180" />
             </button>
+
+            {/* Move Down */}
+            <button
+              onClick={() => moveItemDown(item.id, parentId)}
+              disabled={isLast}
+              className="hover:bg-muted rounded p-1.5 transition-colors disabled:cursor-not-allowed disabled:opacity-30"
+              title={isArabic ? 'تحريك لأسفل' : 'Move Down'}
+            >
+              <ChevronDown className="size-4" />
+            </button>
+
+            {/* Toggle visibility */}
             <button
               onClick={() => toggleItemActive(item.id, parentId)}
               className="hover:bg-muted rounded p-1.5 transition-colors"
@@ -417,6 +475,8 @@ export default function MenusPage() {
             >
               {item.isActive ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
             </button>
+
+            {/* Delete */}
             <button
               onClick={() => deleteItem(item.id, parentId)}
               className="rounded p-1.5 text-red-500 transition-colors hover:bg-red-500/10"
@@ -436,7 +496,10 @@ export default function MenusPage() {
     );
   };
 
+  // ---------------------------------------------------------------------------
   // Loading state
+  // ---------------------------------------------------------------------------
+
   if (isLoading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
@@ -449,6 +512,10 @@ export default function MenusPage() {
       </div>
     );
   }
+
+  // ---------------------------------------------------------------------------
+  // Render
+  // ---------------------------------------------------------------------------
 
   return (
     <div className="space-y-6">
@@ -542,7 +609,7 @@ export default function MenusPage() {
                 >
                   <div className="flex items-center gap-2">
                     <LocationIcon className="size-4" />
-                    <span>{isArabic ? menu.nameAr : menu.name}</span>
+                    <span>{menu.name}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span
@@ -582,9 +649,7 @@ export default function MenusPage() {
               {/* Menu Header */}
               <div className="flex items-center justify-between border-b p-4">
                 <div>
-                  <h2 className="font-medium">
-                    {isArabic ? currentMenu.nameAr : currentMenu.name}
-                  </h2>
+                  <h2 className="font-medium">{currentMenu.name}</h2>
                   <p className="text-muted-foreground text-sm">
                     {isArabic ? 'الموقع:' : 'Location:'}{' '}
                     <span className="capitalize">{currentMenu.location}</span>
@@ -623,14 +688,11 @@ export default function MenusPage() {
 
               {/* Info */}
               <div className="bg-muted/50 border-t p-4">
-                <div className="text-muted-foreground flex items-start gap-2 text-sm">
-                  <GripVertical className="mt-0.5 size-4" />
-                  <span>
-                    {isArabic
-                      ? 'اسحب العناصر لإعادة ترتيبها. يمكنك إنشاء قوائم فرعية بإضافة عناصر كأبناء.'
-                      : 'Drag items to reorder. You can create submenus by adding items as children.'}
-                  </span>
-                </div>
+                <p className="text-muted-foreground text-sm">
+                  {isArabic
+                    ? 'استخدم أزرار التحريك لأعلى وأسفل لإعادة ترتيب العناصر. يمكنك إنشاء قوائم فرعية بإضافة عناصر كأبناء.'
+                    : 'Use the move up/down buttons to reorder items. You can create submenus by adding items as children.'}
+                </p>
               </div>
             </div>
           ) : (
@@ -762,19 +824,7 @@ export default function MenusPage() {
             <div className="space-y-4 p-4">
               <div>
                 <label className="mb-1.5 block text-sm font-medium">
-                  {isArabic ? 'الاسم بالعربية' : 'Arabic Name'}
-                </label>
-                <input
-                  type="text"
-                  value={newMenu.nameAr}
-                  onChange={e => setNewMenu({ ...newMenu, nameAr: e.target.value })}
-                  dir="rtl"
-                  className="bg-background focus:ring-primary w-full rounded-lg border p-2 focus:outline-none focus:ring-2"
-                />
-              </div>
-              <div>
-                <label className="mb-1.5 block text-sm font-medium">
-                  {isArabic ? 'الاسم بالإنجليزية' : 'English Name'}
+                  {isArabic ? 'اسم القائمة' : 'Menu Name'}
                 </label>
                 <input
                   type="text"
@@ -809,7 +859,7 @@ export default function MenusPage() {
                 </button>
                 <button
                   onClick={addMenu}
-                  disabled={!newMenu.name || !newMenu.nameAr}
+                  disabled={!newMenu.name}
                   className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-4 py-2 transition-colors disabled:opacity-50"
                 >
                   {isArabic ? 'إنشاء' : 'Create'}

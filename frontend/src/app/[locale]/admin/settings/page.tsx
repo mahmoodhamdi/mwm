@@ -3,7 +3,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocale } from 'next-intl';
 import { settingsService, Settings as SettingsData } from '@/services/admin';
+import { uploadImage } from '@/services/admin/upload.service';
 import { ApiError } from '@/lib/api';
+import toast from 'react-hot-toast';
 import {
   Settings as SettingsIcon,
   Globe,
@@ -104,6 +106,20 @@ export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [uploadingField, setUploadingField] = useState<string | null>(null);
+
+  const handleImageUpload = async (field: 'logoLight' | 'logoDark' | 'favicon', file: File) => {
+    setUploadingField(field);
+    try {
+      const result = await uploadImage(file, { folder: 'settings' });
+      setThemeSettings(prev => ({ ...prev, [field]: result.url }));
+      toast.success(isRTL ? 'تم رفع الصورة بنجاح' : 'Image uploaded successfully');
+    } catch {
+      toast.error(isRTL ? 'فشل في رفع الصورة' : 'Failed to upload image');
+    } finally {
+      setUploadingField(null);
+    }
+  };
 
   // General Settings
   const [siteName, setSiteName] = useState({ ar: 'موقع الشركة', en: 'Company Website' });
@@ -376,7 +392,7 @@ export default function SettingsPage() {
         general: {
           siteName,
           siteTagline,
-          logo: '',
+          logo: themeSettings.logoLight,
           favicon: themeSettings.favicon,
           defaultLanguage,
           timezone,
@@ -406,6 +422,25 @@ export default function SettingsPage() {
           (acc, f) => ({ ...acc, [f.id]: f.enabled }),
           {}
         ) as SettingsData['features'],
+        notifications: {
+          emailNotifications: notificationSettings.emailNotifications,
+          newMessageAlert: notificationSettings.newMessageAlert,
+          newSubscriberAlert: notificationSettings.newSubscriberAlert,
+          newContactAlert: notificationSettings.newContactAlert,
+          weeklyReport: notificationSettings.weeklyReport,
+          securityAlerts: notificationSettings.securityAlerts,
+          emailDigest: notificationSettings.emailDigest,
+        },
+        security: {
+          twoFactorRequired: securitySettings.twoFactorRequired,
+          sessionTimeout: securitySettings.sessionTimeout,
+          maxLoginAttempts: securitySettings.maxLoginAttempts,
+          passwordMinLength: securitySettings.passwordMinLength,
+          passwordRequireUppercase: securitySettings.passwordRequireUppercase,
+          passwordRequireNumbers: securitySettings.passwordRequireNumbers,
+          passwordRequireSpecial: securitySettings.passwordRequireSpecial,
+          ipWhitelist: securitySettings.ipWhitelist,
+        },
       };
 
       await settingsService.updateSettings(settingsData);
@@ -440,145 +475,146 @@ export default function SettingsPage() {
     });
   };
 
+  // Shared input class
+  const inputClass =
+    'w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:ring-blue-400';
+  const labelClass = 'mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300';
+  const cardClass =
+    'rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800';
+  const toggleRowClass =
+    'flex items-center justify-between rounded-lg bg-gray-50 p-4 dark:bg-gray-700';
+
   const renderGeneralSettings = () => (
     <div className="space-y-6">
       {/* Site Information */}
-      <div className="rounded-lg border bg-white p-6">
-        <h3 className="mb-4 text-lg font-semibold">
+      <div className={cardClass}>
+        <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
           {isRTL ? 'معلومات الموقع' : 'Site Information'}
         </h3>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className={labelClass}>
               {isRTL ? 'اسم الموقع (عربي)' : 'Site Name (Arabic)'}
             </label>
             <input
               type="text"
               value={siteName.ar}
               onChange={e => setSiteName({ ...siteName, ar: e.target.value })}
-              className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              className={inputClass}
               dir="rtl"
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className={labelClass}>
               {isRTL ? 'اسم الموقع (إنجليزي)' : 'Site Name (English)'}
             </label>
             <input
               type="text"
               value={siteName.en}
               onChange={e => setSiteName({ ...siteName, en: e.target.value })}
-              className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              className={inputClass}
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className={labelClass}>
               {isRTL ? 'شعار الموقع (عربي)' : 'Tagline (Arabic)'}
             </label>
             <input
               type="text"
               value={siteTagline.ar}
               onChange={e => setSiteTagline({ ...siteTagline, ar: e.target.value })}
-              className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              className={inputClass}
               dir="rtl"
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className={labelClass}>
               {isRTL ? 'شعار الموقع (إنجليزي)' : 'Tagline (English)'}
             </label>
             <input
               type="text"
               value={siteTagline.en}
               onChange={e => setSiteTagline({ ...siteTagline, en: e.target.value })}
-              className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              className={inputClass}
             />
           </div>
         </div>
       </div>
 
       {/* Contact Information */}
-      <div className="rounded-lg border bg-white p-6">
-        <h3 className="mb-4 text-lg font-semibold">
+      <div className={cardClass}>
+        <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
           {isRTL ? 'معلومات الاتصال' : 'Contact Information'}
         </h3>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              {isRTL ? 'البريد الإلكتروني' : 'Email'}
-            </label>
+            <label className={labelClass}>{isRTL ? 'البريد الإلكتروني' : 'Email'}</label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 size-5 -translate-y-1/2 text-gray-400" />
+              <Mail className="absolute left-3 top-1/2 size-5 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
               <input
                 type="email"
                 value={siteEmail}
                 onChange={e => setSiteEmail(e.target.value)}
-                className="w-full rounded-lg border py-2 pl-10 pr-3 focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-3 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
             </div>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              {isRTL ? 'الهاتف' : 'Phone'}
-            </label>
+            <label className={labelClass}>{isRTL ? 'الهاتف' : 'Phone'}</label>
             <input
               type="tel"
               value={sitePhone}
               onChange={e => setSitePhone(e.target.value)}
-              className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              className={inputClass}
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              {isRTL ? 'العنوان (عربي)' : 'Address (Arabic)'}
-            </label>
+            <label className={labelClass}>{isRTL ? 'العنوان (عربي)' : 'Address (Arabic)'}</label>
             <input
               type="text"
               value={siteAddress.ar}
               onChange={e => setSiteAddress({ ...siteAddress, ar: e.target.value })}
-              className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              className={inputClass}
               dir="rtl"
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className={labelClass}>
               {isRTL ? 'العنوان (إنجليزي)' : 'Address (English)'}
             </label>
             <input
               type="text"
               value={siteAddress.en}
               onChange={e => setSiteAddress({ ...siteAddress, en: e.target.value })}
-              className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              className={inputClass}
             />
           </div>
         </div>
       </div>
 
       {/* Localization */}
-      <div className="rounded-lg border bg-white p-6">
-        <h3 className="mb-4 text-lg font-semibold">{isRTL ? 'الإقليمية' : 'Localization'}</h3>
+      <div className={cardClass}>
+        <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+          {isRTL ? 'الإقليمية' : 'Localization'}
+        </h3>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              {isRTL ? 'اللغة الافتراضية' : 'Default Language'}
-            </label>
+            <label className={labelClass}>{isRTL ? 'اللغة الافتراضية' : 'Default Language'}</label>
             <select
               value={defaultLanguage}
               onChange={e => setDefaultLanguage(e.target.value as 'ar' | 'en')}
-              className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              className={inputClass}
             >
               <option value="ar">العربية</option>
               <option value="en">English</option>
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              {isRTL ? 'المنطقة الزمنية' : 'Timezone'}
-            </label>
+            <label className={labelClass}>{isRTL ? 'المنطقة الزمنية' : 'Timezone'}</label>
             <select
               value={timezone}
               onChange={e => setTimezone(e.target.value)}
-              className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              className={inputClass}
             >
               <option value="Asia/Riyadh">Asia/Riyadh (GMT+3)</option>
               <option value="Asia/Dubai">Asia/Dubai (GMT+4)</option>
@@ -587,13 +623,11 @@ export default function SettingsPage() {
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              {isRTL ? 'تنسيق التاريخ' : 'Date Format'}
-            </label>
+            <label className={labelClass}>{isRTL ? 'تنسيق التاريخ' : 'Date Format'}</label>
             <select
               value={dateFormat}
               onChange={e => setDateFormat(e.target.value)}
-              className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              className={inputClass}
             >
               <option value="DD/MM/YYYY">DD/MM/YYYY</option>
               <option value="MM/DD/YYYY">MM/DD/YYYY</option>
@@ -604,68 +638,68 @@ export default function SettingsPage() {
       </div>
 
       {/* Social Media */}
-      <div className="rounded-lg border bg-white p-6">
-        <h3 className="mb-4 text-lg font-semibold">
+      <div className={cardClass}>
+        <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
           {isRTL ? 'وسائل التواصل الاجتماعي' : 'Social Media'}
         </h3>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Facebook</label>
+            <label className={labelClass}>Facebook</label>
             <div className="relative">
               <Facebook className="absolute left-3 top-1/2 size-5 -translate-y-1/2 text-blue-600" />
               <input
                 type="url"
                 value={socialMedia.facebook}
                 onChange={e => setSocialMedia({ ...socialMedia, facebook: e.target.value })}
-                className="w-full rounded-lg border py-2 pl-10 pr-3 focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-3 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
             </div>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Twitter</label>
+            <label className={labelClass}>Twitter</label>
             <div className="relative">
               <Twitter className="absolute left-3 top-1/2 size-5 -translate-y-1/2 text-blue-400" />
               <input
                 type="url"
                 value={socialMedia.twitter}
                 onChange={e => setSocialMedia({ ...socialMedia, twitter: e.target.value })}
-                className="w-full rounded-lg border py-2 pl-10 pr-3 focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-3 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
             </div>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">LinkedIn</label>
+            <label className={labelClass}>LinkedIn</label>
             <div className="relative">
               <Linkedin className="absolute left-3 top-1/2 size-5 -translate-y-1/2 text-blue-700" />
               <input
                 type="url"
                 value={socialMedia.linkedin}
                 onChange={e => setSocialMedia({ ...socialMedia, linkedin: e.target.value })}
-                className="w-full rounded-lg border py-2 pl-10 pr-3 focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-3 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
             </div>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Instagram</label>
+            <label className={labelClass}>Instagram</label>
             <div className="relative">
               <Instagram className="absolute left-3 top-1/2 size-5 -translate-y-1/2 text-pink-600" />
               <input
                 type="url"
                 value={socialMedia.instagram}
                 onChange={e => setSocialMedia({ ...socialMedia, instagram: e.target.value })}
-                className="w-full rounded-lg border py-2 pl-10 pr-3 focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-3 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
             </div>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">YouTube</label>
+            <label className={labelClass}>YouTube</label>
             <div className="relative">
               <Youtube className="absolute left-3 top-1/2 size-5 -translate-y-1/2 text-red-600" />
               <input
                 type="url"
                 value={socialMedia.youtube}
                 onChange={e => setSocialMedia({ ...socialMedia, youtube: e.target.value })}
-                className="w-full rounded-lg border py-2 pl-10 pr-3 focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-3 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
             </div>
           </div>
@@ -677,12 +711,14 @@ export default function SettingsPage() {
   const renderSEOSettings = () => (
     <div className="space-y-6">
       {/* Meta Tags */}
-      <div className="rounded-lg border bg-white p-6">
-        <h3 className="mb-4 text-lg font-semibold">{isRTL ? 'وسوم الميتا' : 'Meta Tags'}</h3>
+      <div className={cardClass}>
+        <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+          {isRTL ? 'وسوم الميتا' : 'Meta Tags'}
+        </h3>
         <div className="space-y-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label className={labelClass}>
                 {isRTL ? 'قالب العنوان (عربي)' : 'Title Template (Arabic)'}
               </label>
               <input
@@ -694,16 +730,16 @@ export default function SettingsPage() {
                     titleTemplate: { ...seoSettings.titleTemplate, ar: e.target.value },
                   })
                 }
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className={inputClass}
                 dir="rtl"
                 placeholder="%s | اسم الموقع"
               />
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 {isRTL ? 'استخدم %s للعنوان الديناميكي' : 'Use %s for dynamic title'}
               </p>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label className={labelClass}>
                 {isRTL ? 'قالب العنوان (إنجليزي)' : 'Title Template (English)'}
               </label>
               <input
@@ -715,14 +751,14 @@ export default function SettingsPage() {
                     titleTemplate: { ...seoSettings.titleTemplate, en: e.target.value },
                   })
                 }
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className={inputClass}
                 placeholder="%s | Site Name"
               />
             </div>
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label className={labelClass}>
                 {isRTL ? 'الوصف الافتراضي (عربي)' : 'Default Description (Arabic)'}
               </label>
               <textarea
@@ -733,13 +769,13 @@ export default function SettingsPage() {
                     defaultDescription: { ...seoSettings.defaultDescription, ar: e.target.value },
                   })
                 }
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className={inputClass}
                 rows={3}
                 dir="rtl"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label className={labelClass}>
                 {isRTL ? 'الوصف الافتراضي (إنجليزي)' : 'Default Description (English)'}
               </label>
               <textarea
@@ -750,14 +786,14 @@ export default function SettingsPage() {
                     defaultDescription: { ...seoSettings.defaultDescription, en: e.target.value },
                   })
                 }
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className={inputClass}
                 rows={3}
               />
             </div>
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label className={labelClass}>
                 {isRTL ? 'الكلمات المفتاحية (عربي)' : 'Keywords (Arabic)'}
               </label>
               <input
@@ -769,13 +805,13 @@ export default function SettingsPage() {
                     defaultKeywords: { ...seoSettings.defaultKeywords, ar: e.target.value },
                   })
                 }
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className={inputClass}
                 dir="rtl"
                 placeholder="كلمة1, كلمة2, كلمة3"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label className={labelClass}>
                 {isRTL ? 'الكلمات المفتاحية (إنجليزي)' : 'Keywords (English)'}
               </label>
               <input
@@ -787,7 +823,7 @@ export default function SettingsPage() {
                     defaultKeywords: { ...seoSettings.defaultKeywords, en: e.target.value },
                   })
                 }
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className={inputClass}
                 placeholder="keyword1, keyword2, keyword3"
               />
             </div>
@@ -796,31 +832,27 @@ export default function SettingsPage() {
       </div>
 
       {/* Social Sharing */}
-      <div className="rounded-lg border bg-white p-6">
-        <h3 className="mb-4 text-lg font-semibold">
+      <div className={cardClass}>
+        <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
           {isRTL ? 'المشاركة الاجتماعية' : 'Social Sharing'}
         </h3>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              {isRTL ? 'صورة Open Graph' : 'Open Graph Image'}
-            </label>
+            <label className={labelClass}>{isRTL ? 'صورة Open Graph' : 'Open Graph Image'}</label>
             <div className="flex gap-2">
               <input
                 type="text"
                 value={seoSettings.ogImage}
                 onChange={e => setSeoSettings({ ...seoSettings, ogImage: e.target.value })}
-                className="flex-1 rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
-              <button className="rounded-lg bg-gray-100 px-4 py-2 hover:bg-gray-200">
-                <Upload className="size-5" />
+              <button className="rounded-lg bg-gray-100 px-4 py-2 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600">
+                <Upload className="size-5 text-gray-600 dark:text-gray-400" />
               </button>
             </div>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              {isRTL ? 'نوع بطاقة تويتر' : 'Twitter Card Type'}
-            </label>
+            <label className={labelClass}>{isRTL ? 'نوع بطاقة تويتر' : 'Twitter Card Type'}</label>
             <select
               value={seoSettings.twitterCard}
               onChange={e =>
@@ -829,7 +861,7 @@ export default function SettingsPage() {
                   twitterCard: e.target.value as 'summary' | 'summary_large_image',
                 })
               }
-              className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              className={inputClass}
             >
               <option value="summary">Summary</option>
               <option value="summary_large_image">Summary Large Image</option>
@@ -839,22 +871,26 @@ export default function SettingsPage() {
       </div>
 
       {/* Technical SEO */}
-      <div className="rounded-lg border bg-white p-6">
-        <h3 className="mb-4 text-lg font-semibold">{isRTL ? 'SEO التقني' : 'Technical SEO'}</h3>
+      <div className={cardClass}>
+        <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+          {isRTL ? 'SEO التقني' : 'Technical SEO'}
+        </h3>
         <div className="space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">robots.txt</label>
+            <label className={labelClass}>robots.txt</label>
             <textarea
               value={seoSettings.robotsTxt}
               onChange={e => setSeoSettings({ ...seoSettings, robotsTxt: e.target.value })}
-              className="w-full rounded-lg border px-3 py-2 font-mono text-sm focus:ring-2 focus:ring-blue-500"
+              className={`${inputClass} font-mono text-sm`}
               rows={5}
             />
           </div>
-          <div className="flex items-center justify-between rounded-lg bg-gray-50 p-4">
+          <div className={toggleRowClass}>
             <div>
-              <p className="font-medium">{isRTL ? 'خريطة الموقع' : 'Sitemap'}</p>
-              <p className="text-sm text-gray-500">
+              <p className="font-medium text-gray-900 dark:text-white">
+                {isRTL ? 'خريطة الموقع' : 'Sitemap'}
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 {isRTL ? 'توليد خريطة الموقع تلقائياً' : 'Auto-generate sitemap.xml'}
               </p>
             </div>
@@ -865,18 +901,18 @@ export default function SettingsPage() {
                 onChange={e => setSeoSettings({ ...seoSettings, sitemapEnabled: e.target.checked })}
                 className="peer sr-only"
               />
-              <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-4 peer-focus:ring-blue-300"></div>
+              <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-4 peer-focus:ring-blue-300 dark:bg-gray-600 dark:after:border-gray-500 dark:peer-focus:ring-blue-800"></div>
             </label>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className={labelClass}>
               {isRTL ? 'معرف Google Analytics' : 'Google Analytics ID'}
             </label>
             <input
               type="text"
               value={seoSettings.analyticsId}
               onChange={e => setSeoSettings({ ...seoSettings, analyticsId: e.target.value })}
-              className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              className={inputClass}
               placeholder="G-XXXXXXXXXX"
             />
           </div>
@@ -888,8 +924,10 @@ export default function SettingsPage() {
   const renderThemeSettings = () => (
     <div className="space-y-6">
       {/* Color Mode */}
-      <div className="rounded-lg border bg-white p-6">
-        <h3 className="mb-4 text-lg font-semibold">{isRTL ? 'وضع الألوان' : 'Color Mode'}</h3>
+      <div className={cardClass}>
+        <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+          {isRTL ? 'وضع الألوان' : 'Color Mode'}
+        </h3>
         <div className="flex gap-4">
           {[
             { id: 'light', labelAr: 'فاتح', labelEn: 'Light', icon: <Sun className="size-5" /> },
@@ -908,25 +946,27 @@ export default function SettingsPage() {
               }
               className={`flex flex-1 flex-col items-center gap-2 rounded-lg border-2 p-4 ${
                 themeSettings.mode === mode.id
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 hover:border-gray-300'
+                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                  : 'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500'
               }`}
             >
-              {mode.icon}
-              <span>{isRTL ? mode.labelAr : mode.labelEn}</span>
+              <span className="text-gray-700 dark:text-gray-300">{mode.icon}</span>
+              <span className="text-gray-700 dark:text-gray-300">
+                {isRTL ? mode.labelAr : mode.labelEn}
+              </span>
             </button>
           ))}
         </div>
       </div>
 
       {/* Colors */}
-      <div className="rounded-lg border bg-white p-6">
-        <h3 className="mb-4 text-lg font-semibold">{isRTL ? 'الألوان' : 'Colors'}</h3>
+      <div className={cardClass}>
+        <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+          {isRTL ? 'الألوان' : 'Colors'}
+        </h3>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              {isRTL ? 'اللون الأساسي' : 'Primary Color'}
-            </label>
+            <label className={labelClass}>{isRTL ? 'اللون الأساسي' : 'Primary Color'}</label>
             <div className="flex gap-2">
               <input
                 type="color"
@@ -938,14 +978,12 @@ export default function SettingsPage() {
                 type="text"
                 value={themeSettings.primaryColor}
                 onChange={e => setThemeSettings({ ...themeSettings, primaryColor: e.target.value })}
-                className="flex-1 rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
             </div>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              {isRTL ? 'اللون الثانوي' : 'Secondary Color'}
-            </label>
+            <label className={labelClass}>{isRTL ? 'اللون الثانوي' : 'Secondary Color'}</label>
             <div className="flex gap-2">
               <input
                 type="color"
@@ -961,14 +999,12 @@ export default function SettingsPage() {
                 onChange={e =>
                   setThemeSettings({ ...themeSettings, secondaryColor: e.target.value })
                 }
-                className="flex-1 rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
             </div>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              {isRTL ? 'لون التأكيد' : 'Accent Color'}
-            </label>
+            <label className={labelClass}>{isRTL ? 'لون التأكيد' : 'Accent Color'}</label>
             <div className="flex gap-2">
               <input
                 type="color"
@@ -980,7 +1016,7 @@ export default function SettingsPage() {
                 type="text"
                 value={themeSettings.accentColor}
                 onChange={e => setThemeSettings({ ...themeSettings, accentColor: e.target.value })}
-                className="flex-1 rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
             </div>
           </div>
@@ -988,13 +1024,13 @@ export default function SettingsPage() {
       </div>
 
       {/* Typography */}
-      <div className="rounded-lg border bg-white p-6">
-        <h3 className="mb-4 text-lg font-semibold">{isRTL ? 'الخطوط' : 'Typography'}</h3>
+      <div className={cardClass}>
+        <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+          {isRTL ? 'الخطوط' : 'Typography'}
+        </h3>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              {isRTL ? 'خط النصوص العربية' : 'Arabic Font'}
-            </label>
+            <label className={labelClass}>{isRTL ? 'خط النصوص العربية' : 'Arabic Font'}</label>
             <select
               value={themeSettings.fontFamily.ar}
               onChange={e =>
@@ -1003,7 +1039,7 @@ export default function SettingsPage() {
                   fontFamily: { ...themeSettings.fontFamily, ar: e.target.value },
                 })
               }
-              className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              className={inputClass}
             >
               <option value="Noto Sans Arabic">Noto Sans Arabic</option>
               <option value="Cairo">Cairo</option>
@@ -1012,9 +1048,7 @@ export default function SettingsPage() {
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              {isRTL ? 'خط النصوص الإنجليزية' : 'English Font'}
-            </label>
+            <label className={labelClass}>{isRTL ? 'خط النصوص الإنجليزية' : 'English Font'}</label>
             <select
               value={themeSettings.fontFamily.en}
               onChange={e =>
@@ -1023,7 +1057,7 @@ export default function SettingsPage() {
                   fontFamily: { ...themeSettings.fontFamily, en: e.target.value },
                 })
               }
-              className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              className={inputClass}
             >
               <option value="Inter">Inter</option>
               <option value="Roboto">Roboto</option>
@@ -1035,8 +1069,10 @@ export default function SettingsPage() {
       </div>
 
       {/* Border Radius */}
-      <div className="rounded-lg border bg-white p-6">
-        <h3 className="mb-4 text-lg font-semibold">{isRTL ? 'نصف قطر الحواف' : 'Border Radius'}</h3>
+      <div className={cardClass}>
+        <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+          {isRTL ? 'نصف قطر الحواف' : 'Border Radius'}
+        </h3>
         <div className="flex gap-4">
           {[
             { id: 'none', label: '0' },
@@ -1053,10 +1089,10 @@ export default function SettingsPage() {
                   borderRadius: radius.id as ThemeSettings['borderRadius'],
                 })
               }
-              className={`flex-1 border-2 p-3 ${
+              className={`flex-1 border-2 p-3 text-gray-700 dark:text-gray-300 ${
                 themeSettings.borderRadius === radius.id
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200'
+                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                  : 'border-gray-200 dark:border-gray-600'
               }`}
               style={{ borderRadius: radius.id === 'none' ? '0' : radius.label }}
             >
@@ -1067,36 +1103,55 @@ export default function SettingsPage() {
       </div>
 
       {/* Logo & Branding */}
-      <div className="rounded-lg border bg-white p-6">
-        <h3 className="mb-4 text-lg font-semibold">
+      <div className={cardClass}>
+        <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
           {isRTL ? 'الشعار والهوية' : 'Logo & Branding'}
         </h3>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              {isRTL ? 'الشعار (فاتح)' : 'Logo (Light)'}
-            </label>
-            <div className="rounded-lg border-2 border-dashed p-4 text-center">
-              <Upload className="mx-auto mb-2 size-8 text-gray-400" />
-              <p className="text-sm text-gray-500">{isRTL ? 'رفع صورة' : 'Upload image'}</p>
+          {[
+            { field: 'logoLight' as const, label: isRTL ? 'الشعار (فاتح)' : 'Logo (Light)' },
+            { field: 'logoDark' as const, label: isRTL ? 'الشعار (داكن)' : 'Logo (Dark)' },
+            { field: 'favicon' as const, label: 'Favicon' },
+          ].map(({ field, label }) => (
+            <div key={field}>
+              <label className={labelClass}>{label}</label>
+              <label className="block cursor-pointer rounded-lg border-2 border-dashed border-gray-300 p-4 text-center transition-colors hover:border-blue-400 dark:border-gray-600 dark:hover:border-blue-500">
+                {themeSettings[field] &&
+                themeSettings[field] !==
+                  `/images/${field === 'favicon' ? 'favicon.ico' : `logo-${field === 'logoLight' ? 'light' : 'dark'}.png`}` ? (
+                  <img
+                    src={themeSettings[field]}
+                    alt={label}
+                    className="mx-auto mb-2 max-h-16 object-contain"
+                  />
+                ) : uploadingField === field ? (
+                  <RefreshCw className="mx-auto mb-2 size-8 animate-spin text-blue-500" />
+                ) : (
+                  <Upload className="mx-auto mb-2 size-8 text-gray-400 dark:text-gray-500" />
+                )}
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {uploadingField === field
+                    ? isRTL
+                      ? 'جاري الرفع...'
+                      : 'Uploading...'
+                    : isRTL
+                      ? 'انقر لرفع صورة'
+                      : 'Click to upload'}
+                </p>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  disabled={uploadingField !== null}
+                  onChange={e => {
+                    const file = e.target.files?.[0];
+                    if (file) handleImageUpload(field, file);
+                    e.target.value = '';
+                  }}
+                />
+              </label>
             </div>
-          </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              {isRTL ? 'الشعار (داكن)' : 'Logo (Dark)'}
-            </label>
-            <div className="rounded-lg border-2 border-dashed p-4 text-center">
-              <Upload className="mx-auto mb-2 size-8 text-gray-400" />
-              <p className="text-sm text-gray-500">{isRTL ? 'رفع صورة' : 'Upload image'}</p>
-            </div>
-          </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Favicon</label>
-            <div className="rounded-lg border-2 border-dashed p-4 text-center">
-              <Upload className="mx-auto mb-2 size-8 text-gray-400" />
-              <p className="text-sm text-gray-500">{isRTL ? 'رفع صورة' : 'Upload image'}</p>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </div>
@@ -1113,21 +1168,20 @@ export default function SettingsPage() {
     return (
       <div className="space-y-6">
         {categories.map(category => (
-          <div key={category.id} className="rounded-lg border bg-white p-6">
-            <h3 className="mb-4 text-lg font-semibold">
+          <div key={category.id} className={cardClass}>
+            <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
               {isRTL ? category.labelAr : category.labelEn}
             </h3>
             <div className="space-y-3">
               {features
                 .filter(f => f.category === category.id)
                 .map(feature => (
-                  <div
-                    key={feature.id}
-                    className="flex items-center justify-between rounded-lg bg-gray-50 p-4"
-                  >
+                  <div key={feature.id} className={toggleRowClass}>
                     <div>
-                      <p className="font-medium">{isRTL ? feature.nameAr : feature.nameEn}</p>
-                      <p className="text-sm text-gray-500">
+                      <p className="font-medium text-gray-900 dark:text-white">
+                        {isRTL ? feature.nameAr : feature.nameEn}
+                      </p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
                         {isRTL ? feature.descriptionAr : feature.descriptionEn}
                       </p>
                     </div>
@@ -1138,7 +1192,7 @@ export default function SettingsPage() {
                         onChange={() => toggleFeature(feature.id)}
                         className="peer sr-only"
                       />
-                      <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-4 peer-focus:ring-blue-300"></div>
+                      <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-4 peer-focus:ring-blue-300 dark:bg-gray-600 dark:after:border-gray-500 dark:peer-focus:ring-blue-800"></div>
                     </label>
                   </div>
                 ))}
@@ -1151,8 +1205,8 @@ export default function SettingsPage() {
 
   const renderNotificationSettings = () => (
     <div className="space-y-6">
-      <div className="rounded-lg border bg-white p-6">
-        <h3 className="mb-4 text-lg font-semibold">
+      <div className={cardClass}>
+        <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
           {isRTL ? 'إشعارات البريد الإلكتروني' : 'Email Notifications'}
         </h3>
         <div className="space-y-3">
@@ -1200,13 +1254,14 @@ export default function SettingsPage() {
               descEn: 'Suspicious activity notifications',
             },
           ].map(item => (
-            <div
-              key={item.key}
-              className="flex items-center justify-between rounded-lg bg-gray-50 p-4"
-            >
+            <div key={item.key} className={toggleRowClass}>
               <div>
-                <p className="font-medium">{isRTL ? item.labelAr : item.labelEn}</p>
-                <p className="text-sm text-gray-500">{isRTL ? item.descAr : item.descEn}</p>
+                <p className="font-medium text-gray-900 dark:text-white">
+                  {isRTL ? item.labelAr : item.labelEn}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {isRTL ? item.descAr : item.descEn}
+                </p>
               </div>
               <label className="relative inline-flex cursor-pointer items-center">
                 <input
@@ -1220,17 +1275,19 @@ export default function SettingsPage() {
                   }
                   className="peer sr-only"
                 />
-                <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-4 peer-focus:ring-blue-300"></div>
+                <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-4 peer-focus:ring-blue-300 dark:bg-gray-600 dark:after:border-gray-500 dark:peer-focus:ring-blue-800"></div>
               </label>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="rounded-lg border bg-white p-6">
-        <h3 className="mb-4 text-lg font-semibold">{isRTL ? 'ملخص البريد' : 'Email Digest'}</h3>
+      <div className={cardClass}>
+        <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+          {isRTL ? 'ملخص البريد' : 'Email Digest'}
+        </h3>
         <div>
-          <label className="mb-2 block text-sm font-medium text-gray-700">
+          <label className={`${labelClass} mb-2`}>
             {isRTL ? 'تكرار الملخص' : 'Digest Frequency'}
           </label>
           <div className="flex gap-4">
@@ -1247,10 +1304,10 @@ export default function SettingsPage() {
                     emailDigest: option.value as NotificationSettings['emailDigest'],
                   })
                 }
-                className={`flex-1 rounded-lg border-2 p-3 ${
+                className={`flex-1 rounded-lg border-2 p-3 text-gray-700 dark:text-gray-300 ${
                   notificationSettings.emailDigest === option.value
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                    : 'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500'
                 }`}
               >
                 {isRTL ? option.labelAr : option.labelEn}
@@ -1265,15 +1322,17 @@ export default function SettingsPage() {
   const renderSecuritySettings = () => (
     <div className="space-y-6">
       {/* Authentication */}
-      <div className="rounded-lg border bg-white p-6">
-        <h3 className="mb-4 text-lg font-semibold">{isRTL ? 'المصادقة' : 'Authentication'}</h3>
+      <div className={cardClass}>
+        <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+          {isRTL ? 'المصادقة' : 'Authentication'}
+        </h3>
         <div className="space-y-4">
-          <div className="flex items-center justify-between rounded-lg bg-gray-50 p-4">
+          <div className={toggleRowClass}>
             <div>
-              <p className="font-medium">
+              <p className="font-medium text-gray-900 dark:text-white">
                 {isRTL ? 'المصادقة الثنائية مطلوبة' : 'Two-Factor Required'}
               </p>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 {isRTL ? 'إجبار المستخدمين على تفعيل 2FA' : 'Force users to enable 2FA'}
               </p>
             </div>
@@ -1286,12 +1345,12 @@ export default function SettingsPage() {
                 }
                 className="peer sr-only"
               />
-              <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-4 peer-focus:ring-blue-300"></div>
+              <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-4 peer-focus:ring-blue-300 dark:bg-gray-600 dark:after:border-gray-500 dark:peer-focus:ring-blue-800"></div>
             </label>
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label className={labelClass}>
                 {isRTL ? 'مهلة الجلسة (دقائق)' : 'Session Timeout (minutes)'}
               </label>
               <input
@@ -1303,13 +1362,13 @@ export default function SettingsPage() {
                     sessionTimeout: parseInt(e.target.value),
                   })
                 }
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className={inputClass}
                 min="5"
                 max="1440"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label className={labelClass}>
                 {isRTL ? 'محاولات الدخول القصوى' : 'Max Login Attempts'}
               </label>
               <input
@@ -1321,7 +1380,7 @@ export default function SettingsPage() {
                     maxLoginAttempts: parseInt(e.target.value),
                   })
                 }
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className={inputClass}
                 min="3"
                 max="10"
               />
@@ -1331,15 +1390,13 @@ export default function SettingsPage() {
       </div>
 
       {/* Password Policy */}
-      <div className="rounded-lg border bg-white p-6">
-        <h3 className="mb-4 text-lg font-semibold">
+      <div className={cardClass}>
+        <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
           {isRTL ? 'سياسة كلمة المرور' : 'Password Policy'}
         </h3>
         <div className="space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              {isRTL ? 'الحد الأدنى للطول' : 'Minimum Length'}
-            </label>
+            <label className={labelClass}>{isRTL ? 'الحد الأدنى للطول' : 'Minimum Length'}</label>
             <input
               type="number"
               value={securitySettings.passwordMinLength}
@@ -1349,7 +1406,7 @@ export default function SettingsPage() {
                   passwordMinLength: parseInt(e.target.value),
                 })
               }
-              className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 md:w-48"
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 md:w-48 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               min="6"
               max="32"
             />
@@ -1372,11 +1429,10 @@ export default function SettingsPage() {
                 labelEn: 'Require special characters',
               },
             ].map(item => (
-              <div
-                key={item.key}
-                className="flex items-center justify-between rounded-lg bg-gray-50 p-4"
-              >
-                <p className="font-medium">{isRTL ? item.labelAr : item.labelEn}</p>
+              <div key={item.key} className={toggleRowClass}>
+                <p className="font-medium text-gray-900 dark:text-white">
+                  {isRTL ? item.labelAr : item.labelEn}
+                </p>
                 <label className="relative inline-flex cursor-pointer items-center">
                   <input
                     type="checkbox"
@@ -1386,7 +1442,7 @@ export default function SettingsPage() {
                     }
                     className="peer sr-only"
                   />
-                  <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-4 peer-focus:ring-blue-300"></div>
+                  <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-4 peer-focus:ring-blue-300 dark:bg-gray-600 dark:after:border-gray-500 dark:peer-focus:ring-blue-800"></div>
                 </label>
               </div>
             ))}
@@ -1395,8 +1451,8 @@ export default function SettingsPage() {
       </div>
 
       {/* IP Whitelist */}
-      <div className="rounded-lg border bg-white p-6">
-        <h3 className="mb-4 text-lg font-semibold">
+      <div className={cardClass}>
+        <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
           {isRTL ? 'قائمة IP المسموحة' : 'IP Whitelist'}
         </h3>
         <div className="space-y-4">
@@ -1405,7 +1461,7 @@ export default function SettingsPage() {
               type="text"
               value={newIp}
               onChange={e => setNewIp(e.target.value)}
-              className="flex-1 rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               placeholder="192.168.1.1"
             />
             <button
@@ -1420,12 +1476,12 @@ export default function SettingsPage() {
               {securitySettings.ipWhitelist.map(ip => (
                 <div
                   key={ip}
-                  className="flex items-center justify-between rounded-lg bg-gray-50 p-3"
+                  className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-700"
                 >
-                  <span className="font-mono">{ip}</span>
+                  <span className="font-mono text-gray-900 dark:text-white">{ip}</span>
                   <button
                     onClick={() => removeIpFromWhitelist(ip)}
-                    className="text-red-600 hover:text-red-700"
+                    className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                   >
                     {isRTL ? 'حذف' : 'Remove'}
                   </button>
@@ -1433,7 +1489,7 @@ export default function SettingsPage() {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               {isRTL
                 ? 'لم يتم إضافة عناوين IP. جميع العناوين مسموحة.'
                 : 'No IPs added. All IPs allowed.'}
@@ -1443,14 +1499,16 @@ export default function SettingsPage() {
       </div>
 
       {/* Maintenance Mode */}
-      <div className="rounded-lg border bg-white p-6">
-        <h3 className="mb-4 text-lg font-semibold">{isRTL ? 'وضع الصيانة' : 'Maintenance Mode'}</h3>
-        <div className="flex items-center justify-between rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+      <div className={cardClass}>
+        <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+          {isRTL ? 'وضع الصيانة' : 'Maintenance Mode'}
+        </h3>
+        <div className="flex items-center justify-between rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-700/50 dark:bg-yellow-900/20">
           <div>
-            <p className="font-medium text-yellow-800">
+            <p className="font-medium text-yellow-800 dark:text-yellow-400">
               {isRTL ? 'تفعيل وضع الصيانة' : 'Enable Maintenance Mode'}
             </p>
-            <p className="text-sm text-yellow-600">
+            <p className="text-sm text-yellow-600 dark:text-yellow-500">
               {isRTL ? 'الموقع سيكون غير متاح للزوار' : 'Site will be unavailable to visitors'}
             </p>
           </div>
@@ -1463,7 +1521,7 @@ export default function SettingsPage() {
               }
               className="peer sr-only"
             />
-            <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-yellow-500 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-4 peer-focus:ring-yellow-300"></div>
+            <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-yellow-500 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-4 peer-focus:ring-yellow-300 dark:bg-gray-600 dark:after:border-gray-500"></div>
           </label>
         </div>
       </div>
@@ -1474,24 +1532,31 @@ export default function SettingsPage() {
   if (isLoading) {
     return (
       <div
-        className={`flex min-h-screen items-center justify-center bg-gray-50 ${isRTL ? 'rtl' : 'ltr'}`}
+        className={`flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900 ${isRTL ? 'rtl' : 'ltr'}`}
       >
         <div className="text-center">
           <RefreshCw className="mx-auto size-8 animate-spin text-blue-600" />
-          <p className="mt-4 text-gray-600">{isRTL ? 'جاري التحميل...' : 'Loading...'}</p>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">
+            {isRTL ? 'جاري التحميل...' : 'Loading...'}
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`min-h-screen bg-gray-50 ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+    <div
+      className={`min-h-screen bg-gray-50 dark:bg-gray-900 ${isRTL ? 'rtl' : 'ltr'}`}
+      dir={isRTL ? 'rtl' : 'ltr'}
+    >
       {/* Header */}
-      <div className="border-b bg-white px-6 py-4">
+      <div className="border-b border-gray-200 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{isRTL ? 'الإعدادات' : 'Settings'}</h1>
-            <p className="text-gray-500">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              {isRTL ? 'الإعدادات' : 'Settings'}
+            </h1>
+            <p className="text-gray-500 dark:text-gray-400">
               {isRTL ? 'إدارة إعدادات الموقع' : 'Manage site settings'}
             </p>
           </div>
@@ -1508,7 +1573,7 @@ export default function SettingsPage() {
 
       {/* Success Message */}
       {showSuccess && (
-        <div className="mx-6 mt-4 flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 p-4 text-green-800">
+        <div className="mx-6 mt-4 flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 p-4 text-green-800 dark:border-green-700/50 dark:bg-green-900/20 dark:text-green-400">
           <CheckCircle className="size-5" />
           {isRTL ? 'تم حفظ الإعدادات بنجاح' : 'Settings saved successfully'}
         </div>
@@ -1516,7 +1581,7 @@ export default function SettingsPage() {
 
       {/* Error Message */}
       {error && (
-        <div className="mx-6 mt-4 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
+        <div className="mx-6 mt-4 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-4 text-red-800 dark:border-red-700/50 dark:bg-red-900/20 dark:text-red-400">
           <Shield className="size-5" />
           {error}
         </div>
@@ -1524,7 +1589,7 @@ export default function SettingsPage() {
 
       <div className="flex">
         {/* Sidebar */}
-        <div className="min-h-screen w-64 border-r bg-white p-4">
+        <div className="min-h-screen w-64 border-r border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
           <nav className="space-y-1">
             {tabs.map(tab => (
               <button
@@ -1532,8 +1597,8 @@ export default function SettingsPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left ${
                   activeTab === tab.id
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400'
+                    : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700'
                 }`}
               >
                 {tab.icon}

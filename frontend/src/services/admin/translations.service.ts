@@ -64,7 +64,7 @@ export async function getByNamespace(
  */
 export async function getAllByLocale(locale: 'ar' | 'en' = 'ar'): Promise<Record<string, string>> {
   const response = await apiClient.get<{ translations: Record<string, string> }>(
-    `${TRANSLATIONS_ENDPOINT}/locale`,
+    `${TRANSLATIONS_ENDPOINT}/all`,
     { locale }
   );
   return response.data?.translations || {};

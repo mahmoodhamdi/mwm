@@ -8,6 +8,7 @@ import { projectController } from '../controllers';
 import { authenticate, authorize } from '../middlewares/auth';
 import { validate, idParamsSchema } from '../middlewares/validate';
 import { projectValidation } from '../validations';
+import { csrfValidation } from '../middlewares/csrf';
 
 const router = Router();
 
@@ -113,6 +114,7 @@ router.get(
 router.post(
   '/admin/categories',
   authenticate,
+  csrfValidation,
   authorize('projects:create'),
   validate({ body: projectValidation.createCategory }),
   projectController.createCategory
@@ -170,6 +172,7 @@ router.post(
 router.put(
   '/admin/categories/:id',
   authenticate,
+  csrfValidation,
   authorize('projects:update'),
   validate({ params: idParamsSchema, body: projectValidation.updateCategory }),
   projectController.updateCategory
@@ -201,6 +204,7 @@ router.put(
 router.delete(
   '/admin/categories/:id',
   authenticate,
+  csrfValidation,
   authorize('projects:delete'),
   validate({ params: idParamsSchema }),
   projectController.deleteCategory
@@ -290,6 +294,7 @@ router.get('/admin', authenticate, authorize('projects:read'), projectController
 router.put(
   '/admin/reorder',
   authenticate,
+  csrfValidation,
   authorize('projects:update'),
   projectController.reorderProjects
 );
@@ -408,6 +413,7 @@ router.get(
 router.post(
   '/admin',
   authenticate,
+  csrfValidation,
   authorize('projects:create'),
   validate({ body: projectValidation.create }),
   projectController.createProject
@@ -439,6 +445,7 @@ router.post(
 router.put(
   '/admin/:id/publish',
   authenticate,
+  csrfValidation,
   authorize('projects:update'),
   validate({ params: idParamsSchema }),
   projectController.togglePublishStatus
@@ -470,6 +477,7 @@ router.put(
 router.put(
   '/admin/:id/featured',
   authenticate,
+  csrfValidation,
   authorize('projects:update'),
   validate({ params: idParamsSchema }),
   projectController.toggleFeaturedStatus
@@ -555,6 +563,7 @@ router.put(
 router.put(
   '/admin/:id',
   authenticate,
+  csrfValidation,
   authorize('projects:update'),
   validate({ params: idParamsSchema, body: projectValidation.update }),
   projectController.updateProject
@@ -586,6 +595,7 @@ router.put(
 router.delete(
   '/admin/:id',
   authenticate,
+  csrfValidation,
   authorize('projects:delete'),
   validate({ params: idParamsSchema }),
   projectController.deleteProject
@@ -630,6 +640,40 @@ router.get('/categories', projectController.getCategories);
  *         description: Category not found
  */
 router.get('/categories/:slug', projectController.getCategoryBySlug);
+
+/**
+ * @swagger
+ * /projects/categories/{slug}/projects:
+ *   get:
+ *     summary: Get projects by category slug
+ *     description: Retrieve all published projects belonging to a specific category
+ *     tags: [Projects]
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema:
+ *           type: string
+ *           example: web-development
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of projects per page
+ *     responses:
+ *       200:
+ *         description: Paginated list of projects in the category
+ *       404:
+ *         description: Category not found
+ */
+router.get('/categories/:slug/projects', projectController.getProjectsByCategorySlug);
 
 // ============================================
 // Public Routes - Projects

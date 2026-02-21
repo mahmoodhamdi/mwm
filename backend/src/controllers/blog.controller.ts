@@ -125,6 +125,26 @@ export const getAllCategories = asyncHandler(async (req: Request, res: Response)
 });
 
 /**
+ * Get category by ID (Admin)
+ * جلب الفئة بالمعرف (للمسؤول)
+ */
+export const getCategoryById = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const category = await BlogCategory.findById(id)
+    .populate('postCount')
+    .populate('parent', 'name slug')
+    .populate('createdBy', 'name email')
+    .populate('updatedBy', 'name email');
+
+  if (!category) {
+    throw Errors.NOT_FOUND('Category | الفئة');
+  }
+
+  return successResponse(res, { category });
+});
+
+/**
  * Create category (Admin)
  * إنشاء فئة (للمسؤول)
  */
@@ -1251,22 +1271,13 @@ async function invalidateCategoryCache() {
  * جلب إحصائيات المدونة (للمسؤول)
  */
 export const getStats = asyncHandler(async (_req: Request, res: Response) => {
-  const [
-    total,
-    published,
-    draft,
-    scheduled,
-    archived,
-    totalViewsResult,
-  ] = await Promise.all([
+  const [total, published, draft, scheduled, archived, totalViewsResult] = await Promise.all([
     BlogPost.countDocuments(),
     BlogPost.countDocuments({ status: 'published' }),
     BlogPost.countDocuments({ status: 'draft' }),
     BlogPost.countDocuments({ status: 'scheduled' }),
     BlogPost.countDocuments({ status: 'archived' }),
-    BlogPost.aggregate([
-      { $group: { _id: null, totalViews: { $sum: '$views' } } },
-    ]),
+    BlogPost.aggregate([{ $group: { _id: null, totalViews: { $sum: '$views' } } }]),
   ]);
 
   const totalViews = totalViewsResult[0]?.totalViews || 0;
@@ -1286,6 +1297,7 @@ export const blogController = {
   getCategories,
   getCategoryBySlug,
   getAllCategories,
+  getCategoryById,
   createCategory,
   updateCategory,
   deleteCategory,

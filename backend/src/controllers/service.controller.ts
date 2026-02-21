@@ -74,6 +74,39 @@ export const getCategoryBySlug = asyncHandler(async (req: Request, res: Response
 });
 
 /**
+ * Get services by category slug (Public)
+ * جلب الخدمات حسب رابط الفئة المختصر (عام)
+ */
+export const getServicesByCategorySlug = asyncHandler(async (req: Request, res: Response) => {
+  const { slug } = req.params;
+  const { page = 1, limit = 10 } = req.query;
+
+  const category = await ServiceCategory.findOne({ slug, isActive: true });
+  if (!category) {
+    throw Errors.NOT_FOUND('Category | الفئة');
+  }
+
+  const query = { category: category._id, status: 'published' };
+  const total = await Service.countDocuments(query);
+  const services = await Service.find(query)
+    .populate('category', 'name slug')
+    .sort({ order: 1 })
+    .skip((Number(page) - 1) * Number(limit))
+    .limit(Number(limit));
+
+  return successResponse(res, {
+    services,
+    category,
+    pagination: {
+      page: Number(page),
+      limit: Number(limit),
+      total,
+      pages: Math.ceil(total / Number(limit)),
+    },
+  });
+});
+
+/**
  * Get all categories (Admin)
  * جلب جميع الفئات (للمسؤول)
  */
@@ -600,6 +633,7 @@ export const serviceController = {
   // Categories
   getCategories,
   getCategoryBySlug,
+  getServicesByCategorySlug,
   getAllCategories,
   createCategory,
   updateCategory,

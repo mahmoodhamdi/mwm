@@ -43,9 +43,13 @@
     "ourClients": "Our Clients",
     "testimonials": "Testimonials",
     "stats": {
+      "projectsValue": "50+",
       "projects": "Projects Completed",
+      "clientsValue": "30+",
       "clients": "Happy Clients",
+      "experienceValue": "5+",
       "experience": "Years of Experience",
+      "teamValue": "10+",
       "team": "Professional Developers"
     }
   },

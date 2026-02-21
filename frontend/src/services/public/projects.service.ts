@@ -21,15 +21,42 @@ export interface ProjectCategory {
 export interface ProjectTechnology {
   name: string;
   icon?: string;
+  category?: string;
 }
 
+/**
+ * Matches backend `IProjectTestimonial`:
+ *   text, author (bilingual), position (bilingual), photo?
+ */
 export interface ProjectTestimonial {
-  clientName: BilingualText;
-  clientTitle?: BilingualText;
-  clientCompany?: string;
-  clientImage?: string;
-  content: BilingualText;
-  rating?: number;
+  text: BilingualText;
+  author: BilingualText;
+  position: BilingualText;
+  photo?: string;
+}
+
+/**
+ * Matches backend `IProjectClient`:
+ *   name (bilingual), logo?, website?
+ */
+export interface ProjectClient {
+  name: BilingualText;
+  logo?: string;
+  website?: string;
+}
+
+/**
+ * Backend SEO fields use `title` and `description` (not `metaTitle` / `metaDescription`).
+ * Keywords are bilingual: `{ ar: string[], en: string[] }`.
+ */
+export interface ProjectSEO {
+  title?: BilingualText;
+  description?: BilingualText;
+  keywords?: {
+    ar: string[];
+    en: string[];
+  };
+  ogImage?: string;
 }
 
 export interface Project {
@@ -38,29 +65,25 @@ export interface Project {
   slug: string;
   shortDescription: BilingualText;
   description: BilingualText;
-  category: ProjectCategory | string;
-  client?: BilingualText;
-  clientLogo?: string;
-  thumbnail: string;
-  images: string[];
-  technologies: ProjectTechnology[];
-  features?: BilingualText[];
-  challenges?: BilingualText;
+  challenge?: BilingualText;
   solution?: BilingualText;
   results?: BilingualText;
+  category: ProjectCategory | string;
+  client?: ProjectClient;
+  thumbnail: string;
+  images: string[];
+  video?: string;
+  technologies: ProjectTechnology[];
   testimonial?: ProjectTestimonial;
   liveUrl?: string;
   githubUrl?: string;
   duration?: string;
   completedAt?: string;
-  isActive: boolean;
+  isPublished: boolean;
   isFeatured: boolean;
+  views: number;
   order: number;
-  seo?: {
-    metaTitle?: BilingualText;
-    metaDescription?: BilingualText;
-    keywords?: string[];
-  };
+  seo?: ProjectSEO;
   createdAt: string;
   updatedAt: string;
 }
@@ -91,7 +114,6 @@ export async function getProjects(
 ): Promise<ApiResponse<ProjectsResponse>> {
   const response = await apiClient.get<ProjectsResponse>(PROJECTS_ENDPOINT, {
     ...filters,
-    isActive: true,
   });
   return response;
 }

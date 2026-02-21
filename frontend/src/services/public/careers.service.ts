@@ -92,6 +92,22 @@ export interface JobApplication {
   skills?: string[];
 }
 
+/**
+ * Backend error response shape:
+ *   { success: false, error: { code: string, message: string } }
+ */
+interface BackendErrorBody {
+  success: false;
+  error?: {
+    code?: string;
+    message?: string;
+  };
+}
+
+function extractErrorMessage(body: BackendErrorBody, fallback: string): string {
+  return body?.error?.message || fallback;
+}
+
 // API endpoints
 const CAREERS_ENDPOINT = '/careers';
 
@@ -121,8 +137,9 @@ export async function uploadResume(file: File): Promise<{ url: string; filename:
   );
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: 'Upload failed' }));
-    throw new Error(error.message || 'Failed to upload resume');
+    // Backend error shape: { success: false, error: { code, message } }
+    const body = await response.json().catch(() => ({}) as BackendErrorBody);
+    throw new Error(extractErrorMessage(body, 'Failed to upload resume'));
   }
 
   const data = await response.json();

@@ -25,10 +25,13 @@ export interface MenuItem {
   children?: MenuItem[];
 }
 
+/**
+ * The backend Menu model stores `name` as a plain string (not a LocalizedString).
+ * There is no separate `nameAr` field in the schema.
+ */
 export interface Menu {
   _id: string;
   name: string;
-  nameAr: string;
   slug: string;
   location: MenuLocation;
   items: MenuItem[];
@@ -44,18 +47,24 @@ export interface MenuFilters {
   isActive?: boolean;
 }
 
+/**
+ * Data required to create a menu.
+ * `name` is a plain string matching the backend schema (max 100 chars).
+ */
 export interface CreateMenuData {
   name: string;
-  nameAr: string;
   slug: string;
   location: MenuLocation;
   items?: MenuItem[];
   isActive?: boolean;
 }
 
+/**
+ * Data allowed when updating a menu.
+ * `name` is a plain string matching the backend schema.
+ */
 export interface UpdateMenuData {
   name?: string;
-  nameAr?: string;
   location?: MenuLocation;
   items?: MenuItem[];
   isActive?: boolean;

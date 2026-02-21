@@ -55,6 +55,16 @@ export interface UpdateContentData {
   isActive?: boolean;
 }
 
+/**
+ * Shape of a single item in the bulk upsert request body.
+ * The backend `bulkUpsertContentSchema` expects:
+ *   { contents: [{ key: string, data: { type?, content?, section?, ... } }] }
+ */
+export interface BulkContentItem {
+  key: string;
+  data: Omit<CreateContentData, 'key'>;
+}
+
 // API endpoints
 const CONTENT_ENDPOINT = '/content';
 
@@ -141,11 +151,14 @@ export async function upsertContent(key: string, data: CreateContentData): Promi
 }
 
 /**
- * Bulk upsert content
+ * Bulk upsert content.
+ *
+ * The backend endpoint POST /content/bulk expects:
+ *   { contents: [{ key: string, data: { type?, content, section?, ... } }] }
+ *
+ * Each `data` object maps to the UpdateContentData shape (key is passed separately).
  */
-export async function bulkUpsertContent(
-  contents: Array<{ key: string; data: CreateContentData }>
-): Promise<ContentItem[]> {
+export async function bulkUpsertContent(contents: BulkContentItem[]): Promise<ContentItem[]> {
   const response = await apiClient.post<{ contents: ContentItem[] }>(`${CONTENT_ENDPOINT}/bulk`, {
     contents,
   });

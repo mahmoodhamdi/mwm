@@ -3,8 +3,9 @@
  * متحكم المصادقة
  */
 
+import crypto from 'crypto';
 import { Request, Response } from 'express';
-import { User } from '../models';
+import { User, ActivityLog } from '../models';
 import { authService, emailService } from '../services';
 import { ApiError, Errors } from '../utils/ApiError';
 import { sendSuccess, sendCreated } from '../utils/response';
@@ -65,9 +66,6 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
         role: user.role,
         isEmailVerified: user.isEmailVerified,
       },
-      // Include tokens in response for backward compatibility
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
     },
     'Registration successful. Please verify your email | تم التسجيل بنجاح. يرجى تأكيد بريدك الإلكتروني'
   );
@@ -117,6 +115,20 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
   // Reset login attempts on successful login
   await user.resetLoginAttempts();
 
+  // Log login activity
+  try {
+    await ActivityLog.create({
+      user: user._id,
+      action: 'login',
+      resource: 'auth',
+      description: `User ${user.email} logged in`,
+      ip: req.ip,
+      userAgent: req.headers['user-agent'],
+    });
+  } catch {
+    // Don't fail login if activity logging fails
+  }
+
   // Generate tokens
   const tokens = await authService.generateTokenPair(user, req.headers['user-agent'], req.ip);
 
@@ -134,9 +146,6 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
         avatar: user.avatar,
         isEmailVerified: user.isEmailVerified,
       },
-      // Include tokens in response for backward compatibility
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
     },
     { message: 'Login successful | تم تسجيل الدخول بنجاح' }
   );
@@ -188,15 +197,7 @@ export const refreshToken = asyncHandler(async (req: Request, res: Response) => 
   // Set new httpOnly cookies
   setAuthCookies(res, tokens.accessToken, tokens.refreshToken);
 
-  sendSuccess(
-    res,
-    {
-      // Include tokens in response for backward compatibility
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-    },
-    { message: 'Tokens refreshed successfully | تم تحديث التوكنات بنجاح' }
-  );
+  sendSuccess(res, null, { message: 'Tokens refreshed successfully | تم تحديث التوكنات بنجاح' });
 });
 
 /**
@@ -398,17 +399,9 @@ export const changePassword = asyncHandler(async (req: Request, res: Response) =
   // Set new httpOnly cookies
   setAuthCookies(res, tokens.accessToken, tokens.refreshToken);
 
-  sendSuccess(
-    res,
-    {
-      // Include tokens in response for backward compatibility
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-    },
-    {
-      message: 'Password changed successfully | تم تغيير كلمة المرور بنجاح',
-    }
-  );
+  sendSuccess(res, null, {
+    message: 'Password changed successfully | تم تغيير كلمة المرور بنجاح',
+  });
 });
 
 /**
@@ -434,7 +427,7 @@ export const googleAuth = asyncHandler(async (req: Request, res: Response) => {
     );
   }
 
-  const { email, name, picture, uid: firebaseUid } = decodedToken;
+  const { email, name, picture } = decodedToken;
 
   if (!email) {
     throw new ApiError(
@@ -473,7 +466,7 @@ export const googleAuth = asyncHandler(async (req: Request, res: Response) => {
     user = await User.create({
       name: name || email.split('@')[0],
       email,
-      password: firebaseUid + '_' + Date.now(), // Random password for Firebase users
+      password: crypto.randomBytes(32).toString('hex'),
       avatar: picture,
       isEmailVerified: true, // Google emails are verified
     });
@@ -505,9 +498,6 @@ export const googleAuth = asyncHandler(async (req: Request, res: Response) => {
         avatar: user.avatar,
         isEmailVerified: user.isEmailVerified,
       },
-      // Include tokens in response for backward compatibility
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
     },
     { message: 'Google sign-in successful | تم تسجيل الدخول بجوجل بنجاح' }
   );
@@ -627,7 +617,7 @@ export const githubAuth = asyncHandler(async (req: Request, res: Response) => {
       user = await User.create({
         name: githubUser.name || githubUser.login,
         email,
-        password: `github_${githubUser.id}_${Date.now()}`, // Random password for GitHub users
+        password: crypto.randomBytes(32).toString('hex'),
         avatar: githubUser.avatar_url,
         isEmailVerified: true, // GitHub emails are verified
       });
@@ -659,9 +649,6 @@ export const githubAuth = asyncHandler(async (req: Request, res: Response) => {
           avatar: user.avatar,
           isEmailVerified: user.isEmailVerified,
         },
-        // Include tokens in response for backward compatibility
-        accessToken: tokens.accessToken,
-        refreshToken: tokens.refreshToken,
       },
       { message: 'GitHub sign-in successful | تم تسجيل الدخول بـ GitHub بنجاح' }
     );

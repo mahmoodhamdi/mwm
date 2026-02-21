@@ -21,6 +21,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
+import { useTheme } from '@/providers/ThemeProvider';
 
 export interface AdminHeaderProps {
   onMenuToggle: () => void;
@@ -31,13 +32,10 @@ export function AdminHeader({ onMenuToggle, unreadMessages = 0 }: AdminHeaderPro
   const locale = useLocale();
   const isRTL = locale === 'ar';
   const { user, logout } = useAuth();
+  const { theme, setTheme } = useTheme();
+  const isDarkMode = theme === 'dark';
+  const toggleDarkMode = () => setTheme(isDarkMode ? 'light' : 'dark');
   const [isUserMenuOpen, setIsUserMenuOpen] = React.useState(false);
-  const [isDarkMode, setIsDarkMode] = React.useState(false);
-
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-    document.documentElement.classList.toggle('dark');
-  };
 
   const switchLanguage = () => {
     const newLocale = locale === 'ar' ? 'en' : 'ar';

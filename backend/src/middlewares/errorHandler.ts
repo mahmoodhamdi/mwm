@@ -18,8 +18,20 @@ const errorMessages: Record<string, { ar: string; en: string }> = {
     en: 'Invalid credentials',
   },
   TOKEN_EXPIRED: {
-    ar: 'انتهت صلاحية الجلسة',
-    en: 'Session expired',
+    ar: 'انتهت صلاحية الرمز',
+    en: 'Token has expired',
+  },
+  INVALID_TOKEN: {
+    ar: 'رمز غير صالح',
+    en: 'Invalid token',
+  },
+  INSUFFICIENT_PERMISSIONS: {
+    ar: 'صلاحيات غير كافية',
+    en: 'Insufficient permissions',
+  },
+  ALREADY_EXISTS: {
+    ar: 'العنصر موجود بالفعل',
+    en: 'Resource already exists',
   },
   VALIDATION_ERROR: {
     ar: 'خطأ في البيانات المدخلة',
@@ -116,7 +128,7 @@ export function errorHandler(err: Error, req: Request, res: Response, _next: Nex
       success: false,
       error: {
         code: ERROR_CODES.INVALID_TOKEN,
-        message: getLocalizedMessage(ERROR_CODES.UNAUTHORIZED, locale),
+        message: getLocalizedMessage(ERROR_CODES.INVALID_TOKEN, locale),
       },
     });
     return;

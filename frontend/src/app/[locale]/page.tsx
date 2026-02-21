@@ -47,24 +47,35 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Stats Section */}
+      {/* Stats Section
+          Numeric values are marketing copy managed via translation files
+          (home.stats.projectsValue, clientsValue, experienceValue, teamValue).
+          Update those keys in en.json / ar.json to change the displayed figures. */}
       <section className="bg-gray-50 py-16 dark:bg-gray-900">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
             <div className="text-center">
-              <div className="text-primary-600 mb-2 text-4xl font-bold md:text-5xl">50+</div>
+              <div className="text-primary-600 mb-2 text-4xl font-bold md:text-5xl">
+                {t('home.stats.projectsValue')}
+              </div>
               <div className="text-gray-600 dark:text-gray-400">{t('home.stats.projects')}</div>
             </div>
             <div className="text-center">
-              <div className="text-primary-600 mb-2 text-4xl font-bold md:text-5xl">30+</div>
+              <div className="text-primary-600 mb-2 text-4xl font-bold md:text-5xl">
+                {t('home.stats.clientsValue')}
+              </div>
               <div className="text-gray-600 dark:text-gray-400">{t('home.stats.clients')}</div>
             </div>
             <div className="text-center">
-              <div className="text-primary-600 mb-2 text-4xl font-bold md:text-5xl">5+</div>
+              <div className="text-primary-600 mb-2 text-4xl font-bold md:text-5xl">
+                {t('home.stats.experienceValue')}
+              </div>
               <div className="text-gray-600 dark:text-gray-400">{t('home.stats.experience')}</div>
             </div>
             <div className="text-center">
-              <div className="text-primary-600 mb-2 text-4xl font-bold md:text-5xl">10+</div>
+              <div className="text-primary-600 mb-2 text-4xl font-bold md:text-5xl">
+                {t('home.stats.teamValue')}
+              </div>
               <div className="text-gray-600 dark:text-gray-400">{t('home.stats.team')}</div>
             </div>
           </div>

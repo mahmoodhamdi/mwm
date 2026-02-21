@@ -8,6 +8,7 @@ import { teamController } from '../controllers';
 import { authenticate, authorize } from '../middlewares/auth';
 import { validate, idParamsSchema } from '../middlewares/validate';
 import { teamValidation } from '../validations';
+import { csrfValidation } from '../middlewares/csrf';
 
 const router = Router();
 
@@ -97,6 +98,7 @@ router.get(
 router.post(
   '/admin/departments',
   authenticate,
+  csrfValidation,
   authorize('team:create'),
   validate({ body: teamValidation.createDepartment }),
   teamController.createDepartment
@@ -153,6 +155,7 @@ router.post(
 router.put(
   '/admin/departments/:id',
   authenticate,
+  csrfValidation,
   authorize('team:update'),
   validate({ params: idParamsSchema, body: teamValidation.updateDepartment }),
   teamController.updateDepartment
@@ -185,6 +188,7 @@ router.put(
 router.delete(
   '/admin/departments/:id',
   authenticate,
+  csrfValidation,
   authorize('team:delete'),
   validate({ params: idParamsSchema }),
   teamController.deleteDepartment
@@ -271,7 +275,13 @@ router.get('/admin', authenticate, authorize('team:read'), teamController.getAll
  *       401:
  *         description: Unauthorized
  */
-router.put('/admin/reorder', authenticate, authorize('team:update'), teamController.reorderMembers);
+router.put(
+  '/admin/reorder',
+  authenticate,
+  csrfValidation,
+  authorize('team:update'),
+  teamController.reorderMembers
+);
 
 /**
  * @swagger
@@ -387,6 +397,7 @@ router.get(
 router.post(
   '/admin',
   authenticate,
+  csrfValidation,
   authorize('team:create'),
   validate({ body: teamValidation.create }),
   teamController.createMember
@@ -419,6 +430,7 @@ router.post(
 router.put(
   '/admin/:id/active',
   authenticate,
+  csrfValidation,
   authorize('team:update'),
   validate({ params: idParamsSchema }),
   teamController.toggleActiveStatus
@@ -451,6 +463,7 @@ router.put(
 router.put(
   '/admin/:id/featured',
   authenticate,
+  csrfValidation,
   authorize('team:update'),
   validate({ params: idParamsSchema }),
   teamController.toggleFeaturedStatus
@@ -483,6 +496,7 @@ router.put(
 router.put(
   '/admin/:id/leader',
   authenticate,
+  csrfValidation,
   authorize('team:update'),
   validate({ params: idParamsSchema }),
   teamController.toggleLeaderStatus
@@ -558,6 +572,7 @@ router.put(
 router.put(
   '/admin/:id',
   authenticate,
+  csrfValidation,
   authorize('team:update'),
   validate({ params: idParamsSchema, body: teamValidation.update }),
   teamController.updateMember
@@ -590,6 +605,7 @@ router.put(
 router.delete(
   '/admin/:id',
   authenticate,
+  csrfValidation,
   authorize('team:delete'),
   validate({ params: idParamsSchema }),
   teamController.deleteMember
@@ -635,6 +651,41 @@ router.get('/departments', teamController.getDepartments);
  *         description: Department not found
  */
 router.get('/departments/:slug', teamController.getDepartmentBySlug);
+
+/**
+ * @swagger
+ * /team/departments/{slug}/members:
+ *   get:
+ *     summary: Get team members by department slug
+ *     description: Retrieve all active team members belonging to a specific department
+ *     tags: [Team]
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Department slug
+ *         example: development
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of members per page
+ *     responses:
+ *       200:
+ *         description: Paginated list of team members in the department
+ *       404:
+ *         description: Department not found
+ */
+router.get('/departments/:slug/members', teamController.getMembersByDepartmentSlug);
 
 // ============================================
 // Public Routes - Team Members

@@ -21,6 +21,25 @@ export interface UploadOptions {
   crop?: 'fill' | 'fit' | 'scale' | 'thumb' | 'limit';
 }
 
+/**
+ * Backend error response shape:
+ *   { success: false, error: { code: string, message: string } }
+ *
+ * When fetch returns a non-OK response we parse the JSON and extract
+ * `body.error.message` — NOT the top-level `body.message`.
+ */
+interface BackendErrorBody {
+  success: false;
+  error?: {
+    code?: string;
+    message?: string;
+  };
+}
+
+function extractErrorMessage(body: BackendErrorBody, fallback: string): string {
+  return body?.error?.message || fallback;
+}
+
 // API endpoints
 const UPLOAD_ENDPOINT = '/upload';
 
@@ -58,8 +77,9 @@ export async function uploadImage(file: File, options: UploadOptions = {}): Prom
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: 'Upload failed' }));
-    throw new Error(error.message || 'Failed to upload image');
+    // Backend error shape: { success: false, error: { code, message } }
+    const body = await response.json().catch(() => ({}) as BackendErrorBody);
+    throw new Error(extractErrorMessage(body, 'Failed to upload image'));
   }
 
   const data = await response.json();
@@ -103,8 +123,9 @@ export async function uploadImages(
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: 'Upload failed' }));
-    throw new Error(error.message || 'Failed to upload images');
+    // Backend error shape: { success: false, error: { code, message } }
+    const body = await response.json().catch(() => ({}) as BackendErrorBody);
+    throw new Error(extractErrorMessage(body, 'Failed to upload images'));
   }
 
   const data = await response.json();

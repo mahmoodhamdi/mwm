@@ -85,7 +85,7 @@ jobs:
           NODE_ENV: test
           MONGODB_URI: mongodb://admin:password@localhost:27017/mwm_test?authSource=admin
           REDIS_URL: redis://localhost:6379
-          JWT_SECRET: test-jwt-secret-key
+          JWT_SECRET: test-jwt-secret-key-that-is-at-least-32-chars-long
 
       - name: Upload coverage
         uses: codecov/codecov-action@v3

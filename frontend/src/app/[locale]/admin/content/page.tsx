@@ -308,7 +308,9 @@ export default function ContentPage() {
       <div className="flex min-h-96 items-center justify-center">
         <div className="text-center">
           <RefreshCw className="mx-auto size-8 animate-spin text-blue-600" />
-          <p className="mt-4 text-gray-600">{isArabic ? 'جاري التحميل...' : 'Loading...'}</p>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">
+            {isArabic ? 'جاري التحميل...' : 'Loading...'}
+          </p>
         </div>
       </div>
     );
@@ -359,7 +361,7 @@ export default function ContentPage() {
 
       {/* Error Message */}
       {error && (
-        <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
+        <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-4 text-red-800 dark:border-red-700/50 dark:bg-red-900/20 dark:text-red-400">
           <AlertCircle className="size-5" />
           {error}
         </div>

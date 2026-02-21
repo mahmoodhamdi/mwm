@@ -1,0 +1,1037 @@
+# Careers API Documentation
+# توثيق واجهة برمجة الوظائف
+
+tags:
+  - name: Careers
+    description: Public job listings and applications
+  - name: Careers Admin
+    description: Job and application management (Admin only)
+
+paths:
+  /careers/jobs:
+    get:
+      summary: Get open jobs
+      description: Retrieve all open job listings with optional filters
+      tags: [Careers]
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+        - in: query
+          name: department
+          schema:
+            type: string
+          description: Filter by department ID
+        - in: query
+          name: type
+          schema:
+            type: string
+            enum: [full-time, part-time, contract, internship, remote]
+        - in: query
+          name: experienceLevel
+          schema:
+            type: string
+            enum: [entry, mid, senior, lead, executive]
+        - in: query
+          name: featured
+          schema:
+            type: boolean
+        - in: query
+          name: locale
+          schema:
+            type: string
+            enum: [ar, en]
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Search in job title and description
+      responses:
+        200:
+          description: List of open jobs with pagination
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Job'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+  /careers/jobs/featured:
+    get:
+      summary: Get featured jobs
+      description: Retrieve all featured job listings
+      tags: [Careers]
+      responses:
+        200:
+          description: List of featured jobs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Job'
+
+  /careers/jobs/{slug}:
+    get:
+      summary: Get job by slug
+      description: Retrieve a single job listing by its URL-friendly slug
+      tags: [Careers]
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema:
+            type: string
+          description: Job slug (URL-friendly identifier)
+          example: senior-frontend-developer
+      responses:
+        200:
+          description: Job details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Job'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+  /careers/upload-resume:
+    post:
+      summary: Upload resume file
+      description: Upload a resume file (PDF, DOC, DOCX) for use in a job application. Rate limited to 10 uploads per hour per IP.
+      tags: [Careers]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - resume
+              properties:
+                resume:
+                  type: string
+                  format: binary
+                  description: Resume file (PDF, DOC, DOCX — max 5MB)
+      responses:
+        200:
+          description: Resume uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+                        format: uri
+                        description: URL of the uploaded resume file
+                      publicId:
+                        type: string
+                        description: Cloudinary public ID
+        400:
+          $ref: '#/components/responses/ValidationError'
+        429:
+          description: Too many requests (10 uploads per hour limit)
+
+  /careers/apply:
+    post:
+      summary: Submit job application
+      description: Submit a job application for an open position. Rate limited to 3 applications per hour per IP.
+      tags: [Careers]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateApplication'
+      responses:
+        201:
+          description: Application submitted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Application'
+        400:
+          $ref: '#/components/responses/ValidationError'
+        429:
+          description: Too many requests (3 applications per hour limit)
+
+  /careers/admin/jobs:
+    get:
+      summary: Get all jobs (Admin)
+      description: Retrieve all jobs including drafts, with optional filters (Admin only)
+      tags: [Careers Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+        - in: query
+          name: department
+          schema:
+            type: string
+        - in: query
+          name: type
+          schema:
+            type: string
+            enum: [full-time, part-time, contract, internship, remote]
+        - in: query
+          name: experienceLevel
+          schema:
+            type: string
+            enum: [entry, mid, senior, lead, executive]
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [draft, open, closed, filled]
+        - in: query
+          name: search
+          schema:
+            type: string
+      responses:
+        200:
+          description: List of all jobs with pagination
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Job'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+
+    post:
+      summary: Create job (Admin)
+      description: Create a new job listing (Admin only)
+      tags: [Careers Admin]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateJob'
+      responses:
+        201:
+          description: Job created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Job'
+        400:
+          $ref: '#/components/responses/ValidationError'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+
+  /careers/admin/jobs/bulk-status:
+    put:
+      summary: Bulk update job status (Admin)
+      description: Update status for multiple jobs at once (Admin only)
+      tags: [Careers Admin]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - ids
+                - status
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: string
+                  description: Array of job IDs to update
+                status:
+                  type: string
+                  enum: [draft, open, closed, filled]
+      responses:
+        200:
+          description: Jobs status updated successfully
+        400:
+          $ref: '#/components/responses/ValidationError'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+
+  /careers/admin/jobs/{id}:
+    get:
+      summary: Get job by ID (Admin)
+      description: Retrieve a single job by its ID (Admin only)
+      tags: [Careers Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Job ID
+      responses:
+        200:
+          description: Job details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Job'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      summary: Update job (Admin)
+      description: Update an existing job listing (Admin only)
+      tags: [Careers Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Job ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateJob'
+      responses:
+        200:
+          description: Job updated successfully
+        400:
+          $ref: '#/components/responses/ValidationError'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      summary: Delete job (Admin)
+      description: Permanently delete a job listing (Admin only)
+      tags: [Careers Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Job ID
+      responses:
+        200:
+          description: Job deleted successfully
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+  /careers/admin/applications:
+    get:
+      summary: Get all applications (Admin)
+      description: Retrieve all job applications with optional filters (Admin only)
+      tags: [Careers Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+        - in: query
+          name: job
+          schema:
+            type: string
+          description: Filter by job ID
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [pending, reviewing, shortlisted, interviewed, offered, hired, rejected, withdrawn]
+        - in: query
+          name: email
+          schema:
+            type: string
+            format: email
+          description: Filter by applicant email
+      responses:
+        200:
+          description: List of applications with pagination
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Application'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+
+  /careers/admin/applications/bulk-status:
+    put:
+      summary: Bulk update application status (Admin)
+      description: Update status for multiple applications at once (Admin only)
+      tags: [Careers Admin]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - ids
+                - status
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: string
+                  description: Array of application IDs to update
+                status:
+                  type: string
+                  enum: [pending, reviewing, shortlisted, interviewed, offered, hired, rejected, withdrawn]
+      responses:
+        200:
+          description: Applications status updated successfully
+        400:
+          $ref: '#/components/responses/ValidationError'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+
+  /careers/admin/applications/{id}:
+    get:
+      summary: Get application by ID (Admin)
+      description: Retrieve a single job application by its ID (Admin only)
+      tags: [Careers Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Application ID
+      responses:
+        200:
+          description: Application details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Application'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      summary: Update application (Admin)
+      description: Update job application status, notes, or rating (Admin only)
+      tags: [Careers Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Application ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [pending, reviewing, shortlisted, interviewed, offered, hired, rejected, withdrawn]
+                notes:
+                  type: string
+                  description: Admin notes about the application
+                rating:
+                  type: number
+                  minimum: 1
+                  maximum: 5
+                  description: Application rating (1-5)
+      responses:
+        200:
+          description: Application updated successfully
+        400:
+          $ref: '#/components/responses/ValidationError'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      summary: Delete application (Admin)
+      description: Permanently delete a job application (Admin only)
+      tags: [Careers Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Application ID
+      responses:
+        200:
+          description: Application deleted successfully
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+  /careers/admin/jobs/{jobId}/applications:
+    get:
+      summary: Get applications for a job (Admin)
+      description: Retrieve all applications submitted for a specific job (Admin only)
+      tags: [Careers Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: jobId
+          required: true
+          schema:
+            type: string
+          description: Job ID
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [pending, reviewing, shortlisted, interviewed, offered, hired, rejected, withdrawn]
+      responses:
+        200:
+          description: List of applications for the specified job
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Application'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+  /careers/admin/jobs/{jobId}/stats:
+    get:
+      summary: Get application statistics for a job (Admin)
+      description: Retrieve application counts and metrics for a specific job (Admin only)
+      tags: [Careers Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: jobId
+          required: true
+          schema:
+            type: string
+          description: Job ID
+      responses:
+        200:
+          description: Application statistics for the job
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                        example: 42
+                      byStatus:
+                        type: object
+                        properties:
+                          pending:
+                            type: integer
+                          reviewing:
+                            type: integer
+                          shortlisted:
+                            type: integer
+                          interviewed:
+                            type: integer
+                          offered:
+                            type: integer
+                          hired:
+                            type: integer
+                          rejected:
+                            type: integer
+                          withdrawn:
+                            type: integer
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+components:
+  schemas:
+    Job:
+      type: object
+      properties:
+        _id:
+          type: string
+        title:
+          $ref: '#/components/schemas/LocalizedContent'
+        slug:
+          type: string
+          example: senior-frontend-developer
+        description:
+          $ref: '#/components/schemas/LocalizedContent'
+        requirements:
+          type: array
+          items:
+            $ref: '#/components/schemas/LocalizedContent'
+        responsibilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/LocalizedContent'
+        benefits:
+          type: array
+          items:
+            $ref: '#/components/schemas/LocalizedContent'
+        department:
+          type: string
+          description: Department ID
+        location:
+          $ref: '#/components/schemas/LocalizedContent'
+        type:
+          type: string
+          enum: [full-time, part-time, contract, internship, remote]
+        experienceLevel:
+          type: string
+          enum: [entry, mid, senior, lead, executive]
+        salaryRange:
+          type: object
+          properties:
+            min:
+              type: number
+            max:
+              type: number
+            currency:
+              type: string
+              example: SAR
+            period:
+              type: string
+              enum: [hourly, monthly, yearly]
+            isPublic:
+              type: boolean
+        skills:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [draft, open, closed, filled]
+        applicationDeadline:
+          type: string
+          format: date
+        isFeatured:
+          type: boolean
+        applicationCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateJob:
+      type: object
+      required:
+        - title
+        - slug
+        - description
+        - department
+        - location
+        - type
+        - experienceLevel
+      properties:
+        title:
+          $ref: '#/components/schemas/LocalizedContent'
+        slug:
+          type: string
+          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+        description:
+          $ref: '#/components/schemas/LocalizedContent'
+        requirements:
+          type: array
+          items:
+            $ref: '#/components/schemas/LocalizedContent'
+        responsibilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/LocalizedContent'
+        benefits:
+          type: array
+          items:
+            $ref: '#/components/schemas/LocalizedContent'
+        department:
+          type: string
+          description: Department ID
+        location:
+          $ref: '#/components/schemas/LocalizedContent'
+        type:
+          type: string
+          enum: [full-time, part-time, contract, internship, remote]
+        experienceLevel:
+          type: string
+          enum: [entry, mid, senior, lead, executive]
+        salaryRange:
+          type: object
+          properties:
+            min:
+              type: number
+            max:
+              type: number
+            currency:
+              type: string
+              default: SAR
+            period:
+              type: string
+              enum: [hourly, monthly, yearly]
+              default: monthly
+            isPublic:
+              type: boolean
+              default: false
+        skills:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [draft, open, closed, filled]
+          default: draft
+        applicationDeadline:
+          type: string
+          format: date
+        isFeatured:
+          type: boolean
+          default: false
+
+    UpdateJob:
+      type: object
+      properties:
+        title:
+          $ref: '#/components/schemas/LocalizedContent'
+        slug:
+          type: string
+        description:
+          $ref: '#/components/schemas/LocalizedContent'
+        requirements:
+          type: array
+          items:
+            $ref: '#/components/schemas/LocalizedContent'
+        responsibilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/LocalizedContent'
+        benefits:
+          type: array
+          items:
+            $ref: '#/components/schemas/LocalizedContent'
+        department:
+          type: string
+        location:
+          $ref: '#/components/schemas/LocalizedContent'
+        type:
+          type: string
+          enum: [full-time, part-time, contract, internship, remote]
+        experienceLevel:
+          type: string
+          enum: [entry, mid, senior, lead, executive]
+        salaryRange:
+          type: object
+        skills:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [draft, open, closed, filled]
+        applicationDeadline:
+          type: string
+          format: date
+        isFeatured:
+          type: boolean
+
+    Application:
+      type: object
+      properties:
+        _id:
+          type: string
+        job:
+          type: string
+          description: Job ID
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        resume:
+          type: string
+          format: uri
+          description: URL of the uploaded resume
+        coverLetter:
+          type: string
+        linkedIn:
+          type: string
+          format: uri
+        portfolio:
+          type: string
+          format: uri
+        expectedSalary:
+          type: number
+        availableFrom:
+          type: string
+          format: date
+        experience:
+          type: number
+          description: Years of experience
+        education:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        answers:
+          type: object
+          additionalProperties:
+            type: string
+        status:
+          type: string
+          enum: [pending, reviewing, shortlisted, interviewed, offered, hired, rejected, withdrawn]
+        notes:
+          type: string
+          description: Admin notes
+        rating:
+          type: number
+          minimum: 1
+          maximum: 5
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateApplication:
+      type: object
+      required:
+        - job
+        - firstName
+        - lastName
+        - email
+        - phone
+        - resume
+        - experience
+      properties:
+        job:
+          type: string
+          description: Job ID
+        firstName:
+          type: string
+          maxLength: 50
+        lastName:
+          type: string
+          maxLength: 50
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        resume:
+          type: string
+          format: uri
+          description: URL of the uploaded resume file
+        coverLetter:
+          type: string
+        linkedIn:
+          type: string
+          format: uri
+        portfolio:
+          type: string
+          format: uri
+        expectedSalary:
+          type: number
+          minimum: 0
+        availableFrom:
+          type: string
+          format: date
+        experience:
+          type: number
+          minimum: 0
+          description: Years of experience
+        education:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        answers:
+          type: object
+          additionalProperties:
+            type: string
+
+    LocalizedContent:
+      type: object
+      properties:
+        ar:
+          type: string
+        en:
+          type: string
+      required: [ar, en]

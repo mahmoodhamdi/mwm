@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocale } from 'next-intl';
-import Link from 'next/link';
+import toast from 'react-hot-toast';
 import Image from 'next/image';
 import {
   Plus,
@@ -19,6 +19,9 @@ import {
   ExternalLink,
   Image as ImageIcon,
   RefreshCw,
+  X,
+  Save,
+  Loader2,
 } from 'lucide-react';
 import { DataTable, tableActions } from '@/components/admin';
 import type { Column, DataTableAction } from '@/components/admin';
@@ -26,6 +29,7 @@ import {
   projectsAdminService,
   type Project,
   type ProjectsResponse,
+  type UpdateProjectData,
 } from '@/services/admin/projects.service';
 
 export default function ProjectsPage() {
@@ -35,12 +39,39 @@ export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [page, _setPage] = useState(1);
+  const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [featuredFilter, setFeaturedFilter] = useState<boolean | null>(null);
+
+  // Edit modal state
+  const [editingItem, setEditingItem] = useState<Project | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editSaving, setEditSaving] = useState(false);
+  const [editForm, setEditForm] = useState<{
+    titleAr: string;
+    titleEn: string;
+    shortDescriptionAr: string;
+    shortDescriptionEn: string;
+    thumbnail: string;
+    liveUrl: string;
+    githubUrl: string;
+    isPublished: boolean;
+    isFeatured: boolean;
+    order: number;
+  }>({
+    titleAr: '',
+    titleEn: '',
+    shortDescriptionAr: '',
+    shortDescriptionEn: '',
+    thumbnail: '',
+    liveUrl: '',
+    githubUrl: '',
+    isPublished: false,
+    isFeatured: false,
+    order: 0,
+  });
 
   // Fetch projects
   const fetchProjects = useCallback(async () => {
@@ -73,6 +104,52 @@ export default function ProjectsPage() {
     fetchProjects();
   }, [fetchProjects]);
 
+  // Open edit modal pre-populated with project data
+  const openEditModal = (project: Project) => {
+    setEditingItem(project);
+    setEditForm({
+      titleAr: project.title.ar,
+      titleEn: project.title.en,
+      shortDescriptionAr: project.shortDescription.ar,
+      shortDescriptionEn: project.shortDescription.en,
+      thumbnail: project.thumbnail || '',
+      liveUrl: project.liveUrl || '',
+      githubUrl: project.githubUrl || '',
+      isPublished: project.isPublished,
+      isFeatured: project.isFeatured,
+      order: project.order,
+    });
+    setShowEditModal(true);
+  };
+
+  // Save edit
+  const handleSaveEdit = async () => {
+    if (!editingItem) return;
+    setEditSaving(true);
+    try {
+      const data: UpdateProjectData = {
+        title: { ar: editForm.titleAr, en: editForm.titleEn },
+        shortDescription: { ar: editForm.shortDescriptionAr, en: editForm.shortDescriptionEn },
+        thumbnail: editForm.thumbnail || undefined,
+        liveUrl: editForm.liveUrl || undefined,
+        githubUrl: editForm.githubUrl || undefined,
+        isPublished: editForm.isPublished,
+        isFeatured: editForm.isFeatured,
+        order: editForm.order,
+      };
+      await projectsAdminService.updateProject(editingItem._id, data);
+      toast.success(isArabic ? 'تم تحديث المشروع بنجاح' : 'Project updated successfully');
+      setShowEditModal(false);
+      setEditingItem(null);
+      fetchProjects();
+    } catch (err) {
+      console.error('Failed to update project:', err);
+      toast.error(isArabic ? 'فشل في تحديث المشروع' : 'Failed to update project');
+    } finally {
+      setEditSaving(false);
+    }
+  };
+
   // Toggle featured status
   const toggleFeatured = async (project: Project) => {
     try {
@@ -80,7 +157,7 @@ export default function ProjectsPage() {
       fetchProjects();
     } catch (err) {
       console.error('Failed to toggle featured:', err);
-      alert(isArabic ? 'فشل في تغيير حالة المميز' : 'Failed to toggle featured status');
+      toast.error(isArabic ? 'فشل في تغيير حالة المميز' : 'Failed to toggle featured status');
     }
   };
 
@@ -91,7 +168,7 @@ export default function ProjectsPage() {
       fetchProjects();
     } catch (err) {
       console.error('Failed to toggle publish:', err);
-      alert(isArabic ? 'فشل في تغيير حالة النشر' : 'Failed to toggle publish status');
+      toast.error(isArabic ? 'فشل في تغيير حالة النشر' : 'Failed to toggle publish status');
     }
   };
 
@@ -112,7 +189,7 @@ export default function ProjectsPage() {
       fetchProjects();
     } catch (err) {
       console.error('Failed to delete project:', err);
-      alert(isArabic ? 'فشل في حذف المشروع' : 'Failed to delete project');
+      toast.error(isArabic ? 'فشل في حذف المشروع' : 'Failed to delete project');
     }
   };
 
@@ -133,7 +210,7 @@ export default function ProjectsPage() {
       fetchProjects();
     } catch (err) {
       console.error('Failed to bulk delete:', err);
-      alert(isArabic ? 'فشل في حذف المشاريع' : 'Failed to delete projects');
+      toast.error(isArabic ? 'فشل في حذف المشاريع' : 'Failed to delete projects');
     }
   };
 
@@ -146,7 +223,7 @@ export default function ProjectsPage() {
       fetchProjects();
     } catch (err) {
       console.error('Failed to bulk update:', err);
-      alert(isArabic ? 'فشل في تحديث المشاريع' : 'Failed to update projects');
+      toast.error(isArabic ? 'فشل في تحديث المشاريع' : 'Failed to update projects');
     }
   };
 
@@ -184,12 +261,20 @@ export default function ProjectsPage() {
       headerEn: 'Title',
       accessor: row => (isArabic ? row.title.ar : row.title.en),
       sortable: true,
-      render: (value, row) => (
-        <div>
-          <div className="font-medium">{value as string}</div>
-          <div className="text-muted-foreground text-sm">{row.client?.name || '-'}</div>
-        </div>
-      ),
+      render: (value, row) => {
+        // client.name is a LocalizedString — extract the correct locale string for display
+        const clientName = row.client?.name
+          ? isArabic
+            ? row.client.name.ar
+            : row.client.name.en
+          : null;
+        return (
+          <div>
+            <div className="font-medium">{value as string}</div>
+            <div className="text-muted-foreground text-sm">{clientName || '-'}</div>
+          </div>
+        );
+      },
     },
     {
       id: 'category',
@@ -278,7 +363,7 @@ export default function ProjectsPage() {
       window.open(`/${locale}/projects/${project.slug}`, '_blank');
     }),
     tableActions.edit(project => {
-      window.location.href = `/${locale}/admin/projects/${project._id}/edit`;
+      openEditModal(project);
     }),
     {
       id: 'toggle-featured',
@@ -383,13 +468,28 @@ export default function ProjectsPage() {
           >
             <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
-          <Link
-            href={`/${locale}/admin/projects/new`}
+          <button
+            onClick={() => {
+              setEditingItem(null);
+              setEditForm({
+                titleAr: '',
+                titleEn: '',
+                shortDescriptionAr: '',
+                shortDescriptionEn: '',
+                thumbnail: '',
+                liveUrl: '',
+                githubUrl: '',
+                isPublished: false,
+                isFeatured: false,
+                order: projects.length + 1,
+              });
+              setShowEditModal(true);
+            }}
             className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 transition-colors"
           >
             <Plus className="size-5" />
             <span>{isArabic ? 'مشروع جديد' : 'New Project'}</span>
-          </Link>
+          </button>
         </div>
       </div>
 
@@ -461,6 +561,7 @@ export default function ProjectsPage() {
         pagination={{
           pageSize: 10,
           pageSizeOptions: [5, 10, 20, 50],
+          onPageChange: (newPage: number) => setPage(newPage),
         }}
         bulkActions={bulkActions}
         emptyStateAr="لا توجد مشاريع"
@@ -471,6 +572,189 @@ export default function ProjectsPage() {
       <div className="text-muted-foreground text-center text-sm">
         {isArabic ? `صفحة ${page} من ${totalPages}` : `Page ${page} of ${totalPages}`}
       </div>
+
+      {/* Edit / Create Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-background w-full max-w-lg rounded-lg shadow-xl">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b px-6 py-4">
+              <h2 className="text-xl font-bold">
+                {editingItem
+                  ? isArabic
+                    ? 'تعديل المشروع'
+                    : 'Edit Project'
+                  : isArabic
+                    ? 'مشروع جديد'
+                    : 'New Project'}
+              </h2>
+              <button
+                onClick={() => {
+                  setShowEditModal(false);
+                  setEditingItem(null);
+                }}
+                className="hover:bg-muted rounded-lg p-1"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="space-y-4 p-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-muted-foreground mb-1 block text-sm font-medium">
+                    {isArabic ? 'العنوان (عربي)' : 'Title (Arabic)'} *
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.titleAr}
+                    onChange={e => setEditForm(f => ({ ...f, titleAr: e.target.value }))}
+                    className="bg-background w-full rounded-lg border px-3 py-2"
+                    dir="rtl"
+                  />
+                </div>
+                <div>
+                  <label className="text-muted-foreground mb-1 block text-sm font-medium">
+                    {isArabic ? 'العنوان (إنجليزي)' : 'Title (English)'} *
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.titleEn}
+                    onChange={e => setEditForm(f => ({ ...f, titleEn: e.target.value }))}
+                    className="bg-background w-full rounded-lg border px-3 py-2"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-muted-foreground mb-1 block text-sm font-medium">
+                    {isArabic ? 'الوصف المختصر (عربي)' : 'Short Description (Arabic)'}
+                  </label>
+                  <textarea
+                    value={editForm.shortDescriptionAr}
+                    onChange={e => setEditForm(f => ({ ...f, shortDescriptionAr: e.target.value }))}
+                    className="bg-background w-full rounded-lg border px-3 py-2"
+                    rows={3}
+                    dir="rtl"
+                  />
+                </div>
+                <div>
+                  <label className="text-muted-foreground mb-1 block text-sm font-medium">
+                    {isArabic ? 'الوصف المختصر (إنجليزي)' : 'Short Description (English)'}
+                  </label>
+                  <textarea
+                    value={editForm.shortDescriptionEn}
+                    onChange={e => setEditForm(f => ({ ...f, shortDescriptionEn: e.target.value }))}
+                    className="bg-background w-full rounded-lg border px-3 py-2"
+                    rows={3}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-muted-foreground mb-1 block text-sm font-medium">
+                  {isArabic ? 'رابط الصورة المصغرة' : 'Thumbnail URL'}
+                </label>
+                <input
+                  type="text"
+                  value={editForm.thumbnail}
+                  onChange={e => setEditForm(f => ({ ...f, thumbnail: e.target.value }))}
+                  className="bg-background w-full rounded-lg border px-3 py-2"
+                  placeholder="https://..."
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-muted-foreground mb-1 block text-sm font-medium">
+                    {isArabic ? 'رابط المشروع' : 'Live URL'}
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.liveUrl}
+                    onChange={e => setEditForm(f => ({ ...f, liveUrl: e.target.value }))}
+                    className="bg-background w-full rounded-lg border px-3 py-2"
+                    placeholder="https://..."
+                  />
+                </div>
+                <div>
+                  <label className="text-muted-foreground mb-1 block text-sm font-medium">
+                    {isArabic ? 'رابط GitHub' : 'GitHub URL'}
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.githubUrl}
+                    onChange={e => setEditForm(f => ({ ...f, githubUrl: e.target.value }))}
+                    className="bg-background w-full rounded-lg border px-3 py-2"
+                    placeholder="https://github.com/..."
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-muted-foreground mb-1 block text-sm font-medium">
+                  {isArabic ? 'الترتيب' : 'Order'}
+                </label>
+                <input
+                  type="number"
+                  value={editForm.order}
+                  onChange={e => setEditForm(f => ({ ...f, order: parseInt(e.target.value) || 0 }))}
+                  className="bg-background w-full rounded-lg border px-3 py-2"
+                  min={0}
+                />
+              </div>
+
+              <div className="flex items-center gap-6">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={editForm.isPublished}
+                    onChange={e => setEditForm(f => ({ ...f, isPublished: e.target.checked }))}
+                    className="rounded"
+                  />
+                  <span className="text-sm font-medium">{isArabic ? 'منشور' : 'Published'}</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={editForm.isFeatured}
+                    onChange={e => setEditForm(f => ({ ...f, isFeatured: e.target.checked }))}
+                    className="rounded"
+                  />
+                  <span className="text-sm font-medium">{isArabic ? 'مميز' : 'Featured'}</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex justify-end gap-2 border-t px-6 py-4">
+              <button
+                onClick={() => {
+                  setShowEditModal(false);
+                  setEditingItem(null);
+                }}
+                className="hover:bg-muted rounded-lg border px-4 py-2"
+              >
+                {isArabic ? 'إلغاء' : 'Cancel'}
+              </button>
+              <button
+                onClick={handleSaveEdit}
+                disabled={editSaving || !editForm.titleAr || !editForm.titleEn}
+                className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center gap-2 rounded-lg px-4 py-2 disabled:opacity-50"
+              >
+                {editSaving ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Save className="size-4" />
+                )}
+                {isArabic ? 'حفظ' : 'Save'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

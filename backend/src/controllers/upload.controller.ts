@@ -5,7 +5,13 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { asyncHandler } from '../middlewares';
-import { sendCreated, uploadImageToCloudinary, deleteFromCloudinary, ApiError } from '../utils';
+import {
+  sendSuccess,
+  sendCreated,
+  uploadImageToCloudinary,
+  deleteFromCloudinary,
+  ApiError,
+} from '../utils';
 
 /**
  * Upload a single image
@@ -112,7 +118,7 @@ export const deleteImage = asyncHandler(
 
     await deleteFromCloudinary(decodedPublicId, 'image');
 
-    sendCreated(res, null, 'Image deleted successfully | تم حذف الصورة بنجاح');
+    sendSuccess(res, null, { message: 'Image deleted successfully | تم حذف الصورة بنجاح' });
   }
 );
 

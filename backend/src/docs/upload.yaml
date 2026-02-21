@@ -1,0 +1,261 @@
+# Upload API Documentation
+# توثيق واجهة برمجة رفع الملفات
+
+tags:
+  - name: Upload
+    description: File upload management (authenticated users with content permissions)
+
+paths:
+  /upload/image:
+    post:
+      summary: Upload a single image
+      description: |
+        Upload a single image file to Cloudinary. Requires authentication and at least one
+        content update permission (services, projects, team, blog, or settings).
+
+        Rate limited to 20 uploads per hour per IP.
+      tags: [Upload]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: folder
+          schema:
+            type: string
+            default: images
+          description: Cloudinary folder to store the image in
+        - in: query
+          name: width
+          schema:
+            type: integer
+          description: Maximum width to resize the image to (in pixels)
+        - in: query
+          name: height
+          schema:
+            type: integer
+          description: Maximum height to resize the image to (in pixels)
+        - in: query
+          name: crop
+          schema:
+            type: string
+            enum: [fill, fit, scale, thumb, limit]
+          description: Cloudinary crop mode applied during upload
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - image
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: Image file (JPEG, PNG, GIF, WebP — max 5MB)
+      responses:
+        200:
+          description: Image uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/UploadResult'
+        400:
+          description: No image file provided or invalid file type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        429:
+          description: Too many upload requests (20 per hour limit)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: TOO_MANY_UPLOADS
+                      message:
+                        type: string
+
+  /upload/images:
+    post:
+      summary: Upload multiple images
+      description: |
+        Upload up to 10 image files in a single request to Cloudinary.
+        Requires authentication and at least one content update permission.
+
+        Rate limited to 20 uploads per hour per IP (shared with single image upload).
+      tags: [Upload]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: folder
+          schema:
+            type: string
+            default: images
+          description: Cloudinary folder to store the images in
+        - in: query
+          name: width
+          schema:
+            type: integer
+          description: Maximum width to resize images to (in pixels)
+        - in: query
+          name: height
+          schema:
+            type: integer
+          description: Maximum height to resize images to (in pixels)
+        - in: query
+          name: crop
+          schema:
+            type: string
+            enum: [fill, fit, scale, thumb, limit]
+          description: Cloudinary crop mode applied to all uploaded images
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - images
+              properties:
+                images:
+                  type: array
+                  maxItems: 10
+                  items:
+                    type: string
+                    format: binary
+                  description: Image files (JPEG, PNG, GIF, WebP — max 5MB each, max 10 files)
+      responses:
+        200:
+          description: Images uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UploadResult'
+        400:
+          description: No image files provided or invalid file type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        429:
+          description: Too many upload requests (20 per hour limit)
+
+  /upload/image/{publicId}:
+    delete:
+      summary: Delete an image
+      description: |
+        Permanently delete an image from Cloudinary by its public ID.
+        The public ID is the identifier returned when the image was uploaded.
+        Requires authentication and at least one content update permission.
+      tags: [Upload]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: publicId
+          required: true
+          schema:
+            type: string
+          description: |
+            Cloudinary public ID of the image to delete.
+            Note: forward slashes in the public ID must be URL-encoded as %2F
+            (e.g. `images%2Fmy-photo` for `images/my-photo`).
+          example: images%2Fservices%2Fhero-image
+      responses:
+        200:
+          description: Image deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      publicId:
+                        type: string
+                        description: The public ID of the deleted image
+                      result:
+                        type: string
+                        example: ok
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          description: Image not found in Cloudinary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    UploadResult:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          description: Public URL of the uploaded image
+          example: https://res.cloudinary.com/mwm/image/upload/v1700000000/images/photo.jpg
+        secureUrl:
+          type: string
+          format: uri
+          description: HTTPS URL of the uploaded image
+        publicId:
+          type: string
+          description: Cloudinary public ID used for future operations (e.g. deletion)
+          example: images/photo
+        width:
+          type: integer
+          description: Width of the uploaded image in pixels
+          example: 1200
+        height:
+          type: integer
+          description: Height of the uploaded image in pixels
+          example: 800
+        format:
+          type: string
+          description: File format of the uploaded image
+          example: jpg
+        size:
+          type: integer
+          description: File size in bytes
+          example: 245760

@@ -72,7 +72,7 @@ export interface UpdateUserData {
 
 export interface BulkActionData {
   ids: string[];
-  action: 'activate' | 'deactivate' | 'unlock' | 'delete';
+  action: 'activate' | 'deactivate' | 'delete';
 }
 
 // Admin Service Functions

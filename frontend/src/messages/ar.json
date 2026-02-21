@@ -43,9 +43,13 @@
     "ourClients": "عملاؤنا",
     "testimonials": "آراء العملاء",
     "stats": {
+      "projectsValue": "+50",
       "projects": "مشروع منجز",
+      "clientsValue": "+30",
       "clients": "عميل سعيد",
+      "experienceValue": "+5",
       "experience": "سنة خبرة",
+      "teamValue": "+10",
       "team": "مطور محترف"
     }
   },

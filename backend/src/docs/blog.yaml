@@ -1,0 +1,310 @@
+# Blog API Documentation
+# توثيق واجهة برمجة المدونة
+
+tags:
+  - name: Blog
+    description: Blog posts and categories management
+
+paths:
+  /blog:
+    get:
+      summary: Get all blog posts
+      tags: [Blog]
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [draft, published, scheduled, archived]
+        - in: query
+          name: category
+          schema:
+            type: string
+        - in: query
+          name: search
+          schema:
+            type: string
+      responses:
+        200:
+          description: List of blog posts with pagination
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BlogPost'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+    post:
+      summary: Create a new blog post
+      tags: [Blog]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBlogPost'
+      responses:
+        201:
+          description: Blog post created successfully
+        401:
+          $ref: '#/components/responses/Unauthorized'
+
+  /blog/admin/stats:
+    get:
+      summary: Get blog statistics (Admin)
+      description: |
+        Returns comprehensive statistics about blog posts including:
+        - Total posts count
+        - Posts by status (published, draft, scheduled, archived)
+        - Total views across all posts
+      tags: [Blog]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Blog statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                        description: Total number of blog posts
+                        example: 50
+                      published:
+                        type: integer
+                        description: Number of published posts
+                        example: 35
+                      draft:
+                        type: integer
+                        description: Number of draft posts
+                        example: 10
+                      scheduled:
+                        type: integer
+                        description: Number of scheduled posts
+                        example: 3
+                      archived:
+                        type: integer
+                        description: Number of archived posts
+                        example: 2
+                      totalViews:
+                        type: integer
+                        description: Total views across all posts
+                        example: 15420
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+
+  /blog/{slug}:
+    get:
+      summary: Get blog post by slug
+      tags: [Blog]
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Blog post details
+        404:
+          $ref: '#/components/responses/NotFound'
+
+  /blog/{id}:
+    put:
+      summary: Update blog post
+      tags: [Blog]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBlogPost'
+      responses:
+        200:
+          description: Blog post updated
+        404:
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      summary: Delete blog post
+      tags: [Blog]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Blog post deleted
+        404:
+          $ref: '#/components/responses/NotFound'
+
+  /blog/categories:
+    get:
+      summary: Get all blog categories
+      tags: [Blog]
+      responses:
+        200:
+          description: List of blog categories
+
+    post:
+      summary: Create blog category
+      tags: [Blog]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBlogCategory'
+      responses:
+        201:
+          description: Category created
+
+components:
+  schemas:
+    BlogPost:
+      type: object
+      properties:
+        _id:
+          type: string
+        title:
+          $ref: '#/components/schemas/LocalizedContent'
+        slug:
+          type: string
+        content:
+          $ref: '#/components/schemas/LocalizedContent'
+        excerpt:
+          $ref: '#/components/schemas/LocalizedContent'
+        featuredImage:
+          type: string
+        category:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [draft, published, scheduled, archived]
+        views:
+          type: integer
+        author:
+          type: string
+        publishedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateBlogPost:
+      type: object
+      required:
+        - title
+        - content
+      properties:
+        title:
+          $ref: '#/components/schemas/LocalizedContent'
+        content:
+          $ref: '#/components/schemas/LocalizedContent'
+        excerpt:
+          $ref: '#/components/schemas/LocalizedContent'
+        featuredImage:
+          type: string
+        category:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [draft, published, scheduled]
+
+    UpdateBlogPost:
+      type: object
+      properties:
+        title:
+          $ref: '#/components/schemas/LocalizedContent'
+        content:
+          $ref: '#/components/schemas/LocalizedContent'
+        excerpt:
+          $ref: '#/components/schemas/LocalizedContent'
+        featuredImage:
+          type: string
+        category:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [draft, published, scheduled, archived]
+
+    CreateBlogCategory:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          $ref: '#/components/schemas/LocalizedContent'
+        description:
+          $ref: '#/components/schemas/LocalizedContent'
+        slug:
+          type: string
+        parent:
+          type: string
+
+    LocalizedContent:
+      type: object
+      properties:
+        ar:
+          type: string
+        en:
+          type: string
+      required: [ar, en]

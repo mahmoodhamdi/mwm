@@ -5,8 +5,6 @@ import { useLocale } from 'next-intl';
 import {
   Bell,
   Mail,
-  MessageSquare,
-  FileText,
   CheckCircle,
   AlertTriangle,
   Info,

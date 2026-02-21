@@ -6,6 +6,7 @@
 import { Router } from 'express';
 import { contentController } from '../controllers';
 import { authenticate, authorize } from '../middlewares/auth';
+import { csrfValidation } from '../middlewares/csrf';
 
 const router = Router();
 
@@ -129,7 +130,13 @@ router.get('/', authenticate, authorize('settings:read'), contentController.getA
  *       401:
  *         description: Unauthorized
  */
-router.post('/', authenticate, authorize('settings:update'), contentController.createContent);
+router.post(
+  '/',
+  authenticate,
+  csrfValidation,
+  authorize('settings:update'),
+  contentController.createContent
+);
 
 /**
  * @swagger
@@ -168,6 +175,7 @@ router.post('/', authenticate, authorize('settings:update'), contentController.c
 router.post(
   '/bulk',
   authenticate,
+  csrfValidation,
   authorize('settings:update'),
   contentController.bulkUpsertContent
 );
@@ -203,7 +211,13 @@ router.post(
  *       404:
  *         description: Content not found
  */
-router.put('/:key', authenticate, authorize('settings:update'), contentController.updateContent);
+router.put(
+  '/:key',
+  authenticate,
+  csrfValidation,
+  authorize('settings:update'),
+  contentController.updateContent
+);
 
 /**
  * @swagger
@@ -239,6 +253,7 @@ router.put('/:key', authenticate, authorize('settings:update'), contentControlle
 router.put(
   '/:key/upsert',
   authenticate,
+  csrfValidation,
   authorize('settings:update'),
   contentController.upsertContent
 );
@@ -263,6 +278,12 @@ router.put(
  *       404:
  *         description: Content not found
  */
-router.delete('/:key', authenticate, authorize('settings:delete'), contentController.deleteContent);
+router.delete(
+  '/:key',
+  authenticate,
+  csrfValidation,
+  authorize('settings:delete'),
+  contentController.deleteContent
+);
 
 export default router;

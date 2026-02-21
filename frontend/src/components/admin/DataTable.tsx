@@ -5,7 +5,7 @@
 
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useLocale } from 'next-intl';
 import {
   ChevronUp,
@@ -44,6 +44,7 @@ export interface DataTableAction<T> {
 export interface PaginationConfig {
   pageSize?: number;
   pageSizeOptions?: number[];
+  onPageChange?: (page: number) => void;
 }
 
 export interface DataTableProps<T> {
@@ -121,6 +122,11 @@ export function DataTable<T extends object>({
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(initialPageSize);
   const [openActionMenu, setOpenActionMenu] = useState<string | null>(null);
+
+  // Notify parent when page changes (for server-side pagination)
+  useEffect(() => {
+    paginationConfig.onPageChange?.(currentPage);
+  }, [currentPage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Filter data based on search
   const filteredData = useMemo(() => {

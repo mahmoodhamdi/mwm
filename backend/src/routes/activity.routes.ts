@@ -6,6 +6,7 @@
 import { Router } from 'express';
 import { activityController } from '../controllers/activity.controller';
 import { authenticate, authorize } from '../middlewares';
+import { csrfValidation } from '../middlewares/csrf';
 
 const router = Router();
 
@@ -78,7 +79,7 @@ router.get('/me', activityController.getMyActivity);
  *       401:
  *         description: Unauthorized
  */
-router.get('/', authorize('admin', 'super_admin'), activityController.getLogs);
+router.get('/', authorize('activity:read'), activityController.getLogs);
 
 /**
  * @swagger
@@ -94,7 +95,7 @@ router.get('/', authorize('admin', 'super_admin'), activityController.getLogs);
  *       401:
  *         description: Unauthorized
  */
-router.get('/recent', authorize('admin', 'super_admin'), activityController.getRecent);
+router.get('/recent', authorize('activity:read'), activityController.getRecent);
 
 /**
  * @swagger
@@ -110,7 +111,7 @@ router.get('/recent', authorize('admin', 'super_admin'), activityController.getR
  *       401:
  *         description: Unauthorized
  */
-router.get('/stats', authorize('admin', 'super_admin'), activityController.getStatistics);
+router.get('/stats', authorize('activity:read'), activityController.getStatistics);
 
 /**
  * @swagger
@@ -132,7 +133,7 @@ router.get('/stats', authorize('admin', 'super_admin'), activityController.getSt
  *       401:
  *         description: Unauthorized
  */
-router.get('/user/:userId', authorize('admin', 'super_admin'), activityController.getLogsByUser);
+router.get('/user/:userId', authorize('activity:read'), activityController.getLogsByUser);
 
 /**
  * @swagger
@@ -154,11 +155,7 @@ router.get('/user/:userId', authorize('admin', 'super_admin'), activityControlle
  *       401:
  *         description: Unauthorized
  */
-router.get(
-  '/resource/:resource',
-  authorize('admin', 'super_admin'),
-  activityController.getLogsByResource
-);
+router.get('/resource/:resource', authorize('activity:read'), activityController.getLogsByResource);
 
 /**
  * @swagger
@@ -177,6 +174,11 @@ router.get(
  *       403:
  *         description: Forbidden - Super Admin only
  */
-router.delete('/old', authorize('super_admin'), activityController.deleteOldLogs);
+router.delete(
+  '/old',
+  csrfValidation,
+  authorize('activity:delete'),
+  activityController.deleteOldLogs
+);
 
 export default router;

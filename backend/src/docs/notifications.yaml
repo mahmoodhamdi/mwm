@@ -1,0 +1,424 @@
+# Notifications API Documentation
+# توثيق واجهة برمجة الإشعارات
+
+tags:
+  - name: Notifications
+    description: Push notifications and FCM topic management
+
+paths:
+  /notifications:
+    get:
+      summary: Get user notifications
+      tags: [Notifications]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 20
+        - in: query
+          name: unreadOnly
+          schema:
+            type: boolean
+            default: false
+      responses:
+        200:
+          description: List of notifications
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      notifications:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Notification'
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+
+  /notifications/unread-count:
+    get:
+      summary: Get unread notifications count
+      tags: [Notifications]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Unread count
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      count:
+                        type: integer
+                        example: 5
+
+  /notifications/{id}/read:
+    put:
+      summary: Mark notification as read
+      tags: [Notifications]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Notification marked as read
+        404:
+          $ref: '#/components/responses/NotFound'
+
+  /notifications/read-all:
+    put:
+      summary: Mark all notifications as read
+      tags: [Notifications]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: All notifications marked as read
+
+  /notifications/device-tokens:
+    post:
+      summary: Register device token for push notifications
+      tags: [Notifications]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+              properties:
+                token:
+                  type: string
+                  description: FCM device token
+                platform:
+                  type: string
+                  enum: [web, android, ios]
+                  default: web
+      responses:
+        200:
+          description: Device token registered
+        401:
+          $ref: '#/components/responses/Unauthorized'
+
+    delete:
+      summary: Remove device token
+      tags: [Notifications]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+              properties:
+                token:
+                  type: string
+      responses:
+        200:
+          description: Device token removed
+
+  /notifications/topics/{topic}/subscribe:
+    post:
+      summary: Subscribe to FCM topic
+      description: |
+        Subscribe a device token to an FCM (Firebase Cloud Messaging) topic.
+        This allows the device to receive push notifications sent to that topic.
+
+        Common topics:
+        - `all-users` - General announcements
+        - `news` - News updates
+        - `promotions` - Promotional content
+      tags: [Notifications]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: topic
+          required: true
+          schema:
+            type: string
+          description: Topic name to subscribe to
+          example: news
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+              properties:
+                token:
+                  type: string
+                  description: FCM device token
+                  example: "fMxnH7Aq..."
+      responses:
+        200:
+          description: Successfully subscribed to topic
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: "Subscribed to topic: news"
+                      topic:
+                        type: string
+                        example: news
+                      token:
+                        type: string
+        400:
+          description: Token is required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        500:
+          description: FCM subscription failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /notifications/topics/{topic}/unsubscribe:
+    post:
+      summary: Unsubscribe from FCM topic
+      description: |
+        Unsubscribe a device token from an FCM topic.
+        The device will no longer receive push notifications for that topic.
+      tags: [Notifications]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: topic
+          required: true
+          schema:
+            type: string
+          description: Topic name to unsubscribe from
+          example: promotions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+              properties:
+                token:
+                  type: string
+                  description: FCM device token
+      responses:
+        200:
+          description: Successfully unsubscribed from topic
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: "Unsubscribed from topic: promotions"
+                      topic:
+                        type: string
+                      token:
+                        type: string
+        400:
+          description: Token is required
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        500:
+          description: FCM unsubscription failed
+
+  /notifications/admin/send:
+    post:
+      summary: Send notification to user(s) (Admin)
+      tags: [Notifications]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - body
+              properties:
+                userId:
+                  type: string
+                  description: Single user ID
+                userIds:
+                  type: array
+                  items:
+                    type: string
+                  description: Multiple user IDs
+                userRole:
+                  type: string
+                  description: Send to all users with this role
+                title:
+                  $ref: '#/components/schemas/LocalizedContent'
+                body:
+                  $ref: '#/components/schemas/LocalizedContent'
+                type:
+                  type: string
+                  enum: [info, success, warning, error]
+                  default: info
+                link:
+                  type: string
+                data:
+                  type: object
+      responses:
+        200:
+          description: Notification sent
+        400:
+          description: Recipient required
+        401:
+          $ref: '#/components/responses/Unauthorized'
+
+  /notifications/admin/broadcast:
+    post:
+      summary: Broadcast notification to all users (Admin)
+      tags: [Notifications]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - body
+              properties:
+                title:
+                  $ref: '#/components/schemas/LocalizedContent'
+                body:
+                  $ref: '#/components/schemas/LocalizedContent'
+                type:
+                  type: string
+                  enum: [info, success, warning, error]
+                link:
+                  type: string
+                topic:
+                  type: string
+                  default: all-users
+      responses:
+        200:
+          description: Broadcast sent
+        401:
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  schemas:
+    Notification:
+      type: object
+      properties:
+        _id:
+          type: string
+        user:
+          type: string
+        type:
+          type: string
+          enum: [info, success, warning, error]
+        title:
+          $ref: '#/components/schemas/LocalizedContent'
+        body:
+          $ref: '#/components/schemas/LocalizedContent'
+        link:
+          type: string
+        data:
+          type: object
+        isRead:
+          type: boolean
+        readAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    LocalizedContent:
+      type: object
+      properties:
+        ar:
+          type: string
+        en:
+          type: string
+      required: [ar, en]
+
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        pages:
+          type: integer

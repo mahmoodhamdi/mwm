@@ -179,10 +179,9 @@ export async function updateSettingsSection(
     | 'homepage',
   data: unknown
 ): Promise<Settings> {
-  const response = await apiClient.patch<{ settings: Settings }>(
-    `${SETTINGS_ENDPOINT}/${section}`,
-    { data }
-  );
+  const response = await apiClient.put<{ settings: Settings }>(`${SETTINGS_ENDPOINT}/${section}`, {
+    data,
+  });
   return response.data?.settings as Settings;
 }
 

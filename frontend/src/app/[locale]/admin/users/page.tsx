@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocale } from 'next-intl';
+import toast from 'react-hot-toast';
 import {
   Users,
   UserPlus,
@@ -221,7 +222,7 @@ export default function UsersPage() {
       fetchStats();
     } catch (err) {
       console.error('Failed to create user:', err);
-      alert(isRTL ? 'فشل في إنشاء المستخدم' : 'Failed to create user');
+      toast.error(isRTL ? 'فشل في إنشاء المستخدم' : 'Failed to create user');
     }
   };
 
@@ -239,18 +240,18 @@ export default function UsersPage() {
       fetchUsers();
     } catch (err) {
       console.error('Failed to update user:', err);
-      alert(isRTL ? 'فشل في تحديث المستخدم' : 'Failed to update user');
+      toast.error(isRTL ? 'فشل في تحديث المستخدم' : 'Failed to update user');
     }
   };
 
   const handleResetPassword = async () => {
     if (!editingUser) return;
     if (newPassword !== confirmPassword) {
-      alert(isRTL ? 'كلمتا المرور غير متطابقتين' : 'Passwords do not match');
+      toast.error(isRTL ? 'كلمتا المرور غير متطابقتين' : 'Passwords do not match');
       return;
     }
     if (newPassword.length < 8) {
-      alert(
+      toast.error(
         isRTL
           ? 'كلمة المرور يجب أن تكون 8 أحرف على الأقل'
           : 'Password must be at least 8 characters'
@@ -263,10 +264,10 @@ export default function UsersPage() {
       setEditingUser(null);
       setNewPassword('');
       setConfirmPassword('');
-      alert(isRTL ? 'تم إعادة تعيين كلمة المرور بنجاح' : 'Password reset successfully');
+      toast.success(isRTL ? 'تم إعادة تعيين كلمة المرور بنجاح' : 'Password reset successfully');
     } catch (err) {
       console.error('Failed to reset password:', err);
-      alert(isRTL ? 'فشل في إعادة تعيين كلمة المرور' : 'Failed to reset password');
+      toast.error(isRTL ? 'فشل في إعادة تعيين كلمة المرور' : 'Failed to reset password');
     }
   };
 
@@ -284,11 +285,11 @@ export default function UsersPage() {
       fetchStats();
     } catch (err) {
       console.error('Failed to delete user:', err);
-      alert(isRTL ? 'فشل في حذف المستخدم' : 'Failed to delete user');
+      toast.error(isRTL ? 'فشل في حذف المستخدم' : 'Failed to delete user');
     }
   };
 
-  const handleBulkAction = async (action: 'activate' | 'deactivate' | 'delete' | 'unlock') => {
+  const handleBulkAction = async (action: 'activate' | 'deactivate' | 'delete') => {
     if (
       action === 'delete' &&
       !confirm(
@@ -306,7 +307,19 @@ export default function UsersPage() {
       fetchStats();
     } catch (err) {
       console.error('Failed to perform bulk action:', err);
-      alert(isRTL ? 'فشل في تنفيذ العملية' : 'Failed to perform action');
+      toast.error(isRTL ? 'فشل في تنفيذ العملية' : 'Failed to perform action');
+    }
+  };
+
+  const handleBulkUnlock = async () => {
+    try {
+      await Promise.all(selectedUsers.map(id => usersAdminService.unlockUser(id)));
+      setSelectedUsers([]);
+      fetchUsers();
+      fetchStats();
+    } catch (err) {
+      console.error('Failed to unlock users:', err);
+      toast.error(isRTL ? 'فشل في فتح قفل المستخدمين' : 'Failed to unlock users');
     }
   };
 
@@ -606,7 +619,7 @@ export default function UsersPage() {
                 {t.deactivate}
               </button>
               <button
-                onClick={() => handleBulkAction('unlock')}
+                onClick={handleBulkUnlock}
                 className="flex items-center gap-1 rounded px-3 py-1 text-yellow-600 hover:text-yellow-800 dark:text-yellow-400"
               >
                 <Unlock className="size-4" />

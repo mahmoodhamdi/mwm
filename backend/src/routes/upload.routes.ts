@@ -5,7 +5,7 @@
 
 import { Router } from 'express';
 import { uploadController } from '../controllers/upload.controller';
-import { authenticate, authorize, csrfValidation } from '../middlewares';
+import { authenticate, authorizeAny, csrfValidation } from '../middlewares';
 import { imageUpload } from '../utils';
 import rateLimit from 'express-rate-limit';
 
@@ -89,13 +89,14 @@ router.post(
   '/image',
   uploadLimiter,
   csrfValidation,
-  authorize([
+  authorizeAny(
     'services:update',
     'projects:update',
     'team:update',
     'blog:update',
     'settings:update',
-  ]),
+    'upload:*'
+  ),
   imageUpload.single('image'),
   uploadController.uploadImage
 );
@@ -153,13 +154,14 @@ router.post(
   '/images',
   uploadLimiter,
   csrfValidation,
-  authorize([
+  authorizeAny(
     'services:update',
     'projects:update',
     'team:update',
     'blog:update',
     'settings:update',
-  ]),
+    'upload:*'
+  ),
   imageUpload.array('images', 10),
   uploadController.uploadImages
 );
@@ -188,13 +190,14 @@ router.post(
 router.delete(
   '/image/:publicId',
   csrfValidation,
-  authorize([
+  authorizeAny(
     'services:update',
     'projects:update',
     'team:update',
     'blog:update',
     'settings:update',
-  ]),
+    'upload:*'
+  ),
   uploadController.deleteImage
 );
 

@@ -221,8 +221,8 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
       {/* Sidebar */}
       <aside
         className={`
-          fixed top-0 ${isRTL ? 'right-0' : 'left-0'} bg-card border- z-50
-          h-full w-72${isRTL ? 'l' : 'r'} border-border
+          fixed top-0 ${isRTL ? 'right-0' : 'left-0'} bg-card z-50
+          h-full w-72 ${isRTL ? 'border-l' : 'border-r'} border-border
           transition-transform duration-300 ease-in-out lg:translate-x-0
           ${isOpen ? 'translate-x-0' : isRTL ? 'translate-x-full' : '-translate-x-full'}
         `}

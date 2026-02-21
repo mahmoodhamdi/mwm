@@ -1,0 +1,282 @@
+# Dashboard API Documentation
+# توثيق واجهة برمجة لوحة التحكم
+
+tags:
+  - name: Dashboard
+    description: Admin dashboard statistics and data
+
+paths:
+  /dashboard/stats:
+    get:
+      summary: Get dashboard statistics
+      description: |
+        Returns comprehensive overview statistics for the admin dashboard.
+        Includes counts for all major content types, recent activity summary,
+        and key performance indicators.
+      tags: [Dashboard]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Dashboard statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      services:
+                        type: object
+                        properties:
+                          total:
+                            type: integer
+                            example: 12
+                          active:
+                            type: integer
+                            example: 10
+                      projects:
+                        type: object
+                        properties:
+                          total:
+                            type: integer
+                            example: 35
+                          published:
+                            type: integer
+                            example: 28
+                      team:
+                        type: object
+                        properties:
+                          total:
+                            type: integer
+                            example: 8
+                          active:
+                            type: integer
+                            example: 7
+                      blog:
+                        type: object
+                        properties:
+                          total:
+                            type: integer
+                            example: 54
+                          published:
+                            type: integer
+                            example: 42
+                      contact:
+                        type: object
+                        properties:
+                          total:
+                            type: integer
+                            example: 127
+                          unread:
+                            type: integer
+                            example: 5
+                      newsletter:
+                        type: object
+                        properties:
+                          subscribers:
+                            type: integer
+                            example: 1840
+                          active:
+                            type: integer
+                            example: 1620
+                      careers:
+                        type: object
+                        properties:
+                          openJobs:
+                            type: integer
+                            example: 4
+                          pendingApplications:
+                            type: integer
+                            example: 18
+                      users:
+                        type: object
+                        properties:
+                          total:
+                            type: integer
+                            example: 6
+                          active:
+                            type: integer
+                            example: 5
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+
+  /dashboard/activity:
+    get:
+      summary: Get recent activity for dashboard
+      description: Returns the most recent activity log entries for display on the admin dashboard
+      tags: [Dashboard]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+            maximum: 50
+          description: Number of recent activity entries to return
+      responses:
+        200:
+          description: Recent activity list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                        user:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            email:
+                              type: string
+                              format: email
+                        action:
+                          type: string
+                          enum: [create, update, delete, login, logout]
+                        resource:
+                          type: string
+                        resourceId:
+                          type: string
+                        details:
+                          type: object
+                        createdAt:
+                          type: string
+                          format: date-time
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+
+  /dashboard/charts:
+    get:
+      summary: Get charts data
+      description: |
+        Returns time-series and aggregated data for dashboard charts and graphs.
+        Includes content creation trends, contact message volume,
+        newsletter growth, and other visualizable metrics.
+      tags: [Dashboard]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: period
+          schema:
+            type: string
+            enum: [week, month, quarter, year]
+            default: month
+          description: Time period for chart data
+      responses:
+        200:
+          description: Charts data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      contentCreation:
+                        type: array
+                        description: Content creation counts over time
+                        items:
+                          type: object
+                          properties:
+                            date:
+                              type: string
+                              format: date
+                            count:
+                              type: integer
+                      contactMessages:
+                        type: array
+                        description: Contact message volume over time
+                        items:
+                          type: object
+                          properties:
+                            date:
+                              type: string
+                              format: date
+                            count:
+                              type: integer
+                      newsletterGrowth:
+                        type: array
+                        description: Newsletter subscriber growth over time
+                        items:
+                          type: object
+                          properties:
+                            date:
+                              type: string
+                              format: date
+                            total:
+                              type: integer
+                            new:
+                              type: integer
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+
+  /dashboard/quick-stats:
+    get:
+      summary: Get quick stats
+      description: |
+        Returns a compact set of key statistics intended for display in the
+        admin header or sidebar. Optimised for low latency.
+      tags: [Dashboard]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Quick stats for header display
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      unreadMessages:
+                        type: integer
+                        description: Number of unread contact messages
+                        example: 5
+                      pendingApplications:
+                        type: integer
+                        description: Number of pending job applications
+                        example: 18
+                      newSubscribers:
+                        type: integer
+                        description: New newsletter subscribers in the last 7 days
+                        example: 24
+                      unreadNotifications:
+                        type: integer
+                        description: Number of unread notifications for the current user
+                        example: 3
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'

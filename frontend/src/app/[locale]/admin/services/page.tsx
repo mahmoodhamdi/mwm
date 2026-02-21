@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocale } from 'next-intl';
-import Link from 'next/link';
+import toast from 'react-hot-toast';
 import {
   Plus,
   Trash2,
@@ -21,6 +21,9 @@ import {
   Shield,
   LineChart,
   RefreshCw,
+  X,
+  Save,
+  Loader2,
 } from 'lucide-react';
 import { DataTable, tableActions } from '@/components/admin';
 import type { Column, DataTableAction } from '@/components/admin';
@@ -28,6 +31,7 @@ import {
   servicesAdminService,
   type Service,
   type ServicesResponse,
+  type UpdateServiceData,
 } from '@/services/admin/services.service';
 
 // Icon mapping
@@ -40,6 +44,8 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   'line-chart': LineChart,
 };
 
+const ICON_OPTIONS = ['code', 'smartphone', 'palette', 'server', 'shield', 'line-chart'];
+
 export default function ServicesPage() {
   const locale = useLocale();
   const isArabic = locale === 'ar';
@@ -47,10 +53,33 @@ export default function ServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [page, _setPage] = useState(1);
+  const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
+
+  // Edit modal state
+  const [editingItem, setEditingItem] = useState<Service | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editSaving, setEditSaving] = useState(false);
+  const [editForm, setEditForm] = useState<{
+    nameAr: string;
+    nameEn: string;
+    shortDescriptionAr: string;
+    shortDescriptionEn: string;
+    icon: string;
+    isActive: boolean;
+    isFeatured: boolean;
+    order: number;
+  }>({
+    nameAr: '',
+    nameEn: '',
+    shortDescriptionAr: '',
+    shortDescriptionEn: '',
+    icon: 'code',
+    isActive: true,
+    isFeatured: false,
+    order: 0,
+  });
 
   // Fetch services
   const fetchServices = useCallback(async () => {
@@ -77,6 +106,48 @@ export default function ServicesPage() {
     fetchServices();
   }, [fetchServices]);
 
+  // Open edit modal pre-populated with service data
+  const openEditModal = (service: Service) => {
+    setEditingItem(service);
+    setEditForm({
+      nameAr: service.name.ar,
+      nameEn: service.name.en,
+      shortDescriptionAr: service.shortDescription.ar,
+      shortDescriptionEn: service.shortDescription.en,
+      icon: service.icon || 'code',
+      isActive: service.isActive,
+      isFeatured: service.isFeatured,
+      order: service.order,
+    });
+    setShowEditModal(true);
+  };
+
+  // Save edit
+  const handleSaveEdit = async () => {
+    if (!editingItem) return;
+    setEditSaving(true);
+    try {
+      const data: UpdateServiceData = {
+        name: { ar: editForm.nameAr, en: editForm.nameEn },
+        shortDescription: { ar: editForm.shortDescriptionAr, en: editForm.shortDescriptionEn },
+        icon: editForm.icon,
+        isActive: editForm.isActive,
+        isFeatured: editForm.isFeatured,
+        order: editForm.order,
+      };
+      await servicesAdminService.updateService(editingItem._id, data);
+      toast.success(isArabic ? 'تم تحديث الخدمة بنجاح' : 'Service updated successfully');
+      setShowEditModal(false);
+      setEditingItem(null);
+      fetchServices();
+    } catch (err) {
+      console.error('Failed to update service:', err);
+      toast.error(isArabic ? 'فشل في تحديث الخدمة' : 'Failed to update service');
+    } finally {
+      setEditSaving(false);
+    }
+  };
+
   // Toggle service status
   const toggleStatus = async (service: Service) => {
     try {
@@ -86,7 +157,7 @@ export default function ServicesPage() {
       fetchServices();
     } catch (err) {
       console.error('Failed to toggle status:', err);
-      alert(isArabic ? 'فشل في تغيير الحالة' : 'Failed to toggle status');
+      toast.error(isArabic ? 'فشل في تغيير الحالة' : 'Failed to toggle status');
     }
   };
 
@@ -107,7 +178,7 @@ export default function ServicesPage() {
       fetchServices();
     } catch (err) {
       console.error('Failed to delete service:', err);
-      alert(isArabic ? 'فشل في حذف الخدمة' : 'Failed to delete service');
+      toast.error(isArabic ? 'فشل في حذف الخدمة' : 'Failed to delete service');
     }
   };
 
@@ -128,7 +199,7 @@ export default function ServicesPage() {
       fetchServices();
     } catch (err) {
       console.error('Failed to bulk delete:', err);
-      alert(isArabic ? 'فشل في حذف الخدمات' : 'Failed to delete services');
+      toast.error(isArabic ? 'فشل في حذف الخدمات' : 'Failed to delete services');
     }
   };
 
@@ -141,7 +212,7 @@ export default function ServicesPage() {
       fetchServices();
     } catch (err) {
       console.error('Failed to bulk update:', err);
-      alert(isArabic ? 'فشل في تحديث الخدمات' : 'Failed to update services');
+      toast.error(isArabic ? 'فشل في تحديث الخدمات' : 'Failed to update services');
     }
   };
 
@@ -176,10 +247,10 @@ export default function ServicesPage() {
       },
     },
     {
-      id: 'title',
+      id: 'name',
       headerAr: 'الخدمة',
       headerEn: 'Service',
-      accessor: row => (isArabic ? row.title.ar : row.title.en),
+      accessor: row => (isArabic ? row.name.ar : row.name.en),
       sortable: true,
       render: (value, row) => (
         <div>
@@ -261,7 +332,7 @@ export default function ServicesPage() {
       window.open(`/${locale}/services/${service.slug}`, '_blank');
     }),
     tableActions.edit(service => {
-      window.location.href = `/${locale}/admin/services/${service._id}/edit`;
+      openEditModal(service);
     }),
     {
       id: 'toggle-status',
@@ -347,13 +418,26 @@ export default function ServicesPage() {
           >
             <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
-          <Link
-            href={`/${locale}/admin/services/new`}
+          <button
+            onClick={() => {
+              setEditingItem(null);
+              setEditForm({
+                nameAr: '',
+                nameEn: '',
+                shortDescriptionAr: '',
+                shortDescriptionEn: '',
+                icon: 'code',
+                isActive: true,
+                isFeatured: false,
+                order: services.length + 1,
+              });
+              setShowEditModal(true);
+            }}
             className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 transition-colors"
           >
             <Plus className="size-5" />
             <span>{isArabic ? 'خدمة جديدة' : 'New Service'}</span>
-          </Link>
+          </button>
         </div>
       </div>
 
@@ -390,6 +474,7 @@ export default function ServicesPage() {
         pagination={{
           pageSize: 10,
           pageSizeOptions: [5, 10, 20],
+          onPageChange: (newPage: number) => setPage(newPage),
         }}
         bulkActions={bulkActions}
         emptyStateAr="لا توجد خدمات"
@@ -400,6 +485,169 @@ export default function ServicesPage() {
       <div className="text-muted-foreground text-center text-sm">
         {isArabic ? `صفحة ${page} من ${totalPages}` : `Page ${page} of ${totalPages}`}
       </div>
+
+      {/* Edit / Create Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-background w-full max-w-lg rounded-lg shadow-xl">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b px-6 py-4">
+              <h2 className="text-xl font-bold">
+                {editingItem
+                  ? isArabic
+                    ? 'تعديل الخدمة'
+                    : 'Edit Service'
+                  : isArabic
+                    ? 'خدمة جديدة'
+                    : 'New Service'}
+              </h2>
+              <button
+                onClick={() => {
+                  setShowEditModal(false);
+                  setEditingItem(null);
+                }}
+                className="hover:bg-muted rounded-lg p-1"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="space-y-4 p-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-muted-foreground mb-1 block text-sm font-medium">
+                    {isArabic ? 'الاسم (عربي)' : 'Name (Arabic)'} *
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.nameAr}
+                    onChange={e => setEditForm(f => ({ ...f, nameAr: e.target.value }))}
+                    className="bg-background w-full rounded-lg border px-3 py-2"
+                    dir="rtl"
+                  />
+                </div>
+                <div>
+                  <label className="text-muted-foreground mb-1 block text-sm font-medium">
+                    {isArabic ? 'الاسم (إنجليزي)' : 'Name (English)'} *
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.nameEn}
+                    onChange={e => setEditForm(f => ({ ...f, nameEn: e.target.value }))}
+                    className="bg-background w-full rounded-lg border px-3 py-2"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-muted-foreground mb-1 block text-sm font-medium">
+                    {isArabic ? 'الوصف المختصر (عربي)' : 'Short Description (Arabic)'}
+                  </label>
+                  <textarea
+                    value={editForm.shortDescriptionAr}
+                    onChange={e => setEditForm(f => ({ ...f, shortDescriptionAr: e.target.value }))}
+                    className="bg-background w-full rounded-lg border px-3 py-2"
+                    rows={3}
+                    dir="rtl"
+                  />
+                </div>
+                <div>
+                  <label className="text-muted-foreground mb-1 block text-sm font-medium">
+                    {isArabic ? 'الوصف المختصر (إنجليزي)' : 'Short Description (English)'}
+                  </label>
+                  <textarea
+                    value={editForm.shortDescriptionEn}
+                    onChange={e => setEditForm(f => ({ ...f, shortDescriptionEn: e.target.value }))}
+                    className="bg-background w-full rounded-lg border px-3 py-2"
+                    rows={3}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-muted-foreground mb-1 block text-sm font-medium">
+                    {isArabic ? 'الأيقونة' : 'Icon'}
+                  </label>
+                  <select
+                    value={editForm.icon}
+                    onChange={e => setEditForm(f => ({ ...f, icon: e.target.value }))}
+                    className="bg-background w-full rounded-lg border px-3 py-2"
+                  >
+                    {ICON_OPTIONS.map(icon => (
+                      <option key={icon} value={icon}>
+                        {icon}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-muted-foreground mb-1 block text-sm font-medium">
+                    {isArabic ? 'الترتيب' : 'Order'}
+                  </label>
+                  <input
+                    type="number"
+                    value={editForm.order}
+                    onChange={e =>
+                      setEditForm(f => ({ ...f, order: parseInt(e.target.value) || 0 }))
+                    }
+                    className="bg-background w-full rounded-lg border px-3 py-2"
+                    min={0}
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-6">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={editForm.isActive}
+                    onChange={e => setEditForm(f => ({ ...f, isActive: e.target.checked }))}
+                    className="rounded"
+                  />
+                  <span className="text-sm font-medium">{isArabic ? 'مفعّل' : 'Active'}</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={editForm.isFeatured}
+                    onChange={e => setEditForm(f => ({ ...f, isFeatured: e.target.checked }))}
+                    className="rounded"
+                  />
+                  <span className="text-sm font-medium">{isArabic ? 'مميز' : 'Featured'}</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex justify-end gap-2 border-t px-6 py-4">
+              <button
+                onClick={() => {
+                  setShowEditModal(false);
+                  setEditingItem(null);
+                }}
+                className="hover:bg-muted rounded-lg border px-4 py-2"
+              >
+                {isArabic ? 'إلغاء' : 'Cancel'}
+              </button>
+              <button
+                onClick={handleSaveEdit}
+                disabled={editSaving || !editForm.nameAr || !editForm.nameEn}
+                className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center gap-2 rounded-lg px-4 py-2 disabled:opacity-50"
+              >
+                {editSaving ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Save className="size-4" />
+                )}
+                {isArabic ? 'حفظ' : 'Save'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

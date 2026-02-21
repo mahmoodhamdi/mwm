@@ -7,6 +7,7 @@ import { Router } from 'express';
 import { menuController } from '../controllers';
 import { authenticate, authorize } from '../middlewares/auth';
 import { validate, idParamsSchema, idWithItemIdParamsSchema } from '../middlewares/validate';
+import { csrfValidation } from '../middlewares/csrf';
 
 const router = Router();
 
@@ -150,7 +151,13 @@ router.get(
  *       401:
  *         description: Unauthorized
  */
-router.post('/', authenticate, authorize('settings:update'), menuController.createMenu);
+router.post(
+  '/',
+  authenticate,
+  csrfValidation,
+  authorize('settings:update'),
+  menuController.createMenu
+);
 
 /**
  * @swagger
@@ -189,6 +196,7 @@ router.post('/', authenticate, authorize('settings:update'), menuController.crea
 router.put(
   '/:id',
   authenticate,
+  csrfValidation,
   authorize('settings:update'),
   validate({ params: idParamsSchema }),
   menuController.updateMenu
@@ -217,6 +225,7 @@ router.put(
 router.delete(
   '/:id',
   authenticate,
+  csrfValidation,
   authorize('settings:delete'),
   validate({ params: idParamsSchema }),
   menuController.deleteMenu
@@ -274,6 +283,7 @@ router.delete(
 router.post(
   '/:id/items',
   authenticate,
+  csrfValidation,
   authorize('settings:update'),
   validate({ params: idParamsSchema }),
   menuController.addMenuItem
@@ -319,6 +329,7 @@ router.post(
 router.put(
   '/:id/items/:itemId',
   authenticate,
+  csrfValidation,
   authorize('settings:update'),
   validate({ params: idWithItemIdParamsSchema }),
   menuController.updateMenuItem
@@ -352,6 +363,7 @@ router.put(
 router.delete(
   '/:id/items/:itemId',
   authenticate,
+  csrfValidation,
   authorize('settings:update'),
   validate({ params: idWithItemIdParamsSchema }),
   menuController.removeMenuItem
@@ -398,6 +410,7 @@ router.delete(
 router.post(
   '/:id/reorder',
   authenticate,
+  csrfValidation,
   authorize('settings:update'),
   validate({ params: idParamsSchema }),
   menuController.reorderMenuItems

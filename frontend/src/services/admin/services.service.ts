@@ -53,7 +53,7 @@ export interface ServiceCategory {
 
 export interface Service {
   _id: string;
-  title: BilingualText;
+  name: BilingualText;
   slug: string;
   shortDescription: BilingualText;
   description: BilingualText;
@@ -103,7 +103,7 @@ export interface CategoriesResponse {
 }
 
 export interface CreateServiceData {
-  title: BilingualText;
+  name: BilingualText;
   shortDescription: BilingualText;
   description: BilingualText;
   category: string;

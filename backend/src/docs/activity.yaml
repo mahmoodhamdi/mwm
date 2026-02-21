@@ -1,0 +1,386 @@
+# Activity Log API Documentation
+# توثيق واجهة برمجة سجل النشاط
+
+tags:
+  - name: Activity
+    description: Activity log tracking for admin users
+
+paths:
+  /activity/me:
+    get:
+      summary: Get my activity
+      description: Returns paginated activity logs for the currently authenticated user
+      tags: [Activity]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Page number
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+          description: Items per page
+      responses:
+        200:
+          description: User's own activity logs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ActivityLog'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+
+  /activity:
+    get:
+      summary: Get all activity logs
+      description: Returns paginated activity logs for all users (Admin only)
+      tags: [Activity]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+        - in: query
+          name: action
+          schema:
+            type: string
+            enum: [create, update, delete, login, logout]
+          description: Filter by action type
+        - in: query
+          name: resource
+          schema:
+            type: string
+          description: Filter by resource type (e.g. services, blog, users)
+        - in: query
+          name: startDate
+          schema:
+            type: string
+            format: date
+          description: Filter logs from this date (inclusive)
+        - in: query
+          name: endDate
+          schema:
+            type: string
+            format: date
+          description: Filter logs up to this date (inclusive)
+      responses:
+        200:
+          description: Paginated activity logs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ActivityLog'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+
+  /activity/recent:
+    get:
+      summary: Get recent activity
+      description: Returns the most recent activity logs across all users (Admin only)
+      tags: [Activity]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+            maximum: 50
+          description: Number of recent logs to return
+      responses:
+        200:
+          description: Recent activity logs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ActivityLog'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+
+  /activity/stats:
+    get:
+      summary: Get activity statistics
+      description: Returns aggregated statistics about activity logs (Admin only)
+      tags: [Activity]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Activity statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                        description: Total number of activity log entries
+                        example: 1250
+                      byAction:
+                        type: object
+                        description: Count of logs grouped by action type
+                        properties:
+                          create:
+                            type: integer
+                            example: 320
+                          update:
+                            type: integer
+                            example: 540
+                          delete:
+                            type: integer
+                            example: 90
+                          login:
+                            type: integer
+                            example: 250
+                          logout:
+                            type: integer
+                            example: 50
+                      byResource:
+                        type: object
+                        description: Count of logs grouped by resource type
+                        additionalProperties:
+                          type: integer
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+
+  /activity/user/{userId}:
+    get:
+      summary: Get activity by user
+      description: Returns activity logs for a specific user (Admin only)
+      tags: [Activity]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+          description: The ID of the user whose activity to retrieve
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+        - in: query
+          name: action
+          schema:
+            type: string
+            enum: [create, update, delete, login, logout]
+      responses:
+        200:
+          description: Activity logs for the specified user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ActivityLog'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+  /activity/resource/{resource}:
+    get:
+      summary: Get activity by resource
+      description: Returns activity logs filtered by a specific resource type (Admin only)
+      tags: [Activity]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: resource
+          required: true
+          schema:
+            type: string
+          description: Resource type (e.g. services, projects, blog, users, team)
+          example: blog
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+        - in: query
+          name: action
+          schema:
+            type: string
+            enum: [create, update, delete, login, logout]
+      responses:
+        200:
+          description: Activity logs for the specified resource type
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ActivityLog'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+
+  /activity/old:
+    delete:
+      summary: Delete old activity logs
+      description: |
+        Permanently deletes activity logs older than a specified threshold.
+        Restricted to Super Admin only.
+      tags: [Activity]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: days
+          schema:
+            type: integer
+            default: 90
+          description: Delete logs older than this many days
+      responses:
+        200:
+          description: Old activity logs deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      deletedCount:
+                        type: integer
+                        description: Number of log entries deleted
+                        example: 342
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+
+components:
+  schemas:
+    ActivityLog:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 64f1a2b3c4d5e6f7a8b9c0d1
+        user:
+          type: object
+          properties:
+            _id:
+              type: string
+            name:
+              type: string
+            email:
+              type: string
+              format: email
+        action:
+          type: string
+          enum: [create, update, delete, login, logout]
+          example: update
+        resource:
+          type: string
+          description: The type of resource that was acted upon
+          example: blog
+        resourceId:
+          type: string
+          description: The ID of the specific resource instance
+          example: 64f1a2b3c4d5e6f7a8b9c0d2
+        details:
+          type: object
+          description: Additional details about the action
+          additionalProperties: true
+        ipAddress:
+          type: string
+          example: 192.168.1.1
+        userAgent:
+          type: string
+        createdAt:
+          type: string
+          format: date-time

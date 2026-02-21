@@ -179,7 +179,7 @@ router.get('/verify/:token', newsletterController.verifyEmail);
 router.get(
   '/subscribers',
   authenticate,
-  authorize('admin', 'super_admin'),
+  authorize('newsletter:read'),
   validate({ query: querySubscribersSchema }),
   newsletterController.getSubscribers
 );
@@ -199,7 +199,7 @@ router.get(
 router.get(
   '/subscribers/stats',
   authenticate,
-  authorize('admin', 'super_admin'),
+  authorize('newsletter:read'),
   newsletterController.getSubscriberStats
 );
 
@@ -218,7 +218,7 @@ router.get(
 router.get(
   '/subscribers/tags',
   authenticate,
-  authorize('admin', 'super_admin'),
+  authorize('newsletter:read'),
   newsletterController.getSubscriberTags
 );
 
@@ -265,7 +265,8 @@ router.get(
 router.post(
   '/subscribers/import',
   authenticate,
-  authorize('admin', 'super_admin'),
+  csrfValidation,
+  authorize('newsletter:create'),
   newsletterController.importSubscribers
 );
 
@@ -293,7 +294,7 @@ router.post(
 router.get(
   '/subscribers/export',
   authenticate,
-  authorize('admin', 'super_admin'),
+  authorize('newsletter:read'),
   newsletterController.exportSubscribers
 );
 
@@ -333,7 +334,8 @@ router.get(
 router.post(
   '/subscribers/bulk',
   authenticate,
-  authorize('admin', 'super_admin'),
+  csrfValidation,
+  authorize('newsletter:update'),
   validate({ body: bulkSubscriberActionSchema }),
   newsletterController.bulkSubscriberAction
 );
@@ -372,7 +374,8 @@ router.post(
 router.post(
   '/subscribers',
   authenticate,
-  authorize('admin', 'super_admin'),
+  csrfValidation,
+  authorize('newsletter:create'),
   validate({ body: createSubscriberSchema }),
   newsletterController.createSubscriber
 );
@@ -398,7 +401,8 @@ router.post(
 router.put(
   '/subscribers/:id',
   authenticate,
-  authorize('admin', 'super_admin'),
+  csrfValidation,
+  authorize('newsletter:update'),
   validate({ params: idParamsSchema, body: updateSubscriberSchema }),
   newsletterController.updateSubscriber
 );
@@ -424,7 +428,8 @@ router.put(
 router.delete(
   '/subscribers/:id',
   authenticate,
-  authorize('admin', 'super_admin'),
+  csrfValidation,
+  authorize('newsletter:delete'),
   validate({ params: idParamsSchema }),
   newsletterController.deleteSubscriber
 );
@@ -464,7 +469,7 @@ router.delete(
 router.get(
   '/campaigns',
   authenticate,
-  authorize('admin', 'super_admin'),
+  authorize('newsletter:read'),
   validate({ query: queryCampaignsSchema }),
   newsletterController.getCampaigns
 );
@@ -484,7 +489,7 @@ router.get(
 router.get(
   '/campaigns/stats',
   authenticate,
-  authorize('admin', 'super_admin'),
+  authorize('newsletter:read'),
   newsletterController.getCampaignStats
 );
 
@@ -530,7 +535,8 @@ router.get(
 router.post(
   '/campaigns',
   authenticate,
-  authorize('admin', 'super_admin'),
+  csrfValidation,
+  authorize('newsletter:create'),
   validate({ body: createCampaignSchema }),
   newsletterController.createCampaign
 );
@@ -556,7 +562,7 @@ router.post(
 router.get(
   '/campaigns/:id',
   authenticate,
-  authorize('admin', 'super_admin'),
+  authorize('newsletter:read'),
   validate({ params: idParamsSchema }),
   newsletterController.getCampaign
 );
@@ -582,7 +588,8 @@ router.get(
 router.put(
   '/campaigns/:id',
   authenticate,
-  authorize('admin', 'super_admin'),
+  csrfValidation,
+  authorize('newsletter:update'),
   validate({ params: idParamsSchema, body: updateCampaignSchema }),
   newsletterController.updateCampaign
 );
@@ -608,7 +615,8 @@ router.put(
 router.delete(
   '/campaigns/:id',
   authenticate,
-  authorize('admin', 'super_admin'),
+  csrfValidation,
+  authorize('newsletter:delete'),
   validate({ params: idParamsSchema }),
   newsletterController.deleteCampaign
 );
@@ -634,7 +642,8 @@ router.delete(
 router.post(
   '/campaigns/:id/send',
   authenticate,
-  authorize('admin', 'super_admin'),
+  csrfValidation,
+  authorize('newsletter:update'),
   validate({ params: idParamsSchema }),
   newsletterController.sendCampaign
 );
@@ -672,7 +681,8 @@ router.post(
 router.post(
   '/campaigns/:id/schedule',
   authenticate,
-  authorize('admin', 'super_admin'),
+  csrfValidation,
+  authorize('newsletter:update'),
   validate({ params: idParamsSchema, body: scheduleCampaignSchema }),
   newsletterController.scheduleCampaign
 );
@@ -698,7 +708,8 @@ router.post(
 router.post(
   '/campaigns/:id/cancel',
   authenticate,
-  authorize('admin', 'super_admin'),
+  csrfValidation,
+  authorize('newsletter:update'),
   validate({ params: idParamsSchema }),
   newsletterController.cancelCampaign
 );
@@ -724,7 +735,8 @@ router.post(
 router.post(
   '/campaigns/:id/duplicate',
   authenticate,
-  authorize('admin', 'super_admin'),
+  csrfValidation,
+  authorize('newsletter:create'),
   validate({ params: idParamsSchema }),
   newsletterController.duplicateCampaign
 );

@@ -25,7 +25,7 @@ let io: Server;
 export function initializeSocket(httpServer: HTTPServer): Server {
   io = new Server(httpServer, {
     cors: {
-      origin: env.cors.origin === '*' ? true : env.cors.origin?.split(','),
+      origin: env.corsOrigin === '*' ? true : env.corsOrigin.split(','),
       credentials: true,
       methods: ['GET', 'POST'],
     },

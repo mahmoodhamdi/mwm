@@ -74,6 +74,39 @@ export const getCategoryBySlug = asyncHandler(async (req: Request, res: Response
 });
 
 /**
+ * Get projects by category slug (Public)
+ * جلب المشاريع حسب رابط الفئة المختصر (عام)
+ */
+export const getProjectsByCategorySlug = asyncHandler(async (req: Request, res: Response) => {
+  const { slug } = req.params;
+  const { page = 1, limit = 10 } = req.query;
+
+  const category = await ProjectCategory.findOne({ slug, isActive: true });
+  if (!category) {
+    throw Errors.NOT_FOUND('Category | الفئة');
+  }
+
+  const query = { category: category._id, status: 'published' };
+  const total = await Project.countDocuments(query);
+  const projects = await Project.find(query)
+    .populate('category', 'name slug')
+    .sort({ order: 1 })
+    .skip((Number(page) - 1) * Number(limit))
+    .limit(Number(limit));
+
+  return successResponse(res, {
+    projects,
+    category,
+    pagination: {
+      page: Number(page),
+      limit: Number(limit),
+      total,
+      pages: Math.ceil(total / Number(limit)),
+    },
+  });
+});
+
+/**
  * Get all categories (Admin)
  * جلب جميع الفئات (للمسؤول)
  */
@@ -652,6 +685,7 @@ export const projectController = {
   // Categories
   getCategories,
   getCategoryBySlug,
+  getProjectsByCategorySlug,
   getAllCategories,
   createCategory,
   updateCategory,

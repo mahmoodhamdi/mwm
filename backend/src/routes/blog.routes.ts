@@ -622,6 +622,40 @@ router.get(
 
 /**
  * @swagger
+ * /blog/admin/categories/{id}:
+ *   get:
+ *     summary: Get category by ID (Admin)
+ *     description: Retrieves a specific blog category by its MongoDB ID (Admin only)
+ *     tags: [Blog Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Category ID
+ *     responses:
+ *       200:
+ *         description: Category details
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - Insufficient permissions
+ *       404:
+ *         description: Category not found
+ */
+router.get(
+  '/admin/categories/:id',
+  authenticate,
+  authorize('blog:read'),
+  validate({ params: idParamsSchema }),
+  blogController.getCategoryById
+);
+
+/**
+ * @swagger
  * /blog/admin/categories:
  *   post:
  *     summary: Create category

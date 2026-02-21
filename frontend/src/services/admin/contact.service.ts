@@ -86,7 +86,7 @@ export interface ReplyData {
 
 export interface BulkActionData {
   ids: string[];
-  action: 'archive' | 'spam' | 'delete' | 'read' | 'unread' | 'star' | 'unstar';
+  action: 'delete' | 'archive' | 'markRead' | 'markUnread' | 'markSpam';
 }
 
 // Admin Service Functions

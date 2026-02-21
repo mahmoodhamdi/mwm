@@ -116,36 +116,72 @@ export default function CareersPage() {
 
   // Status configs
   const jobStatusConfig: Record<JobStatus, { labelAr: string; labelEn: string; color: string }> = {
-    draft: { labelAr: 'مسودة', labelEn: 'Draft', color: 'bg-gray-100 text-gray-800' },
-    open: { labelAr: 'مفتوح', labelEn: 'Open', color: 'bg-green-100 text-green-800' },
-    closed: { labelAr: 'مغلق', labelEn: 'Closed', color: 'bg-red-100 text-red-800' },
-    filled: { labelAr: 'تم التعيين', labelEn: 'Filled', color: 'bg-blue-100 text-blue-800' },
+    draft: {
+      labelAr: 'مسودة',
+      labelEn: 'Draft',
+      color: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
+    },
+    open: {
+      labelAr: 'مفتوح',
+      labelEn: 'Open',
+      color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+    },
+    closed: {
+      labelAr: 'مغلق',
+      labelEn: 'Closed',
+      color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
+    },
+    filled: {
+      labelAr: 'تم التعيين',
+      labelEn: 'Filled',
+      color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+    },
   };
 
   const applicationStatusConfig: Record<
     ApplicationStatus,
     { labelAr: string; labelEn: string; color: string }
   > = {
-    pending: { labelAr: 'معلق', labelEn: 'Pending', color: 'bg-gray-100 text-gray-800' },
+    pending: {
+      labelAr: 'معلق',
+      labelEn: 'Pending',
+      color: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
+    },
     reviewing: {
       labelAr: 'قيد المراجعة',
       labelEn: 'Reviewing',
-      color: 'bg-yellow-100 text-yellow-800',
+      color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
     },
     shortlisted: {
       labelAr: 'قائمة قصيرة',
       labelEn: 'Shortlisted',
-      color: 'bg-blue-100 text-blue-800',
+      color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
     },
     interviewed: {
       labelAr: 'تمت المقابلة',
       labelEn: 'Interviewed',
-      color: 'bg-purple-100 text-purple-800',
+      color: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
     },
-    offered: { labelAr: 'تم العرض', labelEn: 'Offered', color: 'bg-indigo-100 text-indigo-800' },
-    hired: { labelAr: 'تم التوظيف', labelEn: 'Hired', color: 'bg-green-100 text-green-800' },
-    rejected: { labelAr: 'مرفوض', labelEn: 'Rejected', color: 'bg-red-100 text-red-800' },
-    withdrawn: { labelAr: 'منسحب', labelEn: 'Withdrawn', color: 'bg-gray-100 text-gray-800' },
+    offered: {
+      labelAr: 'تم العرض',
+      labelEn: 'Offered',
+      color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400',
+    },
+    hired: {
+      labelAr: 'تم التوظيف',
+      labelEn: 'Hired',
+      color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+    },
+    rejected: {
+      labelAr: 'مرفوض',
+      labelEn: 'Rejected',
+      color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
+    },
+    withdrawn: {
+      labelAr: 'منسحب',
+      labelEn: 'Withdrawn',
+      color: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
+    },
   };
 
   const jobTypeConfig: Record<JobType, { labelAr: string; labelEn: string }> = {
@@ -490,20 +526,28 @@ export default function CareersPage() {
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        <div className="rounded-lg border bg-white p-4">
-          <p className="text-sm text-gray-500">{isRTL ? 'إجمالي الوظائف' : 'Total Jobs'}</p>
-          <p className="text-2xl font-bold">{jobStats.total}</p>
+        <div className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {isRTL ? 'إجمالي الوظائف' : 'Total Jobs'}
+          </p>
+          <p className="text-2xl font-bold dark:text-white">{jobStats.total}</p>
         </div>
-        <div className="rounded-lg border bg-white p-4">
-          <p className="text-sm text-gray-500">{isRTL ? 'وظائف مفتوحة' : 'Open Jobs'}</p>
+        <div className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {isRTL ? 'وظائف مفتوحة' : 'Open Jobs'}
+          </p>
           <p className="text-2xl font-bold text-green-600">{jobStats.open}</p>
         </div>
-        <div className="rounded-lg border bg-white p-4">
-          <p className="text-sm text-gray-500">{isRTL ? 'وظائف مغلقة' : 'Closed Jobs'}</p>
+        <div className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {isRTL ? 'وظائف مغلقة' : 'Closed Jobs'}
+          </p>
           <p className="text-2xl font-bold text-red-600">{jobStats.closed}</p>
         </div>
-        <div className="rounded-lg border bg-white p-4">
-          <p className="text-sm text-gray-500">{isRTL ? 'إجمالي الطلبات' : 'Total Applications'}</p>
+        <div className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {isRTL ? 'إجمالي الطلبات' : 'Total Applications'}
+          </p>
           <p className="text-2xl font-bold text-blue-600">{jobStats.totalApplications}</p>
         </div>
       </div>
@@ -511,19 +555,19 @@ export default function CareersPage() {
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 size-5 -translate-y-1/2 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 size-5 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
           <input
             type="text"
             placeholder={isRTL ? 'بحث في الوظائف...' : 'Search jobs...'}
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border py-2 pl-10 pr-4 focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-10 pr-4 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500"
           />
         </div>
         <select
           value={statusFilter}
           onChange={e => setStatusFilter(e.target.value as JobStatus | 'all')}
-          className="rounded-lg border px-4 py-2 focus:ring-2 focus:ring-blue-500"
+          className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
         >
           <option value="all">{isRTL ? 'كل الحالات' : 'All Status'}</option>
           {Object.entries(jobStatusConfig).map(([key, config]) => (
@@ -545,7 +589,7 @@ export default function CareersPage() {
         </button>
         <button
           onClick={() => fetchJobs()}
-          className="rounded-lg border p-2 hover:bg-gray-50"
+          className="rounded-lg border border-gray-200 p-2 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700"
           title={isRTL ? 'تحديث' : 'Refresh'}
         >
           <RefreshCw className={`size-5 ${loading ? 'animate-spin' : ''}`} />
@@ -554,8 +598,8 @@ export default function CareersPage() {
 
       {/* Bulk Actions */}
       {selectedJobs.length > 0 && (
-        <div className="flex items-center gap-4 rounded-lg bg-blue-50 p-4">
-          <span className="text-sm text-blue-800">
+        <div className="flex items-center gap-4 rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
+          <span className="text-sm text-blue-800 dark:text-blue-300">
             {isRTL
               ? `تم اختيار ${selectedJobs.length} وظيفة`
               : `${selectedJobs.length} jobs selected`}
@@ -585,7 +629,7 @@ export default function CareersPage() {
 
       {/* Error message */}
       {error && (
-        <div className="rounded-lg bg-red-50 p-4 text-red-600">
+        <div className="rounded-lg bg-red-50 p-4 text-red-600 dark:bg-red-900/20 dark:text-red-400">
           {error}
           <button onClick={() => setError(null)} className="float-right">
             <X className="size-4" />
@@ -601,9 +645,9 @@ export default function CareersPage() {
       ) : (
         <>
           {/* Jobs Table */}
-          <div className="overflow-hidden rounded-lg border bg-white">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+          <div className="overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-900">
                 <tr>
                   <th className="w-12 px-4 py-3">
                     <input
@@ -613,27 +657,27 @@ export default function CareersPage() {
                       className="rounded"
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
                     {isRTL ? 'الوظيفة' : 'Job'}
                   </th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
                     {isRTL ? 'القسم' : 'Department'}
                   </th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
                     {isRTL ? 'النوع' : 'Type'}
                   </th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
                     {isRTL ? 'الحالة' : 'Status'}
                   </th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
                     {isRTL ? 'الطلبات' : 'Applications'}
                   </th>
                   <th className="w-24 px-4 py-3"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {jobs.map(job => (
-                  <tr key={job._id} className="hover:bg-gray-50">
+                  <tr key={job._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                     <td className="px-4 py-3">
                       <input
                         type="checkbox"
@@ -644,16 +688,20 @@ export default function CareersPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div>
-                        <p className="font-medium">{isRTL ? job.title.ar : job.title.en}</p>
-                        <div className="mt-1 flex items-center gap-2 text-sm text-gray-500">
+                        <p className="font-medium text-gray-900 dark:text-white">
+                          {isRTL ? job.title.ar : job.title.en}
+                        </p>
+                        <div className="mt-1 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                           <MapPin className="size-3" />
                           <span>{isRTL ? job.location.ar : job.location.en}</span>
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-sm">{getDepartmentName(job.department)}</td>
+                    <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-200">
+                      {getDepartmentName(job.department)}
+                    </td>
                     <td className="px-4 py-3">
-                      <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-sm">
+                      <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-sm text-gray-800 dark:bg-gray-700 dark:text-gray-200">
                         {isRTL ? jobTypeConfig[job.type].labelAr : jobTypeConfig[job.type].labelEn}
                       </span>
                     </td>
@@ -667,8 +715,8 @@ export default function CareersPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <span className="flex items-center gap-1 text-sm">
-                        <Users className="size-4 text-gray-400" />
+                      <span className="flex items-center gap-1 text-sm text-gray-900 dark:text-gray-200">
+                        <Users className="size-4 text-gray-400 dark:text-gray-500" />
                         {job.applicationsCount}
                       </span>
                     </td>
@@ -676,14 +724,14 @@ export default function CareersPage() {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleEditJob(job)}
-                          className="rounded p-1 hover:bg-gray-100"
+                          className="rounded p-1 hover:bg-gray-100 dark:hover:bg-gray-700"
                           title={isRTL ? 'تعديل' : 'Edit'}
                         >
-                          <Edit className="size-4 text-gray-500" />
+                          <Edit className="size-4 text-gray-500 dark:text-gray-400" />
                         </button>
                         <button
                           onClick={() => handleDeleteJob(job._id)}
-                          className="rounded p-1 hover:bg-gray-100"
+                          className="rounded p-1 hover:bg-gray-100 dark:hover:bg-gray-700"
                           title={isRTL ? 'حذف' : 'Delete'}
                           disabled={actionLoading}
                         >
@@ -696,7 +744,7 @@ export default function CareersPage() {
               </tbody>
             </table>
             {jobs.length === 0 && (
-              <div className="p-8 text-center text-gray-500">
+              <div className="p-8 text-center text-gray-500 dark:text-gray-400">
                 {isRTL ? 'لا توجد وظائف' : 'No jobs found'}
               </div>
             )}
@@ -708,11 +756,11 @@ export default function CareersPage() {
               <button
                 onClick={() => setJobsPage(p => Math.max(1, p - 1))}
                 disabled={jobsPage === 1}
-                className="rounded-lg border px-4 py-2 hover:bg-gray-50 disabled:opacity-50"
+                className="rounded-lg border border-gray-200 px-4 py-2 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:hover:bg-gray-700"
               >
                 {isRTL ? 'السابق' : 'Previous'}
               </button>
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-gray-500 dark:text-gray-400">
                 {isRTL
                   ? `صفحة ${jobsPage} من ${jobsTotalPages}`
                   : `Page ${jobsPage} of ${jobsTotalPages}`}
@@ -720,7 +768,7 @@ export default function CareersPage() {
               <button
                 onClick={() => setJobsPage(p => Math.min(jobsTotalPages, p + 1))}
                 disabled={jobsPage === jobsTotalPages}
-                className="rounded-lg border px-4 py-2 hover:bg-gray-50 disabled:opacity-50"
+                className="rounded-lg border border-gray-200 px-4 py-2 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:hover:bg-gray-700"
               >
                 {isRTL ? 'التالي' : 'Next'}
               </button>
@@ -739,7 +787,7 @@ export default function CareersPage() {
         <select
           value={applicationStatusFilter}
           onChange={e => setApplicationStatusFilter(e.target.value as ApplicationStatus | 'all')}
-          className="rounded-lg border px-4 py-2 focus:ring-2 focus:ring-blue-500"
+          className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
         >
           <option value="all">{isRTL ? 'كل الحالات' : 'All Status'}</option>
           {Object.entries(applicationStatusConfig).map(([key, config]) => (
@@ -750,7 +798,7 @@ export default function CareersPage() {
         </select>
         <button
           onClick={() => fetchApplications()}
-          className="rounded-lg border p-2 hover:bg-gray-50"
+          className="rounded-lg border border-gray-200 p-2 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700"
           title={isRTL ? 'تحديث' : 'Refresh'}
         >
           <RefreshCw className={`size-5 ${loading ? 'animate-spin' : ''}`} />
@@ -759,8 +807,8 @@ export default function CareersPage() {
 
       {/* Bulk Actions */}
       {selectedApplications.length > 0 && (
-        <div className="flex flex-wrap items-center gap-4 rounded-lg bg-blue-50 p-4">
-          <span className="text-sm text-blue-800">
+        <div className="flex flex-wrap items-center gap-4 rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
+          <span className="text-sm text-blue-800 dark:text-blue-300">
             {isRTL
               ? `تم اختيار ${selectedApplications.length} طلب`
               : `${selectedApplications.length} applications selected`}
@@ -796,9 +844,9 @@ export default function CareersPage() {
       ) : (
         <>
           {/* Applications Table */}
-          <div className="overflow-hidden rounded-lg border bg-white">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+          <div className="overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-900">
                 <tr>
                   <th className="w-12 px-4 py-3">
                     <input
@@ -811,27 +859,27 @@ export default function CareersPage() {
                       className="rounded"
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
                     {isRTL ? 'المتقدم' : 'Applicant'}
                   </th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
                     {isRTL ? 'الوظيفة' : 'Job'}
                   </th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
                     {isRTL ? 'الحالة' : 'Status'}
                   </th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
                     {isRTL ? 'التقييم' : 'Rating'}
                   </th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
                     {isRTL ? 'التاريخ' : 'Date'}
                   </th>
                   <th className="w-24 px-4 py-3"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {applications.map(app => (
-                  <tr key={app._id} className="hover:bg-gray-50">
+                  <tr key={app._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                     <td className="px-4 py-3">
                       <input
                         type="checkbox"
@@ -842,13 +890,15 @@ export default function CareersPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div>
-                        <p className="font-medium">
+                        <p className="font-medium text-gray-900 dark:text-white">
                           {app.firstName} {app.lastName}
                         </p>
-                        <p className="text-sm text-gray-500">{app.email}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">{app.email}</p>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-sm">{getJobTitle(app.job)}</td>
+                    <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-200">
+                      {getJobTitle(app.job)}
+                    </td>
                     <td className="px-4 py-3">
                       <span
                         className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-sm ${applicationStatusConfig[app.status].color}`}
@@ -863,26 +913,26 @@ export default function CareersPage() {
                         {[1, 2, 3, 4, 5].map(star => (
                           <Star
                             key={star}
-                            className={`size-4 ${app.rating && star <= app.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                            className={`size-4 ${app.rating && star <= app.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 dark:text-gray-600'}`}
                           />
                         ))}
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-500">
+                    <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
                       {new Date(app.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleViewApplication(app)}
-                          className="rounded p-1 hover:bg-gray-100"
+                          className="rounded p-1 hover:bg-gray-100 dark:hover:bg-gray-700"
                           title={isRTL ? 'عرض' : 'View'}
                         >
-                          <Eye className="size-4 text-gray-500" />
+                          <Eye className="size-4 text-gray-500 dark:text-gray-400" />
                         </button>
                         <button
                           onClick={() => handleDeleteApplication(app._id)}
-                          className="rounded p-1 hover:bg-gray-100"
+                          className="rounded p-1 hover:bg-gray-100 dark:hover:bg-gray-700"
                           title={isRTL ? 'حذف' : 'Delete'}
                           disabled={actionLoading}
                         >
@@ -895,7 +945,7 @@ export default function CareersPage() {
               </tbody>
             </table>
             {applications.length === 0 && (
-              <div className="p-8 text-center text-gray-500">
+              <div className="p-8 text-center text-gray-500 dark:text-gray-400">
                 {isRTL ? 'لا توجد طلبات' : 'No applications found'}
               </div>
             )}
@@ -907,11 +957,11 @@ export default function CareersPage() {
               <button
                 onClick={() => setApplicationsPage(p => Math.max(1, p - 1))}
                 disabled={applicationsPage === 1}
-                className="rounded-lg border px-4 py-2 hover:bg-gray-50 disabled:opacity-50"
+                className="rounded-lg border border-gray-200 px-4 py-2 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:hover:bg-gray-700"
               >
                 {isRTL ? 'السابق' : 'Previous'}
               </button>
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-gray-500 dark:text-gray-400">
                 {isRTL
                   ? `صفحة ${applicationsPage} من ${applicationsTotalPages}`
                   : `Page ${applicationsPage} of ${applicationsTotalPages}`}
@@ -919,7 +969,7 @@ export default function CareersPage() {
               <button
                 onClick={() => setApplicationsPage(p => Math.min(applicationsTotalPages, p + 1))}
                 disabled={applicationsPage === applicationsTotalPages}
-                className="rounded-lg border px-4 py-2 hover:bg-gray-50 disabled:opacity-50"
+                className="rounded-lg border border-gray-200 px-4 py-2 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:hover:bg-gray-700"
               >
                 {isRTL ? 'التالي' : 'Next'}
               </button>
@@ -933,9 +983,9 @@ export default function CareersPage() {
   // Job Modal
   const renderJobModal = () => (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-lg bg-white">
-        <div className="sticky top-0 flex items-center justify-between border-b bg-white px-6 py-4">
-          <h2 className="text-xl font-bold">
+      <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-lg bg-white dark:bg-gray-800">
+        <div className="sticky top-0 flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
             {editingJob
               ? isRTL
                 ? 'تعديل الوظيفة'
@@ -944,8 +994,11 @@ export default function CareersPage() {
                 ? 'وظيفة جديدة'
                 : 'New Job'}
           </h2>
-          <button onClick={() => setShowJobModal(false)} className="rounded p-1 hover:bg-gray-100">
-            <X className="size-6" />
+          <button
+            onClick={() => setShowJobModal(false)}
+            className="rounded p-1 hover:bg-gray-100 dark:hover:bg-gray-700"
+          >
+            <X className="size-6 text-gray-900 dark:text-white" />
           </button>
         </div>
 
@@ -953,65 +1006,67 @@ export default function CareersPage() {
           {/* Title */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1 block text-sm font-medium">
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 {isRTL ? 'العنوان (عربي)' : 'Title (Arabic)'}
               </label>
               <input
                 type="text"
                 value={jobForm.titleAr}
                 onChange={e => setJobForm({ ...jobForm, titleAr: e.target.value })}
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 dir="rtl"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 {isRTL ? 'العنوان (إنجليزي)' : 'Title (English)'}
               </label>
               <input
                 type="text"
                 value={jobForm.titleEn}
                 onChange={e => setJobForm({ ...jobForm, titleEn: e.target.value })}
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
             </div>
           </div>
 
           {/* Slug */}
           <div>
-            <label className="mb-1 block text-sm font-medium">{isRTL ? 'الرابط' : 'Slug'}</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              {isRTL ? 'الرابط' : 'Slug'}
+            </label>
             <input
               type="text"
               value={jobForm.slug}
               onChange={e => setJobForm({ ...jobForm, slug: e.target.value })}
               placeholder={jobForm.titleEn ? generateSlug(jobForm.titleEn) : ''}
-              className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
           </div>
 
           {/* Location */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1 block text-sm font-medium">
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 {isRTL ? 'الموقع (عربي)' : 'Location (Arabic)'}
               </label>
               <input
                 type="text"
                 value={jobForm.locationAr}
                 onChange={e => setJobForm({ ...jobForm, locationAr: e.target.value })}
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 dir="rtl"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 {isRTL ? 'الموقع (إنجليزي)' : 'Location (English)'}
               </label>
               <input
                 type="text"
                 value={jobForm.locationEn}
                 onChange={e => setJobForm({ ...jobForm, locationEn: e.target.value })}
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
             </div>
           </div>
@@ -1019,13 +1074,13 @@ export default function CareersPage() {
           {/* Type, Experience, Status */}
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="mb-1 block text-sm font-medium">
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 {isRTL ? 'نوع العمل' : 'Job Type'}
               </label>
               <select
                 value={jobForm.type}
                 onChange={e => setJobForm({ ...jobForm, type: e.target.value as JobType })}
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               >
                 {Object.entries(jobTypeConfig).map(([key, config]) => (
                   <option key={key} value={key}>
@@ -1035,7 +1090,7 @@ export default function CareersPage() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 {isRTL ? 'مستوى الخبرة' : 'Experience Level'}
               </label>
               <select
@@ -1043,7 +1098,7 @@ export default function CareersPage() {
                 onChange={e =>
                   setJobForm({ ...jobForm, experienceLevel: e.target.value as ExperienceLevel })
                 }
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               >
                 {Object.entries(experienceLevelConfig).map(([key, config]) => (
                   <option key={key} value={key}>
@@ -1053,13 +1108,13 @@ export default function CareersPage() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 {isRTL ? 'الحالة' : 'Status'}
               </label>
               <select
                 value={jobForm.status}
                 onChange={e => setJobForm({ ...jobForm, status: e.target.value as JobStatus })}
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               >
                 {Object.entries(jobStatusConfig).map(([key, config]) => (
                   <option key={key} value={key}>
@@ -1073,25 +1128,25 @@ export default function CareersPage() {
           {/* Description */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1 block text-sm font-medium">
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 {isRTL ? 'الوصف (عربي)' : 'Description (Arabic)'}
               </label>
               <textarea
                 value={jobForm.descriptionAr}
                 onChange={e => setJobForm({ ...jobForm, descriptionAr: e.target.value })}
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 rows={6}
                 dir="rtl"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 {isRTL ? 'الوصف (إنجليزي)' : 'Description (English)'}
               </label>
               <textarea
                 value={jobForm.descriptionEn}
                 onChange={e => setJobForm({ ...jobForm, descriptionEn: e.target.value })}
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 rows={6}
               />
             </div>
@@ -1099,7 +1154,7 @@ export default function CareersPage() {
 
           {/* Skills */}
           <div>
-            <label className="mb-1 block text-sm font-medium">
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               {isRTL ? 'المهارات (مفصولة بفواصل)' : 'Skills (comma-separated)'}
             </label>
             <input
@@ -1107,20 +1162,20 @@ export default function CareersPage() {
               value={jobForm.skills}
               onChange={e => setJobForm({ ...jobForm, skills: e.target.value })}
               placeholder="React, TypeScript, Node.js"
-              className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
           </div>
 
           {/* Deadline */}
           <div>
-            <label className="mb-1 block text-sm font-medium">
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               {isRTL ? 'الموعد النهائي' : 'Application Deadline'}
             </label>
             <input
               type="date"
               value={jobForm.applicationDeadline}
               onChange={e => setJobForm({ ...jobForm, applicationDeadline: e.target.value })}
-              className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
           </div>
 
@@ -1133,16 +1188,19 @@ export default function CareersPage() {
               onChange={e => setJobForm({ ...jobForm, isFeatured: e.target.checked })}
               className="rounded"
             />
-            <label htmlFor="isFeatured" className="text-sm font-medium">
+            <label
+              htmlFor="isFeatured"
+              className="text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
               {isRTL ? 'وظيفة مميزة' : 'Featured Job'}
             </label>
           </div>
         </div>
 
-        <div className="sticky bottom-0 flex justify-end gap-3 border-t bg-white px-6 py-4">
+        <div className="sticky bottom-0 flex justify-end gap-3 border-t border-gray-200 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800">
           <button
             onClick={() => setShowJobModal(false)}
-            className="rounded-lg border px-4 py-2 hover:bg-gray-50"
+            className="rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
           >
             {isRTL ? 'إلغاء' : 'Cancel'}
           </button>
@@ -1169,33 +1227,37 @@ export default function CareersPage() {
 
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-        <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white">
-          <div className="flex items-center justify-between border-b px-6 py-4">
-            <h2 className="text-xl font-bold">{isRTL ? 'تفاصيل الطلب' : 'Application Details'}</h2>
+        <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white dark:bg-gray-800">
+          <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-700">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+              {isRTL ? 'تفاصيل الطلب' : 'Application Details'}
+            </h2>
             <button
               onClick={() => {
                 setShowApplicationModal(false);
                 setViewingApplication(null);
               }}
-              className="rounded p-1 hover:bg-gray-100"
+              className="rounded p-1 hover:bg-gray-100 dark:hover:bg-gray-700"
             >
-              <X className="size-6" />
+              <X className="size-6 text-gray-900 dark:text-white" />
             </button>
           </div>
 
           <div className="space-y-6 p-6">
             {/* Applicant Info */}
-            <div className="rounded-lg border p-4">
-              <h3 className="mb-4 font-medium">{isRTL ? 'معلومات المتقدم' : 'Applicant Info'}</h3>
+            <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+              <h3 className="mb-4 font-medium text-gray-900 dark:text-white">
+                {isRTL ? 'معلومات المتقدم' : 'Applicant Info'}
+              </h3>
               <div className="space-y-3">
-                <p className="text-lg font-semibold">
+                <p className="text-lg font-semibold text-gray-900 dark:text-white">
                   {viewingApplication.firstName} {viewingApplication.lastName}
                 </p>
-                <div className="flex items-center gap-2 text-gray-600">
+                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
                   <Mail className="size-4" />
                   <span>{viewingApplication.email}</span>
                 </div>
-                <div className="flex items-center gap-2 text-gray-600">
+                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
                   <Phone className="size-4" />
                   <span>{viewingApplication.phone}</span>
                 </div>
@@ -1224,7 +1286,7 @@ export default function CareersPage() {
 
             {/* Status */}
             <div>
-              <label className="mb-2 block text-sm font-medium">
+              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 {isRTL ? 'الحالة' : 'Status'}
               </label>
               <div className="flex flex-wrap gap-2">
@@ -1241,7 +1303,7 @@ export default function CareersPage() {
                     className={`rounded-full px-3 py-1 text-sm ${
                       viewingApplication.status === key
                         ? config.color + ' font-medium'
-                        : 'border hover:bg-gray-50'
+                        : 'border border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700'
                     } disabled:opacity-50`}
                   >
                     {isRTL ? config.labelAr : config.labelEn}
@@ -1253,10 +1315,10 @@ export default function CareersPage() {
             {/* Cover Letter */}
             {viewingApplication.coverLetter && (
               <div>
-                <label className="mb-2 block text-sm font-medium">
+                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                   {isRTL ? 'الرسالة التعريفية' : 'Cover Letter'}
                 </label>
-                <p className="rounded-lg border bg-gray-50 p-4 text-sm">
+                <p className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
                   {viewingApplication.coverLetter}
                 </p>
               </div>
@@ -1265,21 +1327,21 @@ export default function CareersPage() {
             {/* Notes */}
             {viewingApplication.notes && (
               <div>
-                <label className="mb-2 block text-sm font-medium">
+                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                   {isRTL ? 'ملاحظات' : 'Notes'}
                 </label>
-                <p className="rounded-lg border bg-gray-50 p-4 text-sm">
+                <p className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
                   {viewingApplication.notes}
                 </p>
               </div>
             )}
           </div>
 
-          <div className="flex justify-between border-t px-6 py-4">
+          <div className="flex justify-between border-t border-gray-200 px-6 py-4 dark:border-gray-700">
             <button
               onClick={() => handleDeleteApplication(viewingApplication._id)}
               disabled={actionLoading}
-              className="flex items-center gap-2 rounded-lg border border-red-300 px-4 py-2 text-red-600 hover:bg-red-50 disabled:opacity-50"
+              className="flex items-center gap-2 rounded-lg border border-red-300 px-4 py-2 text-red-600 hover:bg-red-50 disabled:opacity-50 dark:border-red-700 dark:hover:bg-red-900/20"
             >
               <Trash2 className="size-5" />
               {isRTL ? 'حذف' : 'Delete'}
@@ -1289,7 +1351,7 @@ export default function CareersPage() {
                 setShowApplicationModal(false);
                 setViewingApplication(null);
               }}
-              className="rounded-lg border px-4 py-2 hover:bg-gray-50"
+              className="rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
             >
               {isRTL ? 'إغلاق' : 'Close'}
             </button>
@@ -1300,13 +1362,18 @@ export default function CareersPage() {
   };
 
   return (
-    <div className={`min-h-screen bg-gray-50 ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+    <div
+      className={`min-h-screen bg-gray-50 dark:bg-gray-900 ${isRTL ? 'rtl' : 'ltr'}`}
+      dir={isRTL ? 'rtl' : 'ltr'}
+    >
       {/* Header */}
-      <div className="border-b bg-white px-6 py-4">
+      <div className="border-b border-gray-200 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{isRTL ? 'الوظائف' : 'Careers'}</h1>
-            <p className="text-gray-500">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              {isRTL ? 'الوظائف' : 'Careers'}
+            </h1>
+            <p className="text-gray-500 dark:text-gray-400">
               {isRTL ? 'إدارة الوظائف والطلبات' : 'Manage jobs and applications'}
             </p>
           </div>
@@ -1314,7 +1381,7 @@ export default function CareersPage() {
       </div>
 
       {/* Tabs */}
-      <div className="border-b bg-white px-6">
+      <div className="border-b border-gray-200 bg-white px-6 dark:border-gray-700 dark:bg-gray-800">
         <div className="flex gap-4">
           {[
             { id: 'jobs', labelAr: 'الوظائف', labelEn: 'Jobs' },
@@ -1326,7 +1393,7 @@ export default function CareersPage() {
               className={`border-b-2 px-4 py-3 text-sm font-medium ${
                 activeTab === tab.id
                   ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
               }`}
             >
               {isRTL ? tab.labelAr : tab.labelEn}

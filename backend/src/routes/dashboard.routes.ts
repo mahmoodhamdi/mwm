@@ -16,9 +16,9 @@ const router = Router();
  *     description: Admin dashboard statistics and data
  */
 
-// All routes require authentication and admin role
+// All routes require authentication and analytics read permission
 router.use(authenticate);
-router.use(authorize('admin', 'super_admin', 'editor'));
+router.use(authorize('analytics:read'));
 
 /**
  * @swagger

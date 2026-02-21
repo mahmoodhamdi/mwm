@@ -76,7 +76,7 @@ export default function AnalyticsPage() {
 
       const [statsResponse, chartsResponse] = await Promise.all([
         dashboardService.getStats(),
-        dashboardService.getChartsData(dateRange),
+        dashboardService.getChartsData(Number(dateRange)),
       ]);
 
       setStats(statsResponse as Stats);

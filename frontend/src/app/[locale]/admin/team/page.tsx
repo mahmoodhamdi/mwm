@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocale } from 'next-intl';
-import Link from 'next/link';
+import toast from 'react-hot-toast';
 import Image from 'next/image';
 import {
   Plus,
@@ -24,6 +24,9 @@ import {
   Star,
   StarOff,
   RefreshCw,
+  X,
+  Save,
+  Loader2,
 } from 'lucide-react';
 import { DataTable, tableActions } from '@/components/admin';
 import type { Column, DataTableAction } from '@/components/admin';
@@ -31,6 +34,7 @@ import {
   teamAdminService,
   type TeamMember,
   type TeamResponse,
+  type UpdateTeamMemberData,
 } from '@/services/admin/team.service';
 
 export default function TeamPage() {
@@ -40,10 +44,45 @@ export default function TeamPage() {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [page, _setPage] = useState(1);
+  const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
+
+  // Edit modal state
+  const [editingItem, setEditingItem] = useState<TeamMember | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editSaving, setEditSaving] = useState(false);
+  const [editForm, setEditForm] = useState<{
+    nameAr: string;
+    nameEn: string;
+    titleAr: string;
+    titleEn: string;
+    photo: string;
+    isActive: boolean;
+    isFeatured: boolean;
+    isLeader: boolean;
+    order: number;
+    linkedinUrl: string;
+    twitterUrl: string;
+    githubUrl: string;
+    websiteUrl: string;
+    email: string;
+  }>({
+    nameAr: '',
+    nameEn: '',
+    titleAr: '',
+    titleEn: '',
+    photo: '',
+    isActive: true,
+    isFeatured: false,
+    isLeader: false,
+    order: 0,
+    linkedinUrl: '',
+    twitterUrl: '',
+    githubUrl: '',
+    websiteUrl: '',
+    email: '',
+  });
 
   // Fetch team members
   const fetchTeamMembers = useCallback(async () => {
@@ -70,6 +109,62 @@ export default function TeamPage() {
     fetchTeamMembers();
   }, [fetchTeamMembers]);
 
+  // Open edit modal pre-populated with member data
+  const openEditModal = (member: TeamMember) => {
+    setEditingItem(member);
+    setEditForm({
+      nameAr: member.name.ar,
+      nameEn: member.name.en,
+      titleAr: member.title.ar,
+      titleEn: member.title.en,
+      photo: member.photo || '',
+      isActive: member.isActive,
+      isFeatured: member.isFeatured,
+      isLeader: member.isLeader,
+      order: member.order,
+      linkedinUrl: member.social?.linkedin || '',
+      twitterUrl: member.social?.twitter || '',
+      githubUrl: member.social?.github || '',
+      websiteUrl: member.social?.website || '',
+      email: member.social?.email || '',
+    });
+    setShowEditModal(true);
+  };
+
+  // Save edit
+  const handleSaveEdit = async () => {
+    if (!editingItem) return;
+    setEditSaving(true);
+    try {
+      const data: UpdateTeamMemberData = {
+        name: { ar: editForm.nameAr, en: editForm.nameEn },
+        title: { ar: editForm.titleAr, en: editForm.titleEn },
+        photo: editForm.photo || undefined,
+        isActive: editForm.isActive,
+        isFeatured: editForm.isFeatured,
+        isLeader: editForm.isLeader,
+        order: editForm.order,
+        social: {
+          linkedin: editForm.linkedinUrl || undefined,
+          twitter: editForm.twitterUrl || undefined,
+          github: editForm.githubUrl || undefined,
+          website: editForm.websiteUrl || undefined,
+          email: editForm.email || undefined,
+        },
+      };
+      await teamAdminService.updateMember(editingItem._id, data);
+      toast.success(isArabic ? 'تم تحديث العضو بنجاح' : 'Team member updated successfully');
+      setShowEditModal(false);
+      setEditingItem(null);
+      fetchTeamMembers();
+    } catch (err) {
+      console.error('Failed to update member:', err);
+      toast.error(isArabic ? 'فشل في تحديث العضو' : 'Failed to update team member');
+    } finally {
+      setEditSaving(false);
+    }
+  };
+
   // Toggle visibility
   const toggleVisibility = async (member: TeamMember) => {
     try {
@@ -77,7 +172,7 @@ export default function TeamPage() {
       fetchTeamMembers();
     } catch (err) {
       console.error('Failed to toggle visibility:', err);
-      alert(isArabic ? 'فشل في تغيير الحالة' : 'Failed to toggle visibility');
+      toast.error(isArabic ? 'فشل في تغيير الحالة' : 'Failed to toggle visibility');
     }
   };
 
@@ -88,7 +183,7 @@ export default function TeamPage() {
       fetchTeamMembers();
     } catch (err) {
       console.error('Failed to toggle featured:', err);
-      alert(isArabic ? 'فشل في تغيير حالة المميز' : 'Failed to toggle featured');
+      toast.error(isArabic ? 'فشل في تغيير حالة المميز' : 'Failed to toggle featured');
     }
   };
 
@@ -109,7 +204,7 @@ export default function TeamPage() {
       fetchTeamMembers();
     } catch (err) {
       console.error('Failed to delete member:', err);
-      alert(isArabic ? 'فشل في حذف العضو' : 'Failed to delete member');
+      toast.error(isArabic ? 'فشل في حذف العضو' : 'Failed to delete member');
     }
   };
 
@@ -130,7 +225,7 @@ export default function TeamPage() {
       fetchTeamMembers();
     } catch (err) {
       console.error('Failed to bulk delete:', err);
-      alert(isArabic ? 'فشل في حذف الأعضاء' : 'Failed to delete members');
+      toast.error(isArabic ? 'فشل في حذف الأعضاء' : 'Failed to delete members');
     }
   };
 
@@ -141,7 +236,7 @@ export default function TeamPage() {
       fetchTeamMembers();
     } catch (err) {
       console.error('Failed to bulk update:', err);
-      alert(isArabic ? 'فشل في تحديث الأعضاء' : 'Failed to update members');
+      toast.error(isArabic ? 'فشل في تحديث الأعضاء' : 'Failed to update members');
     }
   };
 
@@ -161,10 +256,10 @@ export default function TeamPage() {
       ),
     },
     {
-      id: 'avatar',
+      id: 'photo',
       headerAr: 'الصورة',
       headerEn: 'Avatar',
-      accessor: 'avatar',
+      accessor: 'photo',
       width: '80px',
       render: value => (
         <div className="relative size-12 overflow-hidden rounded-full">
@@ -200,7 +295,7 @@ export default function TeamPage() {
         <div>
           <div className="font-medium">{value as string}</div>
           <div className="text-muted-foreground text-sm">
-            {isArabic ? row.position.ar : row.position.en}
+            {isArabic ? row.title.ar : row.title.en}
           </div>
         </div>
       ),
@@ -332,7 +427,7 @@ export default function TeamPage() {
       window.open(`/${locale}/team/${member.slug}`, '_blank');
     }),
     tableActions.edit(member => {
-      window.location.href = `/${locale}/admin/team/${member._id}/edit`;
+      openEditModal(member);
     }),
     {
       id: 'toggle-visibility',
@@ -426,13 +521,32 @@ export default function TeamPage() {
           >
             <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
-          <Link
-            href={`/${locale}/admin/team/new`}
+          <button
+            onClick={() => {
+              setEditingItem(null);
+              setEditForm({
+                nameAr: '',
+                nameEn: '',
+                titleAr: '',
+                titleEn: '',
+                photo: '',
+                isActive: true,
+                isFeatured: false,
+                isLeader: false,
+                order: teamMembers.length + 1,
+                linkedinUrl: '',
+                twitterUrl: '',
+                githubUrl: '',
+                websiteUrl: '',
+                email: '',
+              });
+              setShowEditModal(true);
+            }}
             className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 transition-colors"
           >
             <Plus className="size-5" />
             <span>{isArabic ? 'عضو جديد' : 'New Member'}</span>
-          </Link>
+          </button>
         </div>
       </div>
 
@@ -479,6 +593,7 @@ export default function TeamPage() {
         pagination={{
           pageSize: 10,
           pageSizeOptions: [5, 10, 20],
+          onPageChange: (newPage: number) => setPage(newPage),
         }}
         bulkActions={bulkActions}
         emptyStateAr="لا يوجد أعضاء في الفريق"
@@ -489,6 +604,236 @@ export default function TeamPage() {
       <div className="text-muted-foreground text-center text-sm">
         {isArabic ? `صفحة ${page} من ${totalPages}` : `Page ${page} of ${totalPages}`}
       </div>
+
+      {/* Edit / Create Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-background max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg shadow-xl">
+            {/* Modal Header */}
+            <div className="sticky top-0 flex items-center justify-between border-b bg-inherit px-6 py-4">
+              <h2 className="text-xl font-bold">
+                {editingItem
+                  ? isArabic
+                    ? 'تعديل العضو'
+                    : 'Edit Member'
+                  : isArabic
+                    ? 'عضو جديد'
+                    : 'New Member'}
+              </h2>
+              <button
+                onClick={() => {
+                  setShowEditModal(false);
+                  setEditingItem(null);
+                }}
+                className="hover:bg-muted rounded-lg p-1"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="space-y-4 p-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-muted-foreground mb-1 block text-sm font-medium">
+                    {isArabic ? 'الاسم (عربي)' : 'Name (Arabic)'} *
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.nameAr}
+                    onChange={e => setEditForm(f => ({ ...f, nameAr: e.target.value }))}
+                    className="bg-background w-full rounded-lg border px-3 py-2"
+                    dir="rtl"
+                  />
+                </div>
+                <div>
+                  <label className="text-muted-foreground mb-1 block text-sm font-medium">
+                    {isArabic ? 'الاسم (إنجليزي)' : 'Name (English)'} *
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.nameEn}
+                    onChange={e => setEditForm(f => ({ ...f, nameEn: e.target.value }))}
+                    className="bg-background w-full rounded-lg border px-3 py-2"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-muted-foreground mb-1 block text-sm font-medium">
+                    {isArabic ? 'المسمى الوظيفي (عربي)' : 'Title (Arabic)'} *
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.titleAr}
+                    onChange={e => setEditForm(f => ({ ...f, titleAr: e.target.value }))}
+                    className="bg-background w-full rounded-lg border px-3 py-2"
+                    dir="rtl"
+                  />
+                </div>
+                <div>
+                  <label className="text-muted-foreground mb-1 block text-sm font-medium">
+                    {isArabic ? 'المسمى الوظيفي (إنجليزي)' : 'Title (English)'} *
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.titleEn}
+                    onChange={e => setEditForm(f => ({ ...f, titleEn: e.target.value }))}
+                    className="bg-background w-full rounded-lg border px-3 py-2"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-muted-foreground mb-1 block text-sm font-medium">
+                  {isArabic ? 'رابط الصورة' : 'Photo URL'}
+                </label>
+                <input
+                  type="text"
+                  value={editForm.photo}
+                  onChange={e => setEditForm(f => ({ ...f, photo: e.target.value }))}
+                  className="bg-background w-full rounded-lg border px-3 py-2"
+                  placeholder="https://..."
+                />
+              </div>
+
+              <div>
+                <label className="text-muted-foreground mb-1 block text-sm font-medium">
+                  {isArabic ? 'الترتيب' : 'Order'}
+                </label>
+                <input
+                  type="number"
+                  value={editForm.order}
+                  onChange={e => setEditForm(f => ({ ...f, order: parseInt(e.target.value) || 0 }))}
+                  className="bg-background w-full rounded-lg border px-3 py-2"
+                  min={0}
+                />
+              </div>
+
+              {/* Social Links */}
+              <div className="border-t pt-4">
+                <p className="text-muted-foreground mb-3 text-sm font-medium">
+                  {isArabic ? 'روابط التواصل الاجتماعي' : 'Social Links'}
+                </p>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Linkedin className="size-4 shrink-0 text-[#0077b5]" />
+                    <input
+                      type="text"
+                      value={editForm.linkedinUrl}
+                      onChange={e => setEditForm(f => ({ ...f, linkedinUrl: e.target.value }))}
+                      className="bg-background w-full rounded-lg border px-3 py-2 text-sm"
+                      placeholder="https://linkedin.com/in/..."
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Twitter className="size-4 shrink-0 text-[#1da1f2]" />
+                    <input
+                      type="text"
+                      value={editForm.twitterUrl}
+                      onChange={e => setEditForm(f => ({ ...f, twitterUrl: e.target.value }))}
+                      className="bg-background w-full rounded-lg border px-3 py-2 text-sm"
+                      placeholder="https://twitter.com/..."
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Github className="size-4 shrink-0" />
+                    <input
+                      type="text"
+                      value={editForm.githubUrl}
+                      onChange={e => setEditForm(f => ({ ...f, githubUrl: e.target.value }))}
+                      className="bg-background w-full rounded-lg border px-3 py-2 text-sm"
+                      placeholder="https://github.com/..."
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Globe className="size-4 shrink-0 text-green-600" />
+                    <input
+                      type="text"
+                      value={editForm.websiteUrl}
+                      onChange={e => setEditForm(f => ({ ...f, websiteUrl: e.target.value }))}
+                      className="bg-background w-full rounded-lg border px-3 py-2 text-sm"
+                      placeholder="https://..."
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Mail className="size-4 shrink-0 text-blue-600" />
+                    <input
+                      type="email"
+                      value={editForm.email}
+                      onChange={e => setEditForm(f => ({ ...f, email: e.target.value }))}
+                      className="bg-background w-full rounded-lg border px-3 py-2 text-sm"
+                      placeholder="email@example.com"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-6 border-t pt-4">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={editForm.isActive}
+                    onChange={e => setEditForm(f => ({ ...f, isActive: e.target.checked }))}
+                    className="rounded"
+                  />
+                  <span className="text-sm font-medium">{isArabic ? 'ظاهر' : 'Visible'}</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={editForm.isFeatured}
+                    onChange={e => setEditForm(f => ({ ...f, isFeatured: e.target.checked }))}
+                    className="rounded"
+                  />
+                  <span className="text-sm font-medium">{isArabic ? 'مميز' : 'Featured'}</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={editForm.isLeader}
+                    onChange={e => setEditForm(f => ({ ...f, isLeader: e.target.checked }))}
+                    className="rounded"
+                  />
+                  <span className="text-sm font-medium">{isArabic ? 'قائد' : 'Leader'}</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="sticky bottom-0 flex justify-end gap-2 border-t bg-inherit px-6 py-4">
+              <button
+                onClick={() => {
+                  setShowEditModal(false);
+                  setEditingItem(null);
+                }}
+                className="hover:bg-muted rounded-lg border px-4 py-2"
+              >
+                {isArabic ? 'إلغاء' : 'Cancel'}
+              </button>
+              <button
+                onClick={handleSaveEdit}
+                disabled={
+                  editSaving ||
+                  !editForm.nameAr ||
+                  !editForm.nameEn ||
+                  !editForm.titleAr ||
+                  !editForm.titleEn
+                }
+                className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center gap-2 rounded-lg px-4 py-2 disabled:opacity-50"
+              >
+                {editSaving ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Save className="size-4" />
+                )}
+                {isArabic ? 'حفظ' : 'Save'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

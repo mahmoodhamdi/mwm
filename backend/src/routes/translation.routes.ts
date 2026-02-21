@@ -6,6 +6,7 @@
 import { Router } from 'express';
 import { translationController } from '../controllers';
 import { authenticate, authorize } from '../middlewares/auth';
+import { csrfValidation } from '../middlewares/csrf';
 
 const router = Router();
 
@@ -201,6 +202,7 @@ router.get('/:id', authenticate, authorize('settings:read'), translationControll
 router.post(
   '/',
   authenticate,
+  csrfValidation,
   authorize('settings:update'),
   translationController.createTranslation
 );
@@ -239,6 +241,7 @@ router.post(
 router.post(
   '/upsert',
   authenticate,
+  csrfValidation,
   authorize('settings:update'),
   translationController.upsertTranslation
 );
@@ -280,6 +283,7 @@ router.post(
 router.post(
   '/bulk',
   authenticate,
+  csrfValidation,
   authorize('settings:update'),
   translationController.bulkUpsertTranslations
 );
@@ -317,6 +321,7 @@ router.post(
 router.put(
   '/:id',
   authenticate,
+  csrfValidation,
   authorize('settings:update'),
   translationController.updateTranslation
 );
@@ -344,6 +349,7 @@ router.put(
 router.delete(
   '/:id',
   authenticate,
+  csrfValidation,
   authorize('settings:delete'),
   translationController.deleteTranslation
 );

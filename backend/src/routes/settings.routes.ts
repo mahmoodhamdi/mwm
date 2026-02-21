@@ -6,6 +6,7 @@
 import { Router } from 'express';
 import { settingsController } from '../controllers';
 import { authenticate, authorize } from '../middlewares/auth';
+import { csrfValidation } from '../middlewares/csrf';
 
 const router = Router();
 
@@ -84,7 +85,13 @@ router.get('/', authenticate, authorize('settings:read'), settingsController.get
  *       401:
  *         description: Unauthorized
  */
-router.put('/', authenticate, authorize('settings:update'), settingsController.updateSettings);
+router.put(
+  '/',
+  authenticate,
+  csrfValidation,
+  authorize('settings:update'),
+  settingsController.updateSettings
+);
 
 /**
  * @swagger
@@ -116,6 +123,7 @@ router.put('/', authenticate, authorize('settings:update'), settingsController.u
 router.put(
   '/:section',
   authenticate,
+  csrfValidation,
   authorize('settings:update'),
   settingsController.updateSettingsSection
 );
@@ -137,6 +145,12 @@ router.put(
  *       403:
  *         description: Forbidden - Super Admin only
  */
-router.post('/reset', authenticate, authorize('settings:delete'), settingsController.resetSettings);
+router.post(
+  '/reset',
+  authenticate,
+  csrfValidation,
+  authorize('settings:delete'),
+  settingsController.resetSettings
+);
 
 export default router;

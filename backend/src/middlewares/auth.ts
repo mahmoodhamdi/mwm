@@ -35,9 +35,17 @@ export const rolePermissions: Record<UserRole, string[]> = {
     'team:*',
     'blog:*',
     'messages:*',
+    'careers:*',
+    'newsletter:*',
+    'notifications:*',
     'settings:read',
     'settings:update',
     'analytics:read',
+    'upload:*',
+    'content:*',
+    'translations:*',
+    'menus:*',
+    'activity:read',
   ],
   [UserRoles.EDITOR]: [
     'projects:read',
@@ -52,6 +60,15 @@ export const rolePermissions: Record<UserRole, string[]> = {
     'blog:*',
     'messages:read',
     'messages:update',
+    'careers:read',
+    'newsletter:read',
+    'notifications:read',
+    'analytics:read',
+    'upload:*',
+    'content:read',
+    'content:update',
+    'translations:read',
+    'menus:read',
   ],
   [UserRoles.AUTHOR]: ['blog:read', 'blog:create', 'blog:update'],
   [UserRoles.VIEWER]: ['projects:read', 'services:read', 'team:read', 'blog:read'],
@@ -168,6 +185,44 @@ export const authorize = (...permissions: string[]) => {
 };
 
 /**
+ * Authorize middleware - check if user has ANY of the required permissions
+ * وسيط التفويض - التحقق من امتلاك أي من الصلاحيات المطلوبة
+ */
+export const authorizeAny = (...permissions: string[]) => {
+  return asyncHandler(async (req: Request, _res: Response, next: NextFunction) => {
+    if (!req.user) {
+      throw Errors.UNAUTHORIZED();
+    }
+
+    const userRole = req.user.role as UserRole;
+    const userPermissions = rolePermissions[userRole] || [];
+
+    // Super admin has all permissions
+    if (userPermissions.includes('*')) {
+      return next();
+    }
+
+    // Check if user has ANY of the required permissions
+    const hasAny = permissions.some(required => {
+      if (userPermissions.includes(required)) return true;
+      const [resource] = required.split(':');
+      return userPermissions.includes(`${resource}:*`);
+    });
+
+    if (!hasAny) {
+      // Check custom permissions
+      const customPermissions = req.user.customPermissions || [];
+      const hasCustom = permissions.some(p => customPermissions.includes(p));
+      if (!hasCustom) {
+        throw Errors.INSUFFICIENT_PERMISSIONS();
+      }
+    }
+
+    next();
+  });
+};
+
+/**
  * Optional authenticate - doesn't fail if no token
  * تحقق اختياري - لا يفشل إذا لم يكن هناك توكن
  */
@@ -233,6 +288,7 @@ export const requireEmailVerified = asyncHandler(
 export const authMiddleware = {
   authenticate,
   authorize,
+  authorizeAny,
   optionalAuth,
   requireEmailVerified,
   rolePermissions,

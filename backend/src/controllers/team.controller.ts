@@ -71,6 +71,39 @@ export const getDepartmentBySlug = asyncHandler(async (req: Request, res: Respon
 });
 
 /**
+ * Get team members by department slug (Public)
+ * جلب أعضاء الفريق حسب رابط القسم المختصر (عام)
+ */
+export const getMembersByDepartmentSlug = asyncHandler(async (req: Request, res: Response) => {
+  const { slug } = req.params;
+  const { page = 1, limit = 10 } = req.query;
+
+  const department = await Department.findOne({ slug, isActive: true });
+  if (!department) {
+    throw Errors.NOT_FOUND('Department | القسم');
+  }
+
+  const query = { department: department._id, isActive: true };
+  const total = await TeamMember.countDocuments(query);
+  const members = await TeamMember.find(query)
+    .populate('department', 'name slug')
+    .sort({ order: 1 })
+    .skip((Number(page) - 1) * Number(limit))
+    .limit(Number(limit));
+
+  return successResponse(res, {
+    members,
+    department,
+    pagination: {
+      page: Number(page),
+      limit: Number(limit),
+      total,
+      pages: Math.ceil(total / Number(limit)),
+    },
+  });
+});
+
+/**
  * Get all departments (Admin)
  * جلب جميع الأقسام (للمسؤول)
  */
@@ -714,6 +747,7 @@ export const teamController = {
   // Departments
   getDepartments,
   getDepartmentBySlug,
+  getMembersByDepartmentSlug,
   getAllDepartments,
   createDepartment,
   updateDepartment,

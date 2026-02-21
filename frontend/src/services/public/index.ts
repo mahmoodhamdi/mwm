@@ -6,6 +6,24 @@
 // Shared types
 export type { BilingualText, PaginationMeta } from './types';
 
+// Public Settings
+export type {
+  PublicContactSettings,
+  PublicSocialSettings,
+  PublicGeneralSettings,
+  PublicSeoSettings,
+  PublicFeatureSettings,
+  PublicHomepageSettings,
+  PublicThemeSettings,
+  PublicSettings,
+} from './settings.service';
+export {
+  getPublicSettings,
+  DEFAULT_CONTACT_SETTINGS,
+  DEFAULT_SOCIAL_SETTINGS,
+  publicSettingsService,
+} from './settings.service';
+
 // Services - export specific types and functions to avoid conflicts
 export type {
   ServiceCategory,

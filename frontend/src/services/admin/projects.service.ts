@@ -15,15 +15,21 @@ export interface ProjectTechnology {
   category: 'frontend' | 'backend' | 'database' | 'devops' | 'mobile' | 'other';
 }
 
+/**
+ * Backend `IProjectClient.name` is a LocalizedString (bilingual), not a plain string.
+ */
 export interface ProjectClient {
-  name: string;
+  name: BilingualText;
   logo?: string;
   website?: string;
 }
 
+/**
+ * Backend `IProjectTestimonial.author` and `.position` are both LocalizedString.
+ */
 export interface ProjectTestimonial {
   text: BilingualText;
-  author: string;
+  author: BilingualText;
   position: BilingualText;
   photo?: string;
 }
@@ -38,6 +44,20 @@ export interface ProjectCategory {
   order: number;
   createdAt: string;
   updatedAt: string;
+}
+
+/**
+ * Backend SEO fields use `title` and `description` (not `metaTitle` / `metaDescription`).
+ * Keywords are bilingual: `{ ar: string[], en: string[] }`.
+ */
+export interface ProjectSEO {
+  title?: BilingualText;
+  description?: BilingualText;
+  keywords?: {
+    ar: string[];
+    en: string[];
+  };
+  ogImage?: string;
 }
 
 export interface Project {
@@ -60,12 +80,7 @@ export interface Project {
   githubUrl?: string;
   duration?: string;
   completedAt?: string;
-  seo?: {
-    metaTitle?: BilingualText;
-    metaDescription?: BilingualText;
-    keywords?: string[];
-    ogImage?: string;
-  };
+  seo?: ProjectSEO;
   isFeatured: boolean;
   isPublished: boolean;
   views: number;
@@ -115,12 +130,7 @@ export interface CreateProjectData {
   githubUrl?: string;
   duration?: string;
   completedAt?: string;
-  seo?: {
-    metaTitle?: BilingualText;
-    metaDescription?: BilingualText;
-    keywords?: string[];
-    ogImage?: string;
-  };
+  seo?: ProjectSEO;
   isFeatured?: boolean;
   isPublished?: boolean;
   order?: number;

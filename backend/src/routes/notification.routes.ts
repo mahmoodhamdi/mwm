@@ -6,6 +6,7 @@
 import { Router } from 'express';
 import { notificationController } from '../controllers/notification.controller';
 import { authenticate, authorize } from '../middlewares';
+import { csrfValidation } from '../middlewares/csrf';
 
 const router = Router();
 
@@ -314,7 +315,8 @@ router.post(
 router.post(
   '/admin/send',
   authenticate,
-  authorize('admin', 'super_admin'),
+  csrfValidation,
+  authorize('notifications:create'),
   notificationController.sendNotificationToUser
 );
 
@@ -362,7 +364,8 @@ router.post(
 router.post(
   '/admin/broadcast',
   authenticate,
-  authorize('admin', 'super_admin'),
+  csrfValidation,
+  authorize('notifications:create'),
   notificationController.broadcastNotification
 );
 

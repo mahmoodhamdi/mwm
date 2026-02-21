@@ -8,6 +8,7 @@ import { serviceController } from '../controllers';
 import { authenticate, authorize } from '../middlewares/auth';
 import { validate, idParamsSchema } from '../middlewares/validate';
 import { serviceValidation } from '../validations';
+import { csrfValidation } from '../middlewares/csrf';
 
 const router = Router();
 
@@ -110,6 +111,7 @@ router.get(
 router.post(
   '/admin/categories',
   authenticate,
+  csrfValidation,
   authorize('services:create'),
   validate({ body: serviceValidation.createCategory }),
   serviceController.createCategory
@@ -176,6 +178,7 @@ router.post(
 router.put(
   '/admin/categories/:id',
   authenticate,
+  csrfValidation,
   authorize('services:update'),
   validate({ params: idParamsSchema, body: serviceValidation.updateCategory }),
   serviceController.updateCategory
@@ -208,6 +211,7 @@ router.put(
 router.delete(
   '/admin/categories/:id',
   authenticate,
+  csrfValidation,
   authorize('services:delete'),
   validate({ params: idParamsSchema }),
   serviceController.deleteCategory
@@ -297,6 +301,7 @@ router.get('/admin', authenticate, authorize('services:read'), serviceController
 router.put(
   '/admin/reorder',
   authenticate,
+  csrfValidation,
   authorize('services:update'),
   serviceController.reorderServices
 );
@@ -434,6 +439,7 @@ router.get(
 router.post(
   '/admin',
   authenticate,
+  csrfValidation,
   authorize('services:create'),
   validate({ body: serviceValidation.create }),
   serviceController.createService
@@ -531,6 +537,7 @@ router.post(
 router.put(
   '/admin/:id',
   authenticate,
+  csrfValidation,
   authorize('services:update'),
   validate({ params: idParamsSchema, body: serviceValidation.update }),
   serviceController.updateService
@@ -563,6 +570,7 @@ router.put(
 router.delete(
   '/admin/:id',
   authenticate,
+  csrfValidation,
   authorize('services:delete'),
   validate({ params: idParamsSchema }),
   serviceController.deleteService
@@ -608,6 +616,41 @@ router.get('/categories', serviceController.getCategories);
  *         description: Category not found
  */
 router.get('/categories/:slug', serviceController.getCategoryBySlug);
+
+/**
+ * @swagger
+ * /services/categories/{slug}/services:
+ *   get:
+ *     summary: Get services by category slug
+ *     description: Retrieve all published services belonging to a specific category
+ *     tags: [Services]
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Category slug
+ *         example: web-development
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of services per page
+ *     responses:
+ *       200:
+ *         description: Paginated list of services in the category
+ *       404:
+ *         description: Category not found
+ */
+router.get('/categories/:slug/services', serviceController.getServicesByCategorySlug);
 
 // ============================================
 // Public Routes - Services

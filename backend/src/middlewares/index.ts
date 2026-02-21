@@ -10,6 +10,7 @@ export { asyncHandler } from './asyncHandler';
 export {
   authenticate,
   authorize,
+  authorizeAny,
   optionalAuth,
   requireEmailVerified,
   rolePermissions,

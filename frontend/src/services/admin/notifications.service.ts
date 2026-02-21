@@ -30,7 +30,7 @@ export interface DeviceToken {
   _id: string;
   user: string;
   token: string;
-  deviceType: 'web' | 'android' | 'ios';
+  platform: 'web' | 'android' | 'ios';
   deviceId?: string;
   deviceName?: string;
   browser?: string;
@@ -98,7 +98,7 @@ export async function deleteReadNotifications(): Promise<{ count: number }> {
 export async function registerDeviceToken(
   token: string,
   deviceInfo?: {
-    deviceType?: 'web' | 'android' | 'ios';
+    platform?: 'web' | 'android' | 'ios';
     deviceId?: string;
     deviceName?: string;
     browser?: string;

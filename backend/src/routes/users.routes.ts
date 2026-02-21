@@ -7,6 +7,13 @@ import { Router } from 'express';
 import { userController } from '../controllers';
 import { authenticate, authorize } from '../middlewares/auth';
 import { validate, idParamsSchema } from '../middlewares/validate';
+import { csrfValidation } from '../middlewares/csrf';
+import {
+  createUserSchema,
+  updateUserSchema,
+  bulkUpdateUsersSchema,
+  resetPasswordSchema,
+} from '../validations/users.validation';
 
 const router = Router();
 
@@ -136,7 +143,13 @@ router.get('/:id', validate({ params: idParamsSchema }), userController.getUserB
  *       409:
  *         description: Email already exists
  */
-router.post('/', authorize('users:create'), userController.createUser);
+router.post(
+  '/',
+  csrfValidation,
+  authorize('users:create'),
+  validate({ body: createUserSchema }),
+  userController.createUser
+);
 
 /**
  * @swagger
@@ -169,7 +182,13 @@ router.post('/', authorize('users:create'), userController.createUser);
  *       401:
  *         description: Unauthorized
  */
-router.post('/bulk', authorize('users:update'), userController.bulkUpdateUsers);
+router.post(
+  '/bulk',
+  csrfValidation,
+  authorize('users:update'),
+  validate({ body: bulkUpdateUsersSchema }),
+  userController.bulkUpdateUsers
+);
 
 /**
  * @swagger
@@ -205,8 +224,9 @@ router.post('/bulk', authorize('users:update'), userController.bulkUpdateUsers);
  */
 router.put(
   '/:id',
+  csrfValidation,
   authorize('users:update'),
-  validate({ params: idParamsSchema }),
+  validate({ params: idParamsSchema, body: updateUserSchema }),
   userController.updateUser
 );
 
@@ -232,6 +252,7 @@ router.put(
  */
 router.put(
   '/:id/status',
+  csrfValidation,
   authorize('users:update'),
   validate({ params: idParamsSchema }),
   userController.toggleUserStatus
@@ -259,6 +280,7 @@ router.put(
  */
 router.put(
   '/:id/unlock',
+  csrfValidation,
   authorize('users:update'),
   validate({ params: idParamsSchema }),
   userController.unlockUser
@@ -297,8 +319,9 @@ router.put(
  */
 router.put(
   '/:id/password',
+  csrfValidation,
   authorize('users:update'),
-  validate({ params: idParamsSchema }),
+  validate({ params: idParamsSchema, body: resetPasswordSchema }),
   userController.resetUserPassword
 );
 
@@ -324,6 +347,7 @@ router.put(
  */
 router.delete(
   '/:id',
+  csrfValidation,
   authorize('users:delete'),
   validate({ params: idParamsSchema }),
   userController.deleteUser

@@ -52,11 +52,11 @@ export interface TeamMember {
   _id: string;
   name: BilingualText;
   slug: string;
-  position: BilingualText;
+  title: BilingualText;
   bio: BilingualText;
   shortBio?: BilingualText;
   department: Department | string;
-  avatar?: string;
+  photo?: string;
   coverImage?: string;
   skills: TeamMemberSkill[];
   social?: TeamMemberSocial;
@@ -104,11 +104,11 @@ export interface DepartmentsResponse {
 
 export interface CreateTeamMemberData {
   name: BilingualText;
-  position: BilingualText;
+  title: BilingualText;
   bio: BilingualText;
   shortBio?: BilingualText;
   department: string;
-  avatar?: string;
+  photo?: string;
   coverImage?: string;
   skills?: TeamMemberSkill[];
   social?: TeamMemberSocial;

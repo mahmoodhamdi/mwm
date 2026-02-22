@@ -103,13 +103,8 @@ const nextConfig = {
   async redirects() {
     return [
       {
-        source: '/:locale(ar|en)/admin',
-        destination: '/:locale/admin/dashboard',
-        permanent: true,
-      },
-      {
         source: '/admin',
-        destination: '/ar/admin/dashboard',
+        destination: '/ar/admin',
         permanent: true,
       },
     ];

@@ -11,9 +11,10 @@ import { asyncHandler } from '../middlewares/asyncHandler';
 import { Errors } from '../utils/ApiError';
 import { successResponse, paginatedResponse } from '../utils/response';
 import { parsePagination } from '../utils/pagination';
-import { redis } from '../config';
+import { redis, logger } from '../config';
 import { escapeRegex } from '../utils/security';
 import { uploadToCloudinary } from '../utils/upload';
+import { notifyNewJobApplication } from '../services/notification.service';
 
 const JOB_CACHE_PREFIX = 'careers-job';
 const CACHE_TTL = 1800; // 30 minutes
@@ -172,6 +173,14 @@ export const submitApplication = asyncHandler(async (req: Request, res: Response
 
   // Increment applications count
   await Job.incrementApplicationsCount(value.job);
+
+  // Notify admins of new application (non-blocking)
+  const job_doc = await Job.findById(value.job).select('title');
+  notifyNewJobApplication(
+    application._id.toString(),
+    `${value.firstName} ${value.lastName}`,
+    job_doc?.title?.en || 'Unknown'
+  ).catch(err => logger.error('Failed to notify new job application:', err));
 
   return successResponse(
     res,

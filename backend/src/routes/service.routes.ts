@@ -9,6 +9,7 @@ import { authenticate, authorize } from '../middlewares/auth';
 import { validate, idParamsSchema } from '../middlewares/validate';
 import { serviceValidation } from '../validations';
 import { csrfValidation } from '../middlewares/csrf';
+import { logActivity } from '../middlewares/activityLogger';
 
 const router = Router();
 
@@ -114,6 +115,7 @@ router.post(
   csrfValidation,
   authorize('services:create'),
   validate({ body: serviceValidation.createCategory }),
+  logActivity({ action: 'create', resource: 'service' }),
   serviceController.createCategory
 );
 
@@ -181,6 +183,7 @@ router.put(
   csrfValidation,
   authorize('services:update'),
   validate({ params: idParamsSchema, body: serviceValidation.updateCategory }),
+  logActivity({ action: 'update', resource: 'service' }),
   serviceController.updateCategory
 );
 
@@ -214,6 +217,7 @@ router.delete(
   csrfValidation,
   authorize('services:delete'),
   validate({ params: idParamsSchema }),
+  logActivity({ action: 'delete', resource: 'service' }),
   serviceController.deleteCategory
 );
 
@@ -442,6 +446,7 @@ router.post(
   csrfValidation,
   authorize('services:create'),
   validate({ body: serviceValidation.create }),
+  logActivity({ action: 'create', resource: 'service' }),
   serviceController.createService
 );
 
@@ -540,6 +545,7 @@ router.put(
   csrfValidation,
   authorize('services:update'),
   validate({ params: idParamsSchema, body: serviceValidation.update }),
+  logActivity({ action: 'update', resource: 'service' }),
   serviceController.updateService
 );
 
@@ -573,6 +579,7 @@ router.delete(
   csrfValidation,
   authorize('services:delete'),
   validate({ params: idParamsSchema }),
+  logActivity({ action: 'delete', resource: 'service' }),
   serviceController.deleteService
 );
 

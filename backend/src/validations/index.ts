@@ -21,3 +21,4 @@ export {
   bulkUpdateUsersSchema,
   resetPasswordSchema,
 } from './users.validation';
+export { notificationValidation } from './notification.validation';

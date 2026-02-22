@@ -9,6 +9,7 @@ import { authenticate, authorize } from '../middlewares/auth';
 import { validate, idParamsSchema } from '../middlewares/validate';
 import { projectValidation } from '../validations';
 import { csrfValidation } from '../middlewares/csrf';
+import { logActivity } from '../middlewares/activityLogger';
 
 const router = Router();
 
@@ -117,6 +118,7 @@ router.post(
   csrfValidation,
   authorize('projects:create'),
   validate({ body: projectValidation.createCategory }),
+  logActivity({ action: 'create', resource: 'project' }),
   projectController.createCategory
 );
 
@@ -175,6 +177,7 @@ router.put(
   csrfValidation,
   authorize('projects:update'),
   validate({ params: idParamsSchema, body: projectValidation.updateCategory }),
+  logActivity({ action: 'update', resource: 'project' }),
   projectController.updateCategory
 );
 
@@ -207,6 +210,7 @@ router.delete(
   csrfValidation,
   authorize('projects:delete'),
   validate({ params: idParamsSchema }),
+  logActivity({ action: 'delete', resource: 'project' }),
   projectController.deleteCategory
 );
 
@@ -416,6 +420,7 @@ router.post(
   csrfValidation,
   authorize('projects:create'),
   validate({ body: projectValidation.create }),
+  logActivity({ action: 'create', resource: 'project' }),
   projectController.createProject
 );
 
@@ -566,6 +571,7 @@ router.put(
   csrfValidation,
   authorize('projects:update'),
   validate({ params: idParamsSchema, body: projectValidation.update }),
+  logActivity({ action: 'update', resource: 'project' }),
   projectController.updateProject
 );
 
@@ -598,6 +604,7 @@ router.delete(
   csrfValidation,
   authorize('projects:delete'),
   validate({ params: idParamsSchema }),
+  logActivity({ action: 'delete', resource: 'project' }),
   projectController.deleteProject
 );
 

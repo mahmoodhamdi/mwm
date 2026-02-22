@@ -252,13 +252,13 @@ export default function AdminDashboard() {
             <QuickActionButton
               labelAr="إضافة مشروع جديد"
               labelEn="Add New Project"
-              href={`/${locale}/admin/projects/new`}
+              href={`/${locale}/admin/projects`}
               icon={<FolderKanban className="size-4" />}
             />
             <QuickActionButton
               labelAr="إضافة عضو فريق"
               labelEn="Add Team Member"
-              href={`/${locale}/admin/team/new`}
+              href={`/${locale}/admin/team`}
               icon={<Users className="size-4" />}
             />
             <QuickActionButton

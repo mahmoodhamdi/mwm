@@ -8,6 +8,7 @@ import { userController } from '../controllers';
 import { authenticate, authorize } from '../middlewares/auth';
 import { validate, idParamsSchema } from '../middlewares/validate';
 import { csrfValidation } from '../middlewares/csrf';
+import { logActivity } from '../middlewares/activityLogger';
 import {
   createUserSchema,
   updateUserSchema,
@@ -148,6 +149,7 @@ router.post(
   csrfValidation,
   authorize('users:create'),
   validate({ body: createUserSchema }),
+  logActivity({ action: 'create', resource: 'user' }),
   userController.createUser
 );
 
@@ -227,6 +229,7 @@ router.put(
   csrfValidation,
   authorize('users:update'),
   validate({ params: idParamsSchema, body: updateUserSchema }),
+  logActivity({ action: 'update', resource: 'user' }),
   userController.updateUser
 );
 
@@ -350,6 +353,7 @@ router.delete(
   csrfValidation,
   authorize('users:delete'),
   validate({ params: idParamsSchema }),
+  logActivity({ action: 'delete', resource: 'user' }),
   userController.deleteUser
 );
 

@@ -7,6 +7,7 @@ import { Router } from 'express';
 import { settingsController } from '../controllers';
 import { authenticate, authorize } from '../middlewares/auth';
 import { csrfValidation } from '../middlewares/csrf';
+import { logActivity } from '../middlewares/activityLogger';
 
 const router = Router();
 
@@ -90,6 +91,7 @@ router.put(
   authenticate,
   csrfValidation,
   authorize('settings:update'),
+  logActivity({ action: 'update', resource: 'settings' }),
   settingsController.updateSettings
 );
 
@@ -125,6 +127,7 @@ router.put(
   authenticate,
   csrfValidation,
   authorize('settings:update'),
+  logActivity({ action: 'update', resource: 'settings' }),
   settingsController.updateSettingsSection
 );
 

@@ -7,7 +7,7 @@ import { Server as HTTPServer } from 'http';
 import { Server, Socket } from 'socket.io';
 import { env, logger } from './index';
 import { authService, TokenPayload } from '../services/auth.service';
-import { User } from '../models';
+import { User, Notification } from '../models';
 
 // Extended socket interface with user data
 export interface AuthenticatedSocket extends Socket {
@@ -92,7 +92,10 @@ export function initializeSocket(httpServer: HTTPServer): Server {
     // Handle notification events
     socket.on('notification:read', async (data: { id: string }) => {
       try {
-        // Emit acknowledgment
+        await Notification.findOneAndUpdate(
+          { _id: data.id, user: userId },
+          { isRead: true, readAt: new Date() }
+        );
         socket.emit('notification:read:ack', { id: data.id, success: true });
       } catch (error) {
         socket.emit('notification:read:ack', { id: data.id, success: false });
@@ -101,6 +104,10 @@ export function initializeSocket(httpServer: HTTPServer): Server {
 
     socket.on('notification:read-all', async () => {
       try {
+        await Notification.updateMany(
+          { user: userId, isRead: false },
+          { isRead: true, readAt: new Date() }
+        );
         socket.emit('notification:read-all:ack', { success: true });
       } catch (error) {
         socket.emit('notification:read-all:ack', { success: false });

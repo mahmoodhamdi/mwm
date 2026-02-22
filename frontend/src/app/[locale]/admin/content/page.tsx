@@ -53,106 +53,6 @@ interface ContentItem {
   updatedAt: Date;
 }
 
-// Mock content data
-const mockContent: ContentItem[] = [
-  {
-    id: '1',
-    key: 'home.hero.title',
-    type: 'text',
-    section: 'home',
-    content: {
-      ar: 'نحول أفكارك إلى واقع رقمي',
-      en: 'We Turn Your Ideas Into Digital Reality',
-    },
-    isActive: true,
-    updatedAt: new Date('2024-03-01'),
-  },
-  {
-    id: '2',
-    key: 'home.hero.subtitle',
-    type: 'text',
-    section: 'home',
-    content: {
-      ar: 'نقدم حلول برمجية متكاملة لتطوير أعمالك',
-      en: 'We provide integrated software solutions to develop your business',
-    },
-    isActive: true,
-    updatedAt: new Date('2024-03-01'),
-  },
-  {
-    id: '3',
-    key: 'home.hero.cta',
-    type: 'text',
-    section: 'home',
-    content: {
-      ar: 'ابدأ مشروعك الآن',
-      en: 'Start Your Project Now',
-    },
-    isActive: true,
-    updatedAt: new Date('2024-03-01'),
-  },
-  {
-    id: '4',
-    key: 'home.stats.projects',
-    type: 'text',
-    section: 'home',
-    content: {
-      ar: 'مشروع منجز',
-      en: 'Projects Completed',
-    },
-    isActive: true,
-    updatedAt: new Date('2024-02-15'),
-  },
-  {
-    id: '5',
-    key: 'about.mission.title',
-    type: 'text',
-    section: 'about',
-    content: {
-      ar: 'مهمتنا',
-      en: 'Our Mission',
-    },
-    isActive: true,
-    updatedAt: new Date('2024-02-10'),
-  },
-  {
-    id: '6',
-    key: 'about.mission.description',
-    type: 'html',
-    section: 'about',
-    content: {
-      ar: '<p>نسعى لتقديم أفضل الحلول البرمجية التي تساعد عملائنا على النمو والتطور.</p>',
-      en: '<p>We strive to provide the best software solutions that help our clients grow and evolve.</p>',
-    },
-    isActive: true,
-    updatedAt: new Date('2024-02-10'),
-  },
-  {
-    id: '7',
-    key: 'services.intro.title',
-    type: 'text',
-    section: 'services',
-    content: {
-      ar: 'خدماتنا',
-      en: 'Our Services',
-    },
-    isActive: true,
-    updatedAt: new Date('2024-02-05'),
-  },
-  {
-    id: '8',
-    key: 'contact.form.title',
-    type: 'text',
-    section: 'contact',
-    content: {
-      ar: 'تواصل معنا',
-      en: 'Contact Us',
-    },
-    isActive: true,
-    updatedAt: new Date('2024-02-01'),
-  },
-];
-
 // Section configuration
 const sections = [
   { id: 'home', labelAr: 'الصفحة الرئيسية', labelEn: 'Home', icon: FileText },
@@ -174,7 +74,7 @@ export default function ContentPage() {
   const locale = useLocale();
   const isArabic = locale === 'ar';
 
-  const [content, setContent] = useState<ContentItem[]>(mockContent);
+  const [content, setContent] = useState<ContentItem[]>([]);
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['home']));
   const [editingItem, setEditingItem] = useState<string | null>(null);

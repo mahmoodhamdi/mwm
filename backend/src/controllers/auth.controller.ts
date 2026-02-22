@@ -5,7 +5,7 @@
 
 import crypto from 'crypto';
 import { Request, Response } from 'express';
-import { User, ActivityLog } from '../models';
+import { User } from '../models';
 import { authService, emailService } from '../services';
 import { ApiError, Errors } from '../utils/ApiError';
 import { sendSuccess, sendCreated } from '../utils/response';
@@ -13,6 +13,7 @@ import { setAuthCookies, clearAuthCookies, COOKIE_NAMES } from '../utils/cookies
 import { asyncHandler } from '../middlewares';
 import { logger } from '../config';
 import { verifyIdToken } from '../config/firebase';
+import { logLogin, logLogout } from '../middlewares/activityLogger';
 import axios from 'axios';
 
 /**
@@ -115,19 +116,8 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
   // Reset login attempts on successful login
   await user.resetLoginAttempts();
 
-  // Log login activity
-  try {
-    await ActivityLog.create({
-      user: user._id,
-      action: 'login',
-      resource: 'auth',
-      description: `User ${user.email} logged in`,
-      ip: req.ip,
-      userAgent: req.headers['user-agent'],
-    });
-  } catch {
-    // Don't fail login if activity logging fails
-  }
+  // Log login activity (fire and forget)
+  logLogin(user._id.toString(), req.ip, req.headers['user-agent']);
 
   // Generate tokens
   const tokens = await authService.generateTokenPair(user, req.headers['user-agent'], req.ip);
@@ -170,6 +160,11 @@ export const logout = asyncHandler(async (req: Request, res: Response) => {
   // Blacklist access token
   if (accessToken) {
     await authService.blacklistAccessToken(accessToken);
+  }
+
+  // Log logout activity (fire and forget)
+  if (req.user?._id) {
+    logLogout(req.user._id.toString(), req.ip, req.headers['user-agent']);
   }
 
   // Clear auth cookies

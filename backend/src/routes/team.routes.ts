@@ -9,6 +9,7 @@ import { authenticate, authorize } from '../middlewares/auth';
 import { validate, idParamsSchema } from '../middlewares/validate';
 import { teamValidation } from '../validations';
 import { csrfValidation } from '../middlewares/csrf';
+import { logActivity } from '../middlewares/activityLogger';
 
 const router = Router();
 
@@ -101,6 +102,7 @@ router.post(
   csrfValidation,
   authorize('team:create'),
   validate({ body: teamValidation.createDepartment }),
+  logActivity({ action: 'create', resource: 'team' }),
   teamController.createDepartment
 );
 
@@ -158,6 +160,7 @@ router.put(
   csrfValidation,
   authorize('team:update'),
   validate({ params: idParamsSchema, body: teamValidation.updateDepartment }),
+  logActivity({ action: 'update', resource: 'team' }),
   teamController.updateDepartment
 );
 
@@ -191,6 +194,7 @@ router.delete(
   csrfValidation,
   authorize('team:delete'),
   validate({ params: idParamsSchema }),
+  logActivity({ action: 'delete', resource: 'team' }),
   teamController.deleteDepartment
 );
 
@@ -400,6 +404,7 @@ router.post(
   csrfValidation,
   authorize('team:create'),
   validate({ body: teamValidation.create }),
+  logActivity({ action: 'create', resource: 'team' }),
   teamController.createMember
 );
 
@@ -575,6 +580,7 @@ router.put(
   csrfValidation,
   authorize('team:update'),
   validate({ params: idParamsSchema, body: teamValidation.update }),
+  logActivity({ action: 'update', resource: 'team' }),
   teamController.updateMember
 );
 
@@ -608,6 +614,7 @@ router.delete(
   csrfValidation,
   authorize('team:delete'),
   validate({ params: idParamsSchema }),
+  logActivity({ action: 'delete', resource: 'team' }),
   teamController.deleteMember
 );
 

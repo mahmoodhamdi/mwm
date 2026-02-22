@@ -5,8 +5,9 @@
 
 import { Router } from 'express';
 import { notificationController } from '../controllers/notification.controller';
-import { authenticate, authorize } from '../middlewares';
+import { authenticate, authorize, validate } from '../middlewares';
 import { csrfValidation } from '../middlewares/csrf';
+import { notificationValidation } from '../validations/notification.validation';
 
 const router = Router();
 
@@ -69,6 +70,22 @@ router.get('/unread-count', authenticate, notificationController.getUnreadCount)
 
 /**
  * @swagger
+ * /notifications/read-all:
+ *   put:
+ *     summary: Mark all notifications as read
+ *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: All notifications marked as read
+ *       401:
+ *         description: Unauthorized
+ */
+router.put('/read-all', authenticate, notificationController.markAllAsRead);
+
+/**
+ * @swagger
  * /notifications/{id}/read:
  *   put:
  *     summary: Mark notification as read
@@ -91,19 +108,46 @@ router.put('/:id/read', authenticate, notificationController.markAsRead);
 
 /**
  * @swagger
- * /notifications/read-all:
- *   put:
- *     summary: Mark all notifications as read
+ * /notifications/read:
+ *   delete:
+ *     summary: Delete all read notifications
  *     tags: [Notifications]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: All notifications marked as read
+ *         description: Read notifications deleted
  *       401:
  *         description: Unauthorized
  */
-router.put('/read-all', authenticate, notificationController.markAllAsRead);
+router.delete('/read', authenticate, notificationController.deleteReadNotifications);
+
+/**
+ * @swagger
+ * /notifications/device-token:
+ *   delete:
+ *     summary: Remove device token
+ *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *             properties:
+ *               token:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Token removed
+ *       401:
+ *         description: Unauthorized
+ */
+router.delete('/device-token', authenticate, notificationController.removeDeviceToken);
 
 /**
  * @swagger
@@ -126,22 +170,6 @@ router.put('/read-all', authenticate, notificationController.markAllAsRead);
  *         description: Notification not found
  */
 router.delete('/:id', authenticate, notificationController.deleteNotification);
-
-/**
- * @swagger
- * /notifications/read:
- *   delete:
- *     summary: Delete all read notifications
- *     tags: [Notifications]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Read notifications deleted
- *       401:
- *         description: Unauthorized
- */
-router.delete('/read', authenticate, notificationController.deleteReadNotifications);
 
 /**
  * @swagger
@@ -172,33 +200,6 @@ router.delete('/read', authenticate, notificationController.deleteReadNotificati
  *         description: Unauthorized
  */
 router.post('/device-token', authenticate, notificationController.registerDeviceToken);
-
-/**
- * @swagger
- * /notifications/device-token:
- *   delete:
- *     summary: Remove device token
- *     tags: [Notifications]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - token
- *             properties:
- *               token:
- *                 type: string
- *     responses:
- *       200:
- *         description: Token removed
- *       401:
- *         description: Unauthorized
- */
-router.delete('/device-token', authenticate, notificationController.removeDeviceToken);
 
 /**
  * @swagger
@@ -317,6 +318,7 @@ router.post(
   authenticate,
   csrfValidation,
   authorize('notifications:create'),
+  validate({ body: notificationValidation.sendNotification }),
   notificationController.sendNotificationToUser
 );
 
@@ -366,6 +368,7 @@ router.post(
   authenticate,
   csrfValidation,
   authorize('notifications:create'),
+  validate({ body: notificationValidation.broadcastNotification }),
   notificationController.broadcastNotification
 );
 

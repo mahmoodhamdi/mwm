@@ -8,6 +8,7 @@ import { blogController } from '../controllers';
 import { authenticate, authorize } from '../middlewares/auth';
 import { validate, idParamsSchema, csrfValidation } from '../middlewares';
 import { blogValidation } from '../validations';
+import { logActivity } from '../middlewares/activityLogger';
 
 const router = Router();
 
@@ -710,6 +711,7 @@ router.post(
   authenticate,
   authorize('blog:create'),
   validate({ body: blogValidation.createCategory }),
+  logActivity({ action: 'create', resource: 'blog' }),
   blogController.createCategory
 );
 
@@ -770,6 +772,7 @@ router.put(
   authenticate,
   authorize('blog:update'),
   validate({ params: idParamsSchema, body: blogValidation.updateCategory }),
+  logActivity({ action: 'update', resource: 'blog' }),
   blogController.updateCategory
 );
 
@@ -804,6 +807,7 @@ router.delete(
   authenticate,
   authorize('blog:delete'),
   validate({ params: idParamsSchema }),
+  logActivity({ action: 'delete', resource: 'blog' }),
   blogController.deleteCategory
 );
 
@@ -1050,6 +1054,7 @@ router.post(
   authenticate,
   authorize('blog:create'),
   validate({ body: blogValidation.createPost }),
+  logActivity({ action: 'create', resource: 'blog' }),
   blogController.createPost
 );
 
@@ -1178,6 +1183,7 @@ router.put(
   authenticate,
   authorize('blog:update'),
   validate({ params: idParamsSchema, body: blogValidation.updatePost }),
+  logActivity({ action: 'update', resource: 'blog' }),
   blogController.updatePost
 );
 
@@ -1212,6 +1218,7 @@ router.delete(
   authenticate,
   authorize('blog:delete'),
   validate({ params: idParamsSchema }),
+  logActivity({ action: 'delete', resource: 'blog' }),
   blogController.deletePost
 );
 

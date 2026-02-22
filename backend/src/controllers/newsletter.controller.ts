@@ -9,9 +9,11 @@ import { Newsletter, CampaignStatus } from '../models/Newsletter';
 import { newsletterService } from '../services/newsletter.service';
 import { asyncHandler } from '../middlewares';
 import { redis } from '../config/redis';
+import { logger } from '../config';
 import { ApiError } from '../utils/ApiError';
 import { sendSuccess } from '../utils/response';
 import { generateCacheKey } from '../utils/helpers';
+import { notifyNewSubscriber } from '../services/notification.service';
 
 // Cache TTL: 5 minutes
 const CACHE_TTL = 60 * 5;
@@ -39,6 +41,11 @@ export const subscribe = asyncHandler(async (req: Request, res: Response) => {
     source: 'website',
     metadata: { ip, userAgent, referrer },
   });
+
+  // Notify admins of new subscriber (non-blocking)
+  if (isNew) {
+    notifyNewSubscriber(email).catch(err => logger.error('Failed to notify new subscriber:', err));
+  }
 
   // Invalidate cache
   const cacheKeys = await redis.keys('newsletter:subscribers:*');

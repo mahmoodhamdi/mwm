@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocale } from 'next-intl';
 import Link from 'next/link';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Search, Calendar, Clock, Tag, ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
 import { ImageWithFallback } from '@/components/ui';
 import {
@@ -23,6 +24,10 @@ export function BlogPageClient() {
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 6;
 
+  const [selectedTag, setSelectedTag] = useState<string>('');
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [categories, setCategories] = useState<BlogCategory[]>([]);
   const [featuredPost, setFeaturedPost] = useState<BlogPost | null>(null);
@@ -33,6 +38,14 @@ export function BlogPageClient() {
 
   // Ref for aborting pending requests
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Read tag from URL on mount
+  useEffect(() => {
+    const tagParam = searchParams.get('tag');
+    if (tagParam) {
+      setSelectedTag(tagParam);
+    }
+  }, [searchParams]);
 
   // Fetch categories and tags on mount
   // Using Promise.allSettled for graceful degradation if any request fails
@@ -91,6 +104,7 @@ export function BlogPageClient() {
             limit: postsPerPage,
             category: selectedCategory !== 'all' ? selectedCategory : undefined,
             search: searchQuery || undefined,
+            tag: selectedTag || undefined,
             locale,
           },
           { signal: controller.signal }
@@ -130,12 +144,26 @@ export function BlogPageClient() {
     return () => {
       controller.abort();
     };
-  }, [currentPage, selectedCategory, searchQuery, locale, isRTL]);
+  }, [currentPage, selectedCategory, searchQuery, selectedTag, locale, isRTL]);
 
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedCategory, searchQuery]);
+  }, [selectedCategory, searchQuery, selectedTag]);
+
+  const handleTagClick = useCallback(
+    (tag: string) => {
+      if (selectedTag === tag) {
+        setSelectedTag('');
+        router.push(`/${locale}/blog`, { scroll: false });
+      } else {
+        setSelectedTag(tag);
+        router.push(`/${locale}/blog?tag=${encodeURIComponent(tag)}`, { scroll: false });
+      }
+      setCurrentPage(1);
+    },
+    [selectedTag, locale, router]
+  );
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return '';
@@ -168,7 +196,10 @@ export function BlogPageClient() {
   };
 
   return (
-    <div className={`min-h-screen bg-gray-50 ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+    <div
+      className={`min-h-screen bg-gray-50 dark:bg-gray-900 ${isRTL ? 'rtl' : 'ltr'}`}
+      dir={isRTL ? 'rtl' : 'ltr'}
+    >
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-blue-600 to-blue-800 py-16 text-white">
         <div className="container mx-auto px-4">
@@ -204,12 +235,12 @@ export function BlogPageClient() {
             {/* Featured Post */}
             {featuredPost && currentPage === 1 && selectedCategory === 'all' && !searchQuery && (
               <div className="mb-12">
-                <h2 className="mb-6 text-2xl font-bold">
+                <h2 className="mb-6 text-2xl font-bold dark:text-white">
                   {isRTL ? 'المقال المميز' : 'Featured Post'}
                 </h2>
                 <Link href={`/${locale}/blog/${featuredPost.slug}`}>
-                  <div className="group overflow-hidden rounded-2xl bg-white shadow-lg transition-shadow hover:shadow-xl">
-                    <div className="relative aspect-video overflow-hidden bg-gray-200">
+                  <div className="group overflow-hidden rounded-2xl bg-white shadow-lg transition-shadow hover:shadow-xl dark:bg-gray-800">
+                    <div className="relative aspect-video overflow-hidden bg-gray-200 dark:bg-gray-700">
                       {featuredPost.featuredImage && (
                         <ImageWithFallback
                           src={featuredPost.featuredImage}
@@ -221,21 +252,23 @@ export function BlogPageClient() {
                     </div>
                     <div className="p-6">
                       <div className="mb-3 flex items-center gap-4">
-                        <span className="rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-800">
+                        <span className="rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
                           {getCategoryName(featuredPost.category)}
                         </span>
-                        <span className="flex items-center gap-1 text-sm text-gray-500">
+                        <span className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
                           <Calendar className="size-4" />
                           {formatDate(featuredPost.publishedAt)}
                         </span>
                       </div>
-                      <h3 className="mb-3 text-2xl font-bold text-gray-900 transition-colors group-hover:text-blue-600">
+                      <h3 className="mb-3 text-2xl font-bold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">
                         {getLocalizedText(featuredPost.title)}
                       </h3>
-                      <p className="mb-4 text-gray-600">{getLocalizedText(featuredPost.excerpt)}</p>
+                      <p className="mb-4 text-gray-600 dark:text-gray-300">
+                        {getLocalizedText(featuredPost.excerpt)}
+                      </p>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="relative size-10 overflow-hidden rounded-full bg-gray-200">
+                          <div className="relative size-10 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
                             {getAuthorAvatar(featuredPost.author) ? (
                               <ImageWithFallback
                                 src={getAuthorAvatar(featuredPost.author)!}
@@ -244,22 +277,22 @@ export function BlogPageClient() {
                                 className="object-cover"
                               />
                             ) : (
-                              <div className="flex size-full items-center justify-center text-gray-400">
+                              <div className="flex size-full items-center justify-center text-gray-400 dark:text-gray-500">
                                 {getAuthorName(featuredPost.author).charAt(0)}
                               </div>
                             )}
                           </div>
                           <div>
-                            <p className="font-medium text-gray-900">
+                            <p className="font-medium text-gray-900 dark:text-white">
                               {getAuthorName(featuredPost.author)}
                             </p>
-                            <p className="flex items-center gap-1 text-sm text-gray-500">
+                            <p className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
                               <Clock className="size-3" />
                               {featuredPost.readingTime} {isRTL ? 'دقيقة قراءة' : 'min read'}
                             </p>
                           </div>
                         </div>
-                        <span className="flex items-center gap-1 font-medium text-blue-600">
+                        <span className="flex items-center gap-1 font-medium text-blue-600 dark:text-blue-400">
                           {isRTL ? 'اقرأ المزيد' : 'Read more'}
                           {isRTL ? (
                             <ArrowLeft className="size-4" />
@@ -276,7 +309,7 @@ export function BlogPageClient() {
 
             {/* Posts Grid */}
             <div className="mb-8">
-              <h2 className="mb-6 text-2xl font-bold">
+              <h2 className="mb-6 text-2xl font-bold dark:text-white">
                 {isRTL ? 'أحدث المقالات' : 'Latest Articles'}
               </h2>
 
@@ -287,15 +320,15 @@ export function BlogPageClient() {
               ) : error ? (
                 <div className="py-12 text-center text-red-500">{error}</div>
               ) : posts.length === 0 ? (
-                <div className="py-12 text-center text-gray-500">
+                <div className="py-12 text-center text-gray-500 dark:text-gray-400">
                   {isRTL ? 'لا توجد مقالات' : 'No articles found'}
                 </div>
               ) : (
                 <div className="grid gap-6 md:grid-cols-2">
                   {posts.map(post => (
                     <Link key={post._id} href={`/${locale}/blog/${post.slug}`}>
-                      <article className="group h-full overflow-hidden rounded-xl bg-white shadow-md transition-shadow hover:shadow-lg">
-                        <div className="relative aspect-video overflow-hidden bg-gray-200">
+                      <article className="group h-full overflow-hidden rounded-xl bg-white shadow-md transition-shadow hover:shadow-lg dark:bg-gray-800">
+                        <div className="relative aspect-video overflow-hidden bg-gray-200 dark:bg-gray-700">
                           {post.featuredImage && (
                             <ImageWithFallback
                               src={post.featuredImage}
@@ -307,22 +340,22 @@ export function BlogPageClient() {
                         </div>
                         <div className="p-5">
                           <div className="mb-3 flex items-center gap-3">
-                            <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-700">
+                            <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-700 dark:bg-gray-700 dark:text-gray-300">
                               {getCategoryName(post.category)}
                             </span>
-                            <span className="text-xs text-gray-500">
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
                               {formatDate(post.publishedAt)}
                             </span>
                           </div>
-                          <h3 className="mb-2 line-clamp-2 font-bold text-gray-900 transition-colors group-hover:text-blue-600">
+                          <h3 className="mb-2 line-clamp-2 font-bold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">
                             {getLocalizedText(post.title)}
                           </h3>
-                          <p className="mb-4 line-clamp-2 text-sm text-gray-600">
+                          <p className="mb-4 line-clamp-2 text-sm text-gray-600 dark:text-gray-300">
                             {getLocalizedText(post.excerpt)}
                           </p>
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                              <div className="relative size-8 overflow-hidden rounded-full bg-gray-200">
+                              <div className="relative size-8 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
                                 {getAuthorAvatar(post.author) ? (
                                   <ImageWithFallback
                                     src={getAuthorAvatar(post.author)!}
@@ -331,16 +364,16 @@ export function BlogPageClient() {
                                     className="object-cover"
                                   />
                                 ) : (
-                                  <div className="flex size-full items-center justify-center text-xs text-gray-400">
+                                  <div className="flex size-full items-center justify-center text-xs text-gray-400 dark:text-gray-500">
                                     {getAuthorName(post.author).charAt(0)}
                                   </div>
                                 )}
                               </div>
-                              <span className="text-sm text-gray-700">
+                              <span className="text-sm text-gray-700 dark:text-gray-300">
                                 {getAuthorName(post.author)}
                               </span>
                             </div>
-                            <span className="flex items-center gap-1 text-xs text-gray-500">
+                            <span className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
                               <Clock className="size-3" />
                               {post.readingTime} {isRTL ? 'د' : 'min'}
                             </span>
@@ -359,7 +392,7 @@ export function BlogPageClient() {
                 <button
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="rounded-lg border px-4 py-2 hover:bg-gray-50 disabled:opacity-50"
+                  className="rounded-lg border px-4 py-2 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
                 >
                   {isRTL ? <ArrowRight className="size-5" /> : <ArrowLeft className="size-5" />}
                 </button>
@@ -368,7 +401,9 @@ export function BlogPageClient() {
                     key={page}
                     onClick={() => setCurrentPage(page)}
                     className={`size-10 rounded-lg ${
-                      currentPage === page ? 'bg-blue-600 text-white' : 'border hover:bg-gray-50'
+                      currentPage === page
+                        ? 'bg-blue-600 text-white'
+                        : 'border hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800'
                     }`}
                   >
                     {page}
@@ -377,7 +412,7 @@ export function BlogPageClient() {
                 <button
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="rounded-lg border px-4 py-2 hover:bg-gray-50 disabled:opacity-50"
+                  className="rounded-lg border px-4 py-2 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
                 >
                   {isRTL ? <ArrowLeft className="size-5" /> : <ArrowRight className="size-5" />}
                 </button>
@@ -388,14 +423,18 @@ export function BlogPageClient() {
           {/* Sidebar */}
           <aside className="w-full lg:w-80">
             {/* Categories */}
-            <div className="mb-8 rounded-xl bg-white p-6 shadow-md">
-              <h3 className="mb-4 text-lg font-bold">{isRTL ? 'التصنيفات' : 'Categories'}</h3>
+            <div className="mb-8 rounded-xl bg-white p-6 shadow-md dark:bg-gray-800">
+              <h3 className="mb-4 text-lg font-bold dark:text-white">
+                {isRTL ? 'التصنيفات' : 'Categories'}
+              </h3>
               <ul className="space-y-2">
                 <li>
                   <button
                     onClick={() => setSelectedCategory('all')}
                     className={`flex w-full items-center justify-between rounded-lg px-3 py-2 ${
-                      selectedCategory === 'all' ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'
+                      selectedCategory === 'all'
+                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                        : 'hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800'
                     }`}
                   >
                     <span>{isRTL ? 'الكل' : 'All'}</span>
@@ -407,13 +446,13 @@ export function BlogPageClient() {
                       onClick={() => setSelectedCategory(category._id)}
                       className={`flex w-full items-center justify-between rounded-lg px-3 py-2 ${
                         selectedCategory === category._id
-                          ? 'bg-blue-50 text-blue-600'
-                          : 'hover:bg-gray-50'
+                          ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                          : 'hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800'
                       }`}
                     >
                       <span>{getLocalizedText(category.name)}</span>
                       {category.postCount !== undefined && (
-                        <span className="rounded-full bg-gray-100 px-2 text-sm text-gray-600">
+                        <span className="rounded-full bg-gray-100 px-2 text-sm text-gray-600 dark:bg-gray-700 dark:text-gray-400">
                           {category.postCount}
                         </span>
                       )}
@@ -424,20 +463,24 @@ export function BlogPageClient() {
             </div>
 
             {/* Popular Tags */}
-            <div className="mb-8 rounded-xl bg-white p-6 shadow-md">
-              <h3 className="mb-4 text-lg font-bold">
+            <div className="mb-8 rounded-xl bg-white p-6 shadow-md dark:bg-gray-800">
+              <h3 className="mb-4 text-lg font-bold dark:text-white">
                 {isRTL ? 'الوسوم الشائعة' : 'Popular Tags'}
               </h3>
               <div className="flex flex-wrap gap-2">
                 {tags.map((tag, index) => (
-                  <Link
+                  <button
                     key={index}
-                    href={`/${locale}/blog?tag=${encodeURIComponent(tag)}`}
-                    className="flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm transition-colors hover:border-blue-500 hover:text-blue-600"
+                    onClick={() => handleTagClick(tag)}
+                    className={`flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                      selectedTag === tag
+                        ? 'border-blue-500 bg-blue-50 text-blue-600 dark:border-blue-400 dark:bg-blue-900/30 dark:text-blue-400'
+                        : 'hover:border-blue-500 hover:text-blue-600 dark:border-gray-700 dark:text-gray-300 dark:hover:border-blue-400 dark:hover:text-blue-400'
+                    }`}
                   >
                     <Tag className="size-3" />
                     {tag}
-                  </Link>
+                  </button>
                 ))}
               </div>
             </div>

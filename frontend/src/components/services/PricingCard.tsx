@@ -169,7 +169,7 @@ const PricingCard = forwardRef<HTMLDivElement, PricingCardProps>(
         >
           {/* Popular badge */}
           {isPopular && (
-            <div className="absolute -top-3 left-4">
+            <div className="absolute -top-3 start-4">
               <span className="bg-primary-500 rounded-lg px-3 py-1 text-xs font-medium text-white">
                 {isRTL ? 'مميز' : 'Featured'}
               </span>

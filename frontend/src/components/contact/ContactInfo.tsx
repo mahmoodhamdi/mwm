@@ -154,7 +154,9 @@ const ContactInfo = forwardRef<HTMLDivElement, ContactInfoProps>(
           </div>
           <div>
             <h4 className="font-semibold text-gray-900 dark:text-white">{item.title}</h4>
-            <p className="text-gray-600 dark:text-gray-300">{item.value}</p>
+            <p className="break-all text-gray-600 dark:text-gray-300" dir="ltr">
+              {item.value}
+            </p>
           </div>
         </>
       );
@@ -249,10 +251,14 @@ const ContactInfo = forwardRef<HTMLDivElement, ContactInfoProps>(
                     target={item.type === 'website' ? '_blank' : undefined}
                     rel={item.type === 'website' ? 'noopener noreferrer' : undefined}
                   >
-                    {item.value}
+                    <span dir="ltr" className="break-all">
+                      {item.value}
+                    </span>
                   </a>
                 ) : (
-                  <span className="text-gray-600 dark:text-gray-300">{item.value}</span>
+                  <span className="break-all text-gray-600 dark:text-gray-300" dir="ltr">
+                    {item.value}
+                  </span>
                 )}
               </div>
             </div>
@@ -321,14 +327,17 @@ const ContactInfo = forwardRef<HTMLDivElement, ContactInfoProps>(
                 {item.link ? (
                   <a
                     href={item.link}
-                    className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
+                    className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 break-all"
                     target={item.type === 'website' ? '_blank' : undefined}
                     rel={item.type === 'website' ? 'noopener noreferrer' : undefined}
+                    dir="ltr"
                   >
                     {item.value}
                   </a>
                 ) : (
-                  <p className="text-gray-600 dark:text-gray-300">{item.value}</p>
+                  <p className="break-all text-gray-600 dark:text-gray-300" dir="ltr">
+                    {item.value}
+                  </p>
                 )}
               </div>
             </div>

@@ -86,7 +86,9 @@ export default function HomePage() {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="mb-16 text-center">
-            <h2 className="mb-4 text-3xl font-bold md:text-4xl">{t('home.ourServices')}</h2>
+            <h2 className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl dark:text-white">
+              {t('home.ourServices')}
+            </h2>
             <p className="mx-auto max-w-2xl text-gray-600 dark:text-gray-400">
               {t('services.subtitle')}
             </p>
@@ -110,7 +112,9 @@ export default function HomePage() {
                   />
                 </svg>
               </div>
-              <h3 className="mb-2 text-xl font-semibold">{t('services.webDev.title')}</h3>
+              <h3 className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">
+                {t('services.webDev.title')}
+              </h3>
               <p className="text-gray-600 dark:text-gray-400">{t('services.webDev.description')}</p>
             </div>
 
@@ -131,7 +135,9 @@ export default function HomePage() {
                   />
                 </svg>
               </div>
-              <h3 className="mb-2 text-xl font-semibold">{t('services.mobileDev.title')}</h3>
+              <h3 className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">
+                {t('services.mobileDev.title')}
+              </h3>
               <p className="text-gray-600 dark:text-gray-400">
                 {t('services.mobileDev.description')}
               </p>
@@ -154,7 +160,9 @@ export default function HomePage() {
                   />
                 </svg>
               </div>
-              <h3 className="mb-2 text-xl font-semibold">{t('services.uiux.title')}</h3>
+              <h3 className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">
+                {t('services.uiux.title')}
+              </h3>
               <p className="text-gray-600 dark:text-gray-400">{t('services.uiux.description')}</p>
             </div>
 
@@ -175,7 +183,9 @@ export default function HomePage() {
                   />
                 </svg>
               </div>
-              <h3 className="mb-2 text-xl font-semibold">{t('services.backend.title')}</h3>
+              <h3 className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">
+                {t('services.backend.title')}
+              </h3>
               <p className="text-gray-600 dark:text-gray-400">
                 {t('services.backend.description')}
               </p>
@@ -198,7 +208,9 @@ export default function HomePage() {
                   />
                 </svg>
               </div>
-              <h3 className="mb-2 text-xl font-semibold">{t('services.consulting.title')}</h3>
+              <h3 className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">
+                {t('services.consulting.title')}
+              </h3>
               <p className="text-gray-600 dark:text-gray-400">
                 {t('services.consulting.description')}
               </p>
@@ -221,7 +233,9 @@ export default function HomePage() {
                   />
                 </svg>
               </div>
-              <h3 className="mb-2 text-xl font-semibold">{t('services.support.title')}</h3>
+              <h3 className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">
+                {t('services.support.title')}
+              </h3>
               <p className="text-gray-600 dark:text-gray-400">
                 {t('services.support.description')}
               </p>

@@ -527,6 +527,7 @@ const ContactForm = forwardRef<HTMLFormElement, ContactFormProps>(
                 <div className="relative">
                   <input
                     type="tel"
+                    dir="ltr"
                     id="form-phone"
                     name="phone"
                     value={formData.phone}
@@ -582,6 +583,7 @@ const ContactForm = forwardRef<HTMLFormElement, ContactFormProps>(
               <div className="relative">
                 <input
                   type="url"
+                  dir="ltr"
                   id="form-website"
                   name="website"
                   value={formData.website}

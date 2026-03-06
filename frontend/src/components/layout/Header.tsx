@@ -7,6 +7,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useLocale, useTranslations } from 'next-intl';
 import { Menu, X, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -109,6 +110,7 @@ export function Header({ transparent = false, className }: HeaderProps) {
             href={getLocalizedHref('/')}
             className="text-primary-600 dark:text-primary-400 flex items-center gap-2 text-xl font-bold"
           >
+            <Image src="/favicon.svg" alt="MWM" width={36} height={36} className="rounded-lg" />
             <span className="text-2xl">MWM</span>
           </Link>
 
@@ -172,9 +174,11 @@ export function Header({ transparent = false, className }: HeaderProps) {
           <div className="hidden items-center gap-2 lg:flex">
             <LanguageSwitcher variant="minimal" />
             <ThemeToggle />
-            <Button variant="primary" size="sm" className="ms-2">
-              {tCommon('contactUs')}
-            </Button>
+            <Link href={getLocalizedHref('/contact')}>
+              <Button variant="primary" size="sm" className="ms-2">
+                {tCommon('contactUs')}
+              </Button>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -256,9 +260,11 @@ export function Header({ transparent = false, className }: HeaderProps) {
             <div className="mb-4 flex items-center justify-center gap-4">
               <LanguageSwitcher variant="buttons" showIcon={false} />
             </div>
-            <Button variant="primary" fullWidth>
-              {tCommon('contactUs')}
-            </Button>
+            <Link href={getLocalizedHref('/contact')} onClick={toggleMenu}>
+              <Button variant="primary" fullWidth>
+                {tCommon('contactUs')}
+              </Button>
+            </Link>
           </div>
         </div>
       </div>

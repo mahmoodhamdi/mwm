@@ -6,98 +6,119 @@
 import { MetadataRoute } from 'next';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://mwm.com';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
 
-// Static pages for the sitemap
-const staticPages = ['', '/about', '/services', '/portfolio', '/blog', '/careers', '/contact'];
-
-// Locales
 const locales = ['ar', 'en'];
+
+// Static pages
+const staticPages = [
+  { path: '', changeFrequency: 'daily' as const, priority: 1.0 },
+  { path: '/about', changeFrequency: 'monthly' as const, priority: 0.8 },
+  { path: '/services', changeFrequency: 'weekly' as const, priority: 0.9 },
+  { path: '/projects', changeFrequency: 'weekly' as const, priority: 0.9 },
+  { path: '/blog', changeFrequency: 'daily' as const, priority: 0.8 },
+  { path: '/careers', changeFrequency: 'weekly' as const, priority: 0.7 },
+  { path: '/contact', changeFrequency: 'monthly' as const, priority: 0.8 },
+  { path: '/team', changeFrequency: 'monthly' as const, priority: 0.6 },
+];
+
+async function fetchSlugs(endpoint: string, key: string): Promise<string[]> {
+  try {
+    const res = await fetch(`${API_URL}/${endpoint}?limit=100`, {
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    const items = data.data?.[key] || [];
+    return items.map((item: { slug: string }) => item.slug).filter(Boolean);
+  } catch {
+    return [];
+  }
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const currentDate = new Date().toISOString();
 
-  // Static pages for all locales
-  const staticRoutes: MetadataRoute.Sitemap = [];
+  // Fetch dynamic slugs in parallel
+  const [projectSlugs, blogSlugs, serviceSlugs] = await Promise.all([
+    fetchSlugs('projects', 'projects'),
+    fetchSlugs('blog', 'posts'),
+    fetchSlugs('services', 'services'),
+  ]);
 
+  const entries: MetadataRoute.Sitemap = [];
+
+  // Static pages for all locales
   for (const locale of locales) {
     for (const page of staticPages) {
-      staticRoutes.push({
-        url: `${SITE_URL}/${locale}${page}`,
+      entries.push({
+        url: `${SITE_URL}/${locale}${page.path}`,
         lastModified: currentDate,
-        changeFrequency: page === '' ? 'daily' : 'weekly',
-        priority: page === '' ? 1.0 : 0.8,
+        changeFrequency: page.changeFrequency,
+        priority: page.priority,
         alternates: {
           languages: {
-            ar: `${SITE_URL}/ar${page}`,
-            en: `${SITE_URL}/en${page}`,
+            ar: `${SITE_URL}/ar${page.path}`,
+            en: `${SITE_URL}/en${page.path}`,
           },
         },
       });
     }
   }
 
-  // Services pages (static for now, can be dynamic from API)
-  const services = [
-    'web-development',
-    'mobile-development',
-    'ui-ux-design',
-    'cloud-solutions',
-    'digital-marketing',
-    'data-analytics',
-    'cybersecurity',
-    'ai-ml-solutions',
-    'erp-solutions',
-    'ecommerce',
-    'maintenance-support',
-    'consulting',
-  ];
-
-  const serviceRoutes: MetadataRoute.Sitemap = [];
+  // Dynamic project pages
   for (const locale of locales) {
-    for (const service of services) {
-      serviceRoutes.push({
-        url: `${SITE_URL}/${locale}/services/${service}`,
+    for (const slug of projectSlugs) {
+      entries.push({
+        url: `${SITE_URL}/${locale}/projects/${slug}`,
         lastModified: currentDate,
         changeFrequency: 'monthly',
         priority: 0.7,
         alternates: {
           languages: {
-            ar: `${SITE_URL}/ar/services/${service}`,
-            en: `${SITE_URL}/en/services/${service}`,
+            ar: `${SITE_URL}/ar/projects/${slug}`,
+            en: `${SITE_URL}/en/projects/${slug}`,
           },
         },
       });
     }
   }
 
-  // Admin routes (lower priority, might be excluded in production)
-  const adminRoutes: MetadataRoute.Sitemap = [];
-  if (process.env.NODE_ENV === 'development') {
-    const adminPages = [
-      '/admin/dashboard',
-      '/admin/users',
-      '/admin/content',
-      '/admin/services',
-      '/admin/projects',
-      '/admin/team',
-      '/admin/settings',
-      '/admin/translations',
-      '/admin/menus',
-      '/admin/blog',
-      '/admin/careers',
-      '/admin/analytics',
-      '/admin/notifications',
-    ];
-
-    for (const page of adminPages) {
-      adminRoutes.push({
-        url: `${SITE_URL}/en${page}`,
+  // Dynamic blog posts
+  for (const locale of locales) {
+    for (const slug of blogSlugs) {
+      entries.push({
+        url: `${SITE_URL}/${locale}/blog/${slug}`,
         lastModified: currentDate,
-        changeFrequency: 'yearly',
-        priority: 0.1,
+        changeFrequency: 'monthly',
+        priority: 0.6,
+        alternates: {
+          languages: {
+            ar: `${SITE_URL}/ar/blog/${slug}`,
+            en: `${SITE_URL}/en/blog/${slug}`,
+          },
+        },
       });
     }
   }
 
-  return [...staticRoutes, ...serviceRoutes, ...adminRoutes];
+  // Dynamic service pages
+  for (const locale of locales) {
+    for (const slug of serviceSlugs) {
+      entries.push({
+        url: `${SITE_URL}/${locale}/services/${slug}`,
+        lastModified: currentDate,
+        changeFrequency: 'monthly',
+        priority: 0.7,
+        alternates: {
+          languages: {
+            ar: `${SITE_URL}/ar/services/${slug}`,
+            en: `${SITE_URL}/en/services/${slug}`,
+          },
+        },
+      });
+    }
+  }
+
+  return entries;
 }

@@ -93,8 +93,8 @@ export function ShareButtons({ url, title, description, className = '' }: ShareB
         onClick={handleCopyLink}
         className={`rounded-lg border p-2 transition-colors ${
           copied
-            ? 'border-green-500 bg-green-50 text-green-600'
-            : 'border-gray-300 bg-white text-gray-600 hover:bg-gray-50'
+            ? 'border-green-500 bg-green-50 text-green-600 dark:bg-green-900/20'
+            : 'border-gray-300 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
         }`}
         aria-label={copied ? 'Link copied!' : 'Copy link'}
         title={copied ? 'Link copied!' : 'Copy link'}

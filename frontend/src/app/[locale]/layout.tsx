@@ -48,28 +48,122 @@ export async function generateMetadata({
 
   const isArabic = locale === 'ar';
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://mwm.com';
+
   return {
-    title: isArabic ? 'MWM - حلول برمجية متكاملة' : 'MWM - Integrated Software Solutions',
+    title: {
+      default: isArabic
+        ? 'MWM - شركة برمجة وتطوير مواقع وتطبيقات | حلول برمجية متكاملة'
+        : 'MWM - Software Development Company | Web & Mobile App Development',
+      template: isArabic ? '%s | MWM حلول برمجية' : '%s | MWM Software Solutions',
+    },
     description: isArabic
-      ? 'شركة متخصصة في تطوير البرمجيات والحلول الرقمية المتكاملة'
-      : 'A company specialized in software development and integrated digital solutions',
+      ? 'شركة MWM متخصصة في تطوير المواقع والتطبيقات والأنظمة البرمجية. نبني مواقع ويب احترافية، تطبيقات موبايل، واجهات برمجية APIs، أنظمة إدارة محتوى، ومتاجر إلكترونية. خبرة في Next.js, Node.js, Flutter, Laravel. تواصل معنا للحصول على عرض سعر مجاني.'
+      : 'MWM specializes in web development, mobile apps, and software systems. We build professional websites, mobile applications, REST APIs, CMS platforms, and e-commerce stores. Expert in Next.js, Node.js, Flutter, Laravel. Contact us for a free quote.',
     keywords: isArabic
-      ? ['برمجة', 'تطوير مواقع', 'تطبيقات', 'حلول رقمية']
-      : ['software', 'web development', 'apps', 'digital solutions'],
+      ? [
+          'شركة برمجة',
+          'تطوير مواقع',
+          'تطوير تطبيقات',
+          'برمجة مواقع',
+          'تصميم مواقع',
+          'مبرمج',
+          'مطور ويب',
+          'شركة تطوير برمجيات',
+          'تطبيقات موبايل',
+          'متجر إلكتروني',
+          'واجهة برمجية',
+          'API',
+          'Next.js',
+          'Node.js',
+          'Flutter',
+          'Laravel',
+          'React',
+          'تصميم واجهات',
+          'UI/UX',
+          'مصر',
+          'القاهرة',
+          'freelancer',
+          'مستقل',
+          'خمسات',
+          'مطور فلاتر',
+          'برمجة تطبيقات الجوال',
+        ]
+      : [
+          'software development company',
+          'web development',
+          'mobile app development',
+          'web developer',
+          'programmer',
+          'freelance developer',
+          'website design',
+          'full-stack developer',
+          'React developer',
+          'Next.js developer',
+          'Node.js developer',
+          'Flutter developer',
+          'Laravel developer',
+          'REST API development',
+          'e-commerce development',
+          'CMS development',
+          'UI/UX design',
+          'Egypt',
+          'Cairo',
+          'hire developer',
+          'custom software',
+          'web application',
+          'SaaS development',
+        ],
+    metadataBase: new URL(siteUrl),
+    alternates: {
+      canonical: `/${locale}`,
+      languages: {
+        ar: '/ar',
+        en: '/en',
+      },
+    },
     openGraph: {
-      title: isArabic ? 'MWM - حلول برمجية متكاملة' : 'MWM - Integrated Software Solutions',
+      title: isArabic
+        ? 'MWM - شركة برمجة وتطوير مواقع وتطبيقات'
+        : 'MWM - Software Development Company | Web & Mobile Apps',
       description: isArabic
-        ? 'شركة متخصصة في تطوير البرمجيات والحلول الرقمية المتكاملة'
-        : 'A company specialized in software development and integrated digital solutions',
+        ? 'نبني مواقع ويب احترافية، تطبيقات موبايل، واجهات برمجية، وأنظمة متكاملة. +30 مشروع ناجح. تواصل معنا الآن.'
+        : 'We build professional websites, mobile apps, APIs, and full-stack platforms. 30+ successful projects. Contact us now.',
       locale: isArabic ? 'ar_SA' : 'en_US',
+      alternateLocale: isArabic ? 'en_US' : 'ar_SA',
       type: 'website',
+      siteName: 'MWM Software Solutions',
+      url: `${siteUrl}/${locale}`,
+      images: [
+        {
+          url: `${siteUrl}/og-image.svg`,
+          width: 1200,
+          height: 630,
+          alt: isArabic ? 'MWM حلول برمجية متكاملة' : 'MWM Software Solutions',
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
+      title: isArabic ? 'MWM - شركة برمجة وتطوير مواقع' : 'MWM - Software Development Company',
+      description: isArabic
+        ? 'نبني مواقع ويب، تطبيقات موبايل، وأنظمة برمجية متكاملة'
+        : 'We build websites, mobile apps, and full-stack software systems',
+      images: [`${siteUrl}/og-image.svg`],
     },
     robots: {
       index: true,
       follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
+    verification: {
+      google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
     },
   };
 }

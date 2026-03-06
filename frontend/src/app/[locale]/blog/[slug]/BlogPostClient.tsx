@@ -183,7 +183,7 @@ export function BlogPostClient({ slug }: BlogPostClientProps) {
   if (error || !post) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center">
-        <h1 className="mb-4 text-2xl font-bold text-gray-900">
+        <h1 className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
           {error || (isRTL ? 'المقال غير موجود' : 'Post not found')}
         </h1>
         <Link href={`/${locale}/blog`} className="text-blue-600 hover:text-blue-800">
@@ -197,11 +197,14 @@ export function BlogPostClient({ slug }: BlogPostClientProps) {
   const tableOfContents = extractTOC(content);
 
   return (
-    <div className={`min-h-screen bg-white ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+    <div
+      className={`min-h-screen bg-white dark:bg-gray-900 ${isRTL ? 'rtl' : 'ltr'}`}
+      dir={isRTL ? 'rtl' : 'ltr'}
+    >
       {/* Breadcrumb */}
-      <div className="border-b bg-gray-50">
+      <div className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800">
         <div className="container mx-auto p-4">
-          <nav className="flex items-center gap-2 text-sm text-gray-600">
+          <nav className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <Link href={`/${locale}`} className="hover:text-blue-600">
               {isRTL ? 'الرئيسية' : 'Home'}
             </Link>
@@ -210,7 +213,9 @@ export function BlogPostClient({ slug }: BlogPostClientProps) {
               {isRTL ? 'المدونة' : 'Blog'}
             </Link>
             <ChevronRight className={`size-4 ${isRTL ? 'rotate-180' : ''}`} />
-            <span className="text-gray-900">{getLocalizedText(post.title)}</span>
+            <span className="truncate text-gray-900 dark:text-white">
+              {getLocalizedText(post.title)}
+            </span>
           </nav>
         </div>
       </div>
@@ -227,17 +232,19 @@ export function BlogPostClient({ slug }: BlogPostClientProps) {
           </Link>
 
           {/* Title */}
-          <h1 className="mb-6 text-3xl font-bold leading-tight text-gray-900 md:text-4xl lg:text-5xl">
+          <h1 className="mb-6 text-3xl font-bold leading-tight text-gray-900 md:text-4xl lg:text-5xl dark:text-white">
             {getLocalizedText(post.title)}
           </h1>
 
           {/* Excerpt */}
-          <p className="mb-8 text-xl text-gray-600">{getLocalizedText(post.excerpt)}</p>
+          <p className="mb-8 text-xl text-gray-600 dark:text-gray-300">
+            {getLocalizedText(post.excerpt)}
+          </p>
 
           {/* Meta */}
-          <div className="flex flex-wrap items-center gap-6 text-gray-500">
+          <div className="flex flex-wrap items-center gap-6 text-gray-500 dark:text-gray-400">
             <div className="flex items-center gap-3">
-              <div className="relative flex size-12 items-center justify-center overflow-hidden rounded-full bg-gray-200">
+              <div className="relative flex size-12 items-center justify-center overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
                 {getAuthorAvatar(post.author) ? (
                   <ImageWithFallback
                     src={getAuthorAvatar(post.author)!}
@@ -246,11 +253,13 @@ export function BlogPostClient({ slug }: BlogPostClientProps) {
                     className="object-cover"
                   />
                 ) : (
-                  <User className="size-6 text-gray-500" />
+                  <User className="size-6 text-gray-500 dark:text-gray-400" />
                 )}
               </div>
               <div>
-                <p className="font-medium text-gray-900">{getAuthorName(post.author)}</p>
+                <p className="font-medium text-gray-900 dark:text-white">
+                  {getAuthorName(post.author)}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -291,7 +300,7 @@ export function BlogPostClient({ slug }: BlogPostClientProps) {
             <div className="sticky top-8">
               {tableOfContents.length > 0 && (
                 <>
-                  <h3 className="mb-4 font-bold text-gray-900">
+                  <h3 className="mb-4 font-bold text-gray-900 dark:text-white">
                     {isRTL ? 'محتويات المقال' : 'Table of Contents'}
                   </h3>
                   <nav className="space-y-2">
@@ -299,8 +308,8 @@ export function BlogPostClient({ slug }: BlogPostClientProps) {
                       <button
                         key={item.id}
                         onClick={() => scrollToSection(item.id)}
-                        className="block w-full rounded-lg px-3 py-2 text-left text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                        style={{ paddingLeft: `${(item.level - 1) * 12 + 12}px` }}
+                        className="block w-full rounded-lg px-3 py-2 text-start text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+                        style={{ paddingInlineStart: `${(item.level - 1) * 12 + 12}px` }}
                       >
                         {item.title}
                       </button>
@@ -310,7 +319,7 @@ export function BlogPostClient({ slug }: BlogPostClientProps) {
               )}
 
               {/* Share */}
-              <div className="mt-8 border-t pt-8">
+              <div className="mt-8 border-t border-gray-200 pt-8 dark:border-gray-700">
                 <h3 className="mb-4 font-bold text-gray-900 dark:text-white">
                   {isRTL ? 'شارك المقال' : 'Share'}
                 </h3>
@@ -328,8 +337,8 @@ export function BlogPostClient({ slug }: BlogPostClientProps) {
                   disabled={isSaving}
                   className={`flex w-full items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
                     isSaved
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'text-gray-700 hover:bg-gray-50'
+                      ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                      : 'border-gray-200 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800'
                   } disabled:cursor-not-allowed disabled:opacity-50`}
                 >
                   {isSaving ? (
@@ -353,20 +362,20 @@ export function BlogPostClient({ slug }: BlogPostClientProps) {
           <article className="min-w-0 flex-1">
             {/* Article Content */}
             <div
-              className="prose prose-lg prose-headings:font-bold prose-h2:mt-8 prose-h2:text-2xl prose-p:text-gray-700 prose-a:text-blue-600 prose-ul:my-4 prose-li:text-gray-700 max-w-none"
+              className="prose prose-lg prose-headings:font-bold prose-h2:mt-8 prose-h2:text-2xl prose-p:text-gray-700 prose-a:text-blue-600 prose-ul:my-4 prose-li:text-gray-700 dark:prose-invert dark:prose-p:text-gray-300 dark:prose-a:text-blue-400 dark:prose-li:text-gray-300 max-w-none"
               dangerouslySetInnerHTML={createSanitizedHtml(content)}
             />
 
             {/* Tags */}
             {post.tags && post.tags.length > 0 && (
-              <div className="mt-12 border-t pt-8">
+              <div className="mt-12 border-t border-gray-200 pt-8 dark:border-gray-700">
                 <div className="flex flex-wrap items-center gap-2">
-                  <Tag className="size-5 text-gray-400" />
+                  <Tag className="size-5 text-gray-400 dark:text-gray-500" />
                   {post.tags.map((tag, index) => (
                     <Link
                       key={index}
                       href={`/${locale}/blog?tag=${encodeURIComponent(getTagText(tag))}`}
-                      className="rounded-full border px-4 py-1.5 text-sm text-gray-700 transition-colors hover:border-blue-500 hover:text-blue-600"
+                      className="rounded-full border border-gray-200 px-4 py-1.5 text-sm text-gray-700 transition-colors hover:border-blue-500 hover:text-blue-600 dark:border-gray-700 dark:text-gray-300 dark:hover:border-blue-400 dark:hover:text-blue-400"
                     >
                       {getTagText(tag)}
                     </Link>
@@ -376,9 +385,9 @@ export function BlogPostClient({ slug }: BlogPostClientProps) {
             )}
 
             {/* Author Box */}
-            <div className="mt-12 rounded-2xl bg-gray-50 p-8">
+            <div className="mt-12 rounded-2xl bg-gray-50 p-8 dark:bg-gray-800">
               <div className="flex items-start gap-6">
-                <div className="relative flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-200">
+                <div className="relative flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
                   {getAuthorAvatar(post.author) ? (
                     <ImageWithFallback
                       src={getAuthorAvatar(post.author)!}
@@ -387,14 +396,16 @@ export function BlogPostClient({ slug }: BlogPostClientProps) {
                       className="object-cover"
                     />
                   ) : (
-                    <User className="size-10 text-gray-500" />
+                    <User className="size-10 text-gray-500 dark:text-gray-400" />
                   )}
                 </div>
                 <div>
-                  <h3 className="mb-2 text-xl font-bold text-gray-900">
+                  <h3 className="mb-2 text-xl font-bold text-gray-900 dark:text-white">
                     {getAuthorName(post.author)}
                   </h3>
-                  <p className="mb-4 text-gray-600">{isRTL ? 'كاتب في المدونة' : 'Blog Author'}</p>
+                  <p className="mb-4 text-gray-600 dark:text-gray-300">
+                    {isRTL ? 'كاتب في المدونة' : 'Blog Author'}
+                  </p>
                 </div>
               </div>
             </div>
@@ -407,16 +418,16 @@ export function BlogPostClient({ slug }: BlogPostClientProps) {
 
       {/* Related Posts */}
       {relatedPosts.length > 0 && (
-        <section className="mt-16 bg-gray-50 py-16">
+        <section className="mt-16 bg-gray-50 py-16 dark:bg-gray-800">
           <div className="container mx-auto px-4">
-            <h2 className="mb-8 text-center text-2xl font-bold">
+            <h2 className="mb-8 text-center text-2xl font-bold text-gray-900 dark:text-white">
               {isRTL ? 'مقالات ذات صلة' : 'Related Posts'}
             </h2>
             <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-3">
               {relatedPosts.map(relatedPost => (
                 <Link key={relatedPost._id} href={`/${locale}/blog/${relatedPost.slug}`}>
-                  <article className="group h-full overflow-hidden rounded-xl bg-white shadow-md transition-shadow hover:shadow-lg">
-                    <div className="relative aspect-video bg-gradient-to-br from-gray-100 to-gray-200">
+                  <article className="group h-full overflow-hidden rounded-xl bg-white shadow-md transition-shadow hover:shadow-lg dark:bg-gray-900">
+                    <div className="relative aspect-video bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700">
                       {relatedPost.featuredImage && (
                         <ImageWithFallback
                           src={relatedPost.featuredImage}
@@ -427,10 +438,10 @@ export function BlogPostClient({ slug }: BlogPostClientProps) {
                       )}
                     </div>
                     <div className="p-4">
-                      <h3 className="mb-2 font-bold text-gray-900 transition-colors group-hover:text-blue-600">
+                      <h3 className="mb-2 font-bold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">
                         {getLocalizedText(relatedPost.title)}
                       </h3>
-                      <span className="flex items-center gap-1 text-sm text-gray-500">
+                      <span className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
                         <Clock className="size-4" />
                         {relatedPost.readingTime} {isRTL ? 'دقيقة' : 'min'}
                       </span>
@@ -444,12 +455,12 @@ export function BlogPostClient({ slug }: BlogPostClientProps) {
       )}
 
       {/* Navigation */}
-      <div className="border-t bg-white py-8">
+      <div className="border-t border-gray-200 bg-white py-8 dark:border-gray-700 dark:bg-gray-900">
         <div className="container mx-auto px-4">
           <div className="mx-auto flex max-w-4xl justify-center">
             <Link
               href={`/${locale}/blog`}
-              className="flex items-center gap-2 text-gray-600 hover:text-blue-600"
+              className="flex items-center gap-2 text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
             >
               {isRTL ? <ArrowRight className="size-5" /> : <ArrowLeft className="size-5" />}
               <span>{isRTL ? 'العودة إلى المدونة' : 'Back to Blog'}</span>

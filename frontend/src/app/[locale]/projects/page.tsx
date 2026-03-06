@@ -6,10 +6,9 @@
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { Link } from '@/i18n/routing';
-import { Container, Spinner } from '@/components/ui';
-import { ProjectCard } from '@/components/projects';
-import { Suspense } from 'react';
+import { Container } from '@/components/ui';
 import type { LocalizedString } from '@mwm/shared';
+import { ProjectsPageClient } from './ProjectsPageClient';
 
 // Type alias for backward compatibility
 type BilingualText = LocalizedString;
@@ -52,10 +51,10 @@ export async function generateMetadata({
 }
 
 // Fetch projects from API
-async function getProjects() {
+async function getProjects(): Promise<{ projects: Project[]; total: number }> {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
-    const res = await fetch(`${baseUrl}/projects`, {
+    const res = await fetch(`${baseUrl}/projects?limit=100`, {
       next: { revalidate: 60 },
     });
 
@@ -92,74 +91,10 @@ async function getCategories(): Promise<Category[]> {
   }
 }
 
-// Projects Grid Component
-async function ProjectsGrid({ locale }: { locale: string }) {
-  const { projects } = await getProjects();
-
-  if (!projects || projects.length === 0) {
-    return (
-      <div className="py-12 text-center">
-        <p className="text-gray-500 dark:text-gray-400">
-          {locale === 'ar' ? 'لا توجد مشاريع متاحة حالياً' : 'No projects available at the moment'}
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-      {projects.map((project: Project) => (
-        <ProjectCard
-          key={project._id}
-          title={project.title[locale as 'ar' | 'en']}
-          description={project.shortDescription[locale as 'ar' | 'en']}
-          slug={project.slug}
-          thumbnail={
-            project.thumbnail ||
-            'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=600&fit=crop'
-          }
-          category={project.category?.name?.[locale as 'ar' | 'en'] || ''}
-          technologies={project.technologies || []}
-        />
-      ))}
-    </div>
-  );
-}
-
-// Category Filter Component
-async function CategoryFilter({ locale }: { locale: string }) {
-  const t = await getTranslations({ locale, namespace: 'projects' });
-  const categories = await getCategories();
-
-  return (
-    <div className="flex flex-wrap justify-center gap-3">
-      <button className="border-primary-500 bg-primary-500 rounded-full border px-6 py-2 text-sm font-medium text-white transition-colors">
-        {t('categories.all')}
-      </button>
-      {categories.map(category => (
-        <button
-          key={category._id}
-          className="rounded-full border border-gray-200 bg-white px-6 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600"
-        >
-          {category.name[locale as 'ar' | 'en']}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-// Loading Component
-function ProjectsLoading() {
-  return (
-    <div className="flex items-center justify-center py-12">
-      <Spinner size="lg" />
-    </div>
-  );
-}
-
 export default async function ProjectsPage({ params: { locale } }: { params: { locale: string } }) {
   const t = await getTranslations({ locale, namespace: 'projects' });
   const isRTL = locale === 'ar';
+  const [{ projects }, categories] = await Promise.all([getProjects(), getCategories()]);
 
   return (
     <main className="min-h-screen py-20">
@@ -173,21 +108,10 @@ export default async function ProjectsPage({ params: { locale } }: { params: { l
         </Container>
       </section>
 
-      {/* Category Filter */}
-      <section className="border-b border-gray-200 py-6 dark:border-gray-800">
-        <Container>
-          <Suspense fallback={<div className="h-10" />}>
-            <CategoryFilter locale={locale} />
-          </Suspense>
-        </Container>
-      </section>
-
-      {/* Projects Grid */}
+      {/* Filter + Projects */}
       <section className="py-16">
         <Container>
-          <Suspense fallback={<ProjectsLoading />}>
-            <ProjectsGrid locale={locale} />
-          </Suspense>
+          <ProjectsPageClient projects={projects || []} categories={categories || []} />
         </Container>
       </section>
 

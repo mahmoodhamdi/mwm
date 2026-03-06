@@ -182,13 +182,13 @@ export default function CareersPage() {
 
   const getTypeColor = (type: JobType) => {
     const colors: Record<string, string> = {
-      'full-time': 'bg-green-100 text-green-800',
-      'part-time': 'bg-blue-100 text-blue-800',
-      contract: 'bg-yellow-100 text-yellow-800',
-      remote: 'bg-purple-100 text-purple-800',
-      internship: 'bg-orange-100 text-orange-800',
+      'full-time': 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+      'part-time': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+      contract: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
+      remote: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+      internship: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
     };
-    return colors[type] || 'bg-gray-100 text-gray-800';
+    return colors[type] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
   };
 
   const getExperienceLabel = (level: Job['experienceLevel']) => {
@@ -203,7 +203,7 @@ export default function CareersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-purple-700 py-20 text-white">
         <div className="container mx-auto px-4">
@@ -234,23 +234,21 @@ export default function CareersPage() {
 
       {/* Search & Filter */}
       <div className="container mx-auto -mt-8 px-4">
-        <div className="rounded-2xl bg-white p-6 shadow-lg">
+        <div className="rounded-2xl bg-white p-6 shadow-lg dark:bg-gray-800">
           <div className="flex flex-col gap-4 md:flex-row md:items-center">
             <div className="relative flex-1">
-              <Search
-                className={`absolute top-1/2 size-5 -translate-y-1/2 text-gray-400 ${isRTL ? 'right-4' : 'left-4'}`}
-              />
+              <Search className="absolute start-4 top-1/2 size-5 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
               <input
                 type="text"
                 placeholder={isRTL ? 'ابحث عن وظيفة...' : 'Search for a job...'}
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className={`w-full rounded-xl border border-gray-200 py-3 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${isRTL ? 'pl-4 pr-12' : 'pl-12 pr-4'}`}
+                className="w-full rounded-xl border border-gray-200 bg-white py-3 pe-4 ps-12 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-blue-400"
               />
             </div>
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 px-6 py-3 hover:bg-gray-50 md:w-auto"
+              className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 px-6 py-3 text-gray-700 hover:bg-gray-50 md:w-auto dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
             >
               <Filter className="size-5" />
               {isRTL ? 'فلترة' : 'Filters'}
@@ -258,11 +256,11 @@ export default function CareersPage() {
           </div>
 
           {showFilters && (
-            <div className="mt-4 flex flex-wrap gap-4 border-t pt-4">
+            <div className="mt-4 flex flex-wrap gap-4 border-t border-gray-200 pt-4 dark:border-gray-700">
               <select
                 value={selectedDepartment}
                 onChange={e => setSelectedDepartment(e.target.value)}
-                className="rounded-lg border border-gray-200 px-4 py-2"
+                className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               >
                 <option value="all">{isRTL ? 'كل الأقسام' : 'All Departments'}</option>
                 {departments.map(dept => (
@@ -274,7 +272,7 @@ export default function CareersPage() {
               <select
                 value={selectedType}
                 onChange={e => setSelectedType(e.target.value)}
-                className="rounded-lg border border-gray-200 px-4 py-2"
+                className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               >
                 <option value="all">{isRTL ? 'كل الأنواع' : 'All Types'}</option>
                 {Object.entries(jobTypeLabels).map(([value, labels]) => (
@@ -291,9 +289,11 @@ export default function CareersPage() {
       {/* Jobs List */}
       <div className="container mx-auto px-4 py-12">
         <div className="mb-8 flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
             {isRTL ? 'الوظائف المتاحة' : 'Open Positions'}
-            <span className="ms-2 text-lg font-normal text-gray-500">({jobs.length})</span>
+            <span className="ms-2 text-lg font-normal text-gray-500 dark:text-gray-400">
+              ({jobs.length})
+            </span>
           </h2>
         </div>
 
@@ -307,7 +307,7 @@ export default function CareersPage() {
           <div className="space-y-4">
             {jobs.map(job => (
               <Link key={job._id} href={`/${locale}/careers/${job.slug}`}>
-                <div className="group rounded-xl bg-white p-6 shadow-md transition-all hover:shadow-lg">
+                <div className="group rounded-xl bg-white p-6 shadow-md transition-all hover:shadow-lg dark:bg-gray-800">
                   <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div className="flex-1">
                       <div className="mb-2 flex flex-wrap items-center gap-3">
@@ -316,17 +316,17 @@ export default function CareersPage() {
                         >
                           {getTypeLabel(job.type)}
                         </span>
-                        <span className="text-sm text-gray-500">
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
                           {getDepartmentName(job.department)}
                         </span>
                       </div>
-                      <h3 className="mb-2 text-xl font-bold text-gray-900 transition-colors group-hover:text-blue-600">
+                      <h3 className="mb-2 text-xl font-bold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">
                         {getLocalizedText(job.title)}
                       </h3>
-                      <p className="mb-3 line-clamp-2 text-gray-600">
+                      <p className="mb-3 line-clamp-2 text-gray-600 dark:text-gray-300">
                         {getLocalizedText(job.description)}
                       </p>
-                      <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+                      <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                         <span className="flex items-center gap-1">
                           <MapPin className="size-4" />
                           {getLocalizedText(job.location)}
@@ -344,8 +344,10 @@ export default function CareersPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
-                      <div className="text-sm text-gray-500">{formatDate(job.createdAt)}</div>
-                      <div className="flex items-center gap-1 font-medium text-blue-600 transition-colors group-hover:text-blue-700">
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
+                        {formatDate(job.createdAt)}
+                      </div>
+                      <div className="flex items-center gap-1 font-medium text-blue-600 transition-colors group-hover:text-blue-700 dark:text-blue-400 dark:group-hover:text-blue-300">
                         {isRTL ? 'التفاصيل' : 'View Details'}
                         {isRTL ? (
                           <ArrowLeft className="size-4" />
@@ -360,12 +362,12 @@ export default function CareersPage() {
             ))}
           </div>
         ) : (
-          <div className="rounded-xl bg-white py-16 text-center shadow-md">
-            <Briefcase className="mx-auto mb-4 size-16 text-gray-300" />
-            <h3 className="mb-2 text-xl font-bold text-gray-900">
+          <div className="rounded-xl bg-white py-16 text-center shadow-md dark:bg-gray-800">
+            <Briefcase className="mx-auto mb-4 size-16 text-gray-300 dark:text-gray-600" />
+            <h3 className="mb-2 text-xl font-bold text-gray-900 dark:text-white">
               {isRTL ? 'لا توجد وظائف متاحة' : 'No jobs found'}
             </h3>
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-300">
               {isRTL
                 ? 'جرب تعديل فلتر البحث أو تحقق لاحقاً'
                 : 'Try adjusting your search filters or check back later'}
@@ -375,13 +377,13 @@ export default function CareersPage() {
       </div>
 
       {/* Benefits Section */}
-      <div className="bg-white py-16">
+      <div className="bg-white py-16 dark:bg-gray-900">
         <div className="container mx-auto px-4">
           <div className="mb-12 text-center">
-            <h2 className="mb-4 text-3xl font-bold text-gray-900">
+            <h2 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white">
               {isRTL ? 'لماذا تعمل معنا؟' : 'Why Work With Us?'}
             </h2>
-            <p className="mx-auto max-w-2xl text-gray-600">
+            <p className="mx-auto max-w-2xl text-gray-600 dark:text-gray-300">
               {isRTL
                 ? 'نحن نؤمن بأن الموظفين السعداء يصنعون منتجات رائعة. لهذا نوفر بيئة عمل استثنائية.'
                 : 'We believe that happy employees make great products. That is why we provide an exceptional work environment.'}
@@ -392,15 +394,15 @@ export default function CareersPage() {
             {benefits.map((benefit, index) => (
               <div
                 key={index}
-                className="rounded-xl border border-gray-100 p-6 transition-shadow hover:shadow-md"
+                className="rounded-xl border border-gray-100 p-6 transition-shadow hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
               >
-                <div className="mb-4 flex size-12 items-center justify-center rounded-lg bg-blue-100">
-                  <benefit.icon className="size-6 text-blue-600" />
+                <div className="mb-4 flex size-12 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                  <benefit.icon className="size-6 text-blue-600 dark:text-blue-400" />
                 </div>
-                <h3 className="mb-2 text-lg font-bold text-gray-900">
+                <h3 className="mb-2 text-lg font-bold text-gray-900 dark:text-white">
                   {isRTL ? benefit.titleAr : benefit.titleEn}
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-600 dark:text-gray-300">
                   {isRTL ? benefit.descriptionAr : benefit.descriptionEn}
                 </p>
               </div>

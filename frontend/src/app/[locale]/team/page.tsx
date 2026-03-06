@@ -6,40 +6,17 @@
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { Link } from '@/i18n/routing';
-import { Container, Spinner } from '@/components/ui';
-import { TeamCard } from '@/components/team';
-import { Suspense } from 'react';
+import { Container } from '@/components/ui';
+import { TeamPageClient } from './TeamPageClient';
 import type { LocalizedString } from '@mwm/shared';
 
 // Type alias for backward compatibility
 type BilingualText = LocalizedString;
 
-interface SocialLinks {
-  linkedin?: string;
-  twitter?: string;
-  github?: string;
-  facebook?: string;
-  instagram?: string;
-  website?: string;
-}
-
 interface Department {
   _id: string;
   name: BilingualText;
   slug: string;
-}
-
-interface TeamMember {
-  _id: string;
-  name: BilingualText;
-  slug: string;
-  position: BilingualText;
-  bio: BilingualText;
-  department?: Department | null;
-  avatar: string;
-  socialLinks?: SocialLinks;
-  isActive: boolean;
-  isFeatured: boolean;
 }
 
 // Generate metadata
@@ -101,79 +78,10 @@ async function getDepartments(): Promise<Department[]> {
   }
 }
 
-// Team Grid Component
-async function TeamGrid({ locale }: { locale: string }) {
-  const { members } = await getTeamMembers();
-
-  if (!members || members.length === 0) {
-    return (
-      <div className="py-12 text-center">
-        <p className="text-gray-500 dark:text-gray-400">
-          {locale === 'ar'
-            ? 'لا يوجد أعضاء فريق متاحين حالياً'
-            : 'No team members available at the moment'}
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-      {members.map((member: TeamMember) => (
-        <TeamCard
-          key={member._id}
-          slug={member.slug}
-          name={member.name[locale as 'ar' | 'en']}
-          position={member.position[locale as 'ar' | 'en']}
-          shortBio={member.bio[locale as 'ar' | 'en']}
-          avatar={
-            member.avatar ||
-            'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop'
-          }
-          socialLinks={member.socialLinks}
-        />
-      ))}
-    </div>
-  );
-}
-
-// Department Filter Component
-async function DepartmentFilter({ locale }: { locale: string }) {
-  const departments = await getDepartments();
-
-  if (departments.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className="mb-12 flex flex-wrap justify-center gap-3">
-      <button className="border-primary-500 bg-primary-500 rounded-full border px-6 py-2 text-sm font-medium text-white transition-colors">
-        {locale === 'ar' ? 'الكل' : 'All'}
-      </button>
-      {departments.map(department => (
-        <button
-          key={department._id}
-          className="rounded-full border border-gray-200 bg-white px-6 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600"
-        >
-          {department.name[locale as 'ar' | 'en']}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-// Loading Component
-function TeamLoading() {
-  return (
-    <div className="flex items-center justify-center py-12">
-      <Spinner size="lg" />
-    </div>
-  );
-}
-
 export default async function TeamPage({ params: { locale } }: { params: { locale: string } }) {
   const t = await getTranslations({ locale, namespace: 'about' });
   const isRTL = locale === 'ar';
+  const [{ members }, departments] = await Promise.all([getTeamMembers(), getDepartments()]);
 
   return (
     <main className="min-h-screen py-20">
@@ -194,12 +102,7 @@ export default async function TeamPage({ params: { locale } }: { params: { local
       {/* Team Grid */}
       <section className="py-16">
         <Container>
-          <Suspense fallback={<div className="h-10" />}>
-            <DepartmentFilter locale={locale} />
-          </Suspense>
-          <Suspense fallback={<TeamLoading />}>
-            <TeamGrid locale={locale} />
-          </Suspense>
+          <TeamPageClient members={members || []} departments={departments || []} />
         </Container>
       </section>
 

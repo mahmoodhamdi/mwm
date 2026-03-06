@@ -6,6 +6,7 @@
  */
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useLocale, useTranslations } from 'next-intl';
 import {
   Facebook,
@@ -84,8 +85,9 @@ export function Footer({ className }: FooterProps) {
           <div className="lg:col-span-1">
             <Link
               href={getLocalizedHref('/')}
-              className="mb-4 inline-block text-2xl font-bold text-white"
+              className="mb-4 inline-flex items-center gap-2 text-2xl font-bold text-white"
             >
+              <Image src="/favicon.svg" alt="MWM" width={32} height={32} className="rounded-lg" />
               MWM
             </Link>
             <p className="mb-6 text-gray-400">{t('description')}</p>
@@ -156,6 +158,7 @@ export function Footer({ className }: FooterProps) {
                 <a
                   href="tel:+201019793768"
                   className="hover:text-primary-400 text-gray-400 transition-colors"
+                  dir="ltr"
                 >
                   +20 101 979 3768
                 </a>
@@ -164,7 +167,8 @@ export function Footer({ className }: FooterProps) {
                 <Mail className="text-primary-400 size-5 shrink-0" />
                 <a
                   href="mailto:mwm.softwars.solutions@gmail.com"
-                  className="hover:text-primary-400 text-gray-400 transition-colors"
+                  className="hover:text-primary-400 break-all text-gray-400 transition-colors"
+                  dir="ltr"
                 >
                   mwm.softwars.solutions@gmail.com
                 </a>

@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#1e293b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0f172a;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="brand" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#38bdf8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0ea5e9;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#0ea5e9;stop-opacity:0.15" />
+      <stop offset="100%" style="stop-color:#0ea5e9;stop-opacity:0" />
+    </radialGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <!-- Glow effect -->
+  <ellipse cx="600" cy="280" rx="400" ry="250" fill="url(#glow)"/>
+  <!-- Grid lines -->
+  <g opacity="0.04">
+    <line x1="0" y1="0" x2="0" y2="630" stroke="white" stroke-width="1"/>
+    <line x1="60" y1="0" x2="60" y2="630" stroke="white" stroke-width="1"/>
+    <line x1="120" y1="0" x2="120" y2="630" stroke="white" stroke-width="1"/>
+    <line x1="180" y1="0" x2="180" y2="630" stroke="white" stroke-width="1"/>
+    <line x1="240" y1="0" x2="240" y2="630" stroke="white" stroke-width="1"/>
+    <line x1="300" y1="0" x2="300" y2="630" stroke="white" stroke-width="1"/>
+    <line x1="360" y1="0" x2="360" y2="630" stroke="white" stroke-width="1"/>
+    <line x1="420" y1="0" x2="420" y2="630" stroke="white" stroke-width="1"/>
+    <line x1="480" y1="0" x2="480" y2="630" stroke="white" stroke-width="1"/>
+    <line x1="540" y1="0" x2="540" y2="630" stroke="white" stroke-width="1"/>
+    <line x1="600" y1="0" x2="600" y2="630" stroke="white" stroke-width="1"/>
+    <line x1="660" y1="0" x2="660" y2="630" stroke="white" stroke-width="1"/>
+    <line x1="720" y1="0" x2="720" y2="630" stroke="white" stroke-width="1"/>
+    <line x1="780" y1="0" x2="780" y2="630" stroke="white" stroke-width="1"/>
+    <line x1="840" y1="0" x2="840" y2="630" stroke="white" stroke-width="1"/>
+    <line x1="900" y1="0" x2="900" y2="630" stroke="white" stroke-width="1"/>
+    <line x1="960" y1="0" x2="960" y2="630" stroke="white" stroke-width="1"/>
+    <line x1="1020" y1="0" x2="1020" y2="630" stroke="white" stroke-width="1"/>
+    <line x1="1080" y1="0" x2="1080" y2="630" stroke="white" stroke-width="1"/>
+    <line x1="1140" y1="0" x2="1140" y2="630" stroke="white" stroke-width="1"/>
+    <line x1="1200" y1="0" x2="1200" y2="630" stroke="white" stroke-width="1"/>
+    <line x1="0" y1="63" x2="1200" y2="63" stroke="white" stroke-width="1"/>
+    <line x1="0" y1="126" x2="1200" y2="126" stroke="white" stroke-width="1"/>
+    <line x1="0" y1="189" x2="1200" y2="189" stroke="white" stroke-width="1"/>
+    <line x1="0" y1="252" x2="1200" y2="252" stroke="white" stroke-width="1"/>
+    <line x1="0" y1="315" x2="1200" y2="315" stroke="white" stroke-width="1"/>
+    <line x1="0" y1="378" x2="1200" y2="378" stroke="white" stroke-width="1"/>
+    <line x1="0" y1="441" x2="1200" y2="441" stroke="white" stroke-width="1"/>
+    <line x1="0" y1="504" x2="1200" y2="504" stroke="white" stroke-width="1"/>
+    <line x1="0" y1="567" x2="1200" y2="567" stroke="white" stroke-width="1"/>
+  </g>
+  <!-- Logo icon centered -->
+  <g transform="translate(530, 160)">
+    <path d="M38 20L18 70L38 120" stroke="url(#brand)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M102 20L122 70L102 120" stroke="url(#brand)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <circle cx="70" cy="70" r="10" fill="url(#brand)"/>
+    <line x1="48" y1="70" x2="60" y2="70" stroke="#38bdf8" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+    <line x1="80" y1="70" x2="92" y2="70" stroke="#38bdf8" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+    <line x1="70" y1="48" x2="70" y2="60" stroke="#38bdf8" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+    <line x1="70" y1="80" x2="70" y2="92" stroke="#38bdf8" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+    <circle cx="38" cy="20" r="4" fill="#38bdf8" opacity="0.8"/>
+    <circle cx="38" cy="120" r="4" fill="#38bdf8" opacity="0.8"/>
+    <circle cx="102" cy="20" r="4" fill="#38bdf8" opacity="0.8"/>
+    <circle cx="102" cy="120" r="4" fill="#38bdf8" opacity="0.8"/>
+  </g>
+  <!-- MWM Text -->
+  <text x="600" y="450" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="72" font-weight="800" letter-spacing="8">
+    <tspan fill="#0ea5e9">M</tspan><tspan fill="#f1f5f9">W</tspan><tspan fill="#0ea5e9">M</tspan>
+  </text>
+  <!-- Tagline -->
+  <text x="600" y="490" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="20" font-weight="500" fill="#94a3b8" letter-spacing="6">
+    SOFTWARE SOLUTIONS
+  </text>
+  <!-- URL -->
+  <text x="600" y="570" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="16" font-weight="400" fill="#475569" letter-spacing="2">
+    mwm.software
+  </text>
+</svg>

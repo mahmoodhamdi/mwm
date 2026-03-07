@@ -388,19 +388,23 @@ export function BlogPageClient() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2">
+              <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
                 <button
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="rounded-lg border px-4 py-2 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+                  className="flex size-9 items-center justify-center rounded-lg border hover:bg-gray-50 disabled:opacity-50 sm:size-10 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
                 >
-                  {isRTL ? <ArrowRight className="size-5" /> : <ArrowLeft className="size-5" />}
+                  {isRTL ? (
+                    <ArrowRight className="size-4 sm:size-5" />
+                  ) : (
+                    <ArrowLeft className="size-4 sm:size-5" />
+                  )}
                 </button>
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                   <button
                     key={page}
                     onClick={() => setCurrentPage(page)}
-                    className={`size-10 rounded-lg ${
+                    className={`flex size-9 items-center justify-center rounded-lg text-sm sm:size-10 sm:text-base ${
                       currentPage === page
                         ? 'bg-blue-600 text-white'
                         : 'border hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800'
@@ -412,9 +416,13 @@ export function BlogPageClient() {
                 <button
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="rounded-lg border px-4 py-2 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+                  className="flex size-9 items-center justify-center rounded-lg border hover:bg-gray-50 disabled:opacity-50 sm:size-10 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
                 >
-                  {isRTL ? <ArrowLeft className="size-5" /> : <ArrowRight className="size-5" />}
+                  {isRTL ? (
+                    <ArrowLeft className="size-4 sm:size-5" />
+                  ) : (
+                    <ArrowRight className="size-4 sm:size-5" />
+                  )}
                 </button>
               </div>
             )}

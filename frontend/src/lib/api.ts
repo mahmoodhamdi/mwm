@@ -103,6 +103,11 @@ const createApiClient = (baseURL: string): AxiosInstance => {
   client.interceptors.response.use(
     response => response,
     async (error: AxiosError<ApiResponse>) => {
+      // Re-throw cancel errors directly so callers can detect them
+      if (axios.isCancel(error)) {
+        return Promise.reject(error);
+      }
+
       const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
       // Handle 401 - Unauthorized (token expired)

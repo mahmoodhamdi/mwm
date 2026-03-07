@@ -10,6 +10,7 @@ import { getMessages } from 'next-intl/server';
 import { Cairo, Inter } from 'next/font/google';
 import { locales, localeDirection, type Locale } from '@/i18n/config';
 import { ThemeProvider } from '@/providers/ThemeProvider';
+import { AuthProvider } from '@/providers/AuthProvider';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { OrganizationJsonLd } from '@/components/seo/JsonLd';
@@ -301,11 +302,13 @@ export default async function LocaleLayout({
       >
         <NextIntlClientProvider messages={messages}>
           <ThemeProvider defaultTheme="system">
-            <div className="flex min-h-screen flex-col">
-              <Header />
-              <main className="flex-1 pt-16 md:pt-20">{children}</main>
-              <Footer />
-            </div>
+            <AuthProvider>
+              <div className="flex min-h-screen flex-col">
+                <Header />
+                <main className="flex-1 pt-16 md:pt-20">{children}</main>
+                <Footer />
+              </div>
+            </AuthProvider>
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>

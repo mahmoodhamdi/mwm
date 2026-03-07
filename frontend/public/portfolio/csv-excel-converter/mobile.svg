@@ -1,0 +1,218 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="60%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#14b8a6"/>
+      <stop offset="100%" stop-color="#0d9488"/>
+    </linearGradient>
+    <linearGradient id="accentH" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#14b8a6"/>
+      <stop offset="100%" stop-color="#0d9488"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#14b8a6" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#14b8a6" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="blur4">
+      <feGaussianBlur stdDeviation="4"/>
+    </filter>
+    <filter id="blur2">
+      <feGaussianBlur stdDeviation="2"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <ellipse cx="600" cy="315" rx="500" ry="300" fill="url(#glow)"/>
+<g opacity="0.03"><line x1="0" y1="0" x2="0" y2="630" stroke="white" stroke-width="1"/><line x1="60" y1="0" x2="60" y2="630" stroke="white" stroke-width="1"/><line x1="120" y1="0" x2="120" y2="630" stroke="white" stroke-width="1"/><line x1="180" y1="0" x2="180" y2="630" stroke="white" stroke-width="1"/><line x1="240" y1="0" x2="240" y2="630" stroke="white" stroke-width="1"/><line x1="300" y1="0" x2="300" y2="630" stroke="white" stroke-width="1"/><line x1="360" y1="0" x2="360" y2="630" stroke="white" stroke-width="1"/><line x1="420" y1="0" x2="420" y2="630" stroke="white" stroke-width="1"/><line x1="480" y1="0" x2="480" y2="630" stroke="white" stroke-width="1"/><line x1="540" y1="0" x2="540" y2="630" stroke="white" stroke-width="1"/><line x1="600" y1="0" x2="600" y2="630" stroke="white" stroke-width="1"/><line x1="660" y1="0" x2="660" y2="630" stroke="white" stroke-width="1"/><line x1="720" y1="0" x2="720" y2="630" stroke="white" stroke-width="1"/><line x1="780" y1="0" x2="780" y2="630" stroke="white" stroke-width="1"/><line x1="840" y1="0" x2="840" y2="630" stroke="white" stroke-width="1"/><line x1="900" y1="0" x2="900" y2="630" stroke="white" stroke-width="1"/><line x1="960" y1="0" x2="960" y2="630" stroke="white" stroke-width="1"/><line x1="1020" y1="0" x2="1020" y2="630" stroke="white" stroke-width="1"/><line x1="1080" y1="0" x2="1080" y2="630" stroke="white" stroke-width="1"/><line x1="1140" y1="0" x2="1140" y2="630" stroke="white" stroke-width="1"/><line x1="0" y1="0" x2="1200" y2="0" stroke="white" stroke-width="1"/><line x1="0" y1="63" x2="1200" y2="63" stroke="white" stroke-width="1"/><line x1="0" y1="126" x2="1200" y2="126" stroke="white" stroke-width="1"/><line x1="0" y1="189" x2="1200" y2="189" stroke="white" stroke-width="1"/><line x1="0" y1="252" x2="1200" y2="252" stroke="white" stroke-width="1"/><line x1="0" y1="315" x2="1200" y2="315" stroke="white" stroke-width="1"/><line x1="0" y1="378" x2="1200" y2="378" stroke="white" stroke-width="1"/><line x1="0" y1="441" x2="1200" y2="441" stroke="white" stroke-width="1"/><line x1="0" y1="504" x2="1200" y2="504" stroke="white" stroke-width="1"/><line x1="0" y1="567" x2="1200" y2="567" stroke="white" stroke-width="1"/></g>
+
+<!-- Background decorative circles -->
+<circle cx="200" cy="315" r="220" fill="#14b8a6" opacity="0.04"/>
+<circle cx="1000" cy="315" r="180" fill="#0d9488" opacity="0.04"/>
+
+<!-- Left info panel -->
+<g transform="translate(40, 0)">
+  
+  <g transform="translate(0, 30)">
+    <path d="M10 4L4 13L10 22" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M26 4L32 13L26 22" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <circle cx="18" cy="13" r="2.5" fill="#0ea5e9"/>
+    <line x1="12.5" y1="13" x2="15.5" y2="13" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+    <line x1="20.5" y1="13" x2="23.5" y2="13" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+    <text x="38" y="18" font-family="Inter, sans-serif" font-size="14" font-weight="800" letter-spacing="1">
+      <tspan fill="#0ea5e9">M</tspan><tspan fill="#f1f5f9">W</tspan><tspan fill="#0ea5e9">M</tspan>
+    </text>
+    <text x="38" y="27" font-family="Inter, sans-serif" font-size="7" font-weight="500" fill="#94a3b8" letter-spacing="2">SOFTWARE</text>
+  </g>
+  <text x="0" y="130" font-family="Inter, sans-serif" font-size="32" font-weight="800" fill="#f1f5f9">CSV / Excel Converter</text>
+  <text x="0" y="158" font-family="Inter, sans-serif" font-size="15" fill="#94a3b8">Multi-Format File Conversion</text>
+
+  <!-- Accent line -->
+  <rect x="0" y="175" width="60" height="3" rx="1.5" fill="url(#accentH)"/>
+
+  <!-- Feature list -->
+  
+  <g transform="translate(0, 210)">
+    <circle cx="8" cy="8" r="8" fill="#14b8a6" opacity="0.2"/>
+    <circle cx="8" cy="8" r="4" fill="#14b8a6"/>
+    <text x="24" y="13" font-family="Inter, sans-serif" font-size="13" fill="#94a3b8">Next.js</text>
+  </g>
+  <g transform="translate(0, 246)">
+    <circle cx="8" cy="8" r="8" fill="#14b8a6" opacity="0.2"/>
+    <circle cx="8" cy="8" r="4" fill="#14b8a6"/>
+    <text x="24" y="13" font-family="Inter, sans-serif" font-size="13" fill="#94a3b8">Vitest</text>
+  </g>
+  <g transform="translate(0, 282)">
+    <circle cx="8" cy="8" r="8" fill="#14b8a6" opacity="0.2"/>
+    <circle cx="8" cy="8" r="4" fill="#14b8a6"/>
+    <text x="24" y="13" font-family="Inter, sans-serif" font-size="13" fill="#94a3b8">Playwright</text>
+  </g>
+
+  <!-- Available on badges -->
+  <rect x="0" y="460" width="130" height="36" rx="10" fill="#334155" opacity="0.5"/>
+  <text x="65" y="482" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#94a3b8">App Store</text>
+  <rect x="145" y="460" width="130" height="36" rx="10" fill="#334155" opacity="0.5"/>
+  <text x="210" y="482" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#94a3b8">Google Play</text>
+</g>
+
+<!-- Phone 1 (main) -->
+
+    <g>
+      <!-- Phone shadow -->
+      <rect x="304" y="39" width="180" height="410" rx="28" fill="black" opacity="0.4" filter="url(#blur4)"/>
+      <!-- Phone body -->
+      <rect x="300" y="35" width="180" height="410" rx="28" fill="#0f172a" stroke="#334155" stroke-width="2"/>
+      <!-- Screen -->
+      <rect x="306" y="49" width="168" height="382" rx="22" fill="#1e293b"/>
+      <!-- Notch -->
+      <rect x="370" y="49" width="40" height="16" rx="8" fill="#0f172a"/>
+      <circle cx="385" cy="57" r="3" fill="#334155"/>
+      <!-- Home indicator -->
+      <rect x="370" y="425" width="40" height="4" rx="2" fill="#334155" opacity="0.5"/>
+      <!-- Content -->
+      
+    <!-- Status bar -->
+    <rect x="310" y="55" width="160" height="8" rx="4" fill="#334155" opacity="0.3"/>
+    <!-- Hero header -->
+    <rect x="310" y="75" width="160" height="40" rx="6" fill="url(#accent)" opacity="0.8"/>
+    <text x="390" y="100" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="white">CSV / Excel Converter</text>
+    <!-- Content cards -->
+    
+    <rect x="315" y="125" width="150" height="60" rx="8" fill="#334155" opacity="0.4"/>
+    <rect x="320" y="130" width="60" height="8" rx="4" fill="#14b8a6" opacity="0.6"/>
+    <rect x="320" y="143" width="130" height="6" rx="3" fill="#334155" opacity="0.3"/>
+    <rect x="320" y="153" width="100" height="6" rx="3" fill="#334155" opacity="0.2"/>
+    <rect x="320" y="163" width="50" height="12" rx="6" fill="url(#accent)" opacity="0.7"/>
+    
+    <rect x="315" y="195" width="150" height="60" rx="8" fill="#334155" opacity="0.4"/>
+    <rect x="320" y="200" width="75" height="8" rx="4" fill="#14b8a6" opacity="0.6"/>
+    <rect x="320" y="213" width="130" height="6" rx="3" fill="#334155" opacity="0.3"/>
+    <rect x="320" y="223" width="100" height="6" rx="3" fill="#334155" opacity="0.2"/>
+    <rect x="320" y="233" width="50" height="12" rx="6" fill="url(#accent)" opacity="0.7"/>
+    
+    <rect x="315" y="265" width="150" height="60" rx="8" fill="#334155" opacity="0.4"/>
+    <rect x="320" y="270" width="90" height="8" rx="4" fill="#14b8a6" opacity="0.6"/>
+    <rect x="320" y="283" width="130" height="6" rx="3" fill="#334155" opacity="0.3"/>
+    <rect x="320" y="293" width="100" height="6" rx="3" fill="#334155" opacity="0.2"/>
+    <rect x="320" y="303" width="50" height="12" rx="6" fill="url(#accent)" opacity="0.7"/>
+    
+    <!-- Bottom nav -->
+    <rect x="310" y="365" width="160" height="40" rx="0" fill="#0f172a" opacity="0.9"/>
+    
+    <rect x="320" y="375" width="20" height="20" rx="4" fill="#14b8a6" opacity="0.8"/>
+    
+    <rect x="358" y="375" width="20" height="20" rx="4" fill="#334155" opacity="0.3"/>
+    
+    <rect x="396" y="375" width="20" height="20" rx="4" fill="#334155" opacity="0.3"/>
+    
+    <rect x="434" y="375" width="20" height="20" rx="4" fill="#334155" opacity="0.3"/>
+    
+    </g>
+
+<!-- Phone 2 (slightly offset) -->
+
+    <g>
+      <!-- Phone shadow -->
+      <rect x="534" y="69" width="180" height="370" rx="28" fill="black" opacity="0.4" filter="url(#blur4)"/>
+      <!-- Phone body -->
+      <rect x="530" y="65" width="180" height="370" rx="28" fill="#0f172a" stroke="#334155" stroke-width="2"/>
+      <!-- Screen -->
+      <rect x="536" y="79" width="168" height="342" rx="22" fill="#1e293b"/>
+      <!-- Notch -->
+      <rect x="600" y="79" width="40" height="16" rx="8" fill="#0f172a"/>
+      <circle cx="615" cy="87" r="3" fill="#334155"/>
+      <!-- Home indicator -->
+      <rect x="600" y="415" width="40" height="4" rx="2" fill="#334155" opacity="0.5"/>
+      <!-- Content -->
+      
+    <!-- Status bar -->
+    <rect x="560" y="85" width="160" height="8" rx="4" fill="#334155" opacity="0.3"/>
+    <!-- List view screen -->
+    <rect x="560" y="105" width="160" height="30" rx="6" fill="#334155" opacity="0.2"/>
+    <text x="640" y="124" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#94a3b8">Explore</text>
+    
+    <rect x="560" y="145" width="160" height="48" rx="8" fill="#334155" opacity="0.35"/>
+    <rect x="565" y="150" width="38" height="38" rx="6" fill="url(#accent)" opacity="0.5"/>
+    <rect x="610" y="154" width="80" height="7" rx="3.5" fill="#f1f5f9" opacity="0.5"/>
+    <rect x="610" y="164" width="55" height="6" rx="3" fill="#94a3b8" opacity="0.4"/>
+    <rect x="610" y="174" width="35" height="10" rx="5" fill="#14b8a6" opacity="0.6"/>
+    
+    <rect x="560" y="200" width="160" height="48" rx="8" fill="#334155" opacity="0.35"/>
+    <rect x="565" y="205" width="38" height="38" rx="6" fill="url(#accent)" opacity="0.5"/>
+    <rect x="610" y="209" width="80" height="7" rx="3.5" fill="#f1f5f9" opacity="0.5"/>
+    <rect x="610" y="219" width="55" height="6" rx="3" fill="#94a3b8" opacity="0.4"/>
+    <rect x="610" y="229" width="35" height="10" rx="5" fill="#14b8a6" opacity="0.6"/>
+    
+    <rect x="560" y="255" width="160" height="48" rx="8" fill="#334155" opacity="0.35"/>
+    <rect x="565" y="260" width="38" height="38" rx="6" fill="url(#accent)" opacity="0.5"/>
+    <rect x="610" y="264" width="80" height="7" rx="3.5" fill="#f1f5f9" opacity="0.5"/>
+    <rect x="610" y="274" width="55" height="6" rx="3" fill="#94a3b8" opacity="0.4"/>
+    <rect x="610" y="284" width="35" height="10" rx="5" fill="#14b8a6" opacity="0.6"/>
+    
+    <rect x="560" y="310" width="160" height="48" rx="8" fill="#334155" opacity="0.35"/>
+    <rect x="565" y="315" width="38" height="38" rx="6" fill="url(#accent)" opacity="0.5"/>
+    <rect x="610" y="319" width="80" height="7" rx="3.5" fill="#f1f5f9" opacity="0.5"/>
+    <rect x="610" y="329" width="55" height="6" rx="3" fill="#94a3b8" opacity="0.4"/>
+    <rect x="610" y="339" width="35" height="10" rx="5" fill="#14b8a6" opacity="0.6"/>
+    
+    <rect x="560" y="365" width="160" height="48" rx="8" fill="#334155" opacity="0.35"/>
+    <rect x="565" y="370" width="38" height="38" rx="6" fill="url(#accent)" opacity="0.5"/>
+    <rect x="610" y="374" width="80" height="7" rx="3.5" fill="#f1f5f9" opacity="0.5"/>
+    <rect x="610" y="384" width="55" height="6" rx="3" fill="#94a3b8" opacity="0.4"/>
+    <rect x="610" y="394" width="35" height="10" rx="5" fill="#14b8a6" opacity="0.6"/>
+    
+    </g>
+
+<!-- Floating UI elements -->
+<rect x="750" y="100" width="200" height="90" rx="12" fill="#1e293b" opacity="0.9"/>
+<rect x="758" y="108" width="3" height="74" rx="1.5" fill="url(#accent)"/>
+<text x="772" y="128" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#f1f5f9">Real-time Updates</text>
+<text x="772" y="146" font-family="Inter, sans-serif" font-size="10" fill="#94a3b8">Live data synchronization</text>
+<text x="772" y="162" font-family="Inter, sans-serif" font-size="10" fill="#94a3b8">Push notifications</text>
+<text x="772" y="178" font-family="Inter, sans-serif" font-size="10" fill="#94a3b8">Offline support</text>
+
+<rect x="750" y="215" width="200" height="90" rx="12" fill="#1e293b" opacity="0.9"/>
+<rect x="758" y="223" width="3" height="74" rx="1.5" fill="url(#accent)"/>
+<text x="772" y="243" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#f1f5f9">Performance</text>
+<text x="772" y="261" font-family="Inter, sans-serif" font-size="10" fill="#94a3b8">60fps animations</text>
+<text x="772" y="277" font-family="Inter, sans-serif" font-size="10" fill="#94a3b8">Optimized rendering</text>
+<text x="772" y="293" font-family="Inter, sans-serif" font-size="10" fill="#94a3b8">Fast startup time</text>
+
+<!-- Stats row -->
+
+<rect x="760" y="430" width="125" height="70" rx="10" fill="#1e293b" opacity="0.7"/>
+<text x="822" y="468" text-anchor="middle" font-family="Inter, sans-serif" font-size="22" font-weight="800" fill="#f1f5f9">50K+</text>
+<text x="822" y="488" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#94a3b8">Downloads</text>
+<rect x="900" y="430" width="125" height="70" rx="10" fill="#1e293b" opacity="0.7"/>
+<text x="962" y="468" text-anchor="middle" font-family="Inter, sans-serif" font-size="22" font-weight="800" fill="#f1f5f9">4.8★</text>
+<text x="962" y="488" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#94a3b8">Rating</text>
+<rect x="1040" y="430" width="125" height="70" rx="10" fill="#1e293b" opacity="0.7"/>
+<text x="1102" y="468" text-anchor="middle" font-family="Inter, sans-serif" font-size="22" font-weight="800" fill="#f1f5f9">12</text>
+<text x="1102" y="488" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#94a3b8">Countries</text>
+
+<!-- Bottom label -->
+<text x="600" y="620" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#475569" letter-spacing="2">MOBILE APPLICATION</text>
+</svg>

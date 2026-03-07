@@ -18,12 +18,33 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: 'contact' });
 
+  const isArabic = locale === 'ar';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://mwm.com';
+
   return {
-    title: t('title'),
-    description: t('subtitle'),
+    title: isArabic
+      ? 'تواصل معنا | احصل على عرض سعر مجاني لمشروعك البرمجي - MWM'
+      : 'Contact Us | Get a Free Quote for Your Software Project - MWM',
+    description: isArabic
+      ? 'تواصل مع فريق MWM للحصول على استشارة مجانية وعرض سعر لمشروعك. نطور مواقع ويب، تطبيقات موبايل، APIs، ومتاجر إلكترونية. القاهرة، مصر. هاتف: +201019793768'
+      : 'Contact MWM team for a free consultation and project quote. We develop websites, mobile apps, APIs, and e-commerce stores. Cairo, Egypt. Phone: +201019793768',
+    keywords: isArabic
+      ? ['تواصل معنا', 'عرض سعر', 'استشارة مجانية', 'شركة برمجة القاهرة', 'طلب مشروع برمجي']
+      : [
+          'contact us',
+          'free quote',
+          'software consultation',
+          'Cairo software company',
+          'project inquiry',
+        ],
     openGraph: {
       title: t('title'),
       description: t('subtitle'),
+      url: `${siteUrl}/${locale}/contact`,
+    },
+    alternates: {
+      canonical: `/${locale}/contact`,
+      languages: { ar: '/ar/contact', en: '/en/contact' },
     },
   };
 }

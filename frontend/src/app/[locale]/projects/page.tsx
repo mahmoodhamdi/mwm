@@ -40,12 +40,34 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: 'projects' });
 
+  const isArabic = locale === 'ar';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://mwm.com';
+
   return {
-    title: t('title'),
-    description: t('subtitle'),
+    title: isArabic
+      ? 'أعمالنا ومشاريعنا | 33+ مشروع برمجي ناجح - MWM'
+      : 'Our Projects & Portfolio | 33+ Successful Software Projects - MWM',
+    description: isArabic
+      ? 'استعرض محفظة أعمال MWM: 33+ مشروع برمجي ناجح تشمل منصات توصيل طعام، تطبيقات نقل ركاب، أنظمة حجوزات، متاجر إلكترونية، منصات رياضات إلكترونية، وأدوات أتمتة. مبنية بـ Next.js, Flutter, Node.js, Laravel.'
+      : 'Browse MWM portfolio: 33+ successful software projects including food delivery platforms, ride-hailing apps, booking systems, e-commerce stores, esports platforms, and automation tools. Built with Next.js, Flutter, Node.js, Laravel.',
+    keywords: isArabic
+      ? ['أعمالنا', 'مشاريع برمجية', 'بورتفوليو', 'تطبيقات ناجحة', 'شركة برمجة مصرية']
+      : [
+          'portfolio',
+          'software projects',
+          'case studies',
+          'successful apps',
+          'Egyptian software company',
+        ],
     openGraph: {
       title: t('title'),
       description: t('subtitle'),
+      url: `${siteUrl}/${locale}/projects`,
+      images: [{ url: `${siteUrl}/og-image.svg`, width: 1200, height: 630 }],
+    },
+    alternates: {
+      canonical: `/${locale}/projects`,
+      languages: { ar: '/ar/projects', en: '/en/projects' },
     },
   };
 }

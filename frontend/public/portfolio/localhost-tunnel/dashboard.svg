@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="60%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#334155"/>
+      <stop offset="100%" stop-color="#475569"/>
+    </linearGradient>
+    <linearGradient id="accentH" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#334155"/>
+      <stop offset="100%" stop-color="#475569"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#334155" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#334155" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="blur4">
+      <feGaussianBlur stdDeviation="4"/>
+    </filter>
+    <filter id="blur2">
+      <feGaussianBlur stdDeviation="2"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <ellipse cx="600" cy="315" rx="500" ry="300" fill="url(#glow)"/>
+<g opacity="0.03"><line x1="0" y1="0" x2="0" y2="630" stroke="white" stroke-width="1"/><line x1="60" y1="0" x2="60" y2="630" stroke="white" stroke-width="1"/><line x1="120" y1="0" x2="120" y2="630" stroke="white" stroke-width="1"/><line x1="180" y1="0" x2="180" y2="630" stroke="white" stroke-width="1"/><line x1="240" y1="0" x2="240" y2="630" stroke="white" stroke-width="1"/><line x1="300" y1="0" x2="300" y2="630" stroke="white" stroke-width="1"/><line x1="360" y1="0" x2="360" y2="630" stroke="white" stroke-width="1"/><line x1="420" y1="0" x2="420" y2="630" stroke="white" stroke-width="1"/><line x1="480" y1="0" x2="480" y2="630" stroke="white" stroke-width="1"/><line x1="540" y1="0" x2="540" y2="630" stroke="white" stroke-width="1"/><line x1="600" y1="0" x2="600" y2="630" stroke="white" stroke-width="1"/><line x1="660" y1="0" x2="660" y2="630" stroke="white" stroke-width="1"/><line x1="720" y1="0" x2="720" y2="630" stroke="white" stroke-width="1"/><line x1="780" y1="0" x2="780" y2="630" stroke="white" stroke-width="1"/><line x1="840" y1="0" x2="840" y2="630" stroke="white" stroke-width="1"/><line x1="900" y1="0" x2="900" y2="630" stroke="white" stroke-width="1"/><line x1="960" y1="0" x2="960" y2="630" stroke="white" stroke-width="1"/><line x1="1020" y1="0" x2="1020" y2="630" stroke="white" stroke-width="1"/><line x1="1080" y1="0" x2="1080" y2="630" stroke="white" stroke-width="1"/><line x1="1140" y1="0" x2="1140" y2="630" stroke="white" stroke-width="1"/><line x1="0" y1="0" x2="1200" y2="0" stroke="white" stroke-width="1"/><line x1="0" y1="63" x2="1200" y2="63" stroke="white" stroke-width="1"/><line x1="0" y1="126" x2="1200" y2="126" stroke="white" stroke-width="1"/><line x1="0" y1="189" x2="1200" y2="189" stroke="white" stroke-width="1"/><line x1="0" y1="252" x2="1200" y2="252" stroke="white" stroke-width="1"/><line x1="0" y1="315" x2="1200" y2="315" stroke="white" stroke-width="1"/><line x1="0" y1="378" x2="1200" y2="378" stroke="white" stroke-width="1"/><line x1="0" y1="441" x2="1200" y2="441" stroke="white" stroke-width="1"/><line x1="0" y1="504" x2="1200" y2="504" stroke="white" stroke-width="1"/><line x1="0" y1="567" x2="1200" y2="567" stroke="white" stroke-width="1"/></g>
+
+<!-- Sidebar panel -->
+<rect x="20" y="20" width="200" height="590" rx="10" fill="#1e293b" opacity="0.8"/>
+
+  <g transform="translate(30, 28)">
+    <path d="M10 4L4 13L10 22" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M26 4L32 13L26 22" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <circle cx="18" cy="13" r="2.5" fill="#0ea5e9"/>
+    <line x1="12.5" y1="13" x2="15.5" y2="13" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+    <line x1="20.5" y1="13" x2="23.5" y2="13" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+    <text x="38" y="18" font-family="Inter, sans-serif" font-size="14" font-weight="800" letter-spacing="1">
+      <tspan fill="#0ea5e9">M</tspan><tspan fill="#f1f5f9">W</tspan><tspan fill="#0ea5e9">M</tspan>
+    </text>
+    <text x="38" y="27" font-family="Inter, sans-serif" font-size="7" font-weight="500" fill="#94a3b8" letter-spacing="2">SOFTWARE</text>
+  </g>
+
+      <rect x="30" y="70" width="160" height="34" rx="6" fill="#334155" opacity="0.15"/>
+      <rect x="38" y="80" width="3" height="14" rx="1.5" fill="#334155"/>
+      <text x="52" y="91" font-family="Inter, sans-serif" font-size="12" font-weight="600" fill="#334155">Dashboard</text>
+      <rect x="30" y="114" width="160" height="34" rx="6" fill="transparent" opacity="0"/>
+      <rect x="38" y="124" width="3" height="14" rx="1.5" fill="#475569"/>
+      <text x="52" y="135" font-family="Inter, sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Analytics</text>
+      <rect x="30" y="158" width="160" height="34" rx="6" fill="transparent" opacity="0"/>
+      <rect x="38" y="168" width="3" height="14" rx="1.5" fill="#475569"/>
+      <text x="52" y="179" font-family="Inter, sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Users</text>
+      <rect x="30" y="202" width="160" height="34" rx="6" fill="transparent" opacity="0"/>
+      <rect x="38" y="212" width="3" height="14" rx="1.5" fill="#475569"/>
+      <text x="52" y="223" font-family="Inter, sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Settings</text>
+      <rect x="30" y="246" width="160" height="34" rx="6" fill="transparent" opacity="0"/>
+      <rect x="38" y="256" width="3" height="14" rx="1.5" fill="#475569"/>
+      <text x="52" y="267" font-family="Inter, sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Reports</text>
+
+<!-- Main content area -->
+<rect x="235" y="20" width="945" height="590" rx="10" fill="#1e293b" opacity="0.5"/>
+
+<!-- Top nav bar -->
+<rect x="235" y="20" width="945" height="50" rx="10" fill="#334155" opacity="0.4"/>
+<text x="260" y="52" font-family="Inter, sans-serif" font-size="14" font-weight="600" fill="#f1f5f9">Localhost Tunnel</text>
+<rect x="980" y="30" width="100" height="30" rx="8" fill="url(#accent)" opacity="0.9"/>
+<text x="1030" y="49" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" font-weight="600" fill="white">+ New</text>
+
+<!-- Stat cards row -->
+
+      <rect x="420" y="80" width="175" height="80" rx="8" fill="#334155" opacity="0.5"/>
+      <rect x="420" y="80" width="4" height="80" rx="2" fill="url(#accent)"/>
+      <text x="436" y="104" font-family="Inter, sans-serif" font-size="10" fill="#94a3b8">Total Users</text>
+      <text x="436" y="130" font-family="Inter, sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">24.8K</text>
+      <rect x="436" y="138" width="38" height="14" rx="7" fill="#334155" opacity="0.2"/>
+      <text x="455" y="148" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#334155">+12%</text>
+      <rect x="610" y="80" width="175" height="80" rx="8" fill="#334155" opacity="0.5"/>
+      <rect x="610" y="80" width="4" height="80" rx="2" fill="url(#accent)"/>
+      <text x="626" y="104" font-family="Inter, sans-serif" font-size="10" fill="#94a3b8">Revenue</text>
+      <text x="626" y="130" font-family="Inter, sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">$182K</text>
+      <rect x="626" y="138" width="38" height="14" rx="7" fill="#334155" opacity="0.2"/>
+      <text x="645" y="148" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#334155">+8.4%</text>
+      <rect x="800" y="80" width="175" height="80" rx="8" fill="#334155" opacity="0.5"/>
+      <rect x="800" y="80" width="4" height="80" rx="2" fill="url(#accent)"/>
+      <text x="816" y="104" font-family="Inter, sans-serif" font-size="10" fill="#94a3b8">Orders</text>
+      <text x="816" y="130" font-family="Inter, sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">3,291</text>
+      <rect x="816" y="138" width="38" height="14" rx="7" fill="#334155" opacity="0.2"/>
+      <text x="835" y="148" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#334155">+21%</text>
+      <rect x="990" y="80" width="175" height="80" rx="8" fill="#334155" opacity="0.5"/>
+      <rect x="990" y="80" width="4" height="80" rx="2" fill="url(#accent)"/>
+      <text x="1006" y="104" font-family="Inter, sans-serif" font-size="10" fill="#94a3b8">Sessions</text>
+      <text x="1006" y="130" font-family="Inter, sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">97.2K</text>
+      <rect x="1006" y="138" width="38" height="14" rx="7" fill="#334155" opacity="0.2"/>
+      <text x="1025" y="148" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#334155">+5.6%</text>
+
+<!-- Chart section heading -->
+<text x="430" y="220" font-family="Inter, sans-serif" font-size="13" font-weight="600" fill="#f1f5f9">Analytics Overview</text>
+<text x="430" y="238" font-family="Inter, sans-serif" font-size="10" fill="#94a3b8">Last 12 months performance</text>
+
+<!-- Chart background -->
+<rect x="420" y="250" width="740" height="130" rx="8" fill="#0f172a" opacity="0.6"/>
+<!-- Bar chart -->
+
+      <rect x="430" y="282" width="36" height="48" rx="4" fill="url(#accent)" opacity="0.7"/>
+      <rect x="430" y="282" width="36" height="6" rx="3" fill="#334155"/>
+      <rect x="485" y="252" width="36" height="78" rx="4" fill="url(#accent)" opacity="0.7"/>
+      <rect x="485" y="252" width="36" height="6" rx="3" fill="#334155"/>
+      <rect x="540" y="270" width="36" height="60" rx="4" fill="url(#accent)" opacity="0.7"/>
+      <rect x="540" y="270" width="36" height="6" rx="3" fill="#334155"/>
+      <rect x="595" y="234" width="36" height="96" rx="4" fill="url(#accent)" opacity="0.7"/>
+      <rect x="595" y="234" width="36" height="6" rx="3" fill="#334155"/>
+      <rect x="650" y="258" width="36" height="72" rx="4" fill="url(#accent)" opacity="0.7"/>
+      <rect x="650" y="258" width="36" height="6" rx="3" fill="#334155"/>
+      <rect x="705" y="222" width="36" height="108" rx="4" fill="url(#accent)" opacity="0.7"/>
+      <rect x="705" y="222" width="36" height="6" rx="3" fill="#334155"/>
+      <rect x="760" y="246" width="36" height="84" rx="4" fill="url(#accent)" opacity="0.7"/>
+      <rect x="760" y="246" width="36" height="6" rx="3" fill="#334155"/>
+      <rect x="815" y="228" width="36" height="102" rx="4" fill="url(#accent)" opacity="0.7"/>
+      <rect x="815" y="228" width="36" height="6" rx="3" fill="#334155"/>
+      <rect x="870" y="264" width="36" height="66" rx="4" fill="url(#accent)" opacity="0.7"/>
+      <rect x="870" y="264" width="36" height="6" rx="3" fill="#334155"/>
+      <rect x="925" y="240" width="36" height="90" rx="4" fill="url(#accent)" opacity="0.7"/>
+      <rect x="925" y="240" width="36" height="6" rx="3" fill="#334155"/>
+      <rect x="980" y="216" width="36" height="114" rx="4" fill="url(#accent)" opacity="0.7"/>
+      <rect x="980" y="216" width="36" height="6" rx="3" fill="#334155"/>
+      <rect x="1035" y="248.4" width="36" height="81.6" rx="4" fill="url(#accent)" opacity="0.7"/>
+      <rect x="1035" y="248.4" width="36" height="6" rx="3" fill="#334155"/>
+
+<!-- Area/Line chart section -->
+<rect x="420" y="400" width="740" height="80" rx="8" fill="#0f172a" opacity="0.6"/>
+<polygon points="430,445 448,413 503,401 558,409 613,389 668,398.6 723,381 778,393 833,377 888,387.4 943,373 998,382.6 1053,369 1053,445" fill="url(#accent)" opacity="0.1"/>
+<polyline points="448,413 503,401 558,409 613,389 668,398.6 723,381 778,393 833,377 888,387.4 943,373 998,382.6 1053,369" fill="none" stroke="url(#accentH)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+<!-- Table heading -->
+<text x="430" y="510" font-family="Inter, sans-serif" font-size="12" font-weight="600" fill="#f1f5f9">Recent Activity</text>
+<rect x="420" y="520" width="740" height="70" rx="8" fill="#0f172a" opacity="0.5"/>
+
+  <rect x="432" y="530" width="200" height="10" rx="5" fill="#334155" opacity="0.5"/>
+  <rect x="700" y="530" width="80" height="10" rx="5" fill="#334155" opacity="0.3"/>
+  <rect x="830" y="530" width="60" height="10" rx="5" fill="#334155" opacity="0.3"/>
+  <rect x="432" y="550" width="240" height="10" rx="5" fill="#334155" opacity="0.5"/>
+  <rect x="700" y="550" width="80" height="10" rx="5" fill="#334155" opacity="0.3"/>
+  <rect x="830" y="550" width="60" height="10" rx="5" fill="#334155" opacity="0.3"/>
+  <rect x="432" y="570" width="200" height="10" rx="5" fill="#334155" opacity="0.5"/>
+  <rect x="700" y="570" width="80" height="10" rx="5" fill="#334155" opacity="0.3"/>
+  <rect x="830" y="570" width="60" height="10" rx="5" fill="#334155" opacity="0.3"/>
+
+<!-- Project name -->
+<text x="600" y="620" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#475569" letter-spacing="2">LOCAL DEVELOPMENT TUNNELING</text>
+</svg>

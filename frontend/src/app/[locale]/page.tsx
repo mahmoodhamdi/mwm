@@ -3,14 +3,22 @@
  * الصفحة الرئيسية
  */
 
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/routing';
+import { WebsiteJsonLd } from '@/components/seo/JsonLd';
 
 export default function HomePage() {
   const t = useTranslations();
+  const locale = useLocale();
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://mwm.com';
 
   return (
     <main className="min-h-screen">
+      <WebsiteJsonLd
+        name={locale === 'ar' ? 'MWM - حلول برمجية متكاملة' : 'MWM - Integrated Software Solutions'}
+        url={`${siteUrl}/${locale}`}
+        searchUrl={`${siteUrl}/${locale}/blog?search={search_term_string}`}
+      />
       {/* Hero Section */}
       <section className="from-primary-600 to-primary-900 relative bg-gradient-to-br text-white">
         {/* Background Image Overlay */}

@@ -18,12 +18,35 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: 'services' });
 
+  const isArabic = locale === 'ar';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://mwm.com';
+
   return {
-    title: t('pageTitle'),
-    description: t('pageDescription'),
+    title: isArabic
+      ? 'خدماتنا البرمجية | تطوير مواقع وتطبيقات وأنظمة - MWM'
+      : 'Our Software Services | Web, Mobile & System Development - MWM',
+    description: isArabic
+      ? 'خدمات MWM البرمجية: تطوير مواقع ويب احترافية، تطبيقات موبايل Flutter، واجهات برمجية REST APIs، متاجر إلكترونية، أنظمة إدارة محتوى، لوحات تحكم، أتمتة وبوتات. أسعار تنافسية وجودة عالمية.'
+      : 'MWM software services: professional website development, Flutter mobile apps, REST APIs, e-commerce stores, CMS platforms, admin dashboards, automation & bots. Competitive pricing with world-class quality.',
+    keywords: isArabic
+      ? ['خدمات برمجية', 'تطوير مواقع', 'تطوير تطبيقات', 'برمجة API', 'متجر إلكتروني', 'لوحة تحكم']
+      : [
+          'software services',
+          'web development',
+          'mobile development',
+          'API development',
+          'e-commerce',
+          'admin dashboard',
+        ],
     openGraph: {
       title: t('pageTitle'),
       description: t('pageDescription'),
+      url: `${siteUrl}/${locale}/services`,
+      images: [{ url: `${siteUrl}/og-image.svg`, width: 1200, height: 630 }],
+    },
+    alternates: {
+      canonical: `/${locale}/services`,
+      languages: { ar: '/ar/services', en: '/en/services' },
     },
   };
 }

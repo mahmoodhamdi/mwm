@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { generateMetaTags } from '@/components/seo/MetaTags';
+import { ArticleJsonLd } from '@/components/seo/JsonLd';
 import { BlogPostClient } from './BlogPostClient';
 
 interface BlogPostPageProps {
@@ -97,7 +98,46 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
 }
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
-  const { slug } = await params;
+  const { locale, slug } = await params;
+  const isArabic = locale === 'ar';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://mwm.com';
 
-  return <BlogPostClient slug={slug} />;
+  const data = await fetchPostForMetadata(slug, locale);
+  const post = data?.post;
+
+  const title = post
+    ? typeof post.title === 'string'
+      ? post.title
+      : isArabic
+        ? (post.title?.ar ?? '')
+        : (post.title?.en ?? '')
+    : '';
+
+  const description = post
+    ? typeof post.excerpt === 'string'
+      ? post.excerpt
+      : isArabic
+        ? (post.excerpt?.ar ?? '')
+        : (post.excerpt?.en ?? '')
+    : '';
+
+  return (
+    <>
+      {post && (
+        <ArticleJsonLd
+          title={title}
+          description={description}
+          url={`${siteUrl}/${locale}/blog/${slug}`}
+          image={post.featuredImage ? `${siteUrl}${post.featuredImage}` : undefined}
+          publishedTime={post.publishedAt || new Date().toISOString()}
+          author={typeof post.author === 'string' ? post.author : (post.author?.name ?? 'MWM Team')}
+          publisher={{
+            name: 'MWM Software Solutions',
+            logo: `${siteUrl}/favicon.svg`,
+          }}
+        />
+      )}
+      <BlogPostClient slug={slug} />
+    </>
+  );
 }

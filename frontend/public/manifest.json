@@ -1,0 +1,21 @@
+{
+  "name": "MWM - Integrated Software Solutions",
+  "short_name": "MWM",
+  "description": "Professional software development company specializing in web apps, mobile apps, APIs, and full-stack platforms",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0ea5e9",
+  "orientation": "portrait-primary",
+  "categories": ["business", "developer tools", "productivity"],
+  "lang": "ar",
+  "dir": "auto",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

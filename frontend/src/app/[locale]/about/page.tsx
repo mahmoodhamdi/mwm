@@ -25,12 +25,24 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: 'about' });
 
+  const isArabic = locale === 'ar';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://mwm.com';
+
   return {
-    title: t('title'),
-    description: t('description'),
+    title: isArabic
+      ? 'من نحن | MWM شركة تطوير برمجيات متخصصة في مصر'
+      : 'About Us | MWM Software Development Company in Egypt',
+    description: isArabic
+      ? 'تعرف على شركة MWM: فريق محترف من مطوري البرمجيات في مصر. 33+ مشروع ناجح في تطوير الويب والتطبيقات والأنظمة المتكاملة. نستخدم أحدث التقنيات: Next.js, Node.js, Flutter, Laravel.'
+      : 'Learn about MWM: a professional team of software developers in Egypt. 33+ successful projects in web, mobile, and full-stack development. We use cutting-edge technologies: Next.js, Node.js, Flutter, Laravel.',
     openGraph: {
       title: t('title'),
       description: t('description'),
+      url: `${siteUrl}/${locale}/about`,
+    },
+    alternates: {
+      canonical: `/${locale}/about`,
+      languages: { ar: '/ar/about', en: '/en/about' },
     },
   };
 }

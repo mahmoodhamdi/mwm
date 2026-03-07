@@ -25,6 +25,7 @@ import { User, UserRoles } from '../models/User';
 import { BlogPost } from '../models/BlogPost';
 import { BlogCategory } from '../models/BlogCategory';
 import { Job } from '../models/Job';
+import { additionalBlogCategories, getBlogPosts } from './blog-posts-data';
 
 const MONGODB_URI =
   process.env.MONGODB_URI || 'mongodb://admin:password@localhost:27017/mwm?authSource=admin';
@@ -1014,7 +1015,12 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
         en: 'Complete food delivery platform including: Backend API (Node.js/Express/TypeScript), Customer App (Flutter), Driver App (Flutter), Restaurant App (Flutter), Admin Dashboard (Next.js), and Shared Types. Supports: real-time order tracking via Socket.io, Paymob payments (cards + Vodafone Cash), push notifications, restaurant and driver management.',
       },
       thumbnail: '/portfolio/bagour-delivery/home.png',
-      images: ['/portfolio/bagour-delivery/home.png'],
+      images: [
+        '/portfolio/bagour-delivery/home.png',
+        '/portfolio/bagour-delivery/dashboard.svg',
+        '/portfolio/bagour-delivery/mobile.svg',
+        '/portfolio/bagour-delivery/features.svg',
+      ],
       category: categories['full-stack-platforms'],
       technologies: [
         { name: 'Node.js', category: 'backend' },
@@ -1052,7 +1058,12 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
         en: 'Comprehensive craftsmen booking platform for Egypt. Includes: Backend API with TypeScript and Joi validation, Dashboard with Next.js 16, and Flutter app with Riverpod. Platform supports: Email OTP verification, Paymob payments, Socket.io notifications, and ratings/reviews system.',
       },
       thumbnail: '/portfolio/sana3y/home.png',
-      images: ['/portfolio/sana3y/home.png'],
+      images: [
+        '/portfolio/sana3y/home.png',
+        '/portfolio/sana3y/dashboard.svg',
+        '/portfolio/sana3y/mobile.svg',
+        '/portfolio/sana3y/features.svg',
+      ],
       category: categories['full-stack-platforms'],
       technologies: [
         { name: 'Node.js', category: 'backend' },
@@ -1080,7 +1091,12 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
         en: 'Complete ride-hailing platform including: Backend API (Express 5/TypeScript), Dashboard (Next.js 16), and Flutter apps. Features: real-time GPS tracking via Redis GEO commands, nearby driver matching, Paymob payments + digital wallet, Unifonic SMS OTP, and Socket.io rooms for trips.',
       },
       thumbnail: '/portfolio/wasalni/home.png',
-      images: ['/portfolio/wasalni/home.png'],
+      images: [
+        '/portfolio/wasalni/home.png',
+        '/portfolio/wasalni/dashboard.svg',
+        '/portfolio/wasalni/mobile.svg',
+        '/portfolio/wasalni/features.svg',
+      ],
       category: categories['full-stack-platforms'],
       technologies: [
         { name: 'Node.js', category: 'backend' },
@@ -1109,7 +1125,12 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
         en: 'MWM corporate website built as a monorepo with npm workspaces. Includes: Backend API (Express/TypeScript/MongoDB), Frontend (Next.js 14/Tailwind), and Shared Types. Supports: bilingual CMS, blog, careers, newsletter, Dark Mode, Firebase push notifications, and GitHub OAuth.',
       },
       thumbnail: '/portfolio/mwm-corporate/home.png',
-      images: ['/portfolio/mwm-corporate/home.png'],
+      images: [
+        '/portfolio/mwm-corporate/home.png',
+        '/portfolio/mwm-corporate/dashboard.svg',
+        '/portfolio/mwm-corporate/mobile.svg',
+        '/portfolio/mwm-corporate/features.svg',
+      ],
       category: categories['web-applications'],
       technologies: [
         { name: 'Node.js', category: 'backend' },
@@ -1141,7 +1162,13 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
         en: 'Ibn Katheer Quran Academy management platform. Includes: teacher and student management, circles and sessions, attendance tracking, Quran memorization progress, and teacher payments. Full Arabic RTL interface with NextAuth 5 and role system (ADMIN/TEACHER).',
       },
       thumbnail: '/portfolio/ebn-kathier/login.png',
-      images: ['/portfolio/ebn-kathier/login.png'],
+      images: [
+        '/portfolio/ebn-kathier/login.png',
+        '/portfolio/ebn-kathier/login-full.png',
+        '/portfolio/ebn-kathier/dashboard.svg',
+        '/portfolio/ebn-kathier/mobile.svg',
+        '/portfolio/ebn-kathier/features.svg',
+      ],
       category: categories['web-applications'],
       technologies: [
         { name: 'Next.js 16', category: 'frontend' },
@@ -1170,7 +1197,12 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
         en: 'Complete doctor appointment booking system built with Laravel 12 (backend) and Next.js 16 (frontend). Includes 88 documented endpoints in API.md. Features: doctor and patient management, appointment scheduling, advanced role system, and reports.',
       },
       thumbnail: '/portfolio/clinic-booking-system/home.png',
-      images: ['/portfolio/clinic-booking-system/home.png'],
+      images: [
+        '/portfolio/clinic-booking-system/home.png',
+        '/portfolio/clinic-booking-system/dashboard.svg',
+        '/portfolio/clinic-booking-system/mobile.svg',
+        '/portfolio/clinic-booking-system/features.svg',
+      ],
       category: categories['web-applications'],
       technologies: [
         { name: 'Laravel 12', category: 'backend' },
@@ -1198,7 +1230,12 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
         en: 'Full-featured API for the Escore esports platform. Covers: news, tournaments, teams, players, matches, live scores, transfers, standings, and following. Supports 12 languages via AI translation. Deployed on DigitalOcean with Swagger docs.',
       },
       thumbnail: '/portfolio/escore-backend/api-docs.png',
-      images: ['/portfolio/escore-backend/api-docs.png', '/portfolio/escore-backend/api-redoc.png'],
+      images: [
+        '/portfolio/escore-backend/api-docs.png',
+        '/portfolio/escore-backend/api-redoc.png',
+        '/portfolio/escore-backend/dashboard.svg',
+        '/portfolio/escore-backend/features.svg',
+      ],
       category: categories['backend-apis'],
       technologies: [
         { name: 'Node.js 20', category: 'backend' },
@@ -1228,7 +1265,13 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
         en: 'Admin dashboard for the Escore platform built with Next.js 16 and React 19 with Tailwind 4. Manages: news, tournaments, teams, matches, users, and settings. Uses AES-256-GCM encrypted sessions.',
       },
       thumbnail: '/portfolio/escore-frontend/home.png',
-      images: ['/portfolio/escore-frontend/home.png'],
+      images: [
+        '/portfolio/escore-frontend/home.png',
+        '/portfolio/escore-frontend/home-full.png',
+        '/portfolio/escore-frontend/dashboard.svg',
+        '/portfolio/escore-frontend/mobile.svg',
+        '/portfolio/escore-frontend/features.svg',
+      ],
       category: categories['web-applications'],
       technologies: [
         { name: 'Next.js 16', category: 'frontend' },
@@ -1254,7 +1297,12 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
         en: 'API built with Python/Flask for Esports World Cup (EWC) news and tournaments. Includes: news, tournaments, teams, and EWC rankings. Documented with Flasgger (Swagger).',
       },
       thumbnail: '/portfolio/esports-flask/home.png',
-      images: ['/portfolio/esports-flask/home.png'],
+      images: [
+        '/portfolio/esports-flask/home.png',
+        '/portfolio/esports-flask/dashboard.svg',
+        '/portfolio/esports-flask/mobile.svg',
+        '/portfolio/esports-flask/features.svg',
+      ],
       category: categories['backend-apis'],
       technologies: [
         { name: 'Python', category: 'backend' },
@@ -1280,7 +1328,12 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
         en: 'API for the Faesl language learning platform. Includes: lesson and exercise management, pronunciation scoring via SpeechAce AI, learner progress tracking, and level system.',
       },
       thumbnail: '/portfolio/sounds-api/home.png',
-      images: ['/portfolio/sounds-api/home.png'],
+      images: [
+        '/portfolio/sounds-api/home.png',
+        '/portfolio/sounds-api/dashboard.svg',
+        '/portfolio/sounds-api/mobile.svg',
+        '/portfolio/sounds-api/features.svg',
+      ],
       category: categories['backend-apis'],
       technologies: [
         { name: 'Python', category: 'backend' },
@@ -1305,7 +1358,12 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
         en: 'API for extracting direct download links from YouTube and 1000+ other platforms using yt-dlp. Supports: single videos and playlists, quality selection (144p - 4K), audio extraction, and subtitles.',
       },
       thumbnail: '/portfolio/downloader-api/home.png',
-      images: ['/portfolio/downloader-api/home.png'],
+      images: [
+        '/portfolio/downloader-api/home.png',
+        '/portfolio/downloader-api/dashboard.svg',
+        '/portfolio/downloader-api/mobile.svg',
+        '/portfolio/downloader-api/features.svg',
+      ],
       category: categories['backend-apis'],
       technologies: [
         { name: 'Python', category: 'backend' },
@@ -1337,6 +1395,9 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
       images: [
         '/portfolio/csv-excel-converter/home.png',
         '/portfolio/csv-excel-converter/home-full.png',
+        '/portfolio/csv-excel-converter/dashboard.svg',
+        '/portfolio/csv-excel-converter/mobile.svg',
+        '/portfolio/csv-excel-converter/features.svg',
       ],
       category: categories['web-tools'],
       technologies: [
@@ -1365,7 +1426,13 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
         en: 'Comprehensive 13-step email validation tool: syntax check (RFC 5322), domain verification, MX record lookup, disposable email detection, role-based check (admin@, support@), typo suggestions, and more.',
       },
       thumbnail: '/portfolio/email-validator/home.png',
-      images: ['/portfolio/email-validator/home.png', '/portfolio/email-validator/home-full.png'],
+      images: [
+        '/portfolio/email-validator/home.png',
+        '/portfolio/email-validator/home-full.png',
+        '/portfolio/email-validator/dashboard.svg',
+        '/portfolio/email-validator/mobile.svg',
+        '/portfolio/email-validator/features.svg',
+      ],
       category: categories['web-tools'],
       technologies: [
         { name: 'Next.js 14', category: 'frontend' },
@@ -1390,7 +1457,12 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
         en: 'Professional Markdown editor with live preview and PDF export. Supports: syntax highlighting, multiple themes, ready-made templates, batch conversion, formatting toolbar, and word counter. Built with Next.js 14 with split-view interface.',
       },
       thumbnail: '/portfolio/markdown-to-pdf/home.png',
-      images: ['/portfolio/markdown-to-pdf/home.png'],
+      images: [
+        '/portfolio/markdown-to-pdf/home.png',
+        '/portfolio/markdown-to-pdf/dashboard.svg',
+        '/portfolio/markdown-to-pdf/mobile.svg',
+        '/portfolio/markdown-to-pdf/features.svg',
+      ],
       category: categories['web-tools'],
       technologies: [
         { name: 'Next.js 14', category: 'frontend' },
@@ -1415,7 +1487,12 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
         en: 'Professional URL shortener with: detailed analytics (clicks, locations, devices), QR code generation, password protection, bulk shortening, and API docs. Built with Next.js 14.',
       },
       thumbnail: '/portfolio/url-shortener/home.png',
-      images: ['/portfolio/url-shortener/home.png'],
+      images: [
+        '/portfolio/url-shortener/home.png',
+        '/portfolio/url-shortener/dashboard.svg',
+        '/portfolio/url-shortener/mobile.svg',
+        '/portfolio/url-shortener/features.svg',
+      ],
       category: categories['web-tools'],
       technologies: [
         { name: 'Next.js 14', category: 'frontend' },
@@ -1440,7 +1517,12 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
         en: 'Complete bulk email sending system. Includes: dashboard, campaign management (draft/sending/completed), email templates, contact management with CSV import, analytics (open rate, click rate), and SMTP settings.',
       },
       thumbnail: '/portfolio/bulk-email-sender/home.png',
-      images: ['/portfolio/bulk-email-sender/home.png'],
+      images: [
+        '/portfolio/bulk-email-sender/home.png',
+        '/portfolio/bulk-email-sender/dashboard.svg',
+        '/portfolio/bulk-email-sender/mobile.svg',
+        '/portfolio/bulk-email-sender/features.svg',
+      ],
       category: categories['web-tools'],
       technologies: [
         { name: 'Next.js 16', category: 'frontend' },
@@ -1468,7 +1550,13 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
         en: 'Marketing website for Smart Stand Egypt, a display solutions company. Elegant gold-themed design with: smart lazy loading, custom carousels, scroll animations, and partner showcase (LG, Red Bull, TCL, Panasonic). Built with Next.js 16 as a single-page app.',
       },
       thumbnail: '/portfolio/smartstand-egypt/home.png',
-      images: ['/portfolio/smartstand-egypt/home.png', '/portfolio/smartstand-egypt/home-full.png'],
+      images: [
+        '/portfolio/smartstand-egypt/home.png',
+        '/portfolio/smartstand-egypt/home-full.png',
+        '/portfolio/smartstand-egypt/dashboard.svg',
+        '/portfolio/smartstand-egypt/mobile.svg',
+        '/portfolio/smartstand-egypt/features.svg',
+      ],
       category: categories['marketing-websites'],
       technologies: [
         { name: 'Next.js 16', category: 'frontend' },
@@ -1494,7 +1582,13 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
         en: 'Web app for finding the nearest LG Electronics stores in Egypt. Uses: browser GPS with Haversine formula for distance calculation, real-time search by name/district/governorate, localStorage caching, and dark mode. Also includes: Python script for extracting coordinates from Google Maps, and QR code generator.',
       },
       thumbnail: '/portfolio/lg-branchs/home.png',
-      images: ['/portfolio/lg-branchs/home.png', '/portfolio/lg-branchs/home-full.png'],
+      images: [
+        '/portfolio/lg-branchs/home.png',
+        '/portfolio/lg-branchs/home-full.png',
+        '/portfolio/lg-branchs/dashboard.svg',
+        '/portfolio/lg-branchs/mobile.svg',
+        '/portfolio/lg-branchs/features.svg',
+      ],
       category: categories['marketing-websites'],
       technologies: [
         { name: 'HTML/CSS/JS', category: 'frontend' },
@@ -1522,7 +1616,12 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
         en: 'Complete SaaS application for automating WhatsApp replies for small businesses, clinics, and restaurants. Includes: WhatsApp Web connection via Baileys, Google Sheets sync, Stripe subscriptions, bilingual support (Arabic RTL + English), 247 unit tests and 95 E2E tests.',
       },
       thumbnail: '/portfolio/whatsapp-sheets-bot/home.png',
-      images: ['/portfolio/whatsapp-sheets-bot/home.png'],
+      images: [
+        '/portfolio/whatsapp-sheets-bot/home.png',
+        '/portfolio/whatsapp-sheets-bot/dashboard.svg',
+        '/portfolio/whatsapp-sheets-bot/mobile.svg',
+        '/portfolio/whatsapp-sheets-bot/features.svg',
+      ],
       category: categories['automation-scraping'],
       technologies: [
         { name: 'Next.js 16', category: 'frontend' },
@@ -1554,7 +1653,12 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
         en: 'Python-based scraping tool that collects contact data (emails, phones, addresses, websites) for construction companies from 8 different sources. Produces Excel files with Arabic RTL, CSV, and JSON. Targets Egypt, Saudi Arabia, and UAE.',
       },
       thumbnail: '/portfolio/artneer/home.png',
-      images: ['/portfolio/artneer/home.png'],
+      images: [
+        '/portfolio/artneer/home.png',
+        '/portfolio/artneer/dashboard.svg',
+        '/portfolio/artneer/mobile.svg',
+        '/portfolio/artneer/features.svg',
+      ],
       category: categories['automation-scraping'],
       technologies: [
         { name: 'Python 3', category: 'backend' },
@@ -1580,7 +1684,13 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
         en: 'Price comparison platform that aggregates product data from 15+ online stores via web scraping with BullMQ job queues. Includes: cross-store search, price tracking, price drop alerts, and trending products display.',
       },
       thumbnail: '/portfolio/price-hunter/home.png',
-      images: ['/portfolio/price-hunter/home.png'],
+      images: [
+        '/portfolio/price-hunter/home.png',
+        '/portfolio/price-hunter/home-full.png',
+        '/portfolio/price-hunter/dashboard.svg',
+        '/portfolio/price-hunter/mobile.svg',
+        '/portfolio/price-hunter/features.svg',
+      ],
       category: categories['web-applications'],
       technologies: [
         { name: 'Next.js 14', category: 'frontend' },
@@ -1609,7 +1719,12 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
         en: 'Tourism platform connecting visitors with local guides in Saudi Arabia. Includes: Backend API (Node.js/Express/TypeScript), Dashboard (Next.js 14), and Flutter app. Supports: tour booking, ratings, online payments, and real-time chat.',
       },
       thumbnail: '/portfolio/saudi-host/home.png',
-      images: ['/portfolio/saudi-host/home.png'],
+      images: [
+        '/portfolio/saudi-host/home.png',
+        '/portfolio/saudi-host/dashboard.svg',
+        '/portfolio/saudi-host/mobile.svg',
+        '/portfolio/saudi-host/features.svg',
+      ],
       category: categories['full-stack-platforms'],
       technologies: [
         { name: 'Node.js', category: 'backend' },
@@ -1636,7 +1751,12 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
         en: 'Multi-service platform including Backend API (Node.js/Express) and Frontend (Next.js) with shared TypeScript types library. Follows Clean Architecture with full separation of concerns.',
       },
       thumbnail: '/portfolio/sabry/home.png',
-      images: ['/portfolio/sabry/home.png'],
+      images: [
+        '/portfolio/sabry/home.png',
+        '/portfolio/sabry/dashboard.svg',
+        '/portfolio/sabry/mobile.svg',
+        '/portfolio/sabry/features.svg',
+      ],
       category: categories['full-stack-platforms'],
       technologies: [
         { name: 'Node.js', category: 'backend' },
@@ -1664,7 +1784,12 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
         en: 'Complete e-commerce store built with Laravel 10 and Filament 3. Supports: Arabic/English, product and category management, shopping cart, order management, payment system, and Filament admin panel with Livewire 3 for SPA experience.',
       },
       thumbnail: '/portfolio/dare/home.png',
-      images: ['/portfolio/dare/home.png'],
+      images: [
+        '/portfolio/dare/home.png',
+        '/portfolio/dare/dashboard.svg',
+        '/portfolio/dare/mobile.svg',
+        '/portfolio/dare/features.svg',
+      ],
       category: categories['web-applications'],
       technologies: [
         { name: 'Laravel 10', category: 'backend' },
@@ -1690,7 +1815,12 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
         en: 'Complete educational platform for booking and managing online tutoring sessions. Includes: teacher and student management, session booking, rating system, and online payments.',
       },
       thumbnail: '/portfolio/tutoring-system/home.png',
-      images: ['/portfolio/tutoring-system/home.png'],
+      images: [
+        '/portfolio/tutoring-system/home.png',
+        '/portfolio/tutoring-system/dashboard.svg',
+        '/portfolio/tutoring-system/mobile.svg',
+        '/portfolio/tutoring-system/features.svg',
+      ],
       category: categories['web-applications'],
       technologies: [
         { name: 'Next.js', category: 'frontend' },
@@ -1717,7 +1847,12 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
         en: 'Professional web portfolio showcasing services offered on the Khamsat platform. Includes 15+ service templates with detailed descriptions, work samples, and pricing. Built with HTML/CSS/JavaScript with ready-made templates.',
       },
       thumbnail: '/portfolio/khamsat-portfolio/home.png',
-      images: ['/portfolio/khamsat-portfolio/home.png'],
+      images: [
+        '/portfolio/khamsat-portfolio/home.png',
+        '/portfolio/khamsat-portfolio/dashboard.svg',
+        '/portfolio/khamsat-portfolio/mobile.svg',
+        '/portfolio/khamsat-portfolio/features.svg',
+      ],
       category: categories['marketing-websites'],
       technologies: [
         { name: 'HTML5', category: 'frontend' },
@@ -1743,7 +1878,12 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
         en: 'API for taking high-quality screenshots of any URL. Supports: custom viewport dimensions, full-page screenshots, CSS selector targeting, and content loading wait strategies.',
       },
       thumbnail: '/portfolio/screenshot-api/home.png',
-      images: ['/portfolio/screenshot-api/home.png'],
+      images: [
+        '/portfolio/screenshot-api/home.png',
+        '/portfolio/screenshot-api/dashboard.svg',
+        '/portfolio/screenshot-api/mobile.svg',
+        '/portfolio/screenshot-api/features.svg',
+      ],
       category: categories['backend-apis'],
       technologies: [
         { name: 'Node.js', category: 'backend' },
@@ -1767,7 +1907,12 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
         en: 'Node.js tool that creates a secure tunnel to share your localhost server with the world. Useful for testing webhooks, demoing work to clients, and testing mobile devices against local dev servers.',
       },
       thumbnail: '/portfolio/localhost-tunnel/home.png',
-      images: ['/portfolio/localhost-tunnel/home.png'],
+      images: [
+        '/portfolio/localhost-tunnel/home.png',
+        '/portfolio/localhost-tunnel/dashboard.svg',
+        '/portfolio/localhost-tunnel/mobile.svg',
+        '/portfolio/localhost-tunnel/features.svg',
+      ],
       category: categories['web-tools'],
       technologies: [
         { name: 'Node.js', category: 'backend' },
@@ -1801,8 +1946,14 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
         ar: 'استخدمنا Next.js 16 مع Prisma و PostgreSQL لقاعدة بيانات علائقية قوية, مع NextAuth للمصادقة ونظام أدوار متعدد المستويات',
         en: 'We used Next.js 16 with Prisma and PostgreSQL for a robust relational database, with NextAuth for authentication and a multi-level role system',
       },
-      thumbnail: '/portfolio/ebn-kathier/home.png',
-      images: ['/portfolio/ebn-kathier/home.png'],
+      thumbnail: '/portfolio/ebn-kathier/login.png',
+      images: [
+        '/portfolio/ebn-kathier/login.png',
+        '/portfolio/ebn-kathier/login-full.png',
+        '/portfolio/ebn-kathier/dashboard.svg',
+        '/portfolio/ebn-kathier/mobile.svg',
+        '/portfolio/ebn-kathier/features.svg',
+      ],
       category: categories['full-stack-platforms'],
       technologies: [
         { name: 'Next.js 16', category: 'frontend' },
@@ -1837,8 +1988,13 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
         ar: 'بنينا API قوي بـ Laravel مع 88 endpoint وتوثيق كامل, ونظام حجز ذكي يتحقق من التعارضات في الوقت الحقيقي',
         en: 'We built a robust API with Laravel featuring 88 endpoints and full documentation, with an intelligent booking system that checks conflicts in real-time',
       },
-      thumbnail: '/portfolio/clinic-booking-system/placeholder.png',
-      images: ['/portfolio/clinic-booking-system/placeholder.png'],
+      thumbnail: '/portfolio/clinic-booking-system/home.png',
+      images: [
+        '/portfolio/clinic-booking-system/home.png',
+        '/portfolio/clinic-booking-system/dashboard.svg',
+        '/portfolio/clinic-booking-system/mobile.svg',
+        '/portfolio/clinic-booking-system/features.svg',
+      ],
       category: categories['full-stack-platforms'],
       technologies: [
         { name: 'Laravel 12', category: 'backend' },
@@ -1877,7 +2033,13 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
         en: 'We used Puppeteer with proxy rotation and BullMQ for task scheduling, with Prisma and PostgreSQL for efficient price history storage',
       },
       thumbnail: '/portfolio/price-hunter/home.png',
-      images: ['/portfolio/price-hunter/home.png'],
+      images: [
+        '/portfolio/price-hunter/home.png',
+        '/portfolio/price-hunter/home-full.png',
+        '/portfolio/price-hunter/dashboard.svg',
+        '/portfolio/price-hunter/mobile.svg',
+        '/portfolio/price-hunter/features.svg',
+      ],
       category: categories['web-applications'],
       technologies: [
         { name: 'Next.js 14', category: 'frontend' },
@@ -1913,7 +2075,14 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
         en: 'We built the Backend with Node.js/Express with MongoDB and Redis caching, Socket.io for live updates, and APNs for iOS notifications',
       },
       thumbnail: '/portfolio/escore-frontend/home.png',
-      images: ['/portfolio/escore-frontend/home.png', '/portfolio/escore-backend/api-docs.png'],
+      images: [
+        '/portfolio/escore-frontend/home.png',
+        '/portfolio/escore-frontend/home-full.png',
+        '/portfolio/escore-backend/api-docs.png',
+        '/portfolio/escore-backend/api-redoc.png',
+        '/portfolio/escore-frontend/dashboard.svg',
+        '/portfolio/escore-frontend/features.svg',
+      ],
       category: categories['full-stack-platforms'],
       technologies: [
         { name: 'Node.js', category: 'backend' },
@@ -1949,8 +2118,13 @@ const seedProjects = async (categories: Record<string, mongoose.Types.ObjectId>)
         ar: 'استخدمنا Laravel مع Filament 3 لبناء لوحة تحكم قوية بسرعة, و Livewire 3 للتفاعلية بدون JavaScript معقد',
         en: 'We used Laravel with Filament 3 to rapidly build a powerful admin panel, and Livewire 3 for interactivity without complex JavaScript',
       },
-      thumbnail: '/portfolio/dare/placeholder.png',
-      images: ['/portfolio/dare/placeholder.png'],
+      thumbnail: '/portfolio/dare/home.png',
+      images: [
+        '/portfolio/dare/home.png',
+        '/portfolio/dare/dashboard.svg',
+        '/portfolio/dare/mobile.svg',
+        '/portfolio/dare/features.svg',
+      ],
       category: categories['web-applications'],
       technologies: [
         { name: 'Laravel 10', category: 'backend' },
@@ -2026,6 +2200,7 @@ const seedBlogCategories = async () => {
       description: { ar: 'دروس وشروحات تقنية', en: 'Technical tutorials and guides' },
       isActive: true,
     },
+    ...additionalBlogCategories,
   ];
 
   const createdCategories: Record<string, mongoose.Types.ObjectId> = {};
@@ -2121,7 +2296,7 @@ const seedBlogPosts = async (categories: Record<string, mongoose.Types.ObjectId>
       },
       category: categories['technology'],
       author: admin._id,
-      featuredImage: '/portfolio/wasalni/placeholder.png',
+      featuredImage: '/portfolio/wasalni/home.png',
       tags: [
         { ar: 'Flutter', en: 'Flutter' },
         { ar: 'تطبيقات موبايل', en: 'Mobile Apps' },
@@ -2147,7 +2322,7 @@ const seedBlogPosts = async (categories: Record<string, mongoose.Types.ObjectId>
       },
       category: categories['design'],
       author: admin._id,
-      featuredImage: '/portfolio/mwm-corporate/placeholder.png',
+      featuredImage: '/portfolio/mwm-corporate/home.png',
       tags: [
         { ar: 'RTL', en: 'RTL' },
         { ar: 'تصميم', en: 'Design' },
@@ -2226,7 +2401,7 @@ const seedBlogPosts = async (categories: Record<string, mongoose.Types.ObjectId>
       },
       category: categories['tutorials'],
       author: admin._id,
-      featuredImage: '/portfolio/artneer/placeholder.png',
+      featuredImage: '/portfolio/artneer/home.png',
       tags: [
         { ar: 'أتمتة', en: 'Automation' },
         { ar: 'Web Scraping', en: 'Web Scraping' },
@@ -2238,7 +2413,11 @@ const seedBlogPosts = async (categories: Record<string, mongoose.Types.ObjectId>
     },
   ];
 
-  for (const post of posts) {
+  // Add the 50 new blog posts
+  const newPosts = getBlogPosts(categories, admin._id);
+  const allPosts = [...posts, ...newPosts];
+
+  for (const post of allPosts) {
     await BlogPost.findOneAndUpdate(
       { slug: post.slug },
       { $set: post },
@@ -2246,7 +2425,7 @@ const seedBlogPosts = async (categories: Record<string, mongoose.Types.ObjectId>
     );
   }
 
-  console.log('Blog Posts seeded successfully!');
+  console.log(`Blog Posts seeded successfully! (${allPosts.length} posts)`);
 };
 
 // ═══════════════════════════════════════════════════════════════

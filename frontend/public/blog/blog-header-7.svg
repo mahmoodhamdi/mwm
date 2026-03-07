@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="60%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#dc2626"/>
+      <stop offset="100%" stop-color="#991b1b"/>
+    </linearGradient>
+    <linearGradient id="accentH" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#dc2626"/>
+      <stop offset="100%" stop-color="#991b1b"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#dc2626" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#dc2626" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="blur4">
+      <feGaussianBlur stdDeviation="4"/>
+    </filter>
+    <filter id="blur2">
+      <feGaussianBlur stdDeviation="2"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <ellipse cx="600" cy="315" rx="500" ry="300" fill="url(#glow)"/>
+<g opacity="0.03"><line x1="0" y1="0" x2="0" y2="630" stroke="white" stroke-width="1"/><line x1="60" y1="0" x2="60" y2="630" stroke="white" stroke-width="1"/><line x1="120" y1="0" x2="120" y2="630" stroke="white" stroke-width="1"/><line x1="180" y1="0" x2="180" y2="630" stroke="white" stroke-width="1"/><line x1="240" y1="0" x2="240" y2="630" stroke="white" stroke-width="1"/><line x1="300" y1="0" x2="300" y2="630" stroke="white" stroke-width="1"/><line x1="360" y1="0" x2="360" y2="630" stroke="white" stroke-width="1"/><line x1="420" y1="0" x2="420" y2="630" stroke="white" stroke-width="1"/><line x1="480" y1="0" x2="480" y2="630" stroke="white" stroke-width="1"/><line x1="540" y1="0" x2="540" y2="630" stroke="white" stroke-width="1"/><line x1="600" y1="0" x2="600" y2="630" stroke="white" stroke-width="1"/><line x1="660" y1="0" x2="660" y2="630" stroke="white" stroke-width="1"/><line x1="720" y1="0" x2="720" y2="630" stroke="white" stroke-width="1"/><line x1="780" y1="0" x2="780" y2="630" stroke="white" stroke-width="1"/><line x1="840" y1="0" x2="840" y2="630" stroke="white" stroke-width="1"/><line x1="900" y1="0" x2="900" y2="630" stroke="white" stroke-width="1"/><line x1="960" y1="0" x2="960" y2="630" stroke="white" stroke-width="1"/><line x1="1020" y1="0" x2="1020" y2="630" stroke="white" stroke-width="1"/><line x1="1080" y1="0" x2="1080" y2="630" stroke="white" stroke-width="1"/><line x1="1140" y1="0" x2="1140" y2="630" stroke="white" stroke-width="1"/><line x1="0" y1="0" x2="1200" y2="0" stroke="white" stroke-width="1"/><line x1="0" y1="63" x2="1200" y2="63" stroke="white" stroke-width="1"/><line x1="0" y1="126" x2="1200" y2="126" stroke="white" stroke-width="1"/><line x1="0" y1="189" x2="1200" y2="189" stroke="white" stroke-width="1"/><line x1="0" y1="252" x2="1200" y2="252" stroke="white" stroke-width="1"/><line x1="0" y1="315" x2="1200" y2="315" stroke="white" stroke-width="1"/><line x1="0" y1="378" x2="1200" y2="378" stroke="white" stroke-width="1"/><line x1="0" y1="441" x2="1200" y2="441" stroke="white" stroke-width="1"/><line x1="0" y1="504" x2="1200" y2="504" stroke="white" stroke-width="1"/><line x1="0" y1="567" x2="1200" y2="567" stroke="white" stroke-width="1"/></g>
+
+<!-- Top accent stripe -->
+<rect x="0" y="0" width="1200" height="5" fill="url(#accentH)"/>
+
+<!-- Left content area -->
+<g transform="translate(60, 0)">
+  
+  <g transform="translate(0, 40)">
+    <path d="M10 4L4 13L10 22" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M26 4L32 13L26 22" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <circle cx="18" cy="13" r="2.5" fill="#0ea5e9"/>
+    <line x1="12.5" y1="13" x2="15.5" y2="13" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+    <line x1="20.5" y1="13" x2="23.5" y2="13" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+    <text x="38" y="18" font-family="Inter, sans-serif" font-size="14" font-weight="800" letter-spacing="1">
+      <tspan fill="#0ea5e9">M</tspan><tspan fill="#f1f5f9">W</tspan><tspan fill="#0ea5e9">M</tspan>
+    </text>
+    <text x="38" y="27" font-family="Inter, sans-serif" font-size="7" font-weight="500" fill="#94a3b8" letter-spacing="2">SOFTWARE</text>
+  </g>
+
+  <!-- Category badge -->
+  <rect x="0" y="120" width="94" height="26" rx="13" fill="#dc2626" opacity="0.2"/>
+  <text x="47" y="137" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#dc2626">SECURITY</text>
+
+  <!-- Main title -->
+  <text x="0" y="198" font-family="Inter, sans-serif" font-size="38" font-weight="800" fill="#f1f5f9">Security in Web Apps</text>
+  <text x="0" y="230" font-family="Inter, sans-serif" font-size="16" fill="#94a3b8">Auth · CSRF · XSS · Rate Limiting</text>
+
+  <!-- Divider -->
+  <rect x="0" y="252" width="80" height="3" rx="1.5" fill="url(#accentH)"/>
+
+  <!-- Author / meta -->
+  <circle cx="16" cy="300" r="16" fill="#dc2626" opacity="0.3"/>
+  <text x="42" y="296" font-family="Inter, sans-serif" font-size="13" font-weight="600" fill="#f1f5f9">MWM Engineering Blog</text>
+  <text x="42" y="314" font-family="Inter, sans-serif" font-size="11" fill="#94a3b8">March 2026 · 8 min read</text>
+
+  <!-- Read time pill -->
+  <rect x="0" y="340" width="100" height="28" rx="14" fill="#334155" opacity="0.5"/>
+  <text x="50" y="358" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#94a3b8">Tech Article</text>
+</g>
+
+<!-- Code snippet / visual right side -->
+
+  <rect x="600" y="140" width="500" height="118" rx="10" fill="#0f172a" opacity="0.9"/>
+  <!-- traffic lights -->
+  <circle cx="618" cy="156" r="5" fill="#ef4444" opacity="0.8"/>
+  <circle cx="634" cy="156" r="5" fill="#f59e0b" opacity="0.8"/>
+  <circle cx="650" cy="156" r="5" fill="#22c55e" opacity="0.8"/>
+  <rect x="600" y="168" width="500" height="1" fill="#334155" opacity="0.5"/>
+  <text x="616" y="188" font-family="'JetBrains Mono', 'Fira Code', monospace" font-size="12" fill="#6b7280">// Verify HMAC signature</text><text x="616" y="210" font-family="'JetBrains Mono', 'Fira Code', monospace" font-size="12" fill="#c084fc">const</text><text x="653.5" y="210" font-family="'JetBrains Mono', 'Fira Code', monospace" font-size="12" fill="#e2e8f0"> hash</text><text x="691" y="210" font-family="'JetBrains Mono', 'Fira Code', monospace" font-size="12" fill="#e2e8f0"> = </text><text x="713.5" y="210" font-family="'JetBrains Mono', 'Fira Code', monospace" font-size="12" fill="#34d399">crypto</text><text x="758.5" y="210" font-family="'JetBrains Mono', 'Fira Code', monospace" font-size="12" fill="#e2e8f0">.createHmac(</text><text x="616" y="232" font-family="'JetBrains Mono', 'Fira Code', monospace" font-size="12" fill="#e2e8f0">  </text><text x="631" y="232" font-family="'JetBrains Mono', 'Fira Code', monospace" font-size="12" fill="#fbbf24">"sha256"</text><text x="691" y="232" font-family="'JetBrains Mono', 'Fira Code', monospace" font-size="12" fill="#e2e8f0">, process.env.</text><text x="796" y="232" font-family="'JetBrains Mono', 'Fira Code', monospace" font-size="12" fill="#fb923c">SECRET</text><text x="841" y="232" font-family="'JetBrains Mono', 'Fira Code', monospace" font-size="12" fill="#e2e8f0">);</text><text x="616" y="254" font-family="'JetBrains Mono', 'Fira Code', monospace" font-size="12" fill="#e2e8f0">hash</text><text x="646" y="254" font-family="'JetBrains Mono', 'Fira Code', monospace" font-size="12" fill="#34d399">.update</text><text x="698.5" y="254" font-family="'JetBrains Mono', 'Fira Code', monospace" font-size="12" fill="#e2e8f0">(payload)</text><text x="766" y="254" font-family="'JetBrains Mono', 'Fira Code', monospace" font-size="12" fill="#34d399">.digest</text><text x="818.5" y="254" font-family="'JetBrains Mono', 'Fira Code', monospace" font-size="12" fill="#fbbf24">("hex"</text><text x="863.5" y="254" font-family="'JetBrains Mono', 'Fira Code', monospace" font-size="12" fill="#e2e8f0">);</text>
+
+<!-- Decorative element -->
+
+    <!-- Abstract hexagon/circuit pattern -->
+    <polygon points="960,200 1010,230 1010,290 960,320 910,290 910,230" fill="none" stroke="#dc2626" stroke-width="2" opacity="0.2"/>
+    <polygon points="960,230 990,247 990,283 960,300 930,283 930,247" fill="#dc2626" opacity="0.08"/>
+    <circle cx="960" cy="265" r="20" fill="#dc2626" opacity="0.25"/>
+    <!-- Orbiting dots -->
+    <circle cx="960" cy="200" r="5" fill="#dc2626" opacity="0.6"/>
+    <circle cx="1010" cy="260" r="5" fill="#dc2626" opacity="0.6"/>
+    <circle cx="910" cy="260" r="5" fill="#dc2626" opacity="0.6"/>
+
+<!-- Bottom bar -->
+<rect x="0" y="590" width="1200" height="40" fill="#1e293b" opacity="0.7"/>
+<text x="60" y="615" font-family="Inter, sans-serif" font-size="11" fill="#475569">mwm.software/blog</text>
+<text x="600" y="615" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#475569" letter-spacing="2">MWM SOFTWARE SOLUTIONS</text>
+<text x="1140" y="615" text-anchor="end" font-family="Inter, sans-serif" font-size="11" fill="#475569">2026</text>
+</svg>

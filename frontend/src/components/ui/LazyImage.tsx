@@ -19,7 +19,7 @@ export function LazyImage({
   src,
   alt,
   className,
-  fallback = '/images/placeholder.jpg',
+  fallback = '/images/placeholder.svg',
   showSkeleton = true,
   skeletonClassName,
   ...props
@@ -91,7 +91,7 @@ export function LazyBackgroundImage({
   src,
   className,
   children,
-  fallback = '/images/placeholder.jpg',
+  fallback = '/images/placeholder.svg',
 }: {
   src: string;
   className?: string;

@@ -29,6 +29,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const locale = useLocale();
 
   const checkAuth = useCallback(async () => {
+    // Skip API call if user never logged in (no auth state in localStorage)
+    if (!tokenUtils.isAuthenticated()) {
+      setIsLoading(false);
+      return;
+    }
+
     try {
       // Try to get current user - cookies are sent automatically
       const userData = await authService.getMe();

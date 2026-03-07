@@ -128,11 +128,6 @@ export function BlogPostClient({ slug }: BlogPostClientProps) {
     return getLocalizedText(category.name);
   };
 
-  const getCategorySlug = (category: BlogPost['category']): string => {
-    if (typeof category === 'string') return category;
-    return category.slug;
-  };
-
   const getAuthorName = (author: BlogPost['author']): string => {
     if (typeof author === 'string') return author;
     return author.name || '';
@@ -225,7 +220,7 @@ export function BlogPostClient({ slug }: BlogPostClientProps) {
         <div className="mx-auto max-w-4xl">
           {/* Category */}
           <Link
-            href={`/${locale}/blog/category/${getCategorySlug(post.category)}`}
+            href={`/${locale}/blog`}
             className="mb-4 inline-block rounded-full bg-blue-100 px-4 py-1 text-sm font-medium text-blue-800 hover:bg-blue-200"
           >
             {getCategoryName(post.category)}

@@ -76,6 +76,7 @@ class AuthService {
   generateAccessToken(payload: TokenPayload): string {
     return jwt.sign(payload, env.jwt.secret, {
       expiresIn: env.jwt.expiresIn as string,
+      algorithm: 'HS256',
     } as jwt.SignOptions);
   }
 
@@ -134,7 +135,9 @@ class AuthService {
    */
   verifyAccessToken(token: string): TokenPayload {
     try {
-      const decoded = jwt.verify(token, env.jwt.secret) as JwtPayload & TokenPayload;
+      const decoded = jwt.verify(token, env.jwt.secret, {
+        algorithms: ['HS256'],
+      }) as JwtPayload & TokenPayload;
       return {
         userId: decoded.userId,
         email: decoded.email,
@@ -203,13 +206,18 @@ class AuthService {
    * Blacklist access token
    * إضافة توكن الوصول للقائمة السوداء
    */
+  private hashToken(token: string): string {
+    return crypto.createHash('sha256').update(token).digest('hex');
+  }
+
   async blacklistAccessToken(token: string): Promise<void> {
     try {
       const decoded = jwt.decode(token) as JwtPayload;
       if (decoded && decoded.exp) {
         const ttl = decoded.exp - Math.floor(Date.now() / 1000);
         if (ttl > 0) {
-          await redis.set(`blacklist:${token}`, '1', 'EX', ttl);
+          const tokenHash = this.hashToken(token);
+          await redis.set(`blacklist:${tokenHash}`, '1', 'EX', ttl);
         }
       }
     } catch {
@@ -222,7 +230,8 @@ class AuthService {
    * التحقق مما إذا كان التوكن في القائمة السوداء
    */
   async isTokenBlacklisted(token: string): Promise<boolean> {
-    const result = await redis.get(`blacklist:${token}`);
+    const tokenHash = this.hashToken(token);
+    const result = await redis.get(`blacklist:${tokenHash}`);
     return result === '1';
   }
 

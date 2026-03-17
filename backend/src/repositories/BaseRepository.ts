@@ -59,6 +59,41 @@ export interface PaginatedResult<T> {
   pagination: PaginationMeta;
 }
 
+// Allowed sort direction values
+const ALLOWED_SORT_VALUES = new Set([1, -1, 'asc', 'desc']);
+
+/**
+ * Sanitize a sort object to prevent sort parameter injection.
+ * Only allows string keys and values of 1, -1, 'asc', or 'desc'.
+ * Returns a safe copy with invalid entries stripped out.
+ */
+function sanitizeSortParam(sort: Record<string, unknown>): Record<string, 1 | -1> {
+  const safe: Record<string, 1 | -1> = {};
+
+  for (const key of Object.keys(sort)) {
+    // Reject keys that start with '$' (Mongoose operators) or contain dots (path traversal)
+    if (typeof key !== 'string' || key.startsWith('$') || key.includes('\0')) {
+      continue;
+    }
+
+    const val = sort[key];
+    if (!ALLOWED_SORT_VALUES.has(val as 1 | -1 | 'asc' | 'desc')) {
+      continue;
+    }
+
+    // Normalize 'asc'/'desc' to 1/-1 for consistent downstream handling
+    if (val === 'asc') {
+      safe[key] = 1;
+    } else if (val === 'desc') {
+      safe[key] = -1;
+    } else {
+      safe[key] = val as 1 | -1;
+    }
+  }
+
+  return safe;
+}
+
 /**
  * Base Repository Class
  * فئة المستودع الأساسية
@@ -143,7 +178,10 @@ export class BaseRepository<T extends Document> {
     }
 
     if (options?.sort) {
-      query = query.sort(options.sort);
+      const safeSort = sanitizeSortParam(options.sort as Record<string, unknown>);
+      if (Object.keys(safeSort).length > 0) {
+        query = query.sort(safeSort);
+      }
     }
 
     if (options?.populate) {
@@ -180,7 +218,13 @@ export class BaseRepository<T extends Document> {
     }
 
     if (options?.sort) {
-      query = query.sort(options.sort);
+      const safeSort = sanitizeSortParam(options.sort as Record<string, unknown>);
+      if (Object.keys(safeSort).length > 0) {
+        query = query.sort(safeSort);
+      } else {
+        // Fallback to default sort if the provided sort was entirely stripped
+        query = query.sort({ createdAt: -1 });
+      }
     } else {
       query = query.sort({ createdAt: -1 });
     }

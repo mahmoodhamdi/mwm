@@ -157,21 +157,22 @@ export function createApp(): Express {
   app.use('/api/v1/users', usersRouter);
   app.use('/api/v1/upload', uploadRouter);
 
-  // Swagger documentation
-  app.use(
-    '/api/docs',
-    swaggerUi.serve,
-    swaggerUi.setup(swaggerSpec, {
-      customCss: '.swagger-ui .topbar { display: none }',
-      customSiteTitle: 'MWM API Documentation',
-    })
-  );
+  // Swagger documentation (disabled in production)
+  if (process.env.NODE_ENV !== 'production') {
+    app.use(
+      '/api/docs',
+      swaggerUi.serve,
+      swaggerUi.setup(swaggerSpec, {
+        customCss: '.swagger-ui .topbar { display: none }',
+        customSiteTitle: 'MWM API Documentation',
+      })
+    );
 
-  // Swagger JSON
-  app.get('/api/docs.json', (_req, res) => {
-    res.setHeader('Content-Type', 'application/json');
-    res.send(swaggerSpec);
-  });
+    app.get('/api/docs.json', (_req, res) => {
+      res.setHeader('Content-Type', 'application/json');
+      res.send(swaggerSpec);
+    });
+  }
 
   // 404 handler
   app.use(notFoundHandler);

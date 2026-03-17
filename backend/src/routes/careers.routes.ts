@@ -41,10 +41,10 @@ const applicationLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Rate limit for resume uploads (10 per hour per IP)
+// Rate limit for resume uploads (5 per 15 minutes per IP)
 const uploadLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 10,
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5,
   skip: () => isTestEnv, // Skip in test environment
   message: {
     success: false,
@@ -488,6 +488,7 @@ router.get(
 router.post(
   '/admin/jobs',
   authenticate,
+  csrfValidation,
   authorize('careers:create'),
   validate({ body: careersValidation.createJob }),
   careersController.createJob
@@ -530,6 +531,7 @@ router.post(
 router.put(
   '/admin/jobs/bulk-status',
   authenticate,
+  csrfValidation,
   authorize('careers:update'),
   careersController.bulkUpdateJobStatus
 );
@@ -601,6 +603,7 @@ router.put(
 router.put(
   '/admin/jobs/:id',
   authenticate,
+  csrfValidation,
   authorize('careers:update'),
   validate({ params: idParamsSchema, body: careersValidation.updateJob }),
   careersController.updateJob
@@ -633,6 +636,7 @@ router.put(
 router.delete(
   '/admin/jobs/:id',
   authenticate,
+  csrfValidation,
   authorize('careers:delete'),
   validate({ params: idParamsSchema }),
   careersController.deleteJob
@@ -762,6 +766,7 @@ router.get(
 router.put(
   '/admin/applications/bulk-status',
   authenticate,
+  csrfValidation,
   authorize('careers:update'),
   careersController.bulkUpdateApplicationStatus
 );
@@ -810,6 +815,7 @@ router.put(
 router.put(
   '/admin/applications/:id',
   authenticate,
+  csrfValidation,
   authorize('careers:update'),
   validate({ params: idParamsSchema, body: careersValidation.updateApplication }),
   careersController.updateApplicationStatus
@@ -842,6 +848,7 @@ router.put(
 router.delete(
   '/admin/applications/:id',
   authenticate,
+  csrfValidation,
   authorize('careers:delete'),
   validate({ params: idParamsSchema }),
   careersController.deleteApplication

@@ -27,8 +27,9 @@ const ALLOWED_RESUME_TYPES = [
 const ALLOWED_RESUME_EXTENSIONS = ['.pdf', '.doc', '.docx'];
 
 // Allowed file types for images
-const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
-const ALLOWED_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
+// SVG removed: SVGs can embed JavaScript and cause stored XSS
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+const ALLOWED_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
 
 // Max file sizes
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB for resumes
@@ -94,7 +95,7 @@ const imageFileFilter = (
       new ApiError(
         400,
         'INVALID_FILE_TYPE',
-        'Only image files (JPG, PNG, GIF, WebP, SVG) are allowed | يُسمح فقط بملفات الصور'
+        'Only image files (JPG, PNG, GIF, WebP) are allowed | يُسمح فقط بملفات الصور'
       )
     );
   }
@@ -190,7 +191,7 @@ export const uploadImageToCloudinary = async (
       {
         folder: `mwm/${folder}`,
         resource_type: 'image',
-        allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'],
+        allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
         transformation: transformations.length > 0 ? transformations : undefined,
       },
       (error, result) => {
@@ -212,6 +213,11 @@ export const uploadImageToCloudinary = async (
  * Delete file from Cloudinary
  * حذف الملف من Cloudinary
  */
+// Allowed pattern for Cloudinary public IDs: alphanumeric, hyphens, underscores, dots, and forward slashes only
+const CLOUDINARY_PUBLIC_ID_PATTERN = /^[a-zA-Z0-9_\-./]+$/;
+// Maximum reasonable length for a public ID (folder path + filename)
+const CLOUDINARY_PUBLIC_ID_MAX_LENGTH = 500;
+
 export const deleteFromCloudinary = async (
   publicId: string,
   resourceType: 'image' | 'raw' | 'video' = 'raw'
@@ -219,6 +225,16 @@ export const deleteFromCloudinary = async (
   // Check if Cloudinary is configured
   if (!env.cloudinary.cloudName || !env.cloudinary.apiKey || !env.cloudinary.apiSecret) {
     throw new ApiError(500, 'CLOUDINARY_NOT_CONFIGURED', 'File upload service is not configured');
+  }
+
+  // Validate publicId to prevent path traversal or injection attacks
+  if (
+    !publicId ||
+    typeof publicId !== 'string' ||
+    publicId.length > CLOUDINARY_PUBLIC_ID_MAX_LENGTH ||
+    !CLOUDINARY_PUBLIC_ID_PATTERN.test(publicId)
+  ) {
+    throw new ApiError(400, 'INVALID_PUBLIC_ID', 'Invalid file identifier | معرّف الملف غير صالح');
   }
 
   await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });

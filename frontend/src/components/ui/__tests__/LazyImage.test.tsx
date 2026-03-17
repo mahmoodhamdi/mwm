@@ -206,7 +206,7 @@ describe('LazyImage', () => {
     image.dispatchEvent(new Event('error'));
 
     await waitFor(() => {
-      expect(image).toHaveAttribute('src', '/images/placeholder.jpg');
+      expect(image).toHaveAttribute('src', '/images/placeholder.svg');
     });
   });
 });

@@ -88,7 +88,7 @@ describe('useNotifications', () => {
     jest.clearAllMocks();
 
     // Mock API responses
-    mockApi.get.mockImplementation((url: string) => {
+    mockApi.get.mockImplementation(((url: string) => {
       if (url === '/notifications') {
         return Promise.resolve(mockNotificationsResponse);
       }
@@ -96,11 +96,11 @@ describe('useNotifications', () => {
         return Promise.resolve(mockUnreadCountResponse);
       }
       return Promise.reject(new Error('Unknown endpoint'));
-    });
+    }) as any);
 
-    mockApi.put.mockResolvedValue({ data: { success: true } });
-    mockApi.delete.mockResolvedValue({ data: { success: true } });
-    mockApi.post.mockResolvedValue({ data: { success: true } });
+    mockApi.put.mockResolvedValue({ success: true, data: { success: true } } as any);
+    mockApi.delete.mockResolvedValue({ success: true, data: { success: true } } as any);
+    mockApi.post.mockResolvedValue({ success: true, data: { success: true } } as any);
 
     // Mock socket
     const mockSocket = {
@@ -229,7 +229,7 @@ describe('useNotifications', () => {
     it('should update socket connection state', async () => {
       const token = 'test-jwt-token';
       const mockSocket = {
-        on: jest.fn((event, callback) => {
+        on: jest.fn((event: string, callback: () => void) => {
           if (event === 'connect') {
             setTimeout(() => callback(), 0);
           }

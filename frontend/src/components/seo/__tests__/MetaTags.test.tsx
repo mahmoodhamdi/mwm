@@ -209,7 +209,7 @@ describe('generateMetaTags', () => {
       description: 'Test description',
     });
 
-    expect(metadata.robots?.googleBot).toMatchObject({
+    expect((metadata.robots as any)?.googleBot).toMatchObject({
       index: true,
       follow: true,
       'max-video-preview': -1,

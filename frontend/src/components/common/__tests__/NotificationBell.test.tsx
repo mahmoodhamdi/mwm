@@ -3,12 +3,7 @@
  * اختبارات مكون جرس الإشعارات
  */
 
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { NotificationBell } from '../NotificationBell';
-
-// Mock next-intl
+// Mock next-intl first
 jest.mock('next-intl', () => ({
   useTranslations: () => (key: string) => key,
   useLocale: jest.fn(() => 'en'),
@@ -28,7 +23,7 @@ jest.mock('date-fns', () => ({
   formatDistanceToNow: jest.fn(() => '2 hours ago'),
 }));
 
-// Mock useNotifications hook
+// Mock useNotifications hook with a jest.fn
 const mockNotifications = [
   {
     _id: 'notif1',
@@ -54,22 +49,39 @@ const mockMarkAllAsRead = jest.fn();
 const mockDeleteNotification = jest.fn();
 const mockRequestPermission = jest.fn().mockResolvedValue(undefined);
 
-jest.mock('@/hooks/useNotifications', () => ({
-  useNotifications: () => ({
-    notifications: mockNotifications,
-    unreadCount: 1,
-    isLoading: false,
-    markAsRead: mockMarkAsRead,
-    markAllAsRead: mockMarkAllAsRead,
-    deleteNotification: mockDeleteNotification,
-    requestPermission: mockRequestPermission,
-    permissionGranted: false,
-  }),
+const mockUseNotifications = jest.fn(() => ({
+  notifications: mockNotifications,
+  unreadCount: 1,
+  isLoading: false,
+  markAsRead: mockMarkAsRead,
+  markAllAsRead: mockMarkAllAsRead,
+  deleteNotification: mockDeleteNotification,
+  requestPermission: mockRequestPermission,
+  permissionGranted: false,
 }));
+
+jest.mock('@/hooks/useNotifications', () => ({
+  useNotifications: mockUseNotifications,
+}));
+
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { NotificationBell } from '../NotificationBell';
 
 describe('NotificationBell', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseNotifications.mockReturnValue({
+      notifications: mockNotifications,
+      unreadCount: 1,
+      isLoading: false,
+      markAsRead: mockMarkAsRead,
+      markAllAsRead: mockMarkAllAsRead,
+      deleteNotification: mockDeleteNotification,
+      requestPermission: mockRequestPermission,
+      permissionGranted: false,
+    });
   });
 
   it('renders bell icon', () => {
@@ -86,8 +98,7 @@ describe('NotificationBell', () => {
   });
 
   it('displays 99+ for unread count over 99', () => {
-    const { useNotifications } = require('@/hooks/useNotifications');
-    useNotifications.mockReturnValue({
+    mockUseNotifications.mockReturnValue({
       notifications: mockNotifications,
       unreadCount: 150,
       isLoading: false,
@@ -215,9 +226,8 @@ describe('NotificationBell', () => {
     expect(mockDeleteNotification).toHaveBeenCalled();
   });
 
-  it('shows loading state', () => {
-    const { useNotifications } = require('@/hooks/useNotifications');
-    useNotifications.mockReturnValue({
+  it('shows loading state', async () => {
+    mockUseNotifications.mockReturnValue({
       notifications: [],
       unreadCount: 0,
       isLoading: true,
@@ -228,17 +238,19 @@ describe('NotificationBell', () => {
       permissionGranted: false,
     });
 
+    const user = userEvent.setup();
     render(<NotificationBell />);
     const button = screen.getByLabelText('notifications');
-    fireEvent.click(button);
+    await user.click(button);
 
-    const spinner = document.querySelector('.animate-spin');
-    expect(spinner).toBeInTheDocument();
+    await waitFor(() => {
+      const spinner = document.querySelector('.animate-spin');
+      expect(spinner).toBeInTheDocument();
+    });
   });
 
   it('shows empty state when no notifications', async () => {
-    const { useNotifications } = require('@/hooks/useNotifications');
-    useNotifications.mockReturnValue({
+    mockUseNotifications.mockReturnValue({
       notifications: [],
       unreadCount: 0,
       isLoading: false,

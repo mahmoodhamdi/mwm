@@ -3,10 +3,14 @@
  * اختبارات مكون محرر Markdown
  */
 
-import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { MarkdownEditor } from '../MarkdownEditor';
+// Mock ThemeProvider first before any imports
+const mockUseTheme = jest.fn(() => ({
+  resolvedTheme: 'light',
+}));
+
+jest.mock('@/providers/ThemeProvider', () => ({
+  useTheme: mockUseTheme,
+}));
 
 // Mock MDEditor
 jest.mock('@uiw/react-md-editor', () => {
@@ -52,18 +56,17 @@ jest.mock('@uiw/react-md-editor', () => {
   };
 });
 
-// Mock ThemeProvider
-jest.mock('@/providers/ThemeProvider', () => ({
-  useTheme: () => ({
-    resolvedTheme: 'light',
-  }),
-}));
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { MarkdownEditor } from '../MarkdownEditor';
 
 describe('MarkdownEditor', () => {
   const mockOnChange = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseTheme.mockReturnValue({ resolvedTheme: 'light' });
   });
 
   it('renders editor with value', async () => {
@@ -193,8 +196,7 @@ describe('MarkdownEditor', () => {
   });
 
   it('uses dark theme when resolvedTheme is dark', async () => {
-    const { useTheme } = require('@/providers/ThemeProvider');
-    useTheme.mockReturnValue({ resolvedTheme: 'dark' });
+    mockUseTheme.mockReturnValue({ resolvedTheme: 'dark' });
 
     const { container } = render(<MarkdownEditor value="" onChange={mockOnChange} />);
 

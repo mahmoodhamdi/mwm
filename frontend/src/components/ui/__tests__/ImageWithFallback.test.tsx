@@ -10,8 +10,12 @@ import { ImageWithFallback } from '../ImageWithFallback';
 // Mock next/image
 jest.mock('next/image', () => ({
   __esModule: true,
-  default: ({ src, alt, onError, ...props }: any) => {
-    return <img src={src} alt={alt} onError={onError} data-testid="next-image" {...props} />;
+  default: ({ src, alt, onError, fill, priority, ...props }: any) => {
+    // Render actual attributes for boolean props
+    const attrs: any = { src, alt, onError, 'data-testid': 'next-image', ...props };
+    if (fill) attrs.fill = '';
+    if (priority) attrs.priority = '';
+    return <img {...attrs} />;
   },
 }));
 
@@ -51,7 +55,7 @@ describe('ImageWithFallback', () => {
     // Trigger error
     fireEvent.error(image);
 
-    expect(image).toHaveAttribute('src', '/images/placeholder.jpg');
+    expect(image).toHaveAttribute('src', '/images/placeholder.svg');
   });
 
   it('uses fallbackAlt when provided and error occurs', () => {

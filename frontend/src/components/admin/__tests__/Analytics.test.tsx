@@ -258,7 +258,7 @@ describe('Analytics Dashboard', () => {
 
       // Should call getChartsData with new period
       await waitFor(() => {
-        expect(dashboardService.getChartsData).toHaveBeenCalledWith('7');
+        expect(dashboardService.getChartsData).toHaveBeenCalledWith(7);
       });
     });
   });

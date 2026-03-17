@@ -19,7 +19,7 @@ class MockIntersectionObserver implements IntersectionObserver {
 
   constructor(callback: IntersectionObserverCallback, options?: IntersectionObserverInit) {
     this.callback = callback;
-    this.root = options?.root || null;
+    this.root = (options?.root as Element | null) || null;
     this.rootMargin = options?.rootMargin || '100px';
     this.thresholds = Array.isArray(options?.threshold)
       ? options.threshold
@@ -74,6 +74,11 @@ class MockIntersectionObserver implements IntersectionObserver {
   }
 }
 
+// Helper to set ref.current (readonly in RefObject)
+function setRefCurrent(ref: React.RefObject<HTMLDivElement | null>, value: HTMLDivElement | null) {
+  Object.defineProperty(ref, 'current', { value, writable: true, configurable: true });
+}
+
 describe('useIntersectionObserver', () => {
   beforeEach(() => {
     observerInstances.length = 0;
@@ -114,7 +119,7 @@ describe('useIntersectionObserver', () => {
         if (!hookResult.ref.current) {
           const el = document.createElement('div');
           document.body.appendChild(el);
-          hookResult.ref.current = el;
+          setRefCurrent(hookResult.ref, el);
         }
         return hookResult;
       });
@@ -146,7 +151,7 @@ describe('useIntersectionObserver', () => {
         if (!hookResult.ref.current) {
           const el = document.createElement('div');
           document.body.appendChild(el);
-          hookResult.ref.current = el;
+          setRefCurrent(hookResult.ref, el);
         }
         return hookResult;
       });
@@ -175,7 +180,7 @@ describe('useIntersectionObserver', () => {
         if (!hookResult.ref.current) {
           const el = document.createElement('div');
           document.body.appendChild(el);
-          hookResult.ref.current = el;
+          setRefCurrent(hookResult.ref, el);
         }
         return hookResult;
       });
@@ -222,7 +227,7 @@ describe('useIntersectionObserver', () => {
         if (!hookResult.ref.current) {
           const el = document.createElement('div');
           document.body.appendChild(el);
-          hookResult.ref.current = el;
+          setRefCurrent(hookResult.ref, el);
         }
         return hookResult;
       });
@@ -240,7 +245,7 @@ describe('useIntersectionObserver', () => {
         if (!hookResult.ref.current) {
           const el = document.createElement('div');
           document.body.appendChild(el);
-          hookResult.ref.current = el;
+          setRefCurrent(hookResult.ref, el);
         }
         return hookResult;
       });
@@ -259,7 +264,7 @@ describe('useIntersectionObserver', () => {
         if (!hookResult.ref.current) {
           const el = document.createElement('div');
           document.body.appendChild(el);
-          hookResult.ref.current = el;
+          setRefCurrent(hookResult.ref, el);
         }
         return hookResult;
       });
@@ -279,7 +284,7 @@ describe('useIntersectionObserver', () => {
         if (!hookResult.ref.current) {
           const el = document.createElement('div');
           document.body.appendChild(el);
-          hookResult.ref.current = el;
+          setRefCurrent(hookResult.ref, el);
         }
         return hookResult;
       });
@@ -319,7 +324,7 @@ describe('useIntersectionObserver', () => {
         if (!hookResult.ref.current) {
           const el = document.createElement('div');
           document.body.appendChild(el);
-          hookResult.ref.current = el;
+          setRefCurrent(hookResult.ref, el);
         }
         return hookResult;
       });
@@ -357,7 +362,7 @@ describe('useIntersectionObserver', () => {
         if (!hookResult.ref.current) {
           const el = document.createElement('div');
           document.body.appendChild(el);
-          hookResult.ref.current = el;
+          setRefCurrent(hookResult.ref, el);
         }
         return hookResult;
       });
@@ -404,7 +409,7 @@ describe('useLazyLoad', () => {
       if (!hookResult.ref.current) {
         const el = document.createElement('div');
         document.body.appendChild(el);
-        hookResult.ref.current = el;
+        setRefCurrent(hookResult.ref, el);
       }
       return hookResult;
     });
@@ -432,7 +437,7 @@ describe('useLazyLoad', () => {
       if (!hookResult.ref.current) {
         const el = document.createElement('div');
         document.body.appendChild(el);
-        hookResult.ref.current = el;
+        setRefCurrent(hookResult.ref, el);
       }
       return hookResult;
     });
@@ -450,7 +455,7 @@ describe('useLazyLoad', () => {
       if (!hookResult.ref.current) {
         const el = document.createElement('div');
         document.body.appendChild(el);
-        hookResult.ref.current = el;
+        setRefCurrent(hookResult.ref, el);
       }
       return hookResult;
     });
@@ -468,7 +473,7 @@ describe('useLazyLoad', () => {
       if (!hookResult.ref.current) {
         const el = document.createElement('div');
         document.body.appendChild(el);
-        hookResult.ref.current = el;
+        setRefCurrent(hookResult.ref, el);
       }
       return hookResult;
     });
@@ -506,7 +511,7 @@ describe('useLazyLoad', () => {
       if (!hookResult.ref.current) {
         const el = document.createElement('div');
         document.body.appendChild(el);
-        hookResult.ref.current = el;
+        setRefCurrent(hookResult.ref, el);
       }
       return hookResult;
     });

@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CommentSection from '../CommentSection';
 import * as blogService from '@/services/public/blog.service';
@@ -22,10 +22,10 @@ const mockUser = {
 };
 
 jest.mock('@/providers/AuthProvider', () => ({
-  useAuth: () => ({
+  useAuth: jest.fn(() => ({
     user: mockUser,
     isAuthenticated: true,
-  }),
+  })),
 }));
 
 // Mock blog service
@@ -65,6 +65,9 @@ const mockComments = [
 describe('CommentSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Reset useAuth to authenticated user (guest fields test overrides this)
+    const { useAuth } = require('@/providers/AuthProvider');
+    useAuth.mockReturnValue({ user: mockUser, isAuthenticated: true });
     (blogService.getPostComments as jest.Mock).mockResolvedValue({
       data: mockComments,
       pagination: { total: 2, pages: 1, page: 1, limit: 10 },
@@ -206,18 +209,18 @@ describe('CommentSection', () => {
       expect(screen.getByText('Great post!')).toBeInTheDocument();
     });
 
-    const likeButtons = screen.getAllByRole('button', { name: '' }).filter(btn => {
-      const svg = btn.querySelector('svg');
-      return svg?.classList.contains('size-4');
+    // Find like buttons by their ThumbsUp icon (lucide-thumbs-up class)
+    const likeButtons = screen.getAllByRole('button').filter(btn => {
+      const svg = btn.querySelector('.lucide-thumbs-up');
+      return svg !== null;
     });
 
-    if (likeButtons.length > 0) {
-      await user.click(likeButtons[0]);
+    expect(likeButtons.length).toBeGreaterThan(0);
+    await user.click(likeButtons[0]);
 
-      await waitFor(() => {
-        expect(blogService.toggleCommentLike).toHaveBeenCalledWith('comment1');
-      });
-    }
+    await waitFor(() => {
+      expect(blogService.toggleCommentLike).toHaveBeenCalledWith('comment1');
+    });
   });
 
   it('displays guest badge for guest comments', async () => {

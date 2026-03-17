@@ -110,7 +110,7 @@ describe('Skeleton', () => {
   });
 
   it('passes through additional props', () => {
-    const { container } = render(<Skeleton data-testid="test-skeleton" />);
+    render(<Skeleton data-testid="test-skeleton" />);
 
     expect(screen.getByTestId('test-skeleton')).toBeInTheDocument();
   });

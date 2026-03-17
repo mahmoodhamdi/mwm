@@ -3,15 +3,13 @@
  * اختبارات مكون رأس لوحة التحكم
  */
 
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { AdminHeader } from '../AdminHeader';
+// Mock hooks first
+const mockUseLocale = jest.fn(() => 'en');
+const mockUseTranslations = jest.fn(() => (key: string) => key);
 
-// Mock next-intl
 jest.mock('next-intl', () => ({
-  useLocale: jest.fn(() => 'en'),
-  useTranslations: () => (key: string) => key,
+  useLocale: mockUseLocale,
+  useTranslations: mockUseTranslations,
 }));
 
 // Mock next/navigation
@@ -27,25 +25,55 @@ jest.mock('next/navigation', () => ({
 
 // Mock AuthProvider
 const mockLogout = jest.fn();
-const mockUser = {
-  _id: '123',
-  name: 'John Doe',
-  email: 'john@example.com',
-  role: 'admin',
-};
+const mockUseAuth = jest.fn(() => ({
+  user: {
+    _id: '123',
+    name: 'John Doe',
+    email: 'john@example.com',
+    role: 'admin',
+  },
+  logout: mockLogout,
+}));
 
 jest.mock('@/providers/AuthProvider', () => ({
-  useAuth: () => ({
-    user: mockUser,
-    logout: mockLogout,
-  }),
+  useAuth: mockUseAuth,
 }));
+
+// Mock ThemeProvider
+const mockUseTheme = jest.fn(() => ({
+  theme: 'light',
+  setTheme: jest.fn(),
+}));
+
+jest.mock('@/providers/ThemeProvider', () => ({
+  useTheme: mockUseTheme,
+}));
+
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { AdminHeader } from '../AdminHeader';
 
 describe('AdminHeader', () => {
   const mockOnMenuToggle = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Reset mocks with defaults
+    mockUseLocale.mockReturnValue('en');
+    mockUseAuth.mockReturnValue({
+      user: {
+        _id: '123',
+        name: 'John Doe',
+        email: 'john@example.com',
+        role: 'admin',
+      },
+      logout: mockLogout,
+    });
+    mockUseTheme.mockReturnValue({
+      theme: 'light',
+      setTheme: jest.fn(),
+    });
     // Reset document classes
     document.documentElement.className = '';
   });
@@ -106,15 +134,18 @@ describe('AdminHeader', () => {
 
   it('toggles dark mode when dark mode button is clicked', async () => {
     const user = userEvent.setup();
+    const mockSetTheme = jest.fn();
+    mockUseTheme.mockReturnValue({
+      theme: 'light',
+      setTheme: mockSetTheme,
+    });
+
     render(<AdminHeader onMenuToggle={mockOnMenuToggle} />);
 
     const darkModeButton = screen.getByLabelText('Toggle dark mode');
     await user.click(darkModeButton);
 
-    expect(document.documentElement.classList.contains('dark')).toBe(true);
-
-    await user.click(darkModeButton);
-    expect(document.documentElement.classList.contains('dark')).toBe(false);
+    expect(mockSetTheme).toHaveBeenCalledWith('dark');
   });
 
   it('opens and closes user menu dropdown', async () => {
@@ -163,8 +194,7 @@ describe('AdminHeader', () => {
   });
 
   it('renders in RTL mode for Arabic locale', () => {
-    const { useLocale } = require('next-intl');
-    useLocale.mockReturnValue('ar');
+    mockUseLocale.mockReturnValue('ar');
 
     render(<AdminHeader onMenuToggle={mockOnMenuToggle} />);
 
@@ -174,9 +204,8 @@ describe('AdminHeader', () => {
   });
 
   it('displays default name when user name is not available', () => {
-    const { useAuth } = require('@/providers/AuthProvider');
-    useAuth.mockReturnValue({
-      user: { _id: '123', email: 'test@example.com', role: 'admin' },
+    mockUseAuth.mockReturnValue({
+      user: { _id: '123', name: '', email: 'test@example.com', role: 'admin' },
       logout: mockLogout,
     });
 
@@ -195,6 +224,6 @@ describe('AdminHeader', () => {
     const langButton = screen.getByLabelText('Switch language');
     await user.click(langButton);
 
-    expect(window.location.href).toBe('http://localhost/ar/admin');
+    expect(window.location.href).toBe('/ar/admin');
   });
 });

@@ -57,6 +57,9 @@ temp/
 *.tmp
 *.temp
 
+# Audit state
+.audit/
+
 # Secrets (never commit)
 *.pem
 *.key

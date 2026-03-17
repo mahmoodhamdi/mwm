@@ -6,6 +6,83 @@
 // Set environment variables before imports
 process.env['NODE_ENV'] = 'test';
 
+// Mock models BEFORE any imports that trigger Mongoose model compilation.
+// Using factory functions avoids Jest auto-mock which still evaluates the real
+// module and hits the Mongoose Document scope symbol conflict.
+jest.mock('../../../src/models/Notification', () => ({
+  Notification: {
+    insertMany: jest.fn(),
+    countDocuments: jest.fn(),
+    findByIdAndUpdate: jest.fn(),
+    updateMany: jest.fn(),
+    deleteMany: jest.fn(),
+  },
+}));
+
+jest.mock('../../../src/models/DeviceToken', () => ({
+  DeviceToken: {
+    find: jest.fn(),
+    deleteMany: jest.fn(),
+    findOneAndUpdate: jest.fn(),
+    deleteOne: jest.fn(),
+    updateMany: jest.fn(),
+  },
+}));
+
+jest.mock('../../../src/models', () => ({
+  User: {
+    find: jest.fn(),
+    findById: jest.fn(),
+    findOne: jest.fn(),
+  },
+  Notification: {
+    insertMany: jest.fn(),
+    countDocuments: jest.fn(),
+    findByIdAndUpdate: jest.fn(),
+    updateMany: jest.fn(),
+    deleteMany: jest.fn(),
+  },
+  DeviceToken: {
+    find: jest.fn(),
+    deleteMany: jest.fn(),
+    findOneAndUpdate: jest.fn(),
+    deleteOne: jest.fn(),
+    updateMany: jest.fn(),
+  },
+}));
+
+// Mock firebase-admin
+jest.mock('firebase-admin', () => ({
+  messaging: jest.fn(),
+}));
+
+// Mock firebase config — the factory defines its own messaging stub object so
+// that the mock is self-contained and not affected by hoisting order.
+// resetMocks:true resets jest.fn() implementations between tests, so we use
+// plain functions inside the returned object and expose the spy separately.
+jest.mock('../../../src/config/firebase', () => {
+  const messagingStub = {
+    sendEachForMulticast: jest.fn(),
+    send: jest.fn(),
+    subscribeToTopic: jest.fn(),
+    unsubscribeFromTopic: jest.fn(),
+  };
+  return {
+    getMessaging: jest.fn(() => messagingStub),
+    __messagingStub: messagingStub,
+  };
+});
+
+// Mock logger and socket
+jest.mock('../../../src/config', () => ({
+  logger: {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  },
+  emitToUser: jest.fn(),
+}));
+
 import * as admin from 'firebase-admin';
 import {
   sendPushNotification,
@@ -18,41 +95,25 @@ import { Notification } from '../../../src/models/Notification';
 import { User } from '../../../src/models';
 import { DeviceToken } from '../../../src/models/DeviceToken';
 
-// Mock firebase-admin
-jest.mock('firebase-admin', () => ({
-  messaging: jest.fn(),
-}));
-
-// Mock firebase config
-const mockMessaging = {
-  sendEachForMulticast: jest.fn(),
-  send: jest.fn(),
-  subscribeToTopic: jest.fn(),
-  unsubscribeFromTopic: jest.fn(),
+// Retrieve the shared messaging stub and getMessaging spy from the mock module.
+// We use jest.requireMock so we get the mocked version, not the real one.
+const firebaseMock = jest.requireMock('../../../src/config/firebase') as {
+  getMessaging: jest.Mock;
+  __messagingStub: {
+    sendEachForMulticast: jest.Mock;
+    send: jest.Mock;
+    subscribeToTopic: jest.Mock;
+    unsubscribeFromTopic: jest.Mock;
+  };
 };
-
-jest.mock('../../../src/config/firebase', () => ({
-  getMessaging: jest.fn(() => mockMessaging),
-}));
-
-// Mock models
-jest.mock('../../../src/models/Notification');
-jest.mock('../../../src/models/DeviceToken');
-jest.mock('../../../src/models');
-
-// Mock logger and socket
-jest.mock('../../../src/config', () => ({
-  logger: {
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-  },
-  emitToUser: jest.fn(),
-}));
+const mockMessaging = firebaseMock.__messagingStub;
 
 describe('NotificationService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // resetMocks:true clears the getMessaging return value between tests.
+    // Re-install the implementation so every test gets the messaging stub.
+    firebaseMock.getMessaging.mockReturnValue(mockMessaging);
   });
 
   describe('sendPushNotification', () => {
@@ -189,7 +250,7 @@ describe('NotificationService', () => {
 
       (Notification.insertMany as jest.Mock).mockResolvedValue([
         {
-          user: userId,
+          user: { toString: () => userId },
           type: 'info',
           title: payload.title,
           body: payload.body,
@@ -228,7 +289,11 @@ describe('NotificationService', () => {
         type: 'success' as const,
       };
 
-      (Notification.insertMany as jest.Mock).mockResolvedValue([{}, {}, {}]);
+      (Notification.insertMany as jest.Mock).mockResolvedValue([
+        { user: { toString: () => 'user1' } },
+        { user: { toString: () => 'user2' } },
+        { user: { toString: () => 'user3' } },
+      ]);
       (Notification.countDocuments as jest.Mock).mockResolvedValue(3);
       (DeviceToken.find as jest.Mock).mockResolvedValue([]);
 
@@ -245,15 +310,18 @@ describe('NotificationService', () => {
 
     it('should send notification to users by role', async () => {
       const mockUsers = [
-        { _id: 'admin1' },
-        { _id: 'admin2' },
+        { _id: { toString: () => 'admin1' } },
+        { _id: { toString: () => 'admin2' } },
       ];
 
       (User.find as jest.Mock).mockReturnValue({
         select: jest.fn().mockResolvedValue(mockUsers),
       });
 
-      (Notification.insertMany as jest.Mock).mockResolvedValue([{}, {}]);
+      (Notification.insertMany as jest.Mock).mockResolvedValue([
+        { user: { toString: () => 'admin1' } },
+        { user: { toString: () => 'admin2' } },
+      ]);
       (Notification.countDocuments as jest.Mock).mockResolvedValue(2);
       (DeviceToken.find as jest.Mock).mockResolvedValue([]);
 
@@ -275,7 +343,9 @@ describe('NotificationService', () => {
         type: 'info' as const,
       };
 
-      const result = await sendNotification({
+      (DeviceToken.find as jest.Mock).mockResolvedValue([]);
+
+      await sendNotification({
         userId: '123',
         payload,
         saveToDatabase: false,
@@ -287,8 +357,8 @@ describe('NotificationService', () => {
 
   describe('notifyAdmins', () => {
     it('should send notification to both admin and super_admin roles', async () => {
-      const mockAdmins = [{ _id: 'admin1' }];
-      const mockSuperAdmins = [{ _id: 'superadmin1' }];
+      const mockAdmins = [{ _id: { toString: () => 'admin1' } }];
+      const mockSuperAdmins = [{ _id: { toString: () => 'superadmin1' } }];
 
       (User.find as jest.Mock)
         .mockReturnValueOnce({
@@ -298,7 +368,9 @@ describe('NotificationService', () => {
           select: jest.fn().mockResolvedValue(mockSuperAdmins),
         });
 
-      (Notification.insertMany as jest.Mock).mockResolvedValue([{}]);
+      (Notification.insertMany as jest.Mock).mockResolvedValue([
+        { user: { toString: () => 'admin1' } },
+      ]);
       (Notification.countDocuments as jest.Mock).mockResolvedValue(1);
       (DeviceToken.find as jest.Mock).mockResolvedValue([]);
 

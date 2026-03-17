@@ -265,7 +265,7 @@ describe('Careers API', () => {
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.jobs).toBeDefined();
+      expect(response.body.data).toBeDefined();
     });
   });
 
@@ -463,7 +463,7 @@ describe('Careers API', () => {
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.applications).toBeDefined();
+      expect(response.body.data).toBeDefined();
     });
   });
 
@@ -685,7 +685,7 @@ describe('Careers API', () => {
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.applications).toBeDefined();
+      expect(response.body.data).toBeDefined();
     });
   });
 

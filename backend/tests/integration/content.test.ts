@@ -85,7 +85,7 @@ describe('Content API', () => {
       await SiteContent.create({
         key: 'home.title',
         section: 'home',
-        value: { ar: 'عنوان الصفحة', en: 'Page Title' },
+        content: { ar: 'عنوان الصفحة', en: 'Page Title' },
       });
 
       const response = await request(app).get('/api/v1/content/sections').expect(200);
@@ -102,7 +102,7 @@ describe('Content API', () => {
       await SiteContent.create({
         key: 'home.title',
         section: 'home',
-        value: { ar: 'عنوان الصفحة', en: 'Page Title' },
+        content: { ar: 'عنوان الصفحة', en: 'Page Title' },
       });
 
       const response = await request(app).get('/api/v1/content/section/home').expect(200);
@@ -119,13 +119,13 @@ describe('Content API', () => {
       await SiteContent.create({
         key: 'home.title',
         section: 'home',
-        value: { ar: 'عنوان الصفحة', en: 'Page Title' },
+        content: { ar: 'عنوان الصفحة', en: 'Page Title' },
       });
 
       const response = await request(app).get('/api/v1/content/home.title').expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.key).toBe('home.title');
+      expect(response.body.data.content.key).toBe('home.title');
     });
 
     it('should return 404 for nonexistent content', async () => {
@@ -147,7 +147,7 @@ describe('Content API', () => {
       await SiteContent.create({
         key: 'home.title',
         section: 'home',
-        value: { ar: 'عنوان', en: 'Title' },
+        content: { ar: 'عنوان', en: 'Title' },
       });
 
       const response = await request(app)
@@ -178,12 +178,12 @@ describe('Content API', () => {
         .send({
           key: 'about.title',
           section: 'about',
-          value: { ar: 'من نحن', en: 'About Us' },
+          content: { ar: 'من نحن', en: 'About Us' },
         })
         .expect(201);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.key).toBe('about.title');
+      expect(response.body.data.content.key).toBe('about.title');
     });
 
     it('should return 401 without auth', async () => {
@@ -194,7 +194,7 @@ describe('Content API', () => {
         .send({
           key: 'about.title',
           section: 'about',
-          value: { ar: 'من نحن', en: 'About Us' },
+          content: { ar: 'من نحن', en: 'About Us' },
         })
         .expect(401);
     });
@@ -208,14 +208,14 @@ describe('Content API', () => {
       await SiteContent.create({
         key: 'home.title',
         section: 'home',
-        value: { ar: 'عنوان', en: 'Title' },
+        content: { ar: 'عنوان', en: 'Title' },
       });
 
       const response = await request(app)
         .put('/api/v1/content/home.title')
         .set('Authorization', `Bearer ${token}`)
         .send({
-          value: { ar: 'عنوان محدث', en: 'Updated Title' },
+          content: { ar: 'عنوان محدث', en: 'Updated Title' },
         })
         .expect(200);
 
@@ -231,7 +231,7 @@ describe('Content API', () => {
         .put('/api/v1/content/nonexistent.key')
         .set('Authorization', `Bearer ${token}`)
         .send({
-          value: { ar: 'قيمة', en: 'Value' },
+          content: { ar: 'قيمة', en: 'Value' },
         })
         .expect(404);
     });
@@ -247,13 +247,13 @@ describe('Content API', () => {
         .put('/api/v1/content/new.key/upsert')
         .set('Authorization', `Bearer ${token}`)
         .send({
-          value: { ar: 'قيمة جديدة', en: 'New Value' },
+          content: { ar: 'قيمة جديدة', en: 'New Value' },
           section: 'home',
         })
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.key).toBe('new.key');
+      expect(response.body.data.content.key).toBe('new.key');
     });
 
     it('should upsert content (update if exists)', async () => {
@@ -263,14 +263,15 @@ describe('Content API', () => {
       await SiteContent.create({
         key: 'existing.key',
         section: 'home',
-        value: { ar: 'قيمة قديمة', en: 'Old Value' },
+        content: { ar: 'قيمة قديمة', en: 'Old Value' },
       });
 
       const response = await request(app)
         .put('/api/v1/content/existing.key/upsert')
         .set('Authorization', `Bearer ${token}`)
         .send({
-          value: { ar: 'قيمة محدثة', en: 'Updated Value' },
+          content: { ar: 'قيمة محدثة', en: 'Updated Value' },
+          section: 'home',
         })
         .expect(200);
 
@@ -288,9 +289,15 @@ describe('Content API', () => {
         .post('/api/v1/content/bulk')
         .set('Authorization', `Bearer ${token}`)
         .send({
-          items: [
-            { key: 'home.title', section: 'home', value: { ar: 'عنوان 1', en: 'Title 1' } },
-            { key: 'home.subtitle', section: 'home', value: { ar: 'عنوان 2', en: 'Title 2' } },
+          contents: [
+            {
+              key: 'home.title',
+              data: { section: 'home', content: { ar: 'عنوان 1', en: 'Title 1' } },
+            },
+            {
+              key: 'home.subtitle',
+              data: { section: 'home', content: { ar: 'عنوان 2', en: 'Title 2' } },
+            },
           ],
         })
         .expect(200);
@@ -307,7 +314,7 @@ describe('Content API', () => {
       await SiteContent.create({
         key: 'home.title',
         section: 'home',
-        value: { ar: 'عنوان', en: 'Title' },
+        content: { ar: 'عنوان', en: 'Title' },
       });
 
       const response = await request(app)
@@ -354,7 +361,7 @@ describe('Content API', () => {
         .send({
           key: 'about.title',
           section: 'about',
-          value: { ar: 'من نحن', en: 'About Us' },
+          content: { ar: 'من نحن', en: 'About Us' },
         })
         .expect(403);
     });

@@ -26,19 +26,22 @@ process.env['REDIS_URL'] = 'redis://localhost:6379';
 // Global test timeout - 120s to allow MongoDB binary download on slow connections
 jest.setTimeout(120000);
 
-// Mock Redis
+// Mock Redis - use plain functions (not jest.fn()) so resetMocks: true doesn't clear implementations
 jest.mock('ioredis', () => {
-  const Redis = jest.fn().mockImplementation(() => ({
-    connect: jest.fn().mockResolvedValue(undefined),
-    quit: jest.fn().mockResolvedValue(undefined),
+  const mockRedis = {
+    connect: () => Promise.resolve(undefined),
+    quit: () => Promise.resolve(undefined),
     status: 'ready',
-    get: jest.fn().mockResolvedValue(null),
-    set: jest.fn().mockResolvedValue('OK'),
-    setex: jest.fn().mockResolvedValue('OK'),
-    del: jest.fn().mockResolvedValue(1),
-    keys: jest.fn().mockResolvedValue([]),
-    exists: jest.fn().mockResolvedValue(0),
-    on: jest.fn(),
-  }));
-  return Redis;
+    get: () => Promise.resolve(null),
+    set: () => Promise.resolve('OK'),
+    setex: () => Promise.resolve('OK'),
+    del: () => Promise.resolve(1),
+    keys: () => Promise.resolve([]),
+    exists: () => Promise.resolve(0),
+    on: () => mockRedis,
+    subscribe: () => Promise.resolve(undefined),
+    unsubscribe: () => Promise.resolve(undefined),
+    publish: () => Promise.resolve(0),
+  };
+  return jest.fn(() => mockRedis);
 });

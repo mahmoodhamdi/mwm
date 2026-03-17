@@ -17,7 +17,13 @@ import { ApiError } from '../../../src/utils/ApiError';
 import { COOKIE_NAMES } from '../../../src/utils/cookies';
 
 // Mock dependencies
-jest.mock('../../../src/services/auth.service');
+jest.mock('../../../src/services', () => ({
+  authService: {
+    isTokenBlacklisted: jest.fn(),
+    verifyAccessToken: jest.fn(),
+    blacklistAccessToken: jest.fn(),
+  },
+}));
 jest.mock('../../../src/models', () => ({
   User: {
     findById: jest.fn(),
@@ -30,6 +36,9 @@ jest.mock('../../../src/models', () => ({
     VIEWER: 'viewer',
   },
 }));
+
+// Helper to flush all pending promises (needed because asyncHandler doesn't return the promise)
+const flushPromises = () => new Promise(resolve => setImmediate(resolve));
 
 describe('Auth Middleware', () => {
   let mockRequest: Partial<Request>;
@@ -73,7 +82,8 @@ describe('Auth Middleware', () => {
       (authService.verifyAccessToken as jest.Mock).mockReturnValue(mockDecoded);
       (User.findById as jest.Mock).mockResolvedValue(mockUser);
 
-      await authenticate(mockRequest as Request, mockResponse as Response, mockNext);
+      authenticate(mockRequest as Request, mockResponse as Response, mockNext);
+      await flushPromises();
 
       expect(authService.isTokenBlacklisted).toHaveBeenCalledWith(token);
       expect(authService.verifyAccessToken).toHaveBeenCalledWith(token);
@@ -90,7 +100,8 @@ describe('Auth Middleware', () => {
       (authService.verifyAccessToken as jest.Mock).mockReturnValue(mockDecoded);
       (User.findById as jest.Mock).mockResolvedValue(mockUser);
 
-      await authenticate(mockRequest as Request, mockResponse as Response, mockNext);
+      authenticate(mockRequest as Request, mockResponse as Response, mockNext);
+      await flushPromises();
 
       expect(authService.verifyAccessToken).toHaveBeenCalledWith(token);
       expect(mockRequest.user).toBe(mockUser);
@@ -98,7 +109,8 @@ describe('Auth Middleware', () => {
     });
 
     it('should fail when no token is provided', async () => {
-      await authenticate(mockRequest as Request, mockResponse as Response, mockNext);
+      authenticate(mockRequest as Request, mockResponse as Response, mockNext);
+      await flushPromises();
 
       expect(mockNext).toHaveBeenCalledWith(expect.any(ApiError));
       const error = (mockNext as jest.Mock).mock.calls[0][0] as ApiError;
@@ -112,7 +124,8 @@ describe('Auth Middleware', () => {
 
       (authService.isTokenBlacklisted as jest.Mock).mockResolvedValue(true);
 
-      await authenticate(mockRequest as Request, mockResponse as Response, mockNext);
+      authenticate(mockRequest as Request, mockResponse as Response, mockNext);
+      await flushPromises();
 
       expect(mockNext).toHaveBeenCalledWith(expect.any(ApiError));
       const error = (mockNext as jest.Mock).mock.calls[0][0] as ApiError;
@@ -128,7 +141,8 @@ describe('Auth Middleware', () => {
         throw new Error('Invalid token');
       });
 
-      await authenticate(mockRequest as Request, mockResponse as Response, mockNext);
+      authenticate(mockRequest as Request, mockResponse as Response, mockNext);
+      await flushPromises();
 
       expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
     });
@@ -141,7 +155,8 @@ describe('Auth Middleware', () => {
       (authService.verifyAccessToken as jest.Mock).mockReturnValue(mockDecoded);
       (User.findById as jest.Mock).mockResolvedValue(null);
 
-      await authenticate(mockRequest as Request, mockResponse as Response, mockNext);
+      authenticate(mockRequest as Request, mockResponse as Response, mockNext);
+      await flushPromises();
 
       expect(mockNext).toHaveBeenCalledWith(expect.any(ApiError));
       const error = (mockNext as jest.Mock).mock.calls[0][0] as ApiError;
@@ -160,7 +175,8 @@ describe('Auth Middleware', () => {
         isActive: false,
       });
 
-      await authenticate(mockRequest as Request, mockResponse as Response, mockNext);
+      authenticate(mockRequest as Request, mockResponse as Response, mockNext);
+      await flushPromises();
 
       expect(mockNext).toHaveBeenCalledWith(expect.any(ApiError));
       const error = (mockNext as jest.Mock).mock.calls[0][0] as ApiError;
@@ -181,7 +197,8 @@ describe('Auth Middleware', () => {
       (authService.verifyAccessToken as jest.Mock).mockReturnValue(mockDecoded);
       (User.findById as jest.Mock).mockResolvedValue(userWithChangedPassword);
 
-      await authenticate(mockRequest as Request, mockResponse as Response, mockNext);
+      authenticate(mockRequest as Request, mockResponse as Response, mockNext);
+      await flushPromises();
 
       expect(mockNext).toHaveBeenCalledWith(expect.any(ApiError));
       const error = (mockNext as jest.Mock).mock.calls[0][0] as ApiError;
@@ -198,7 +215,8 @@ describe('Auth Middleware', () => {
       (authService.verifyAccessToken as jest.Mock).mockReturnValue(decodedWithoutIat);
       (User.findById as jest.Mock).mockResolvedValue(mockUser);
 
-      await authenticate(mockRequest as Request, mockResponse as Response, mockNext);
+      authenticate(mockRequest as Request, mockResponse as Response, mockNext);
+      await flushPromises();
 
       expect(mockUser.changedPasswordAfter).toHaveBeenCalledWith(expect.any(Number));
       expect(mockRequest.user).toBe(mockUser);
@@ -213,7 +231,8 @@ describe('Auth Middleware', () => {
       } as any;
 
       const middleware = authorize('projects:delete', 'users:delete');
-      await middleware(mockRequest as Request, mockResponse as Response, mockNext);
+      middleware(mockRequest as Request, mockResponse as Response, mockNext);
+      await flushPromises();
 
       expect(mockNext).toHaveBeenCalledWith();
     });
@@ -224,7 +243,8 @@ describe('Auth Middleware', () => {
       } as any;
 
       const middleware = authorize('users:read');
-      await middleware(mockRequest as Request, mockResponse as Response, mockNext);
+      middleware(mockRequest as Request, mockResponse as Response, mockNext);
+      await flushPromises();
 
       expect(mockNext).toHaveBeenCalledWith();
     });
@@ -235,7 +255,8 @@ describe('Auth Middleware', () => {
       } as any;
 
       const middleware = authorize('projects:read', 'projects:update');
-      await middleware(mockRequest as Request, mockResponse as Response, mockNext);
+      middleware(mockRequest as Request, mockResponse as Response, mockNext);
+      await flushPromises();
 
       expect(mockNext).toHaveBeenCalledWith();
     });
@@ -246,14 +267,16 @@ describe('Auth Middleware', () => {
       } as any;
 
       const middleware = authorize('blog:create', 'blog:update');
-      await middleware(mockRequest as Request, mockResponse as Response, mockNext);
+      middleware(mockRequest as Request, mockResponse as Response, mockNext);
+      await flushPromises();
 
       expect(mockNext).toHaveBeenCalledWith();
     });
 
     it('should fail when user is not authenticated', async () => {
       const middleware = authorize('users:read');
-      await middleware(mockRequest as Request, mockResponse as Response, mockNext);
+      middleware(mockRequest as Request, mockResponse as Response, mockNext);
+      await flushPromises();
 
       expect(mockNext).toHaveBeenCalledWith(expect.any(ApiError));
       const error = (mockNext as jest.Mock).mock.calls[0][0] as ApiError;
@@ -266,7 +289,8 @@ describe('Auth Middleware', () => {
       } as any;
 
       const middleware = authorize('users:delete');
-      await middleware(mockRequest as Request, mockResponse as Response, mockNext);
+      middleware(mockRequest as Request, mockResponse as Response, mockNext);
+      await flushPromises();
 
       expect(mockNext).toHaveBeenCalledWith(expect.any(ApiError));
       const error = (mockNext as jest.Mock).mock.calls[0][0] as ApiError;
@@ -280,7 +304,8 @@ describe('Auth Middleware', () => {
       } as any;
 
       const middleware = authorize('special:action');
-      await middleware(mockRequest as Request, mockResponse as Response, mockNext);
+      middleware(mockRequest as Request, mockResponse as Response, mockNext);
+      await flushPromises();
 
       expect(mockNext).toHaveBeenCalledWith();
     });
@@ -292,7 +317,8 @@ describe('Auth Middleware', () => {
       } as any;
 
       const middleware = authorize('special:action');
-      await middleware(mockRequest as Request, mockResponse as Response, mockNext);
+      middleware(mockRequest as Request, mockResponse as Response, mockNext);
+      await flushPromises();
 
       expect(mockNext).toHaveBeenCalledWith(expect.any(ApiError));
       const error = (mockNext as jest.Mock).mock.calls[0][0] as ApiError;
@@ -323,14 +349,16 @@ describe('Auth Middleware', () => {
       (authService.verifyAccessToken as jest.Mock).mockReturnValue(mockDecoded);
       (User.findById as jest.Mock).mockResolvedValue(mockUser);
 
-      await optionalAuth(mockRequest as Request, mockResponse as Response, mockNext);
+      optionalAuth(mockRequest as Request, mockResponse as Response, mockNext);
+      await flushPromises();
 
       expect(mockRequest.user).toBe(mockUser);
       expect(mockNext).toHaveBeenCalledWith();
     });
 
     it('should continue without user when no token is provided', async () => {
-      await optionalAuth(mockRequest as Request, mockResponse as Response, mockNext);
+      optionalAuth(mockRequest as Request, mockResponse as Response, mockNext);
+      await flushPromises();
 
       expect(mockRequest.user).toBeUndefined();
       expect(mockNext).toHaveBeenCalledWith();
@@ -342,7 +370,8 @@ describe('Auth Middleware', () => {
 
       (authService.isTokenBlacklisted as jest.Mock).mockResolvedValue(true);
 
-      await optionalAuth(mockRequest as Request, mockResponse as Response, mockNext);
+      optionalAuth(mockRequest as Request, mockResponse as Response, mockNext);
+      await flushPromises();
 
       expect(mockRequest.user).toBeUndefined();
       expect(mockNext).toHaveBeenCalledWith();
@@ -357,7 +386,8 @@ describe('Auth Middleware', () => {
         throw new Error('Invalid token');
       });
 
-      await optionalAuth(mockRequest as Request, mockResponse as Response, mockNext);
+      optionalAuth(mockRequest as Request, mockResponse as Response, mockNext);
+      await flushPromises();
 
       expect(mockRequest.user).toBeUndefined();
       expect(mockNext).toHaveBeenCalledWith();
@@ -374,7 +404,8 @@ describe('Auth Middleware', () => {
         isActive: false,
       });
 
-      await optionalAuth(mockRequest as Request, mockResponse as Response, mockNext);
+      optionalAuth(mockRequest as Request, mockResponse as Response, mockNext);
+      await flushPromises();
 
       expect(mockRequest.user).toBeUndefined();
       expect(mockNext).toHaveBeenCalledWith();
@@ -388,7 +419,8 @@ describe('Auth Middleware', () => {
       (authService.verifyAccessToken as jest.Mock).mockReturnValue(mockDecoded);
       (User.findById as jest.Mock).mockResolvedValue(null);
 
-      await optionalAuth(mockRequest as Request, mockResponse as Response, mockNext);
+      optionalAuth(mockRequest as Request, mockResponse as Response, mockNext);
+      await flushPromises();
 
       expect(mockRequest.user).toBeUndefined();
       expect(mockNext).toHaveBeenCalledWith();
@@ -401,13 +433,15 @@ describe('Auth Middleware', () => {
         isEmailVerified: true,
       } as any;
 
-      await requireEmailVerified(mockRequest as Request, mockResponse as Response, mockNext);
+      requireEmailVerified(mockRequest as Request, mockResponse as Response, mockNext);
+      await flushPromises();
 
       expect(mockNext).toHaveBeenCalledWith();
     });
 
     it('should fail when user is not authenticated', async () => {
-      await requireEmailVerified(mockRequest as Request, mockResponse as Response, mockNext);
+      requireEmailVerified(mockRequest as Request, mockResponse as Response, mockNext);
+      await flushPromises();
 
       expect(mockNext).toHaveBeenCalledWith(expect.any(ApiError));
       const error = (mockNext as jest.Mock).mock.calls[0][0] as ApiError;
@@ -419,7 +453,8 @@ describe('Auth Middleware', () => {
         isEmailVerified: false,
       } as any;
 
-      await requireEmailVerified(mockRequest as Request, mockResponse as Response, mockNext);
+      requireEmailVerified(mockRequest as Request, mockResponse as Response, mockNext);
+      await flushPromises();
 
       expect(mockNext).toHaveBeenCalledWith(expect.any(ApiError));
       const error = (mockNext as jest.Mock).mock.calls[0][0] as ApiError;

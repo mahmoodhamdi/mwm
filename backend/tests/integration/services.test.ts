@@ -92,7 +92,8 @@ describe('Services API', () => {
       const response = await request(app).get('/api/v1/services/categories').expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data).toHaveLength(1);
+      // Controller returns { categories: [...] } wrapped in data
+      expect(response.body.data.categories).toHaveLength(1);
     });
   });
 
@@ -109,7 +110,8 @@ describe('Services API', () => {
       const response = await request(app).get('/api/v1/services/categories/web-development').expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.slug).toBe('web-development');
+      // Controller returns { category: {...} } wrapped in data
+      expect(response.body.data.category.slug).toBe('web-development');
     });
 
     it('should return 404 for nonexistent category', async () => {
@@ -127,18 +129,27 @@ describe('Services API', () => {
     it('should get featured services', async () => {
       if (!isConnected || !app) return;
 
+      const category = await ServiceCategory.create({
+        name: { ar: 'فئة', en: 'Category' },
+        slug: 'category',
+        isActive: true,
+      });
+
       await Service.create({
-        name: { ar: 'خدمة مميزة', en: 'Featured Service' },
+        title: { ar: 'خدمة مميزة', en: 'Featured Service' },
         slug: 'featured-service',
+        shortDescription: { ar: 'وصف مختصر', en: 'Short Description' },
         description: { ar: 'وصف', en: 'Description' },
-        status: 'published',
+        category: category._id,
+        isActive: true,
         isFeatured: true,
       });
 
       const response = await request(app).get('/api/v1/services/featured').expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data).toHaveLength(1);
+      // Controller returns { services: [...] } wrapped in data
+      expect(response.body.data.services).toHaveLength(1);
     });
   });
 
@@ -146,11 +157,19 @@ describe('Services API', () => {
     it('should get published services with pagination', async () => {
       if (!isConnected || !app) return;
 
+      const category = await ServiceCategory.create({
+        name: { ar: 'فئة', en: 'Category' },
+        slug: 'category',
+        isActive: true,
+      });
+
       await Service.create({
-        name: { ar: 'خدمة 1', en: 'Service 1' },
+        title: { ar: 'خدمة 1', en: 'Service 1' },
         slug: 'service-1',
+        shortDescription: { ar: 'وصف مختصر', en: 'Short Description' },
         description: { ar: 'وصف', en: 'Description' },
-        status: 'published',
+        category: category._id,
+        isActive: true,
       });
 
       const response = await request(app).get('/api/v1/services?page=1&limit=10').expect(200);
@@ -163,11 +182,19 @@ describe('Services API', () => {
     it('should filter services by search query', async () => {
       if (!isConnected || !app) return;
 
+      const category = await ServiceCategory.create({
+        name: { ar: 'فئة', en: 'Category' },
+        slug: 'category',
+        isActive: true,
+      });
+
       await Service.create({
-        name: { ar: 'تطوير التطبيقات', en: 'App Development' },
+        title: { ar: 'تطوير التطبيقات', en: 'App Development' },
         slug: 'app-development',
+        shortDescription: { ar: 'وصف مختصر', en: 'Short Description' },
         description: { ar: 'وصف', en: 'Description' },
-        status: 'published',
+        category: category._id,
+        isActive: true,
       });
 
       const response = await request(app).get('/api/v1/services?search=App').expect(200);
@@ -181,17 +208,26 @@ describe('Services API', () => {
     it('should get service by slug', async () => {
       if (!isConnected || !app) return;
 
+      const category = await ServiceCategory.create({
+        name: { ar: 'فئة', en: 'Category' },
+        slug: 'category',
+        isActive: true,
+      });
+
       await Service.create({
-        name: { ar: 'خدمة', en: 'Service' },
+        title: { ar: 'خدمة', en: 'Service' },
         slug: 'test-service',
+        shortDescription: { ar: 'وصف مختصر', en: 'Short Description' },
         description: { ar: 'وصف', en: 'Description' },
-        status: 'published',
+        category: category._id,
+        isActive: true,
       });
 
       const response = await request(app).get('/api/v1/services/test-service').expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.slug).toBe('test-service');
+      // Controller returns { service: {...} } wrapped in data
+      expect(response.body.data.service.slug).toBe('test-service');
     });
 
     it('should return 404 for nonexistent service', async () => {
@@ -246,7 +282,8 @@ describe('Services API', () => {
         .expect(201);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.slug).toBe('new-category');
+      // Controller returns { category: {...} } wrapped in data
+      expect(response.body.data.category.slug).toBe('new-category');
     });
 
     it('should return 401 without auth', async () => {
@@ -333,30 +370,44 @@ describe('Services API', () => {
       if (!isConnected || !app) return;
 
       const token = await getAdminToken();
+      const category = await ServiceCategory.create({
+        name: { ar: 'فئة', en: 'Category' },
+        slug: 'category',
+      });
 
       const response = await request(app)
         .post('/api/v1/services/admin')
         .set('Authorization', `Bearer ${token}`)
         .send({
-          name: { ar: 'خدمة جديدة', en: 'New Service' },
+          title: { ar: 'خدمة جديدة', en: 'New Service' },
           slug: 'new-service',
+          shortDescription: { ar: 'وصف مختصر', en: 'Short Description' },
           description: { ar: 'وصف', en: 'Description' },
+          category: category._id.toString(),
         })
         .expect(201);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.slug).toBe('new-service');
+      // Controller returns { service: {...} } wrapped in data
+      expect(response.body.data.service.slug).toBe('new-service');
     });
 
     it('should return 401 without auth', async () => {
       if (!isConnected || !app) return;
 
+      const category = await ServiceCategory.create({
+        name: { ar: 'فئة', en: 'Category' },
+        slug: 'category',
+      });
+
       await request(app)
         .post('/api/v1/services/admin')
         .send({
-          name: { ar: 'خدمة', en: 'Service' },
+          title: { ar: 'خدمة', en: 'Service' },
           slug: 'service',
+          shortDescription: { ar: 'وصف مختصر', en: 'Short Description' },
           description: { ar: 'وصف', en: 'Description' },
+          category: category._id.toString(),
         })
         .expect(401);
     });
@@ -367,10 +418,16 @@ describe('Services API', () => {
       if (!isConnected || !app) return;
 
       const token = await getAdminToken();
+      const category = await ServiceCategory.create({
+        name: { ar: 'فئة', en: 'Category' },
+        slug: 'category',
+      });
       const service = await Service.create({
-        name: { ar: 'خدمة', en: 'Service' },
+        title: { ar: 'خدمة', en: 'Service' },
         slug: 'service',
+        shortDescription: { ar: 'وصف مختصر', en: 'Short Description' },
         description: { ar: 'وصف', en: 'Description' },
+        category: category._id,
       });
 
       const response = await request(app)
@@ -379,7 +436,8 @@ describe('Services API', () => {
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data._id).toBe(service._id.toString());
+      // Controller returns { service: {...} } wrapped in data
+      expect(response.body.data.service._id).toBe(service._id.toString());
     });
   });
 
@@ -388,17 +446,23 @@ describe('Services API', () => {
       if (!isConnected || !app) return;
 
       const token = await getAdminToken();
+      const category = await ServiceCategory.create({
+        name: { ar: 'فئة', en: 'Category' },
+        slug: 'category',
+      });
       const service = await Service.create({
-        name: { ar: 'خدمة', en: 'Service' },
+        title: { ar: 'خدمة', en: 'Service' },
         slug: 'service',
+        shortDescription: { ar: 'وصف مختصر', en: 'Short Description' },
         description: { ar: 'وصف', en: 'Description' },
+        category: category._id,
       });
 
       const response = await request(app)
         .put(`/api/v1/services/admin/${service._id}`)
         .set('Authorization', `Bearer ${token}`)
         .send({
-          name: { ar: 'خدمة محدثة', en: 'Updated Service' },
+          title: { ar: 'خدمة محدثة', en: 'Updated Service' },
         })
         .expect(200);
 
@@ -411,15 +475,23 @@ describe('Services API', () => {
       if (!isConnected || !app) return;
 
       const token = await getAdminToken();
+      const category = await ServiceCategory.create({
+        name: { ar: 'فئة', en: 'Category' },
+        slug: 'category',
+      });
       const service1 = await Service.create({
-        name: { ar: 'خدمة 1', en: 'Service 1' },
+        title: { ar: 'خدمة 1', en: 'Service 1' },
         slug: 'service-1',
+        shortDescription: { ar: 'وصف مختصر', en: 'Short Description' },
         description: { ar: 'وصف', en: 'Description' },
+        category: category._id,
       });
       const service2 = await Service.create({
-        name: { ar: 'خدمة 2', en: 'Service 2' },
+        title: { ar: 'خدمة 2', en: 'Service 2' },
         slug: 'service-2',
+        shortDescription: { ar: 'وصف مختصر', en: 'Short Description' },
         description: { ar: 'وصف', en: 'Description' },
+        category: category._id,
       });
 
       const response = await request(app)
@@ -442,10 +514,16 @@ describe('Services API', () => {
       if (!isConnected || !app) return;
 
       const token = await getAdminToken();
+      const category = await ServiceCategory.create({
+        name: { ar: 'فئة', en: 'Category' },
+        slug: 'category',
+      });
       const service = await Service.create({
-        name: { ar: 'خدمة', en: 'Service' },
+        title: { ar: 'خدمة', en: 'Service' },
         slug: 'service',
+        shortDescription: { ar: 'وصف مختصر', en: 'Short Description' },
         description: { ar: 'وصف', en: 'Description' },
+        category: category._id,
       });
 
       const response = await request(app)
@@ -475,13 +553,20 @@ describe('Services API', () => {
       });
       const token = res.body.data?.accessToken || '';
 
+      const category = await ServiceCategory.create({
+        name: { ar: 'فئة', en: 'Category' },
+        slug: 'category',
+      });
+
       await request(app)
         .post('/api/v1/services/admin')
         .set('Authorization', `Bearer ${token}`)
         .send({
-          name: { ar: 'خدمة', en: 'Service' },
+          title: { ar: 'خدمة', en: 'Service' },
           slug: 'service',
+          shortDescription: { ar: 'وصف مختصر', en: 'Short Description' },
           description: { ar: 'وصف', en: 'Description' },
+          category: category._id.toString(),
         })
         .expect(403);
     });

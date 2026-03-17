@@ -92,7 +92,8 @@ describe('Projects API', () => {
       const response = await request(app).get('/api/v1/projects/categories').expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data).toHaveLength(1);
+      // Controller returns { categories: [...] } wrapped in data
+      expect(response.body.data.categories).toHaveLength(1);
     });
   });
 
@@ -109,7 +110,8 @@ describe('Projects API', () => {
       const response = await request(app).get('/api/v1/projects/categories/web-development').expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.slug).toBe('web-development');
+      // Controller returns { category: {...} } wrapped in data
+      expect(response.body.data.category.slug).toBe('web-development');
     });
 
     it('should return 404 for nonexistent category', async () => {
@@ -135,16 +137,19 @@ describe('Projects API', () => {
       await Project.create({
         title: { ar: 'مشروع مميز', en: 'Featured Project' },
         slug: 'featured-project',
+        shortDescription: { ar: 'وصف مختصر', en: 'Short Description' },
         description: { ar: 'وصف', en: 'Description' },
+        thumbnail: 'https://example.com/thumbnail.jpg',
         category: category._id,
-        status: 'published',
-        featured: true,
+        isPublished: true,
+        isFeatured: true,
       });
 
       const response = await request(app).get('/api/v1/projects/featured').expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data).toHaveLength(1);
+      // Controller returns { projects: [...] } wrapped in data
+      expect(response.body.data.projects).toHaveLength(1);
     });
   });
 
@@ -160,9 +165,11 @@ describe('Projects API', () => {
       await Project.create({
         title: { ar: 'مشروع 1', en: 'Project 1' },
         slug: 'project-1',
+        shortDescription: { ar: 'وصف مختصر', en: 'Short Description' },
         description: { ar: 'وصف', en: 'Description' },
+        thumbnail: 'https://example.com/thumbnail.jpg',
         category: category._id,
-        status: 'published',
+        isPublished: true,
       });
 
       const response = await request(app).get('/api/v1/projects?page=1&limit=10').expect(200);
@@ -183,9 +190,11 @@ describe('Projects API', () => {
       await Project.create({
         title: { ar: 'تطوير التطبيقات', en: 'App Development' },
         slug: 'app-development',
+        shortDescription: { ar: 'وصف مختصر', en: 'Short Description' },
         description: { ar: 'وصف', en: 'Description' },
+        thumbnail: 'https://example.com/thumbnail.jpg',
         category: category._id,
-        status: 'published',
+        isPublished: true,
       });
 
       const response = await request(app).get('/api/v1/projects?search=App').expect(200);
@@ -207,15 +216,18 @@ describe('Projects API', () => {
       await Project.create({
         title: { ar: 'مشروع', en: 'Project' },
         slug: 'test-project',
+        shortDescription: { ar: 'وصف مختصر', en: 'Short Description' },
         description: { ar: 'وصف', en: 'Description' },
+        thumbnail: 'https://example.com/thumbnail.jpg',
         category: category._id,
-        status: 'published',
+        isPublished: true,
       });
 
       const response = await request(app).get('/api/v1/projects/test-project').expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.slug).toBe('test-project');
+      // Controller returns { project: {...} } wrapped in data
+      expect(response.body.data.project.slug).toBe('test-project');
     });
 
     it('should return 404 for nonexistent project', async () => {
@@ -270,7 +282,8 @@ describe('Projects API', () => {
         .expect(201);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.slug).toBe('new-category');
+      // Controller returns { category: {...} } wrapped in data
+      expect(response.body.data.category.slug).toBe('new-category');
     });
   });
 
@@ -356,13 +369,16 @@ describe('Projects API', () => {
         .send({
           title: { ar: 'مشروع جديد', en: 'New Project' },
           slug: 'new-project',
+          shortDescription: { ar: 'وصف مختصر', en: 'Short Description' },
           description: { ar: 'وصف', en: 'Description' },
+          thumbnail: 'https://example.com/thumbnail.jpg',
           category: category._id.toString(),
         })
         .expect(201);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.slug).toBe('new-project');
+      // Controller returns { project: {...} } wrapped in data
+      expect(response.body.data.project.slug).toBe('new-project');
     });
 
     it('should return 401 without auth', async () => {
@@ -378,7 +394,9 @@ describe('Projects API', () => {
         .send({
           title: { ar: 'مشروع', en: 'Project' },
           slug: 'project',
+          shortDescription: { ar: 'وصف مختصر', en: 'Short Description' },
           description: { ar: 'وصف', en: 'Description' },
+          thumbnail: 'https://example.com/thumbnail.jpg',
           category: category._id.toString(),
         })
         .expect(401);
@@ -397,7 +415,9 @@ describe('Projects API', () => {
       const project = await Project.create({
         title: { ar: 'مشروع', en: 'Project' },
         slug: 'project',
+        shortDescription: { ar: 'وصف مختصر', en: 'Short Description' },
         description: { ar: 'وصف', en: 'Description' },
+        thumbnail: 'https://example.com/thumbnail.jpg',
         category: category._id,
       });
 
@@ -407,7 +427,8 @@ describe('Projects API', () => {
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data._id).toBe(project._id.toString());
+      // Controller returns { project: {...} } wrapped in data
+      expect(response.body.data.project._id).toBe(project._id.toString());
     });
   });
 
@@ -423,7 +444,9 @@ describe('Projects API', () => {
       const project = await Project.create({
         title: { ar: 'مشروع', en: 'Project' },
         slug: 'project',
+        shortDescription: { ar: 'وصف مختصر', en: 'Short Description' },
         description: { ar: 'وصف', en: 'Description' },
+        thumbnail: 'https://example.com/thumbnail.jpg',
         category: category._id,
       });
 
@@ -451,9 +474,11 @@ describe('Projects API', () => {
       const project = await Project.create({
         title: { ar: 'مشروع', en: 'Project' },
         slug: 'project',
+        shortDescription: { ar: 'وصف مختصر', en: 'Short Description' },
         description: { ar: 'وصف', en: 'Description' },
+        thumbnail: 'https://example.com/thumbnail.jpg',
         category: category._id,
-        status: 'draft',
+        isPublished: false,
       });
 
       const response = await request(app)
@@ -477,9 +502,11 @@ describe('Projects API', () => {
       const project = await Project.create({
         title: { ar: 'مشروع', en: 'Project' },
         slug: 'project',
+        shortDescription: { ar: 'وصف مختصر', en: 'Short Description' },
         description: { ar: 'وصف', en: 'Description' },
+        thumbnail: 'https://example.com/thumbnail.jpg',
         category: category._id,
-        featured: false,
+        isFeatured: false,
       });
 
       const response = await request(app)
@@ -503,13 +530,17 @@ describe('Projects API', () => {
       const project1 = await Project.create({
         title: { ar: 'مشروع 1', en: 'Project 1' },
         slug: 'project-1',
+        shortDescription: { ar: 'وصف مختصر', en: 'Short Description' },
         description: { ar: 'وصف', en: 'Description' },
+        thumbnail: 'https://example.com/thumbnail.jpg',
         category: category._id,
       });
       const project2 = await Project.create({
         title: { ar: 'مشروع 2', en: 'Project 2' },
         slug: 'project-2',
+        shortDescription: { ar: 'وصف مختصر', en: 'Short Description' },
         description: { ar: 'وصف', en: 'Description' },
+        thumbnail: 'https://example.com/thumbnail.jpg',
         category: category._id,
       });
 
@@ -540,7 +571,9 @@ describe('Projects API', () => {
       const project = await Project.create({
         title: { ar: 'مشروع', en: 'Project' },
         slug: 'project',
+        shortDescription: { ar: 'وصف مختصر', en: 'Short Description' },
         description: { ar: 'وصف', en: 'Description' },
+        thumbnail: 'https://example.com/thumbnail.jpg',
         category: category._id,
       });
 
@@ -582,7 +615,9 @@ describe('Projects API', () => {
         .send({
           title: { ar: 'مشروع', en: 'Project' },
           slug: 'project',
+          shortDescription: { ar: 'وصف مختصر', en: 'Short Description' },
           description: { ar: 'وصف', en: 'Description' },
+          thumbnail: 'https://example.com/thumbnail.jpg',
           category: category._id.toString(),
         })
         .expect(403);

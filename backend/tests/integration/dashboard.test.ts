@@ -130,7 +130,7 @@ describe('Dashboard API', () => {
 
       expect(response.body.success).toBe(true);
       expect(response.body.data).toBeDefined();
-      expect(response.body.data.stats).toBeDefined();
+      expect(response.body.data.contacts).toBeDefined();
     });
 
     it('should allow editor access', async () => {
@@ -198,7 +198,7 @@ describe('Dashboard API', () => {
 
       expect(response.body.success).toBe(true);
       expect(response.body.data).toBeDefined();
-      expect(response.body.data.activities).toBeDefined();
+      expect(response.body.data.recentContacts).toBeDefined();
     });
 
     it('should fail for non-admin users', async () => {
@@ -265,7 +265,7 @@ describe('Dashboard API', () => {
 
       expect(response.body.success).toBe(true);
       expect(response.body.data).toBeDefined();
-      expect(response.body.data.stats).toBeDefined();
+      expect(response.body.data.unreadMessages).toBeDefined();
     });
 
     it('should fail for non-admin users', async () => {

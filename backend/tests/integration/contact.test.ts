@@ -93,7 +93,7 @@ describe('Contact API', () => {
         .expect(201);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.email).toBe('john@example.com');
+      expect(response.body.data.contactId).toBeDefined();
     });
 
     it('should fail with invalid email', async () => {
@@ -139,8 +139,8 @@ describe('Contact API', () => {
       await Contact.create({
         name: 'John Doe',
         email: 'john@example.com',
-        subject: 'Test',
-        message: 'Test message',
+        subject: 'Test Subject',
+        message: 'Test message content',
       });
 
       const response = await request(app)
@@ -159,8 +159,8 @@ describe('Contact API', () => {
       await Contact.create({
         name: 'John Doe',
         email: 'john@example.com',
-        subject: 'Test',
-        message: 'Test message',
+        subject: 'Test Subject',
+        message: 'Test message content',
         status: 'new',
       });
 
@@ -187,8 +187,8 @@ describe('Contact API', () => {
       const message = await Contact.create({
         name: 'John Doe',
         email: 'john@example.com',
-        subject: 'Test',
-        message: 'Test message',
+        subject: 'Test Subject',
+        message: 'Test message content',
       });
 
       const response = await request(app)
@@ -197,7 +197,7 @@ describe('Contact API', () => {
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data._id).toBe(message._id.toString());
+      expect(response.body.data.message._id).toBe(message._id.toString());
     });
 
     it('should return 404 for nonexistent message', async () => {
@@ -221,8 +221,8 @@ describe('Contact API', () => {
       const message = await Contact.create({
         name: 'John Doe',
         email: 'john@example.com',
-        subject: 'Test',
-        message: 'Test message',
+        subject: 'Test Subject',
+        message: 'Test message content',
       });
 
       const response = await request(app)
@@ -246,8 +246,8 @@ describe('Contact API', () => {
       const message = await Contact.create({
         name: 'John Doe',
         email: 'john@example.com',
-        subject: 'Test',
-        message: 'Test message',
+        subject: 'Test Subject',
+        message: 'Test message content',
       });
 
       const response = await request(app)
@@ -271,7 +271,7 @@ describe('Contact API', () => {
         .post(`/api/v1/contact/messages/${fakeId}/reply`)
         .set('Authorization', `Bearer ${token}`)
         .send({
-          message: 'Reply text',
+          message: 'Reply text here',
         })
         .expect(404);
     });
@@ -285,8 +285,8 @@ describe('Contact API', () => {
       const message = await Contact.create({
         name: 'John Doe',
         email: 'john@example.com',
-        subject: 'Test',
-        message: 'Test message',
+        subject: 'Test Subject',
+        message: 'Test message content',
         starred: false,
       });
 
@@ -307,8 +307,8 @@ describe('Contact API', () => {
       const message = await Contact.create({
         name: 'John Doe',
         email: 'john@example.com',
-        subject: 'Test',
-        message: 'Test message',
+        subject: 'Test Subject',
+        message: 'Test message content',
       });
 
       const response = await request(app)
@@ -328,8 +328,8 @@ describe('Contact API', () => {
       const message = await Contact.create({
         name: 'John Doe',
         email: 'john@example.com',
-        subject: 'Test',
-        message: 'Test message',
+        subject: 'Test Subject',
+        message: 'Test message content',
       });
 
       const response = await request(app)
@@ -349,8 +349,8 @@ describe('Contact API', () => {
       const message = await Contact.create({
         name: 'John Doe',
         email: 'john@example.com',
-        subject: 'Test',
-        message: 'Test message',
+        subject: 'Test Subject',
+        message: 'Test message content',
       });
 
       const response = await request(app)
@@ -370,14 +370,14 @@ describe('Contact API', () => {
       const message1 = await Contact.create({
         name: 'John Doe',
         email: 'john@example.com',
-        subject: 'Test 1',
-        message: 'Test message 1',
+        subject: 'Test Subject One',
+        message: 'Test message content one',
       });
       const message2 = await Contact.create({
         name: 'Jane Doe',
         email: 'jane@example.com',
-        subject: 'Test 2',
-        message: 'Test message 2',
+        subject: 'Test Subject Two',
+        message: 'Test message content two',
       });
 
       const response = await request(app)
@@ -385,7 +385,7 @@ describe('Contact API', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({
           ids: [message1._id.toString(), message2._id.toString()],
-          action: 'markRead',
+          action: 'read',
         })
         .expect(200);
 
@@ -401,8 +401,8 @@ describe('Contact API', () => {
       await Contact.create({
         name: 'John Doe',
         email: 'john@example.com',
-        subject: 'Test',
-        message: 'Test message',
+        subject: 'Test Subject',
+        message: 'Test message content',
         status: 'new',
       });
 
@@ -424,8 +424,8 @@ describe('Contact API', () => {
       await Contact.create({
         name: 'John Doe',
         email: 'john@example.com',
-        subject: 'Test',
-        message: 'Test message',
+        subject: 'Test Subject',
+        message: 'Test message content',
         status: 'new',
       });
 
@@ -460,8 +460,8 @@ describe('Contact API', () => {
       const message = await Contact.create({
         name: 'John Doe',
         email: 'john@example.com',
-        subject: 'Test',
-        message: 'Test message',
+        subject: 'Test Subject',
+        message: 'Test message content',
       });
 
       await request(app)

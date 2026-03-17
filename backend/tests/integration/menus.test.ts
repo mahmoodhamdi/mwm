@@ -80,7 +80,7 @@ describe('Menus API', () => {
       if (!isConnected || !app) return;
 
       await Menu.create({
-        name: { ar: 'قائمة الرأس', en: 'Header Menu' },
+        name: 'Header Menu',
         slug: 'header-menu',
         location: 'header',
         isActive: true,
@@ -99,7 +99,7 @@ describe('Menus API', () => {
       if (!isConnected || !app) return;
 
       await Menu.create({
-        name: { ar: 'قائمة الرأس', en: 'Header Menu' },
+        name: 'Header Menu',
         slug: 'header-menu',
         location: 'header',
         isActive: true,
@@ -140,7 +140,7 @@ describe('Menus API', () => {
       const adminToken = await getAdminToken(app);
 
       const menu = await Menu.create({
-        name: { ar: 'قائمة الرأس', en: 'Header Menu' },
+        name: 'Header Menu',
         slug: 'header-menu',
         location: 'header',
         isActive: true,
@@ -167,7 +167,7 @@ describe('Menus API', () => {
         .post('/api/v1/menus')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
-          name: { ar: 'قائمة التذييل', en: 'Footer Menu' },
+          name: 'Footer Menu',
           slug: 'footer-menu',
           location: 'footer',
         })
@@ -185,7 +185,7 @@ describe('Menus API', () => {
       const adminToken = await getAdminToken(app);
 
       const menu = await Menu.create({
-        name: { ar: 'قائمة الرأس', en: 'Header Menu' },
+        name: 'Header Menu',
         slug: 'header-menu',
         location: 'header',
         isActive: true,
@@ -196,7 +196,7 @@ describe('Menus API', () => {
         .put(`/api/v1/menus/${menu._id}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
-          name: { ar: 'قائمة محدثة', en: 'Updated Menu' },
+          name: 'Updated Menu',
         })
         .expect(200);
 
@@ -211,7 +211,7 @@ describe('Menus API', () => {
       const adminToken = await getAdminToken(app);
 
       const menu = await Menu.create({
-        name: { ar: 'قائمة الرأس', en: 'Header Menu' },
+        name: 'Header Menu',
         slug: 'header-menu',
         location: 'header',
         isActive: true,
@@ -238,7 +238,7 @@ describe('Menus API', () => {
       const adminToken = await getAdminToken(app);
 
       const menu = await Menu.create({
-        name: { ar: 'قائمة الرأس', en: 'Header Menu' },
+        name: 'Header Menu',
         slug: 'header-menu',
         location: 'header',
         isActive: true,
@@ -249,6 +249,7 @@ describe('Menus API', () => {
         .post(`/api/v1/menus/${menu._id}/items`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
+          id: 'item-1',
           label: { ar: 'الرئيسية', en: 'Home' },
           url: '/',
           target: '_self',
@@ -266,13 +267,13 @@ describe('Menus API', () => {
       const adminToken = await getAdminToken(app);
 
       const menu = await Menu.create({
-        name: { ar: 'قائمة الرأس', en: 'Header Menu' },
+        name: 'Header Menu',
         slug: 'header-menu',
         location: 'header',
         isActive: true,
         items: [
           {
-            _id: new mongoose.Types.ObjectId(),
+            id: 'item-1',
             label: { ar: 'الرئيسية', en: 'Home' },
             url: '/',
             target: '_self',
@@ -281,7 +282,7 @@ describe('Menus API', () => {
         ],
       });
 
-      const itemId = menu.items[0]._id;
+      const itemId = menu.items[0].id;
 
       const response = await request(app)
         .put(`/api/v1/menus/${menu._id}/items/${itemId}`)
@@ -302,13 +303,13 @@ describe('Menus API', () => {
       const adminToken = await getAdminToken(app);
 
       const menu = await Menu.create({
-        name: { ar: 'قائمة الرأس', en: 'Header Menu' },
+        name: 'Header Menu',
         slug: 'header-menu',
         location: 'header',
         isActive: true,
         items: [
           {
-            _id: new mongoose.Types.ObjectId(),
+            id: 'item-1',
             label: { ar: 'الرئيسية', en: 'Home' },
             url: '/',
             target: '_self',
@@ -317,7 +318,7 @@ describe('Menus API', () => {
         ],
       });
 
-      const itemId = menu.items[0]._id;
+      const itemId = menu.items[0].id;
 
       const response = await request(app)
         .delete(`/api/v1/menus/${menu._id}/items/${itemId}`)
@@ -334,24 +335,21 @@ describe('Menus API', () => {
 
       const adminToken = await getAdminToken(app);
 
-      const item1Id = new mongoose.Types.ObjectId();
-      const item2Id = new mongoose.Types.ObjectId();
-
       const menu = await Menu.create({
-        name: { ar: 'قائمة الرأس', en: 'Header Menu' },
+        name: 'Header Menu',
         slug: 'header-menu',
         location: 'header',
         isActive: true,
         items: [
           {
-            _id: item1Id,
+            id: 'item-1',
             label: { ar: 'الرئيسية', en: 'Home' },
             url: '/',
             target: '_self',
             order: 0,
           },
           {
-            _id: item2Id,
+            id: 'item-2',
             label: { ar: 'من نحن', en: 'About' },
             url: '/about',
             target: '_self',
@@ -364,10 +362,7 @@ describe('Menus API', () => {
         .post(`/api/v1/menus/${menu._id}/reorder`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
-          items: [
-            { id: item2Id.toString(), order: 0 },
-            { id: item1Id.toString(), order: 1 },
-          ],
+          itemIds: ['item-2', 'item-1'],
         })
         .expect(200);
 

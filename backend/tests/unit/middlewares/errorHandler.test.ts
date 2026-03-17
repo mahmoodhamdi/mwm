@@ -136,7 +136,7 @@ describe('Error Handler Middleware', () => {
         success: false,
         error: {
           code: ERROR_CODES.TOKEN_EXPIRED,
-          message: 'انتهت صلاحية الجلسة',
+          message: 'انتهت صلاحية الرمز',
           details: undefined,
         },
       });
@@ -195,7 +195,7 @@ describe('Error Handler Middleware', () => {
         success: false,
         error: {
           code: ERROR_CODES.ALREADY_EXISTS,
-          message: 'An error occurred', // ALREADY_EXISTS is not in errorMessages
+          message: 'Resource already exists',
         },
       });
     });
@@ -209,7 +209,7 @@ describe('Error Handler Middleware', () => {
       errorHandler(error, mockRequest as Request, mockResponse as Response, mockNext);
 
       expect(statusSpy).toHaveBeenCalledWith(HTTP_STATUS.CONFLICT);
-      expect(jsonSpy.mock.calls[0][0].error.message).toBe('حدث خطأ'); // ALREADY_EXISTS is not in errorMessages
+      expect(jsonSpy.mock.calls[0][0].error.message).toBe('العنصر موجود بالفعل');
     });
   });
 
@@ -226,7 +226,7 @@ describe('Error Handler Middleware', () => {
         success: false,
         error: {
           code: ERROR_CODES.INVALID_TOKEN,
-          message: 'Unauthorized access',
+          message: 'Invalid token',
         },
       });
     });
@@ -243,7 +243,7 @@ describe('Error Handler Middleware', () => {
         success: false,
         error: {
           code: ERROR_CODES.TOKEN_EXPIRED,
-          message: 'Session expired',
+          message: 'Token has expired',
         },
       });
     });
@@ -255,7 +255,7 @@ describe('Error Handler Middleware', () => {
 
       errorHandler(error, mockRequest as Request, mockResponse as Response, mockNext);
 
-      expect(jsonSpy.mock.calls[0][0].error.message).toBe('انتهت صلاحية الجلسة');
+      expect(jsonSpy.mock.calls[0][0].error.message).toBe('انتهت صلاحية الرمز');
     });
   });
 

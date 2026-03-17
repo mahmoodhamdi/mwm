@@ -40,7 +40,9 @@ jest.mock('../../../src/config', () => ({
 jest.mock('../../../src/models', () => ({
   User: {
     findByIdAndUpdate: jest.fn(),
-    findOne: jest.fn(),
+    findOne: jest.fn().mockReturnValue({
+      select: jest.fn(),
+    }),
     updateOne: jest.fn(),
   },
 }));
@@ -225,8 +227,9 @@ describe('AuthService', () => {
 
       await authService.blacklistAccessToken(token);
 
+      const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
       expect(redis.set).toHaveBeenCalledWith(
-        `blacklist:${token}`,
+        `blacklist:${tokenHash}`,
         '1',
         'EX',
         expect.any(Number)
@@ -254,8 +257,9 @@ describe('AuthService', () => {
 
       const isBlacklisted = await authService.isTokenBlacklisted('some-token');
 
+      const tokenHash = crypto.createHash('sha256').update('some-token').digest('hex');
       expect(isBlacklisted).toBe(true);
-      expect(redis.get).toHaveBeenCalledWith('blacklist:some-token');
+      expect(redis.get).toHaveBeenCalledWith(`blacklist:${tokenHash}`);
     });
 
     it('should return false for non-blacklisted token', async () => {
@@ -279,7 +283,9 @@ describe('AuthService', () => {
         isActive: true,
       };
 
-      (User.findOne as jest.Mock).mockResolvedValue(mockUser);
+      (User.findOne as jest.Mock).mockReturnValue({
+        select: jest.fn().mockResolvedValue(mockUser),
+      });
       (User.findByIdAndUpdate as jest.Mock).mockResolvedValue(mockUser);
 
       const result = await authService.refreshTokens(refreshToken, 'Chrome', '192.168.1.1');
@@ -294,7 +300,9 @@ describe('AuthService', () => {
     });
 
     it('should throw error for invalid refresh token', async () => {
-      (User.findOne as jest.Mock).mockResolvedValue(null);
+      (User.findOne as jest.Mock).mockReturnValue({
+        select: jest.fn().mockResolvedValue(null),
+      });
 
       await expect(authService.refreshTokens('invalid-token')).rejects.toThrow();
     });

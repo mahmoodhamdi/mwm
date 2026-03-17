@@ -158,7 +158,7 @@ describe('Activity Log API', () => {
 
       expect(response.body.success).toBe(true);
       expect(response.body.data.logs).toBeDefined();
-      expect(response.body.data.total).toBeDefined();
+      expect(response.body.data.pagination.total).toBeDefined();
     });
 
     it('should support filtering by action', async () => {
@@ -288,7 +288,7 @@ describe('Activity Log API', () => {
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.stats).toBeDefined();
+      expect(response.body.data.byAction).toBeDefined();
     });
 
     it('should fail for non-admin users', async () => {

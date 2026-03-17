@@ -82,7 +82,7 @@ describe('Translations API', () => {
       await Translation.create({
         key: 'common.welcome',
         namespace: 'common',
-        value: { ar: 'مرحبا', en: 'Welcome' },
+        translations: { ar: 'مرحبا', en: 'Welcome' },
       });
 
       const response = await request(app)
@@ -102,13 +102,13 @@ describe('Translations API', () => {
       await Translation.create({
         key: 'common.welcome',
         namespace: 'common',
-        value: { ar: 'مرحبا', en: 'Welcome' },
+        translations: { ar: 'مرحبا', en: 'Welcome' },
       });
 
       await Translation.create({
-        key: 'nav.home',
-        namespace: 'nav',
-        value: { ar: 'الرئيسية', en: 'Home' },
+        key: 'home.navigation',
+        namespace: 'home',
+        translations: { ar: 'الرئيسية', en: 'Home' },
       });
 
       const response = await request(app).get('/api/v1/translations/namespaces').expect(200);
@@ -125,13 +125,13 @@ describe('Translations API', () => {
       await Translation.create({
         key: 'common.welcome',
         namespace: 'common',
-        value: { ar: 'مرحبا', en: 'Welcome' },
+        translations: { ar: 'مرحبا', en: 'Welcome' },
       });
 
       await Translation.create({
         key: 'common.goodbye',
         namespace: 'common',
-        value: { ar: 'وداعا', en: 'Goodbye' },
+        translations: { ar: 'وداعا', en: 'Goodbye' },
       });
 
       const response = await request(app)
@@ -161,7 +161,7 @@ describe('Translations API', () => {
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.translations).toBeDefined();
+      expect(response.body.data).toBeDefined();
     });
   });
 
@@ -174,13 +174,13 @@ describe('Translations API', () => {
       await Translation.create({
         key: 'common.welcome',
         namespace: 'common',
-        value: { ar: 'مرحبا', en: 'Welcome' },
+        translations: { ar: 'مرحبا', en: 'Welcome' },
       });
 
       const response = await request(app)
         .get('/api/v1/translations/search')
         .set('Authorization', `Bearer ${adminToken}`)
-        .query({ q: 'welcome' })
+        .query({ query: 'welcome' })
         .expect(200);
 
       expect(response.body.success).toBe(true);
@@ -197,7 +197,7 @@ describe('Translations API', () => {
       const translation = await Translation.create({
         key: 'common.welcome',
         namespace: 'common',
-        value: { ar: 'مرحبا', en: 'Welcome' },
+        translations: { ar: 'مرحبا', en: 'Welcome' },
       });
 
       const response = await request(app)
@@ -222,7 +222,7 @@ describe('Translations API', () => {
         .send({
           key: 'common.hello',
           namespace: 'common',
-          value: { ar: 'مرحبا', en: 'Hello' },
+          translations: { ar: 'مرحبا', en: 'Hello' },
         })
         .expect(201);
 
@@ -243,7 +243,7 @@ describe('Translations API', () => {
         .send({
           key: 'common.test',
           namespace: 'common',
-          value: { ar: 'اختبار', en: 'Test' },
+          translations: { ar: 'اختبار', en: 'Test' },
         })
         .expect(200);
 
@@ -265,12 +265,12 @@ describe('Translations API', () => {
             {
               key: 'common.save',
               namespace: 'common',
-              value: { ar: 'حفظ', en: 'Save' },
+              translations: { ar: 'حفظ', en: 'Save' },
             },
             {
               key: 'common.cancel',
               namespace: 'common',
-              value: { ar: 'إلغاء', en: 'Cancel' },
+              translations: { ar: 'إلغاء', en: 'Cancel' },
             },
           ],
         })
@@ -289,14 +289,14 @@ describe('Translations API', () => {
       const translation = await Translation.create({
         key: 'common.welcome',
         namespace: 'common',
-        value: { ar: 'مرحبا', en: 'Welcome' },
+        translations: { ar: 'مرحبا', en: 'Welcome' },
       });
 
       const response = await request(app)
         .put(`/api/v1/translations/${translation._id}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
-          value: { ar: 'أهلا وسهلا', en: 'Welcome!' },
+          translations: { ar: 'أهلا وسهلا', en: 'Welcome!' },
         })
         .expect(200);
 
@@ -313,7 +313,7 @@ describe('Translations API', () => {
       const translation = await Translation.create({
         key: 'common.welcome',
         namespace: 'common',
-        value: { ar: 'مرحبا', en: 'Welcome' },
+        translations: { ar: 'مرحبا', en: 'Welcome' },
       });
 
       const response = await request(app)

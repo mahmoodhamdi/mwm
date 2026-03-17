@@ -85,7 +85,7 @@ describe('Settings API', () => {
       await Settings.create({
         general: {
           siteName: { ar: 'موقع الشركة', en: 'Company Site' },
-          tagline: { ar: 'شعار الموقع', en: 'Site Tagline' },
+          siteTagline: { ar: 'شعار الموقع', en: 'Site Tagline' },
         },
       });
 
@@ -108,7 +108,7 @@ describe('Settings API', () => {
       await Settings.create({
         general: {
           siteName: { ar: 'موقع الشركة', en: 'Company Site' },
-          tagline: { ar: 'شعار الموقع', en: 'Site Tagline' },
+          siteTagline: { ar: 'شعار الموقع', en: 'Site Tagline' },
         },
       });
 
@@ -136,7 +136,7 @@ describe('Settings API', () => {
       await Settings.create({
         general: {
           siteName: { ar: 'موقع الشركة', en: 'Company Site' },
-          tagline: { ar: 'شعار الموقع', en: 'Site Tagline' },
+          siteTagline: { ar: 'شعار الموقع', en: 'Site Tagline' },
         },
       });
 
@@ -146,7 +146,7 @@ describe('Settings API', () => {
         .send({
           general: {
             siteName: { ar: 'موقع محدث', en: 'Updated Site' },
-            tagline: { ar: 'شعار محدث', en: 'Updated Tagline' },
+            siteTagline: { ar: 'شعار محدث', en: 'Updated Tagline' },
           },
         })
         .expect(200);
@@ -176,7 +176,7 @@ describe('Settings API', () => {
       await Settings.create({
         general: {
           siteName: { ar: 'موقع الشركة', en: 'Company Site' },
-          tagline: { ar: 'شعار الموقع', en: 'Site Tagline' },
+          siteTagline: { ar: 'شعار الموقع', en: 'Site Tagline' },
         },
       });
 
@@ -185,7 +185,7 @@ describe('Settings API', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({
           siteName: { ar: 'موقع محدث', en: 'Updated Site' },
-          tagline: { ar: 'شعار محدث', en: 'Updated Tagline' },
+          siteTagline: { ar: 'شعار محدث', en: 'Updated Tagline' },
         })
         .expect(200);
 
@@ -270,7 +270,7 @@ describe('Settings API', () => {
       await Settings.create({
         general: {
           siteName: { ar: 'موقع الشركة', en: 'Company Site' },
-          tagline: { ar: 'شعار الموقع', en: 'Site Tagline' },
+          siteTagline: { ar: 'شعار الموقع', en: 'Site Tagline' },
         },
       });
 

@@ -92,7 +92,8 @@ describe('Team API', () => {
       const response = await request(app).get('/api/v1/team/departments').expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data).toHaveLength(1);
+      // Controller returns { departments: [...] } inside data
+      expect(response.body.data.departments).toHaveLength(1);
     });
   });
 
@@ -109,7 +110,8 @@ describe('Team API', () => {
       const response = await request(app).get('/api/v1/team/departments/development').expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.slug).toBe('development');
+      // Controller returns { department: {...} } inside data
+      expect(response.body.data.department.slug).toBe('development');
     });
 
     it('should return 404 for nonexistent department', async () => {
@@ -134,8 +136,10 @@ describe('Team API', () => {
 
       await TeamMember.create({
         name: { ar: 'أحمد محمد', en: 'Ahmed Mohammed' },
-        title: { ar: 'مطور', en: 'Developer' },
         slug: 'ahmed-mohammed',
+        position: { ar: 'مطور', en: 'Developer' },
+        bio: { ar: 'سيرة ذاتية', en: 'Bio text' },
+        avatar: 'https://example.com/avatar.jpg',
         department: department._id,
         isActive: true,
         isFeatured: true,
@@ -144,7 +148,8 @@ describe('Team API', () => {
       const response = await request(app).get('/api/v1/team/featured').expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data).toHaveLength(1);
+      // Controller returns { members: [...] } inside data
+      expect(response.body.data.members).toHaveLength(1);
     });
   });
 
@@ -159,8 +164,10 @@ describe('Team API', () => {
 
       await TeamMember.create({
         name: { ar: 'قائد الفريق', en: 'Team Leader' },
-        title: { ar: 'قائد', en: 'Leader' },
         slug: 'team-leader',
+        position: { ar: 'قائد', en: 'Leader' },
+        bio: { ar: 'سيرة ذاتية', en: 'Bio text' },
+        avatar: 'https://example.com/avatar.jpg',
         department: department._id,
         isActive: true,
         isLeader: true,
@@ -169,7 +176,8 @@ describe('Team API', () => {
       const response = await request(app).get('/api/v1/team/leaders').expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data).toHaveLength(1);
+      // Controller returns { leaders: [...] } inside data
+      expect(response.body.data.leaders).toHaveLength(1);
     });
   });
 
@@ -184,8 +192,10 @@ describe('Team API', () => {
 
       await TeamMember.create({
         name: { ar: 'عضو', en: 'Member' },
-        title: { ar: 'عنوان', en: 'Title' },
         slug: 'member',
+        position: { ar: 'عنوان', en: 'Title' },
+        bio: { ar: 'سيرة ذاتية', en: 'Bio text' },
+        avatar: 'https://example.com/avatar.jpg',
         department: department._id,
         isActive: true,
       });
@@ -193,6 +203,7 @@ describe('Team API', () => {
       const response = await request(app).get('/api/v1/team').expect(200);
 
       expect(response.body.success).toBe(true);
+      // Controller returns { members: [...], pagination: {...} } inside data
       expect(response.body.data.members).toBeDefined();
     });
   });
@@ -208,8 +219,10 @@ describe('Team API', () => {
 
       await TeamMember.create({
         name: { ar: 'أحمد محمد', en: 'Ahmed Mohammed' },
-        title: { ar: 'مطور', en: 'Developer' },
         slug: 'ahmed-mohammed',
+        position: { ar: 'مطور', en: 'Developer' },
+        bio: { ar: 'سيرة ذاتية', en: 'Bio text' },
+        avatar: 'https://example.com/avatar.jpg',
         department: department._id,
         isActive: true,
       });
@@ -217,7 +230,8 @@ describe('Team API', () => {
       const response = await request(app).get('/api/v1/team/ahmed-mohammed').expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.slug).toBe('ahmed-mohammed');
+      // Controller returns { member: {...} } inside data
+      expect(response.body.data.member.slug).toBe('ahmed-mohammed');
     });
 
     it('should return 404 for nonexistent member', async () => {
@@ -272,7 +286,8 @@ describe('Team API', () => {
         .expect(201);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.slug).toBe('new-department');
+      // Controller returns { message: ..., department: {...} } inside data
+      expect(response.body.data.department.slug).toBe('new-department');
     });
   });
 
@@ -357,7 +372,10 @@ describe('Team API', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({
           name: { ar: 'عضو جديد', en: 'New Member' },
-          title: { ar: 'عنوان', en: 'Title' },
+          slug: 'new-member',
+          position: { ar: 'مطور', en: 'Developer' },
+          bio: { ar: 'سيرة ذاتية قصيرة', en: 'Short bio text' },
+          avatar: 'https://example.com/avatar.jpg',
           department: department._id.toString(),
         })
         .expect(201);
@@ -377,7 +395,10 @@ describe('Team API', () => {
         .post('/api/v1/team/admin')
         .send({
           name: { ar: 'عضو', en: 'Member' },
-          title: { ar: 'عنوان', en: 'Title' },
+          slug: 'new-member',
+          position: { ar: 'مطور', en: 'Developer' },
+          bio: { ar: 'سيرة ذاتية', en: 'Bio text' },
+          avatar: 'https://example.com/avatar.jpg',
           department: department._id.toString(),
         })
         .expect(401);
@@ -395,8 +416,10 @@ describe('Team API', () => {
       });
       const member = await TeamMember.create({
         name: { ar: 'عضو', en: 'Member' },
-        title: { ar: 'عنوان', en: 'Title' },
         slug: 'member',
+        position: { ar: 'عنوان', en: 'Title' },
+        bio: { ar: 'سيرة ذاتية', en: 'Bio text' },
+        avatar: 'https://example.com/avatar.jpg',
         department: department._id,
       });
 
@@ -406,7 +429,8 @@ describe('Team API', () => {
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data._id).toBe(member._id.toString());
+      // Controller returns { member: {...} } inside data
+      expect(response.body.data.member._id).toBe(member._id.toString());
     });
   });
 
@@ -421,8 +445,10 @@ describe('Team API', () => {
       });
       const member = await TeamMember.create({
         name: { ar: 'عضو', en: 'Member' },
-        title: { ar: 'عنوان', en: 'Title' },
         slug: 'member',
+        position: { ar: 'عنوان', en: 'Title' },
+        bio: { ar: 'سيرة ذاتية', en: 'Bio text' },
+        avatar: 'https://example.com/avatar.jpg',
         department: department._id,
       });
 
@@ -449,8 +475,10 @@ describe('Team API', () => {
       });
       const member = await TeamMember.create({
         name: { ar: 'عضو', en: 'Member' },
-        title: { ar: 'عنوان', en: 'Title' },
         slug: 'member',
+        position: { ar: 'عنوان', en: 'Title' },
+        bio: { ar: 'سيرة ذاتية', en: 'Bio text' },
+        avatar: 'https://example.com/avatar.jpg',
         department: department._id,
         isActive: false,
       });
@@ -475,8 +503,10 @@ describe('Team API', () => {
       });
       const member = await TeamMember.create({
         name: { ar: 'عضو', en: 'Member' },
-        title: { ar: 'عنوان', en: 'Title' },
         slug: 'member',
+        position: { ar: 'عنوان', en: 'Title' },
+        bio: { ar: 'سيرة ذاتية', en: 'Bio text' },
+        avatar: 'https://example.com/avatar.jpg',
         department: department._id,
         isFeatured: false,
       });
@@ -501,8 +531,10 @@ describe('Team API', () => {
       });
       const member = await TeamMember.create({
         name: { ar: 'عضو', en: 'Member' },
-        title: { ar: 'عنوان', en: 'Title' },
         slug: 'member',
+        position: { ar: 'عنوان', en: 'Title' },
+        bio: { ar: 'سيرة ذاتية', en: 'Bio text' },
+        avatar: 'https://example.com/avatar.jpg',
         department: department._id,
         isLeader: false,
       });
@@ -527,14 +559,18 @@ describe('Team API', () => {
       });
       const member1 = await TeamMember.create({
         name: { ar: 'عضو 1', en: 'Member 1' },
-        title: { ar: 'عنوان', en: 'Title' },
         slug: 'member-1',
+        position: { ar: 'عنوان', en: 'Title' },
+        bio: { ar: 'سيرة ذاتية', en: 'Bio text' },
+        avatar: 'https://example.com/avatar.jpg',
         department: department._id,
       });
       const member2 = await TeamMember.create({
         name: { ar: 'عضو 2', en: 'Member 2' },
-        title: { ar: 'عنوان', en: 'Title' },
         slug: 'member-2',
+        position: { ar: 'عنوان', en: 'Title' },
+        bio: { ar: 'سيرة ذاتية', en: 'Bio text' },
+        avatar: 'https://example.com/avatar.jpg',
         department: department._id,
       });
 
@@ -564,8 +600,10 @@ describe('Team API', () => {
       });
       const member = await TeamMember.create({
         name: { ar: 'عضو', en: 'Member' },
-        title: { ar: 'عنوان', en: 'Title' },
         slug: 'member',
+        position: { ar: 'عنوان', en: 'Title' },
+        bio: { ar: 'سيرة ذاتية', en: 'Bio text' },
+        avatar: 'https://example.com/avatar.jpg',
         department: department._id,
       });
 
@@ -606,7 +644,10 @@ describe('Team API', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({
           name: { ar: 'عضو', en: 'Member' },
-          title: { ar: 'عنوان', en: 'Title' },
+          slug: 'new-member',
+          position: { ar: 'مطور', en: 'Developer' },
+          bio: { ar: 'سيرة ذاتية', en: 'Bio text' },
+          avatar: 'https://example.com/avatar.jpg',
           department: department._id.toString(),
         })
         .expect(403);

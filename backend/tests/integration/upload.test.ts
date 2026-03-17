@@ -9,6 +9,10 @@ process.env['MONGODB_URI'] = 'mongodb://localhost:27017/test';
 process.env['REDIS_URL'] = 'redis://localhost:6379';
 process.env['JWT_SECRET'] = 'test-jwt-secret-key-that-is-long-enough';
 process.env['CLIENT_URL'] = 'http://localhost:3000';
+// Provide fake Cloudinary credentials so the config guard in upload.ts passes
+process.env['CLOUDINARY_CLOUD_NAME'] = 'test-cloud';
+process.env['CLOUDINARY_API_KEY'] = 'test-api-key';
+process.env['CLOUDINARY_API_SECRET'] = 'test-api-secret';
 
 import request from 'supertest';
 import mongoose from 'mongoose';
@@ -17,22 +21,38 @@ import { createApp } from '../../src/app';
 import { User } from '../../src/models';
 import { Express } from 'express';
 
-// Mock cloudinary
-jest.mock('cloudinary', () => ({
-  v2: {
-    config: jest.fn(),
-    uploader: {
-      upload: jest.fn().mockResolvedValue({
-        secure_url: 'https://cloudinary.com/test-image.jpg',
-        public_id: 'test-public-id',
-        width: 800,
-        height: 600,
-        format: 'jpg',
-      }),
-      destroy: jest.fn().mockResolvedValue({ result: 'ok' }),
-    },
-  },
-}));
+// The upload controller does:
+//   import { ..., uploadImageToCloudinary, deleteFromCloudinary } from '../utils';
+// That resolves to src/utils/index.ts which re-exports from ./upload.
+// We mock src/utils/upload (where the functions are defined).
+// Because src/utils/index.ts re-exports those functions, Jest's module mock
+// will intercept the re-exported references too.
+jest.mock('../../src/utils/upload', () => {
+  const original = jest.requireActual('../../src/utils/upload');
+  return {
+    ...original,
+    uploadImageToCloudinary: jest.fn().mockResolvedValue({
+      secure_url: 'https://res.cloudinary.com/test-cloud/image/upload/test-image.jpg',
+      public_id: 'mwm/images/test-public-id',
+      width: 800,
+      height: 600,
+      format: 'jpg',
+      bytes: 12345,
+    }),
+    deleteFromCloudinary: jest.fn().mockResolvedValue(undefined),
+  };
+});
+
+import * as uploadUtils from '../../src/utils/upload';
+
+const mockUploadResult = {
+  secure_url: 'https://res.cloudinary.com/test-cloud/image/upload/test-image.jpg',
+  public_id: 'mwm/images/test-public-id',
+  width: 800,
+  height: 600,
+  format: 'jpg',
+  bytes: 12345,
+};
 
 describe('Upload API', () => {
   let app: Express | null = null;
@@ -101,6 +121,10 @@ describe('Upload API', () => {
     if (isConnected && mongoose.connection.readyState === 1) {
       await User.deleteMany({});
     }
+    // resetMocks:true in jest.config clears mock implementations between tests.
+    // Re-apply implementations before every test.
+    (uploadUtils.uploadImageToCloudinary as jest.Mock).mockResolvedValue(mockUploadResult);
+    (uploadUtils.deleteFromCloudinary as jest.Mock).mockResolvedValue(undefined);
   });
 
   describe('POST /api/v1/upload/image', () => {
@@ -112,11 +136,12 @@ describe('Upload API', () => {
       // Create a test buffer (fake image)
       const imageBuffer = Buffer.from('fake-image-data');
 
+      // Controller uses sendCreated which returns 201
       const response = await request(app)
         .post('/api/v1/upload/image')
         .set('Authorization', `Bearer ${token}`)
-        .attach('image', imageBuffer, 'test-image.jpg')
-        .expect(200);
+        .attach('image', imageBuffer, { filename: 'test-image.jpg', contentType: 'image/jpeg' })
+        .expect(201);
 
       expect(response.body.success).toBe(true);
       expect(response.body.data).toBeDefined();
@@ -143,7 +168,7 @@ describe('Upload API', () => {
 
       const response = await request(app)
         .post('/api/v1/upload/image')
-        .attach('image', imageBuffer, 'test-image.jpg')
+        .attach('image', imageBuffer, { filename: 'test-image.jpg', contentType: 'image/jpeg' })
         .expect(401);
 
       expect(response.body.success).toBe(false);
@@ -158,7 +183,7 @@ describe('Upload API', () => {
       const response = await request(app)
         .post('/api/v1/upload/image')
         .set('Authorization', `Bearer ${token}`)
-        .attach('image', imageBuffer, 'test-image.jpg')
+        .attach('image', imageBuffer, { filename: 'test-image.jpg', contentType: 'image/jpeg' })
         .expect(403);
 
       expect(response.body.success).toBe(false);
@@ -175,12 +200,13 @@ describe('Upload API', () => {
       const imageBuffer1 = Buffer.from('fake-image-data-1');
       const imageBuffer2 = Buffer.from('fake-image-data-2');
 
+      // Controller uses sendCreated which returns 201
       const response = await request(app)
         .post('/api/v1/upload/images')
         .set('Authorization', `Bearer ${token}`)
-        .attach('images', imageBuffer1, 'test-image-1.jpg')
-        .attach('images', imageBuffer2, 'test-image-2.jpg')
-        .expect(200);
+        .attach('images', imageBuffer1, { filename: 'test-image-1.jpg', contentType: 'image/jpeg' })
+        .attach('images', imageBuffer2, { filename: 'test-image-2.jpg', contentType: 'image/jpeg' })
+        .expect(201);
 
       expect(response.body.success).toBe(true);
       expect(response.body.data).toBeDefined();
@@ -209,7 +235,7 @@ describe('Upload API', () => {
       const response = await request(app)
         .post('/api/v1/upload/images')
         .set('Authorization', `Bearer ${token}`)
-        .attach('images', imageBuffer, 'test-image.jpg')
+        .attach('images', imageBuffer, { filename: 'test-image.jpg', contentType: 'image/jpeg' })
         .expect(403);
 
       expect(response.body.success).toBe(false);

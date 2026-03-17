@@ -58,7 +58,11 @@ export function parsePagination(options: PaginationQueryOptions = {}): Paginatio
   const pageNum = Math.max(1, parseInt(String(page || 1), 10) || 1);
 
   // Parse limit (between 1 and maxLimit)
-  let limitNum = parseInt(String(limit || defaultLimit), 10) || defaultLimit;
+  let limitNum =
+    limit !== undefined && limit !== null && limit !== ''
+      ? parseInt(String(limit), 10)
+      : defaultLimit;
+  if (isNaN(limitNum)) limitNum = defaultLimit;
   limitNum = Math.min(Math.max(1, limitNum), maxLimit);
 
   // Calculate skip

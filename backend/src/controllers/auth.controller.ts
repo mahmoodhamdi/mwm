@@ -67,6 +67,8 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
         role: user.role,
         isEmailVerified: user.isEmailVerified,
       },
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
     },
     'Registration successful. Please verify your email | تم التسجيل بنجاح. يرجى تأكيد بريدك الإلكتروني'
   );
@@ -136,6 +138,8 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
         avatar: user.avatar,
         isEmailVerified: user.isEmailVerified,
       },
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
     },
     { message: 'Login successful | تم تسجيل الدخول بنجاح' }
   );
@@ -192,7 +196,14 @@ export const refreshToken = asyncHandler(async (req: Request, res: Response) => 
   // Set new httpOnly cookies
   setAuthCookies(res, tokens.accessToken, tokens.refreshToken);
 
-  sendSuccess(res, null, { message: 'Tokens refreshed successfully | تم تحديث التوكنات بنجاح' });
+  sendSuccess(
+    res,
+    {
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    },
+    { message: 'Tokens refreshed successfully | تم تحديث التوكنات بنجاح' }
+  );
 });
 
 /**
@@ -493,6 +504,8 @@ export const googleAuth = asyncHandler(async (req: Request, res: Response) => {
         avatar: user.avatar,
         isEmailVerified: user.isEmailVerified,
       },
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
     },
     { message: 'Google sign-in successful | تم تسجيل الدخول بجوجل بنجاح' }
   );
@@ -644,6 +657,8 @@ export const githubAuth = asyncHandler(async (req: Request, res: Response) => {
           avatar: user.avatar,
           isEmailVerified: user.isEmailVerified,
         },
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
       },
       { message: 'GitHub sign-in successful | تم تسجيل الدخول بـ GitHub بنجاح' }
     );

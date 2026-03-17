@@ -267,7 +267,7 @@ export const bulkUpsertContent = asyncHandler(async (req: Request, res: Response
 
   // Invalidate all content cache
   const keys = await redis.keys(`${CONTENT_CACHE_PREFIX}:*`);
-  if (keys.length > 0) {
+  if (keys && keys.length > 0) {
     await redis.del(...keys);
   }
 

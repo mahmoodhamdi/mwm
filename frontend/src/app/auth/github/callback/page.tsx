@@ -21,25 +21,26 @@ function GitHubCallbackContent() {
       const state = searchParams.get('state');
       const errorParam = searchParams.get('error');
       const errorDescription = searchParams.get('error_description');
+      const locale = typeof window !== 'undefined' ? localStorage.getItem('locale') || 'ar' : 'ar';
 
       // Check for OAuth errors
       if (errorParam) {
         setError(errorDescription || errorParam);
-        setTimeout(() => router.push('/ar/admin/login'), 3000);
+        setTimeout(() => router.push(`/${locale}/admin/login`), 3000);
         return;
       }
 
       // Verify code exists
       if (!code) {
         setError('No authorization code received');
-        setTimeout(() => router.push('/ar/admin/login'), 3000);
+        setTimeout(() => router.push(`/${locale}/admin/login`), 3000);
         return;
       }
 
       // Verify state (CSRF protection)
       if (state && !verifyState(state)) {
         setError('Invalid state parameter');
-        setTimeout(() => router.push('/ar/admin/login'), 3000);
+        setTimeout(() => router.push(`/${locale}/admin/login`), 3000);
         return;
       }
 
@@ -48,11 +49,11 @@ function GitHubCallbackContent() {
         await authService.loginWithGitHub(code);
 
         // Redirect to admin dashboard
-        router.push('/ar/admin');
+        router.push(`/${locale}/admin`);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'GitHub authentication failed';
         setError(errorMessage);
-        setTimeout(() => router.push('/ar/admin/login'), 3000);
+        setTimeout(() => router.push(`/${locale}/admin/login`), 3000);
       }
     };
 

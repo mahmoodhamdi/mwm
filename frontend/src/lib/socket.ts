@@ -50,30 +50,42 @@ export function connectSocket(token: string): Socket {
   });
 
   socket.on('connect', () => {
-    console.log('Socket connected:', socket?.id);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Socket connected:', socket?.id);
+    }
     isConnecting = false;
   });
 
   socket.on('connect_error', error => {
-    console.error('Socket connection error:', error.message);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Socket connection error:', error.message);
+    }
     isConnecting = false;
   });
 
   socket.on('disconnect', reason => {
-    console.log('Socket disconnected:', reason);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Socket disconnected:', reason);
+    }
     isConnecting = false;
   });
 
   socket.on('reconnect', attemptNumber => {
-    console.log('Socket reconnected after', attemptNumber, 'attempts');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Socket reconnected after', attemptNumber, 'attempts');
+    }
   });
 
   socket.on('reconnect_error', error => {
-    console.error('Socket reconnection error:', error.message);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Socket reconnection error:', error.message);
+    }
   });
 
   socket.on('reconnect_failed', () => {
-    console.error('Socket reconnection failed');
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Socket reconnection failed');
+    }
     isConnecting = false;
   });
 

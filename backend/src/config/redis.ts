@@ -97,7 +97,7 @@ export async function deleteCache(key: string): Promise<void> {
  */
 export async function deleteCacheByPattern(pattern: string): Promise<void> {
   const keys = await redis.keys(pattern);
-  if (keys.length > 0) {
+  if (keys && keys.length > 0) {
     await redis.del(...keys);
   }
 }

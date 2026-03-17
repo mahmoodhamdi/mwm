@@ -114,6 +114,7 @@ export async function getProjects(
 ): Promise<ApiResponse<ProjectsResponse>> {
   const response = await apiClient.get<ProjectsResponse>(PROJECTS_ENDPOINT, {
     ...filters,
+    isActive: true,
   });
   return response;
 }

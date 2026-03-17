@@ -6,7 +6,22 @@
 import { Router } from 'express';
 import { menuController } from '../controllers';
 import { authenticate, authorize } from '../middlewares/auth';
-import { validate, idParamsSchema, idWithItemIdParamsSchema } from '../middlewares/validate';
+import { validate, idParamsSchema } from '../middlewares/validate';
+import Joi from 'joi';
+
+/**
+ * Menu item ID params schema (accepts any string for itemId, not just ObjectId)
+ * مخطط معرف عنصر القائمة (يقبل أي نص وليس فقط ObjectId)
+ */
+const menuItemParamsSchema = Joi.object({
+  id: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      'string.pattern.base': 'Invalid ID format',
+    }),
+  itemId: Joi.string().required(),
+});
 import { csrfValidation } from '../middlewares/csrf';
 
 const router = Router();
@@ -331,7 +346,7 @@ router.put(
   authenticate,
   csrfValidation,
   authorize('settings:update'),
-  validate({ params: idWithItemIdParamsSchema }),
+  validate({ params: menuItemParamsSchema }),
   menuController.updateMenuItem
 );
 
@@ -365,7 +380,7 @@ router.delete(
   authenticate,
   csrfValidation,
   authorize('settings:update'),
-  validate({ params: idWithItemIdParamsSchema }),
+  validate({ params: menuItemParamsSchema }),
   menuController.removeMenuItem
 );
 

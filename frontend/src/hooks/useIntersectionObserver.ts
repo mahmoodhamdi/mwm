@@ -30,7 +30,7 @@ export function useIntersectionObserver(
 
   const updateEntry = useCallback(
     ([entry]: IntersectionObserverEntry[]): void => {
-      if (frozen.current && entry.isIntersecting) return;
+      if (frozen.current) return;
 
       setEntry(entry);
 

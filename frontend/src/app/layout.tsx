@@ -1,6 +1,9 @@
 /**
  * Root Layout
  * التخطيط الجذري
+ *
+ * Note: The [locale]/layout.tsx provides the full document shell (<html>, <body>).
+ * This root layout only wraps children to avoid duplicate <html> tags.
  */
 
 import type { Metadata } from 'next';
@@ -11,9 +14,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <html suppressHydrationWarning>
-      <body>{children}</body>
-    </html>
-  );
+  return children;
 }

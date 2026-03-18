@@ -71,7 +71,7 @@ export async function uploadImage(file: File, options: UploadOptions = {}): Prom
       'x-csrf-token':
         document.cookie
           .split('; ')
-          .find(row => row.startsWith('csrf_token='))
+          .find(row => row.startsWith('csrfToken='))
           ?.split('=')[1] || '',
     },
   });
@@ -117,7 +117,7 @@ export async function uploadImages(
       'x-csrf-token':
         document.cookie
           .split('; ')
-          .find(row => row.startsWith('csrf_token='))
+          .find(row => row.startsWith('csrfToken='))
           ?.split('=')[1] || '',
     },
   });

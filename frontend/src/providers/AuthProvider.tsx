@@ -54,6 +54,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkAuth();
   }, [checkAuth]);
 
+  // Listen for forced logout events from the API client (refresh token failure)
+  useEffect(() => {
+    const handleForcedLogout = () => {
+      tokenUtils.clearTokens();
+      setUser(null);
+    };
+    window.addEventListener('auth:logout', handleForcedLogout);
+    return () => window.removeEventListener('auth:logout', handleForcedLogout);
+  }, []);
+
   const login = async (email: string, password: string) => {
     const response = await authService.login({ email, password });
     setUser(response.user);

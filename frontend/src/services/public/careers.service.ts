@@ -130,7 +130,7 @@ export async function uploadResume(file: File): Promise<{ url: string; filename:
         'x-csrf-token':
           document.cookie
             .split('; ')
-            .find(row => row.startsWith('csrf_token='))
+            .find(row => row.startsWith('csrfToken='))
             ?.split('=')[1] || '',
       },
     }

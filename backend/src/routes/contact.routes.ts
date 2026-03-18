@@ -170,6 +170,7 @@ router.post(
   '/messages/bulk',
   authenticate,
   authorize('messages:update'),
+  csrfValidation,
   validate({ body: contactValidation.bulkActionSchema }),
   contactController.bulkAction
 );

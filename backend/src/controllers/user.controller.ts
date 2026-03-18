@@ -12,6 +12,21 @@ import { validatePasswordStrength, escapeRegex } from '../utils/security';
 import { emailService } from '../services/email.service';
 import { logger } from '../config';
 
+const USER_SORT_FIELDS = ['name', 'email', 'role', 'createdAt', 'lastLogin', 'isActive'];
+
+function sanitizeSort(sort: string, allowed: string[]): Record<string, 1 | -1> {
+  const result: Record<string, 1 | -1> = {};
+  for (const field of sort.split(',')) {
+    const trimmed = field.trim();
+    const desc = trimmed.startsWith('-');
+    const name = desc ? trimmed.slice(1) : trimmed;
+    if (allowed.includes(name)) {
+      result[name] = desc ? -1 : 1;
+    }
+  }
+  return Object.keys(result).length ? result : { createdAt: -1 };
+}
+
 /**
  * Get all users with pagination and filtering
  * الحصول على جميع المستخدمين مع الترقيم والتصفية
@@ -71,7 +86,7 @@ export const getAllUsers = asyncHandler(async (req: Request, res: Response) => {
   // Get users
   const users = await User.find(filter)
     .select('-password -refreshTokens -twoFactorSecret')
-    .sort(sort as string)
+    .sort(sanitizeSort(sort as string, USER_SORT_FIELDS))
     .skip(skip)
     .limit(limitNum);
 

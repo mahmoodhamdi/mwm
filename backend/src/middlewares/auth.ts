@@ -30,6 +30,7 @@ export const rolePermissions: Record<UserRole, string[]> = {
     'users:read',
     'users:create',
     'users:update',
+    'users:delete',
     'projects:*',
     'services:*',
     'team:*',

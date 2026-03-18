@@ -57,8 +57,12 @@ export function isRecaptchaConfigured(): boolean {
  * التحقق من رمز reCAPTCHA
  */
 export async function verifyRecaptcha(token: string): Promise<RecaptchaResult> {
-  // If no secret key is configured, handle appropriately
+  // If no secret key is configured, fail-closed in production
   if (!env.recaptchaSecretKey) {
+    if (env.isProd) {
+      logger.error('reCAPTCHA secret key not configured in production');
+      return { success: false, score: 0, skipped: true };
+    }
     logRecaptchaWarning();
     return { success: true, score: 1.0, skipped: true };
   }

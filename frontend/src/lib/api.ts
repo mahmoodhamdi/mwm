@@ -137,10 +137,14 @@ const createApiClient = (baseURL: string): AxiosInstance => {
 
           // Retry original request - new cookies will be sent automatically
           return client(originalRequest);
-        } catch {
-          // Refresh failed - AuthProvider will handle redirect to login
+        } catch (refreshError) {
+          // Refresh failed - notify all subscribers and signal forced logout
           isRefreshing = false;
           onRefreshComplete(false);
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new Event('auth:logout'));
+          }
+          return Promise.reject(refreshError);
         }
       }
 

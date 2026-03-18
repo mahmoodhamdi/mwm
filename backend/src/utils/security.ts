@@ -118,11 +118,8 @@ function ipToInt(ip: string): number {
  * الحصول على IP العميل من الطلب
  */
 export function getClientIp(req: Request): string {
-  const forwardedFor = req.headers['x-forwarded-for'];
-  if (typeof forwardedFor === 'string') {
-    return forwardedFor.split(',')[0].trim();
-  }
-  return req.socket.remoteAddress || 'unknown';
+  // Use req.ip which respects the 'trust proxy' setting configured in app.ts
+  return req.ip || req.socket.remoteAddress || 'unknown';
 }
 
 /**

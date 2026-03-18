@@ -17,16 +17,16 @@ interface HealthStatus {
   status: 'healthy' | 'unhealthy';
   timestamp: string;
   uptime: number;
-  environment: string;
-  version: string;
+  environment?: string;
+  version?: string;
   services: {
     database: {
       status: 'connected' | 'disconnected';
-      name: string;
+      name?: string;
     };
     cache: {
       status: 'connected' | 'disconnected';
-      name: string;
+      name?: string;
     };
   };
 }
@@ -88,20 +88,26 @@ router.get('/', async (_req: Request, res: Response) => {
   const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
   const redisStatus = redis.status === 'ready' ? 'connected' : 'disconnected';
 
+  const isProd = process.env.NODE_ENV === 'production';
+
   const health: HealthStatus = {
     status: dbStatus === 'connected' && redisStatus === 'connected' ? 'healthy' : 'unhealthy',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
-    environment: process.env.NODE_ENV || 'development',
-    version: process.env.npm_package_version || '1.0.0',
+    ...(isProd
+      ? {}
+      : {
+          environment: process.env.NODE_ENV || 'development',
+          version: process.env.npm_package_version || '1.0.0',
+        }),
     services: {
       database: {
         status: dbStatus,
-        name: 'MongoDB',
+        ...(isProd ? {} : { name: 'MongoDB' }),
       },
       cache: {
         status: redisStatus,
-        name: 'Redis',
+        ...(isProd ? {} : { name: 'Redis' }),
       },
     },
   };

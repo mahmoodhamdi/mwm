@@ -96,10 +96,14 @@ export async function deleteCache(key: string): Promise<void> {
  * حذف بالنمط
  */
 export async function deleteCacheByPattern(pattern: string): Promise<void> {
-  const keys = await redis.keys(pattern);
-  if (keys && keys.length > 0) {
-    await redis.del(...keys);
-  }
+  let cursor = '0';
+  do {
+    const [nextCursor, keys] = await redis.scan(cursor, 'MATCH', pattern, 'COUNT', 100);
+    cursor = nextCursor;
+    if (keys && keys.length > 0) {
+      await redis.del(...keys);
+    }
+  } while (cursor !== '0');
 }
 
 /**

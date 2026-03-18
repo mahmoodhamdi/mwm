@@ -25,6 +25,7 @@ import {
   Job,
 } from '../../src/models';
 import { Express } from 'express';
+import { getCookieValue } from '../helpers/auth.helper';
 
 describe('Dashboard API', () => {
   let app: Express | null = null;
@@ -43,7 +44,7 @@ describe('Dashboard API', () => {
     const res = await request(app)
       .post('/api/v1/auth/login')
       .send({ email: 'admin@test.com', password: 'Test@1234' });
-    return res.body.data?.accessToken || '';
+    return getCookieValue(res, 'accessToken');
   }
 
   async function getEditorToken(): Promise<string> {
@@ -58,7 +59,7 @@ describe('Dashboard API', () => {
     const res = await request(app)
       .post('/api/v1/auth/login')
       .send({ email: 'editor@test.com', password: 'Test@1234' });
-    return res.body.data?.accessToken || '';
+    return getCookieValue(res, 'accessToken');
   }
 
   async function getUserToken(): Promise<string> {
@@ -73,7 +74,7 @@ describe('Dashboard API', () => {
     const res = await request(app)
       .post('/api/v1/auth/login')
       .send({ email: 'user@test.com', password: 'Test@1234' });
-    return res.body.data?.accessToken || '';
+    return getCookieValue(res, 'accessToken');
   }
 
   beforeAll(async () => {

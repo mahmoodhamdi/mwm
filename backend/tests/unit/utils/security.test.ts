@@ -209,11 +209,10 @@ describe('Security Utilities', () => {
   });
 
   describe('getClientIp', () => {
-    it('should extract IP from x-forwarded-for header', () => {
+    it('should extract IP from req.ip (set by Express trust proxy)', () => {
       const req = {
-        headers: {
-          'x-forwarded-for': '192.168.1.100, 10.0.0.1',
-        },
+        ip: '192.168.1.100',
+        headers: {},
         socket: {
           remoteAddress: '127.0.0.1',
         },

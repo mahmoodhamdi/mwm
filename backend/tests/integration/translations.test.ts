@@ -16,6 +16,7 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import { createApp } from '../../src/app';
 import { User, Translation } from '../../src/models';
 import { Express } from 'express';
+import { getCookieValue } from '../helpers/auth.helper';
 
 async function getAdminToken(app: Express): Promise<string> {
   const user = await User.create({
@@ -29,7 +30,7 @@ async function getAdminToken(app: Express): Promise<string> {
   const res = await request(app)
     .post('/api/v1/auth/login')
     .send({ email: 'admin@test.com', password: 'Test@1234' });
-  return res.body.data?.accessToken || '';
+  return getCookieValue(res, 'accessToken');
 }
 
 describe('Translations API', () => {

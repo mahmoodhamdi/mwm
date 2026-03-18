@@ -16,6 +16,7 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import { createApp } from '../../src/app';
 import { User, SiteContent } from '../../src/models';
 import { Express } from 'express';
+import { getCookieValue } from '../helpers/auth.helper';
 
 describe('Content API', () => {
   let app: Express | null = null;
@@ -36,7 +37,7 @@ describe('Content API', () => {
       email: 'admin@test.com',
       password: 'Test@1234',
     });
-    return res.body.data?.accessToken || '';
+    return getCookieValue(res, 'accessToken');
   }
 
   beforeAll(async () => {
@@ -353,7 +354,7 @@ describe('Content API', () => {
         email: 'viewer@test.com',
         password: 'Test@1234',
       });
-      const token = res.body.data?.accessToken || '';
+      const token = getCookieValue(res, 'accessToken');
 
       await request(app)
         .post('/api/v1/content')

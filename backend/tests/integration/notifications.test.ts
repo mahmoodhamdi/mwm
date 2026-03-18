@@ -16,6 +16,7 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import { createApp } from '../../src/app';
 import { User, Notification, DeviceToken } from '../../src/models';
 import { Express } from 'express';
+import { getCookieValue } from '../helpers/auth.helper';
 
 // Mock firebase-admin
 jest.mock('firebase-admin', () => ({
@@ -49,7 +50,7 @@ describe('Notifications API', () => {
     const res = await request(app)
       .post('/api/v1/auth/login')
       .send({ email: 'admin@test.com', password: 'Test@1234' });
-    return res.body.data?.accessToken || '';
+    return getCookieValue(res, 'accessToken');
   }
 
   async function getUserToken(): Promise<string> {
@@ -64,7 +65,7 @@ describe('Notifications API', () => {
     const res = await request(app)
       .post('/api/v1/auth/login')
       .send({ email: 'user@test.com', password: 'Test@1234' });
-    return res.body.data?.accessToken || '';
+    return getCookieValue(res, 'accessToken');
   }
 
   beforeAll(async () => {

@@ -34,7 +34,13 @@ describe('Activity Log API', () => {
     const res = await request(app)
       .post('/api/v1/auth/login')
       .send({ email: 'admin@test.com', password: 'Test@1234' });
-    return res.body.data?.accessToken || '';
+    // Extract token from HttpOnly cookie
+    const cookies = res.headers['set-cookie'] as unknown as string[] | undefined;
+    if (!cookies) return '';
+    for (const c of cookies) {
+      if (c.startsWith('accessToken=')) return c.split(';')[0].split('=').slice(1).join('=');
+    }
+    return '';
   }
 
   async function getUserToken(): Promise<string> {
@@ -49,7 +55,12 @@ describe('Activity Log API', () => {
     const res = await request(app)
       .post('/api/v1/auth/login')
       .send({ email: 'user@test.com', password: 'Test@1234' });
-    return res.body.data?.accessToken || '';
+    const cookies = res.headers['set-cookie'] as unknown as string[] | undefined;
+    if (!cookies) return '';
+    for (const c of cookies) {
+      if (c.startsWith('accessToken=')) return c.split(';')[0].split('=').slice(1).join('=');
+    }
+    return '';
   }
 
   beforeAll(async () => {

@@ -16,6 +16,7 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import { createApp } from '../../src/app';
 import { User, Service, ServiceCategory } from '../../src/models';
 import { Express } from 'express';
+import { getCookieValue } from '../helpers/auth.helper';
 
 describe('Services API', () => {
   let app: Express | null = null;
@@ -36,7 +37,7 @@ describe('Services API', () => {
       email: 'admin@test.com',
       password: 'Test@1234',
     });
-    return res.body.data?.accessToken || '';
+    return getCookieValue(res, 'accessToken');
   }
 
   beforeAll(async () => {
@@ -551,7 +552,7 @@ describe('Services API', () => {
         email: 'viewer@test.com',
         password: 'Test@1234',
       });
-      const token = res.body.data?.accessToken || '';
+      const token = getCookieValue(res, 'accessToken');
 
       const category = await ServiceCategory.create({
         name: { ar: 'فئة', en: 'Category' },

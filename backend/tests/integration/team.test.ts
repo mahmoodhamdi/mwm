@@ -16,6 +16,7 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import { createApp } from '../../src/app';
 import { User, TeamMember, Department } from '../../src/models';
 import { Express } from 'express';
+import { getCookieValue } from '../helpers/auth.helper';
 
 describe('Team API', () => {
   let app: Express | null = null;
@@ -36,7 +37,7 @@ describe('Team API', () => {
       email: 'admin@test.com',
       password: 'Test@1234',
     });
-    return res.body.data?.accessToken || '';
+    return getCookieValue(res, 'accessToken');
   }
 
   beforeAll(async () => {
@@ -632,7 +633,7 @@ describe('Team API', () => {
         email: 'viewer@test.com',
         password: 'Test@1234',
       });
-      const token = res.body.data?.accessToken || '';
+      const token = getCookieValue(res, 'accessToken');
 
       const department = await Department.create({
         name: { ar: 'قسم', en: 'Department' },
